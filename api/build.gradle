@@ -1,0 +1,21 @@
+repositories {
+    mavenCentral()
+}
+
+artifacts {
+    jar
+    sourcesJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(jar)
+            artifact(sourcesJar)
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}

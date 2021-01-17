@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.m1dnightninja.midnightcore.fabric.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "AccessorAnvilChunkStorage",
+    "AccessorMinecraftServer",
+    "AccessorPlayerListPacket",
+    "AccessorServerPlayer",
+    "MixinGameruleCommand",
+    "MixinHungerManager",
+    "MixinLivingEntity",
+    "MixinMinecraftServer",
+    "MixinPacketHandler",
+    "MixinPlayerManager",
+    "MixinScreenHandler",
+    "MixinServerPlayer"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

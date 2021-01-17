@@ -1,0 +1,63 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        url "https://libraries.minecraft.net/"
+    }
+    maven {
+        url "https://mdmc.ddns.net/maven"
+    }
+}
+
+dependencies {
+
+    compile "org.spigotmc:spigot:${project.ext.minecraftVersion}-R0.1-SNAPSHOT"
+
+    shade project(':api')
+    shade project(':common')
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include "plugin.yml"
+        expand "version": project.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "plugin.yml"
+    }
+}
+
+shadowJar {
+
+    archiveBaseName.set("${project.ext.archiveName}-spigot")
+    configurations = [project.configurations.shade]
+
+    dependencies {
+        exclude('net.minecraft:.*')
+        exclude('net.spigotmc:.*')
+        exclude('org.bukkit:.*')
+        include(project(':api'))
+        include(project(':common'))
+    }
+}
+
+tasks.assemble.dependsOn tasks.shadowJar
+
+artifacts {
+    archives shadowJar
+}

@@ -1,0 +1,94 @@
+
+import net.fabricmc.loom.task.RemapJarTask
+
+
+plugins {
+    id 'fabric-loom' version '0.5-SNAPSHOT'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+
+repositories {
+    maven { url 'https://maven.fabricmc.net/' }
+    mavenLocal()
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+archivesBaseName = project.ext.archiveName
+
+def fabricApiVersion = "0.29.3+1.16"
+
+dependencies {
+
+    minecraft "com.mojang:minecraft:${project.ext.minecraftVersion}"
+    mappings minecraft.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:0.11.1"
+
+    //Fabric api
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+
+    shade project(':api')
+    shade project(':common')
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include "fabric.mod.json"
+        expand "version": project.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "fabric.mod.json"
+    }
+}
+
+shadowJar {
+
+    archiveBaseName.set("${project.ext.archiveName}-fabric-dev")
+    configurations = [project.configurations.shade]
+
+    dependencies {
+        exclude('net.fabricmc:.*')
+        include(project(':api'))
+        include(project(':common'))
+
+        exclude '/mappings/*'
+    }
+}
+
+task remapShadowJar(type: RemapJarTask) {
+
+    dependsOn tasks.shadowJar
+    input = tasks.shadowJar.archivePath
+    addNestedDependencies = true
+    archiveBaseName.set("${project.ext.archiveName}-fabric-mc${project.ext.minecraftVersion}")
+}
+
+tasks.assemble.dependsOn tasks.remapShadowJar
+
+artifacts {
+    archives remapShadowJar
+    shadow shadowJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(remapJar) {
+                builtBy remapJar
+            }
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}

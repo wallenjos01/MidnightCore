@@ -1,0 +1,79 @@
+package me.m1dnightninja.midnightcore.fabric.module;
+
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.module.ISkinModule;
+import me.m1dnightninja.midnightcore.api.skin.Skin;
+import me.m1dnightninja.midnightcore.common.module.AbstractSavePointModule;
+import me.m1dnightninja.midnightcore.fabric.MidnightCore;
+import me.m1dnightninja.midnightcore.fabric.api.Location;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+
+import java.util.UUID;
+
+public class SavePointModule extends AbstractSavePointModule<SavePointModule.SavePoint> {
+
+    @Override
+    public boolean initialize() {
+        return true;
+    }
+
+    @Override
+    public void resetPlayer(UUID u) {
+        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+        if(player == null) return;
+
+        player.inventory.clearContent();
+        player.removeAllEffects();
+        player.setRemainingFireTicks(0);
+        player.setHealth(player.getMaxHealth());
+        player.getFoodData().setFoodLevel(20);
+        player.getFoodData().eat(1, 20);
+        player.getFoodData().tick(player);
+
+    }
+
+    @Override
+    protected SavePoint createSavePoint(UUID u) {
+        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+        if(player == null) return null;
+
+        SavePoint out = new SavePoint();
+        out.location = Location.getEntityLocation(player);
+        out.skin = MidnightCoreAPI.getInstance().getModule(ISkinModule.class).getSkin(u);
+        out.tag = player.saveWithoutId(new CompoundTag());
+
+        return out;
+    }
+
+    @Override
+    protected void loadSavePoint(UUID u, SavePoint point) {
+        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+        if(player == null) return;
+
+        resetPlayer(u);
+
+        player.load(point.tag);
+
+        MidnightCoreAPI.getInstance().getModule(ISkinModule.class).setSkin(u, point.skin);
+        MidnightCoreAPI.getInstance().getModule(ISkinModule.class).updateSkin(u);
+
+        point.location.teleport(player);
+
+        for(MobEffectInstance inst : player.getActiveEffects()) {
+            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), inst));
+        }
+
+    }
+
+    protected static class SavePoint {
+
+        Location location;
+        Skin skin;
+        CompoundTag tag;
+
+    }
+
+}

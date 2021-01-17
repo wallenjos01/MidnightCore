@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "midnightcore",
+  "version": "${version}",
+  "name": "MidnightCore",
+  "description": "A library for mods by M1dnight_Ninja",
+  "authors": [
+    "M1dnight_Ninja"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/midnightcore/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.m1dnightninja.midnightcore.fabric.MidnightCore"
+    ]
+  },
+  "mixins": [
+    "midnightcore.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.10.0",
+    "fabric": "*",
+    "minecraft": "1.16.*"
+  }
+}
