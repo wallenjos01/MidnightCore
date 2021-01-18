@@ -40,7 +40,7 @@ subprojects {
     }
 
     jar {
-        from "../LISENCE"
+        from "LISENCE"
     }
 
 }

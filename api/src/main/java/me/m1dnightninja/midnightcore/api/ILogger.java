@@ -1,9 +1,10 @@
 package me.m1dnightninja.midnightcore.api;
 
 public interface ILogger {
+    void info(String var1);
 
-    void info(String message);
-    void warn(String message);
-    void error(String message);
+    void warn(String var1);
 
+    void error(String var1);
 }
+

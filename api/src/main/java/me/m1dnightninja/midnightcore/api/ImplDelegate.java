@@ -1,9 +1,8 @@
 package me.m1dnightninja.midnightcore.api;
 
 public interface ImplDelegate {
+    AbstractTimer createTimer(String var1, int var2, boolean var3, AbstractTimer.TimerCallback var4);
 
-    AbstractTimer createTimer(String text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb);
-
-    AbstractInventoryGUI<?> createInventoryGUI(String title);
-
+    AbstractInventoryGUI<?> createInventoryGUI(String var1);
 }
+

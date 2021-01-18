@@ -1,9 +1,8 @@
 package me.m1dnightninja.midnightcore.api.config;
 
 public interface ConfigSerializer<T> {
+    T deserialize(ConfigSection var1);
 
-    T deserialize(ConfigSection sec);
-
-    ConfigSection serialize(T obj);
-
+    ConfigSection serialize(T var1);
 }
+

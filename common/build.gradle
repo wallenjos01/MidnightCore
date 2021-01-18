@@ -1,22 +1,24 @@
+
 repositories {
+
     mavenCentral()
-    mavenLocal()
     maven {
-        url 'https://libraries.minecraft.net/'
+        url "https://libraries.minecraft.net/"
     }
-    maven {
-        url 'https://mdmc.ddns.net/maven'
-    }
+
 }
 
 dependencies {
 
-    implementation 'com.mojang:authlib:2.0.27'
-
+    implementation 'com.mojang:authlib:2.1.28'
     implementation 'com.google.code.gson:gson:2.8.0'
 
-    implementation project(":api")
+    compile project(":api")
+}
 
+artifacts {
+    jar
+    sourcesJar
 }
 
 publishing {
