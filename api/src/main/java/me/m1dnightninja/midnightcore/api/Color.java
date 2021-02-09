@@ -2,6 +2,8 @@ package me.m1dnightninja.midnightcore.api;
 
 public class Color {
     private static final Color[] mcLegacyColors = new Color[]{new Color(0, 0, 0), new Color(0, 0, 170), new Color(0, 170, 0), new Color(0, 170, 170), new Color(170, 0, 0), new Color(170, 0, 170), new Color(255, 170, 0), new Color(170, 170, 170), new Color(85, 85, 85), new Color(85, 85, 255), new Color(85, 255, 85), new Color(85, 255, 255), new Color(255, 85, 85), new Color(255, 85, 255), new Color(255, 255, 85), new Color(255, 255, 255)};
+    private static final String[] mcLegacyNames = new String[] { "black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white" };
+
     private final int red;
     private final int green;
     private final int blue;
@@ -11,6 +13,10 @@ public class Color {
         this.red = red;
         this.green = green;
         this.blue = blue;
+    }
+
+    public Color(int rgb) {
+        this(Integer.toHexString(rgb));
     }
 
     public Color(String name) {
@@ -61,9 +67,9 @@ public class Color {
     public int toRGBI() {
         if (this.closest4bitColor == -1) {
             int out = 0;
-            double lowest = this.getDistance(this, mcLegacyColors[0]);
+            double lowest = getDistanceTo(mcLegacyColors[0]);
             for (int i = 1; i < mcLegacyColors.length; ++i) {
-                double distance = this.getDistance(this, mcLegacyColors[i]);
+                double distance = getDistanceTo(mcLegacyColors[i]);
                 if (!(distance < lowest)) continue;
                 lowest = distance;
                 out = i;
@@ -123,11 +129,31 @@ public class Color {
         return "white";
     }
 
-    private double getDistance(Color c1, Color c2) {
+    public static Color parse(String s) {
+
+        for(int i = 0 ; i < mcLegacyNames.length ; i++) {
+            if(mcLegacyNames[i].equals(s)) {
+                return mcLegacyColors[i];
+            }
+        }
+
+        return new Color(s);
+
+    }
+
+    public double getDistanceTo(Color c) {
+        return getDistance(this, c);
+    }
+
+    public static double getDistance(Color c1, Color c2) {
         int r = c2.red - c1.red;
         int g = c2.green - c1.green;
         int b = c2.blue - c1.blue;
         return Math.sqrt(r * r + g * g + b * b);
+    }
+
+    public Color multiply(double multiplier) {
+        return new Color((int) (red * multiplier), (int) (green * multiplier), (int) (blue * multiplier));
     }
 }
 

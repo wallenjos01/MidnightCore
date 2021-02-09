@@ -2,18 +2,23 @@ package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import me.m1dnightninja.midnightcore.fabric.api.Location;
+import me.m1dnightninja.midnightcore.fabric.api.event.PlayerTeleportEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.api.event.PacketSendEvent;
 import me.m1dnightninja.midnightcore.fabric.api.event.PlayerChatEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Set;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public class MixinPacketHandler {
@@ -67,5 +72,18 @@ public class MixinPacketHandler {
         currentEvent = null;
 
         return out;
+    }
+
+    @Inject(method = "teleport(DDDFFLjava/util/Set;)V", at=@At("HEAD"), cancellable = true)
+    private void onTeleport(double d, double e, double f, float g, float h, Set<ClientboundPlayerPositionPacket.RelativeArgument> set, CallbackInfo ci) {
+        Location oldLoc = new Location(player.level.dimension().location(), player.xOld, player.yOld, player.zOld, player.xRot, player.yRot);
+        Location newLoc = new Location(player.level.dimension().location(), d, e, f, g, h);
+
+        PlayerTeleportEvent ev = new PlayerTeleportEvent(player, oldLoc, newLoc);
+        Event.invoke(ev);
+
+        if(ev.isCancelled()) {
+            ci.cancel();
+        }
     }
 }

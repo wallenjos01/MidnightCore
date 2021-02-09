@@ -27,17 +27,21 @@ public class WorldCreator {
     private Difficulty difficulty = Difficulty.NORMAL;
     private GameRules gameRules = new GameRules();
 
+    private String folderName;
+
     private BlockPos spawnPosition;
 
     public WorldCreator(ResourceLocation worldId) {
         this.worldId = worldId;
         levelName = worldId.getPath();
+        folderName = worldId.getPath();
     }
 
     public WorldCreator(ResourceLocation worldId, ResourceKey<LevelStem> dimension) {
         this.worldId = worldId;
         this.dimension = dimension;
         levelName = worldId.getPath();
+        folderName = worldId.getPath();
     }
 
     public WorldCreator(ResourceLocation worldId, ResourceKey<LevelStem> dimension, ChunkGenerator generator) {
@@ -45,6 +49,7 @@ public class WorldCreator {
         this.dimension = dimension;
         this.generator = generator;
         levelName = worldId.getPath();
+        folderName = worldId.getPath();
     }
 
 
@@ -134,5 +139,13 @@ public class WorldCreator {
 
     public LevelSettings getLevelInfo() {
         return new LevelSettings(levelName, defaultGameMode, false, difficulty, false, gameRules, DataPackConfig.DEFAULT);
+    }
+
+    public String getFolderName() {
+        return folderName;
+    }
+
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
     }
 }

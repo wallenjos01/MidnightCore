@@ -111,7 +111,7 @@ public class DynamicLevelStorageSource extends LevelStorageSource {
         @Override
         public File getDimensionPath(ResourceKey<Level> key) {
 
-            File root = DynamicLevelStorageSource.this.baseDir.resolve(getBaseDir()).toFile();
+            File root = getBaseDir().resolve(getLevelId()).toFile();
 
             if(key == defaultDimension) {
                 return root;

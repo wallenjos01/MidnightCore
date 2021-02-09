@@ -70,7 +70,6 @@ public class MidnightCore implements ModInitializer {
             }
 
         });
-
     }
 
     public static MinecraftServer getServer() {

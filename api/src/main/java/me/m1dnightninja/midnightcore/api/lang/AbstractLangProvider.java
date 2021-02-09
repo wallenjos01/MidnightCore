@@ -22,11 +22,17 @@ public abstract class AbstractLangProvider {
         }
     }
 
+    public abstract boolean hasMessage(String language, String key);
+
+    public boolean hasMessage(String key) {
+        return hasMessage(getServerLanguage(), key);
+    }
+
     public abstract String getRawMessage(String language, String key);
 
     public abstract String getMessage(String language, String key, Object... objs);
 
-    protected abstract boolean verifyFile(File f);
+    protected abstract boolean verifyFile(File file);
 
     protected abstract void loadEntries(String fileName);
 

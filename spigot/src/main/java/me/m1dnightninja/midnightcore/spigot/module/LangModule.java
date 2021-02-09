@@ -26,7 +26,7 @@ public class LangModule extends AbstractLangModule<BaseComponent> {
     }
 
     @Override
-    public AbstractLangProvider createProvider(String name, File folder) {
+    public AbstractLangProvider createProvider(String name, File folder, HashMap<String, String> strs) {
         return null;
     }
 

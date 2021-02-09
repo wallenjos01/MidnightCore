@@ -3,8 +3,7 @@ package me.m1dnightninja.midnightcore.common.module;
 import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
 import me.m1dnightninja.midnightcore.api.module.ILangModule;
 
-public abstract class AbstractLangModule<T>
-implements ILangModule<T> {
+public abstract class AbstractLangModule<T> implements ILangModule<T> {
     protected final HashMap<String, AbstractLangProvider> providers = new HashMap<>();
     protected final HashMap<String, PlaceholderSupplier<T>> rawPlaceholders = new HashMap<>();
     protected final HashMap<String, PlaceholderSupplier<String>> stringPlaceholders = new HashMap<>();
@@ -28,9 +27,31 @@ implements ILangModule<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public String getStringPlaceholderValue(String key, Object... args) {
-        return stringPlaceholders.get(key).get(args);
+    public <P, O> PlaceholderSupplier<P> createSupplier(Class<O> clazz, TypedSupplier<P, O> supp) {
+        return objs -> {
+            for(Object o : objs) {
+                if(o == null) continue;
+                if(clazz.isAssignableFrom(o.getClass())) {
+                    try {
+                        return supp.get((O) o);
+                    } catch(Exception ex) {
+                        return null;
+                    }
+                }
+            }
+            return null;
+        };
+    }
+
+    @Override
+    public String getStringPlaceholderValue(String key, Object ... args) {
+
+        PlaceholderSupplier<String> supp = stringPlaceholders.get(key);
+        if(supp == null) return "%" + key + "%";
+
+        return supp.get(args);
     }
 
     @Override

@@ -56,7 +56,7 @@ public class Timer extends AbstractTimer {
     @Override
     protected final void display() {
 
-        Component send = textPrefix.plainCopy().append(new TextComponent(FormatUtil.formatTime(secondsLeft * 1000L)).setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.WHITE)));
+        Component send = textPrefix.copy().append(new TextComponent(FormatUtil.formatTime(secondsLeft * 1000L)).setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.WHITE)));
 
         for(UUID player : players) {
             ServerPlayer pl = MidnightCore.getServer().getPlayerList().getPlayer(player);

@@ -46,8 +46,23 @@ public class ConfigSection {
         return (T) out;
     }
 
+    public Iterable<String> getKeys() {
+        return entries.keySet();
+    }
+
+    public Map<String, Object> getEntries() {
+        return new HashMap<>(entries);
+    }
+
     public boolean has(String key) {
         return entries.containsKey(key);
+    }
+
+    public <T> boolean has(String key, Class<T> clazz) {
+        Object out = this.get(key);
+        if(out == null) return false;
+
+        return clazz.isAssignableFrom(out.getClass());
     }
 
     public String getString(String key) {
@@ -65,6 +80,8 @@ public class ConfigSection {
     public double getDouble(String key) {
         return get(key, double.class);
     }
+
+    public boolean getBoolean(String key) { return (boolean) this.get(key); }
 
     public List<?> getList(String key) {
         return get(key, List.class);

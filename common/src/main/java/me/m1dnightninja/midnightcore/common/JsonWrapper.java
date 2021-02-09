@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.fabric.api;
+package me.m1dnightninja.midnightcore.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,27 +8,27 @@ import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 
 import java.io.*;
 
-public class JsonConfiguration {
+public class JsonWrapper {
 
     private File file;
     private JsonObject root;
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public JsonConfiguration() {
+    public JsonWrapper() {
         this.root = new JsonObject();
     }
 
-    public JsonConfiguration(JsonObject obj) {
+    public JsonWrapper(JsonObject obj) {
         this.root = obj;
     }
 
-    public JsonConfiguration(JsonObject obj, File file) {
+    public JsonWrapper(JsonObject obj, File file) {
         this.file = file;
         this.root = obj;
     }
 
-    public JsonConfiguration(File file) {
+    public JsonWrapper(File file) {
         this.file = file;
         this.root = new JsonObject();
     }
@@ -58,7 +58,7 @@ public class JsonConfiguration {
     public boolean save(File file) {
 
         if(file == null || file.isDirectory()) {
-            MidnightCoreAPI.getLogger().warn("Unable to create file to save JSON configuration!");
+            MidnightCoreAPI.getLogger().warn("Unable to create file to save JSON file!");
             return false;
         }
         if(!file.exists()) {
@@ -98,7 +98,7 @@ public class JsonConfiguration {
 
     public boolean load(File file) {
         if(file == null || file.isDirectory() || !file.exists()) {
-            MidnightCoreAPI.getLogger().warn("Unable to locate JSON configuration file!");
+            MidnightCoreAPI.getLogger().warn("Unable to locate JSON file!");
             return false;
         }
 
@@ -118,16 +118,16 @@ public class JsonConfiguration {
 
     }
 
-    public static JsonConfiguration loadFromFile(File file) {
+    public static JsonWrapper loadFromFile(File file) {
 
         if(!file.exists()) {
-            MidnightCoreAPI.getLogger().warn("Unable to load JSON configuration!");
+            MidnightCoreAPI.getLogger().warn("Unable to load JSON file!");
             return null;
         }
 
-        JsonConfiguration out = new JsonConfiguration(file);
+        JsonWrapper out = new JsonWrapper(file);
         if(!out.load()) {
-            MidnightCoreAPI.getLogger().warn("Unable to load configuration from file " + file.getName() + "!");
+            MidnightCoreAPI.getLogger().warn("Unable to load JSON from file " + file.getName() + "!");
             return null;
         }
 

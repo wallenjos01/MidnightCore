@@ -33,5 +33,27 @@ public class Vec3d {
         Vec3d other = (Vec3d)obj;
         return other.getX() == this.getX() && other.getY() == this.getY() && other.getZ() == this.getZ();
     }
+
+    @Override
+    public String toString() {
+        return getX() + "," + getY() + "," + getZ();
+    }
+
+    public static Vec3d parse(String str) {
+
+        if(str == null || str.length() == 0 || !str.contains(",")) return null;
+        String[] xyz = str.split(",");
+
+        try {
+            double x = Double.parseDouble(xyz[0]);
+            double y = Double.parseDouble(xyz[1]);
+            double z = Double.parseDouble(xyz[2]);
+
+            return new Vec3d(x,y,z);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+
+    }
 }
 

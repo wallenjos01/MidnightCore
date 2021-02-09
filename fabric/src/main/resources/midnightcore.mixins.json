@@ -8,6 +8,7 @@
     "AccessorMinecraftServer",
     "AccessorPlayerListPacket",
     "AccessorServerPlayer",
+    "MixinChunkStatus",
     "MixinGameruleCommand",
     "MixinHungerManager",
     "MixinLivingEntity",
@@ -15,7 +16,8 @@
     "MixinPacketHandler",
     "MixinPlayerManager",
     "MixinScreenHandler",
-    "MixinServerPlayer"
+    "MixinServerPlayer",
+    "MixinTimeCommand"
   ],
   "client": [
   ],

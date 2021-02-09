@@ -115,7 +115,7 @@ public class DimensionModule implements IModule {
     public void createWorld(WorldCreator cre, Path location, DimensionLoadCallback cb) {
 
         ResourceKey<Level> key = ResourceKey.create(Registry.DIMENSION_REGISTRY, cre.getWorldId());
-        DynamicLevelStorageSource.DynamicLevelStorageAccess session = createLevelSession(location, cre.getLevelName(), key);
+        DynamicLevelStorageSource.DynamicLevelStorageAccess session = createLevelSession(location, cre.getFolderName(), key);
 
         if(session == null) {
             cb.onLoaded(null);
