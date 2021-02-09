@@ -60,20 +60,17 @@ public class LangProvider extends AbstractLangProvider {
     }
 
     @Override
-    protected void loadEntries(String fileName) {
+    public void loadEntries(String fileName) {
 
         File f = files.get(fileName);
         if(f == null) return;
 
-        JsonWrapper conf = JsonWrapper.loadFromFile(f);
-        if(conf == null) {
-            MidnightCoreAPI.getLogger().warn("Unable to load entries from file " + fileName);
-            return;
-        }
+        JsonObject obj = new JsonObject();
+        JsonWrapper conf = new JsonWrapper(obj);
+        conf.load(f);
 
-        JsonObject obj = conf.getRoot();
-
-        HashMap<String, String> ents = new HashMap<>(defaults);
+        HashMap<String, String> ents = new HashMap<>();
+        if(defaults != null) ents.putAll(defaults);
 
         for(Map.Entry<String, JsonElement> ent : obj.entrySet()) {
             ents.put(ent.getKey(), ent.getValue().getAsString());
@@ -81,9 +78,11 @@ public class LangProvider extends AbstractLangProvider {
 
         entries.put(fileName, ents);
 
+        JsonObject out = new JsonObject();
         for(Map.Entry<String, String> ent : ents.entrySet()) {
-            obj.addProperty(ent.getKey(), ent.getValue());
+            out.addProperty(ent.getKey(), ent.getValue());
         }
+        conf.setRoot(out);
         conf.save(f);
     }
 

@@ -22,6 +22,14 @@ public abstract class AbstractLangProvider {
         }
     }
 
+    public void reloadAllEntries() {
+
+        entries.clear();
+        for(String s : files.keySet()) {
+            loadEntries(s);
+        }
+    }
+
     public abstract boolean hasMessage(String language, String key);
 
     public boolean hasMessage(String key) {

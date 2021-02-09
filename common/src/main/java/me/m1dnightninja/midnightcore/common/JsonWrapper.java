@@ -78,10 +78,12 @@ public class JsonWrapper {
         }
 
         try {
+
             OutputStream stream = new FileOutputStream(file);
             OutputStreamWriter writer = new OutputStreamWriter(stream);
 
-            GSON.toJson(root, new JsonWriter(writer));
+            JsonWriter jw = new JsonWriter(writer);
+            GSON.toJson(root, jw);
 
             writer.close();
             stream.close();
