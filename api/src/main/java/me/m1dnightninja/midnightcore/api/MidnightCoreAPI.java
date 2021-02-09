@@ -1,6 +1,8 @@
 package me.m1dnightninja.midnightcore.api;
 
 import java.util.HashMap;
+
+import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
 import me.m1dnightninja.midnightcore.api.skin.Skin;
 
@@ -11,11 +13,14 @@ public class MidnightCoreAPI {
     private final ConfigRegistry configRegistry;
     private final HashMap<String, IModule> loadedModules = new HashMap<>();
 
-    public MidnightCoreAPI(ILogger logger, ImplDelegate delegate, IModule ... modules) {
+    private final ConfigProvider defaultConfigProvider;
+
+    public MidnightCoreAPI(ILogger logger, ImplDelegate delegate, ConfigProvider def, IModule ... modules) {
         if (INSTANCE == null) {
             INSTANCE = this;
             LOGGER = logger;
         }
+        this.defaultConfigProvider = def;
         this.delegate = delegate;
         this.configRegistry = new ConfigRegistry();
         this.configRegistry.registerSerializer(Skin.class, Skin.SERIALIZER);
@@ -44,12 +49,17 @@ public class MidnightCoreAPI {
         LOGGER.info(b.toString());
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends IModule> T getModule(Class<T> clazz) {
         for (IModule mod : this.loadedModules.values()) {
             if (!clazz.isAssignableFrom(mod.getClass()) && clazz != mod.getClass()) continue;
             return (T) mod;
         }
         return null;
+    }
+
+    public ConfigProvider getDefaultConfigProvider() {
+        return defaultConfigProvider;
     }
 
     public IModule getModuleById(String id) {
