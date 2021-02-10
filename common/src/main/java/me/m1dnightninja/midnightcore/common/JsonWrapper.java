@@ -123,7 +123,7 @@ public class JsonWrapper {
     public static JsonWrapper loadFromFile(File file) {
 
         if(!file.exists()) {
-            MidnightCoreAPI.getLogger().warn("Unable to load JSON file!");
+            MidnightCoreAPI.getLogger().warn("Unable to load JSON from file " + file.getName() + "!");
             return null;
         }
 

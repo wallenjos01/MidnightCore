@@ -1,40 +1,88 @@
 package me.m1dnightninja.midnightcore.api;
 
+import java.io.File;
 import java.util.HashMap;
 
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.skin.Skin;
 
 public class MidnightCoreAPI {
+
     private static MidnightCoreAPI INSTANCE;
-    private static ILogger LOGGER;
+    private static ILogger LOGGER = new ILogger() {
+        @Override
+        public void info(String str) { System.out.println("[INFO] " + str); }
+
+        @Override
+        public void warn(String str) { System.out.println("[WARN] " + str); }
+
+        @Override
+        public void error(String str) { System.out.println("[ERROR] " + str); }
+    };
+
+    private static final ConfigRegistry configRegistry = new ConfigRegistry();
+
     private final ImplDelegate delegate;
-    private final ConfigRegistry configRegistry;
     private final HashMap<String, IModule> loadedModules = new HashMap<>();
 
     private final ConfigProvider defaultConfigProvider;
 
-    public MidnightCoreAPI(ILogger logger, ImplDelegate delegate, ConfigProvider def, IModule ... modules) {
+    private final ConfigSection mainConfig;
+
+    public MidnightCoreAPI(ILogger logger, ImplDelegate delegate, ConfigProvider def, File configFile, ConfigSection config, IModule... modules) {
         if (INSTANCE == null) {
             INSTANCE = this;
             LOGGER = logger;
         }
+
         this.defaultConfigProvider = def;
         this.delegate = delegate;
-        this.configRegistry = new ConfigRegistry();
-        this.configRegistry.registerSerializer(Skin.class, Skin.SERIALIZER);
+        this.mainConfig = config;
+
+        ConfigSection moduleConfig = null;
+        if(mainConfig.has("modules", ConfigSection.class)) {
+            moduleConfig = mainConfig.getSection("modules");
+        }
+
+        if(moduleConfig == null) {
+            moduleConfig = new ConfigSection();
+            mainConfig.set("modules", moduleConfig);
+        }
+
+        configRegistry.registerSerializer(Skin.class, Skin.SERIALIZER);
         for (IModule mod : modules) {
+
             if (this.loadedModules.containsKey(mod.getId())) {
                 LOGGER.warn("Attempt to load Module with duplicate ID!");
                 continue;
             }
-            if (!mod.initialize()) {
+
+            ConfigSection sec = null;
+            ConfigSection defs = mod.getDefaultConfig();
+
+            if(moduleConfig.has(mod.getId(), ConfigSection.class)) {
+                sec = moduleConfig.getSection(mod.getId());
+            }
+            if(sec == null && defs != null) {
+                sec = new ConfigSection();
+                moduleConfig.set(mod.getId(), sec);
+            }
+
+            if(defs != null) {
+                sec.fill(defs);
+            }
+
+            if (!mod.initialize(sec)) {
                 LOGGER.warn("Unable to initialize module " + mod.getId() + "!");
                 continue;
             }
             this.loadedModules.put(mod.getId(), mod);
         }
+
+        defaultConfigProvider.saveToFile(mainConfig, configFile);
+
         StringBuilder b = new StringBuilder("Enabled ");
         b.append(this.loadedModules.size());
         b.append(this.loadedModules.size() == 1 ? " module: " : " modules: ");
@@ -86,11 +134,12 @@ public class MidnightCoreAPI {
         return this.delegate.createInventoryGUI(title);
     }
 
-    public ConfigRegistry getConfigRegistry() {
-        return this.configRegistry;
+    public static ConfigRegistry getConfigRegistry() {
+        return configRegistry;
     }
 
     public static ILogger getLogger() {
+
         return LOGGER;
     }
 

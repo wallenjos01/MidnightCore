@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric;
 
+import com.mojang.brigadier.CommandDispatcher;
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.IModule;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
@@ -7,6 +8,7 @@ import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.common.JsonConfigProvider;
+import me.m1dnightninja.midnightcore.common.JsonWrapper;
 import me.m1dnightninja.midnightcore.fabric.api.InventoryGUI;
 import me.m1dnightninja.midnightcore.fabric.api.Timer;
 import me.m1dnightninja.midnightcore.fabric.api.event.MidnightCoreInitEvent;
@@ -16,7 +18,11 @@ import me.m1dnightninja.midnightcore.fabric.dimension.EmptyGenerator;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.module.*;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -35,14 +41,7 @@ public class MidnightCore implements ModInitializer {
     private static MinecraftServer server;
 
     private File configDirectory;
-
-    private static final IModule[] modules = new IModule[] {
-            new SkinModule(),
-            new LangModule(),
-            new DimensionModule(),
-            new SavePointModule(),
-            new PermissionModule()
-    };
+    private ConfigProvider configProvider;
 
     @Override
     public void onInitialize() {
@@ -51,17 +50,35 @@ public class MidnightCore implements ModInitializer {
         Logger logger = new Logger(LogManager.getLogger());
 
         configDirectory = Paths.get("config/MidnightCore").toFile();
-        if(!configDirectory.exists() || configDirectory.isDirectory()) {
+        if(!configDirectory.exists() || !configDirectory.isDirectory()) {
 
             if(configDirectory.exists() && !FileUtils.deleteQuietly(configDirectory)) {
                 logger.warn("Unable to create config directory!");
                 return;
             }
+
+            if(!configDirectory.mkdirs()) {
+                logger.warn("Unable to create config directory!");
+                return;
+            }
         }
 
-        ConfigProvider prov = new JsonConfigProvider();
+        configProvider = new JsonConfigProvider();
 
-        ConfigSection mainConfig = prov.loadFromFile(new File(configDirectory, "config.json"));
+        File f = new File(configDirectory, "config.json");
+        if(!f.exists() || f.isDirectory()) {
+            new JsonWrapper().save(f);
+        }
+
+        ConfigSection mainConfig = configProvider.loadFromFile(f);
+
+        final IModule[] modules = new IModule[] {
+                new SkinModule(),
+                new LangModule(),
+                new DimensionModule(),
+                new SavePointModule(),
+                new PermissionModule()
+        };
 
         ImplDelegate delegate = new ImplDelegate() {
             @Override
@@ -78,8 +95,10 @@ public class MidnightCore implements ModInitializer {
         api = new MidnightCoreAPI(
                 logger,
                 delegate,
-                prov,
-                loadModules(mainConfig)
+                configProvider,
+                f,
+                mainConfig,
+                loadModules(mainConfig, modules)
         );
 
         Event.invoke(new MidnightCoreInitEvent(this));
@@ -97,15 +116,19 @@ public class MidnightCore implements ModInitializer {
             for(Map.Entry<ResourceLocation, ChunkGenerator> ent : generators.entrySet()) {
                 api.getModule(DimensionModule.class).registerGeneratorType(ent.getKey(), ent.getValue());
             }
-
         });
+
     }
 
     public File getConfigDirectory() {
         return configDirectory;
     }
 
-    private IModule[] loadModules(ConfigSection mainConfig) {
+    public ConfigProvider getDefaultConfigProvider() {
+        return configProvider;
+    }
+
+    private IModule[] loadModules(ConfigSection mainConfig, IModule... modules) {
 
         List<IModule> out = Arrays.asList(modules);
 

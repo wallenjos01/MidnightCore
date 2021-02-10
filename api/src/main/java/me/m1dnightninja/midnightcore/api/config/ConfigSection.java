@@ -12,7 +12,7 @@ public class ConfigSection {
     private final HashMap<String, Object> entries = new HashMap<>();
 
     public ConfigSection() {
-        this(MidnightCoreAPI.getInstance().getConfigRegistry());
+        this(MidnightCoreAPI.getConfigRegistry());
     }
 
     public ConfigSection(ConfigRegistry reg) {
@@ -103,6 +103,13 @@ public class ConfigSection {
        return get(key, ConfigSection.class);
     }
 
+    public void fill(ConfigSection other) {
+        for(Map.Entry<String, Object> ents : other.getEntries().entrySet()) {
+            if(!has(ents.getKey(), ents.getValue().getClass())) {
+                set(ents.getKey(), ents.getValue());
+            }
+        }
+    }
 
 
 }

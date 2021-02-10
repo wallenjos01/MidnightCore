@@ -2,3 +2,4 @@ main: 'me.m1dnightninja.midnightcore.spigot.MidnightCore'
 version: "${version}"
 name: 'MidnightCore'
 author: 'M1dnight_Ninja'
+softdepend: [ Vault ]

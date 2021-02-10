@@ -3,6 +3,7 @@ package me.m1dnightninja.midnightcore.fabric.module;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.skin.Skin;
 import me.m1dnightninja.midnightcore.common.MojangUtil;
 import me.m1dnightninja.midnightcore.common.module.AbstractSkinModule;
@@ -30,7 +31,7 @@ public class SkinModule extends AbstractSkinModule {
 
 
     @Override
-    public boolean initialize() {
+    public boolean initialize(ConfigSection config) {
 
         Event.register(PlayerLoginEvent.class, this, event -> {
             loginSkins.put(event.getPlayer().getUUID(), MojangUtil.getSkinFromProfile(event.getProfile()));
@@ -49,6 +50,11 @@ public class SkinModule extends AbstractSkinModule {
         });
 
         return true;
+    }
+
+    @Override
+    public ConfigSection getDefaultConfig() {
+        return null;
     }
 
     @Override

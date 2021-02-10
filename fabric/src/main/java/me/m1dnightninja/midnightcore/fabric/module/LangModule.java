@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.module;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
 import me.m1dnightninja.midnightcore.common.module.AbstractLangModule;
 import me.m1dnightninja.midnightcore.fabric.api.LangProvider;
@@ -48,7 +49,7 @@ public class LangModule extends AbstractLangModule<Component> {
     }
 
     @Override
-    public boolean initialize() {
+    public boolean initialize(ConfigSection section) {
 
         registerRawPlaceholder("player_display_name", createSupplier(ServerPlayer.class, Player::getDisplayName));
         registerRawPlaceholder("player_name", createSupplier(ServerPlayer.class, Player::getName));
@@ -59,6 +60,10 @@ public class LangModule extends AbstractLangModule<Component> {
         return true;
     }
 
+    @Override
+    public ConfigSection getDefaultConfig() {
+        return null;
+    }
 
 
 }

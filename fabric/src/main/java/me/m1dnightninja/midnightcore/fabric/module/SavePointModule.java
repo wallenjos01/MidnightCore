@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.module;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.ISkinModule;
 import me.m1dnightninja.midnightcore.api.skin.Skin;
 import me.m1dnightninja.midnightcore.common.module.AbstractSavePointModule;
@@ -16,8 +17,13 @@ import java.util.UUID;
 public class SavePointModule extends AbstractSavePointModule<SavePointModule.SavePoint> {
 
     @Override
-    public boolean initialize() {
+    public boolean initialize(ConfigSection section) {
         return true;
+    }
+
+    @Override
+    public ConfigSection getDefaultConfig() {
+        return null;
     }
 
     @Override

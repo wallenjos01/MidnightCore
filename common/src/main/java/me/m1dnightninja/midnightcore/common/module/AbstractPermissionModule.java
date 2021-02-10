@@ -12,16 +12,12 @@ public class AbstractPermissionModule implements IPermissionModule {
     private final HashMap<UUID, List<String>> permissions = new HashMap<>();
     private final List<Group> groups = new ArrayList<>();
 
-    private final ConfigSection sec;
-
-    protected AbstractPermissionModule(ConfigSection load) {
-        this.sec = load;
-    }
-
+    protected ConfigSection section;
 
     @Override
-    public boolean initialize() {
+    public boolean initialize(ConfigSection configuration) {
 
+        if(section == null) return false;
         loadPermissions();
 
         return true;
@@ -33,6 +29,12 @@ public class AbstractPermissionModule implements IPermissionModule {
     }
 
     @Override
+    public ConfigSection getDefaultConfig() {
+
+        return null;
+    }
+
+    @Override
     public boolean hasPermission(UUID u, String permission) {
 
         if(!permissions.containsKey(u)) return false;
@@ -40,9 +42,11 @@ public class AbstractPermissionModule implements IPermissionModule {
         Optional<Boolean> b = getPermissionState(getPermissions(u), permission);
         if(b.isPresent()) return b.get();
 
-        for(Group g : getGroups(u)) {
-            b = getPermissionState(g.getPermissions(), permission);
-            if(b.isPresent()) return b.get();
+        if(!permission.startsWith("group.")) {
+            for (Group g : getGroups(u)) {
+                b = getPermissionState(g.getPermissions(), permission);
+                if (b.isPresent()) return b.get();
+            }
         }
 
         return false;
@@ -161,10 +165,10 @@ public class AbstractPermissionModule implements IPermissionModule {
 
     protected void loadPermissions() {
 
-        if(sec != null) {
+        if(section != null) {
 
-            if(sec.has("players", List.class)) {
-                for(Object o : sec.getList("players")) {
+            if(section.has("players", List.class)) {
+                for(Object o : section.getList("players")) {
                     if(!(o instanceof ConfigSection)) continue;
 
                     ConfigSection sec = (ConfigSection) o;
@@ -178,13 +182,18 @@ public class AbstractPermissionModule implements IPermissionModule {
                             perms.add((String) ob);
                         }
 
+                        MidnightCoreAPI.getLogger().info(uid.toString());
+                        for(String s : perms) {
+                            MidnightCoreAPI.getLogger().info(s);
+                        }
+
                         permissions.put(uid, perms);
                     }
                 }
             }
 
-            if(sec.has("groups", List.class)) {
-                for(Object o : sec.getList("groups")) {
+            if(section.has("groups", List.class)) {
+                for(Object o : section.getList("groups")) {
                     if (!(o instanceof ConfigSection)) continue;
                     try {
                         groups.add(Group.parse((ConfigSection) o));

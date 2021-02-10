@@ -17,17 +17,19 @@ public class JsonConfigProvider implements ConfigProvider {
     @Override
     public ConfigSection loadFromFile(File file) {
 
-        JsonWrapper f = JsonWrapper.loadFromFile(file);
-        if(f == null) return new ConfigSection();
+        JsonWrapper w = JsonWrapper.loadFromFile(file);
+        if(w == null) {
+            return new ConfigSection();
+        }
 
-        return fromJson(f.getRoot());
+        return fromJson(w.getRoot());
     }
 
     @Override
     public void saveToFile(ConfigSection config, File file) {
 
-        JsonWrapper f = new JsonWrapper(toJson(config));
-        f.save(file);
+        JsonWrapper w = new JsonWrapper(toJson(config));
+        w.save(file);
 
     }
 

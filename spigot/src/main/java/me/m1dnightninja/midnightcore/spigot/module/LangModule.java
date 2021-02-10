@@ -35,9 +35,13 @@ public class LangModule extends AbstractLangModule<BaseComponent> {
         return null;
     }
 
+    @Override
+    public boolean initialize(ConfigSection configuration) {
+        return true;
+    }
 
     @Override
-    public boolean initialize() {
-        return true;
+    public ConfigSection getDefaultConfig() {
+        return null;
     }
 }

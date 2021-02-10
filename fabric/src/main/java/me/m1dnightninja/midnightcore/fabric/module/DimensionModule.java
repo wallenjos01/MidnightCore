@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import me.m1dnightninja.midnightcore.api.IModule;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.api.WorldCreator;
 import me.m1dnightninja.midnightcore.fabric.dimension.DynamicLevelStorageSource;
@@ -54,13 +55,19 @@ public class DimensionModule implements IModule {
 
 
     @Override
-    public boolean initialize() {
+    public boolean initialize(ConfigSection sec) {
+
         return true;
     }
 
     @Override
     public String getId() {
         return "dimension";
+    }
+
+    @Override
+    public ConfigSection getDefaultConfig() {
+        return null;
     }
 
     public void registerGeneratorType(ResourceLocation id, ChunkGenerator generator) {

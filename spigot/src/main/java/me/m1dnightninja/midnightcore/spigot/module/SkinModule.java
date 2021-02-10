@@ -69,6 +69,11 @@ public class SkinModule extends AbstractSkinModule implements Listener {
     }
 
     @Override
+    public ConfigSection getDefaultConfig() {
+        return null;
+    }
+
+    @Override
     public void updateSkin(UUID uid) {
 
         if(updater == null) return;
