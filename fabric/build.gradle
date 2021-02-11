@@ -1,6 +1,4 @@
-
 import net.fabricmc.loom.task.RemapJarTask
-
 
 plugins {
     id 'fabric-loom' version '0.5-SNAPSHOT'
@@ -19,8 +17,6 @@ configurations {
 
 archivesBaseName = project.ext.archiveName
 
-def fabricApiVersion = "0.29.3+1.16"
-
 dependencies {
 
     minecraft "com.mojang:minecraft:${project.ext.minecraftVersion}"
@@ -31,6 +27,7 @@ dependencies {
 
     shade project(':api')
     shade project(':common')
+
 }
 
 processResources {
@@ -62,17 +59,19 @@ shadowJar {
 
 task remapShadowJar(type: RemapJarTask) {
 
+    archiveBaseName.set("${project.ext.archiveName}-fabric-mc${project.ext.minecraftVersion}")
+
     dependsOn tasks.shadowJar
     input = tasks.shadowJar.archivePath
     addNestedDependencies = true
-    archiveBaseName.set("${project.ext.archiveName}-fabric-mc${project.ext.minecraftVersion}")
+
 }
 
 tasks.assemble.dependsOn tasks.remapShadowJar
 
 artifacts {
     archives remapShadowJar
-    shadow shadowJar
+    shadow sourcesJar
 }
 
 publishing {

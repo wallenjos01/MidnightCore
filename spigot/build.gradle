@@ -32,8 +32,6 @@ dependencies {
     shade project(":api")
     shade project(":common")
 
-    shade project(':api')
-    shade project(':common')
 }
 
 processResources {
@@ -70,35 +68,15 @@ artifacts {
     shadow sourcesJar
 }
 
-processResources {
-    inputs.property "version", project.version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include "plugin.yml"
-        expand "version": project.version
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(jar)
+            artifact(sourcesJar)
+        }
     }
 
-    from(sourceSets.main.resources.srcDirs) {
-        exclude "plugin.yml"
+    repositories {
+        mavenLocal()
     }
-}
-
-shadowJar {
-
-    archiveBaseName.set("${project.ext.archiveName}-spigot")
-    configurations = [project.configurations.shade]
-
-    dependencies {
-        exclude('net.minecraft:.*')
-        exclude('net.spigotmc:.*')
-        exclude('org.bukkit:.*')
-        include(project(':api'))
-        include(project(':common'))
-    }
-}
-
-tasks.assemble.dependsOn tasks.shadowJar
-
-artifacts {
-    archives shadowJar
 }

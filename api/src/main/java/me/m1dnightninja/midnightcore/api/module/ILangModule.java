@@ -1,13 +1,12 @@
 package me.m1dnightninja.midnightcore.api.module;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.UUID;
 import me.m1dnightninja.midnightcore.api.IModule;
 import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
 
-import java.io.File;
-import java.util.UUID;
-
 public interface ILangModule<T> extends IModule {
-
 
     /**
      * Gets the preferred language for a given player
@@ -15,7 +14,6 @@ public interface ILangModule<T> extends IModule {
      * @param player  The UUID of the player to look up
      * @return        The player's preferred language in the format
      */
-
     String getLanguage(UUID player);
 
 
@@ -89,9 +87,14 @@ public interface ILangModule<T> extends IModule {
 
     AbstractLangProvider getProvider(String name);
 
+    <P, O> PlaceholderSupplier<P> createSupplier(Class<O> clazz, TypedSupplier<P, O> supp);
 
     interface PlaceholderSupplier<P> {
-        P get(Object... args);
+        P get(Object... objs);
     }
 
+    interface TypedSupplier<P, O> {
+        P get(O obj);
+    }
 }
+

@@ -1,5 +1,7 @@
 package me.m1dnightninja.midnightcore.common.module;
 
+import java.util.HashMap;
+
 import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
 import me.m1dnightninja.midnightcore.api.module.ILangModule;
 
@@ -55,7 +57,12 @@ public abstract class AbstractLangModule<T> implements ILangModule<T> {
     }
 
     @Override
-    public T getRawPlaceholderValue(String key, Object... args) {
-        return rawPlaceholders.get(key).get(args);
+    public T getRawPlaceholderValue(String key, Object ... args) {
+
+        PlaceholderSupplier<T> supp = rawPlaceholders.get(key);
+        if(supp == null) return null;
+
+        return supp.get(args);
     }
 }
+

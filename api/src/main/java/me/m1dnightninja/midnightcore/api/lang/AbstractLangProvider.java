@@ -6,19 +6,21 @@ import java.util.HashMap;
 public abstract class AbstractLangProvider {
 
     protected File folder;
+    protected final HashMap<String, File> files = new HashMap<>();
+    protected final HashMap<String, HashMap<String, String>> entries = new HashMap<>();
 
-    protected HashMap<String, File> files;
-    protected HashMap<String, HashMap<String, String>> entries;
+    protected final HashMap<String, String> defaults;
 
-    protected AbstractLangProvider(File folder) {
-        if(!folder.isDirectory()) throw new IllegalArgumentException();
-
+    protected AbstractLangProvider(File folder, HashMap<String, String> defaults) {
+        this.defaults = defaults;
+        if (!folder.isDirectory()) {
+            throw new IllegalArgumentException();
+        }
         this.folder = folder;
-
-        for(File f : folder.listFiles()) {
-            if(verifyFile(f)) {
-                files.put(f.getName(), f);
-            }
+        for (File f : folder.listFiles()) {
+            if (!this.verifyFile(f)) continue;
+            this.files.put(f.getName(), f);
+            loadEntries(f.getName());
         }
     }
 
@@ -38,10 +40,20 @@ public abstract class AbstractLangProvider {
 
     public abstract String getRawMessage(String language, String key);
 
-    public abstract String getMessage(String language, String key, Object... objs);
+    public abstract String getMessage(String language, String key, Object ... args);
+
+    public String getRawMessage(String key) {
+        return getRawMessage(getServerLanguage(), key);
+    }
+
+    public String getMessage(String key, Object... args) {
+        return getMessage(getServerLanguage(), key, args);
+    }
+
+    public abstract String getServerLanguage();
 
     protected abstract boolean verifyFile(File file);
 
-    protected abstract void loadEntries(String fileName);
-
+    public abstract void loadEntries(String language);
 }
+

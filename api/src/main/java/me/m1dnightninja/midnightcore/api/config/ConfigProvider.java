@@ -4,8 +4,8 @@ import java.io.File;
 
 public interface ConfigProvider {
 
-    ConfigSection loadFromFile(File f);
+    ConfigSection loadFromFile(File file);
 
-    void saveToFile(ConfigSection s, File f);
-
+    void saveToFile(ConfigSection config, File file);
 }
+

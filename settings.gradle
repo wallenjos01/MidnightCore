@@ -8,9 +8,10 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'midnightcore'
-include 'common'
-include 'api'
-include 'fabric'
-include 'spigot'
 
+rootProject.name = 'midnightcore'
+
+include 'fabric'
+include 'api'
+include 'common'
+include 'spigot'
