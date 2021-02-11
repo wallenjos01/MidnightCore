@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.skin.Skin;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+
 public interface ISkinUpdater {
 
     boolean initialize();

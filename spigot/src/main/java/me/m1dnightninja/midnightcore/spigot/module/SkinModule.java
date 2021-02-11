@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.spigot.module;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.common.MojangUtil;
 import me.m1dnightninja.midnightcore.common.module.AbstractSkinModule;
 import me.m1dnightninja.midnightcore.spigot.skin.ISkinUpdater;
@@ -49,7 +50,7 @@ public class SkinModule extends AbstractSkinModule implements Listener {
     }
 
     @Override
-    public boolean initialize() {
+    public boolean initialize(ConfigSection section) {
 
         switch(ReflectionUtil.API_VERSION) {
             case "v1_16_R1":
