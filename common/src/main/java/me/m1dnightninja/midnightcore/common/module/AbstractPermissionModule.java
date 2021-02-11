@@ -37,7 +37,9 @@ public class AbstractPermissionModule implements IPermissionModule {
     @Override
     public boolean hasPermission(UUID u, String permission) {
 
-        if(!permissions.containsKey(u)) return false;
+        if(!permissions.containsKey(u)) {
+            return groupHasPermission(getGroup("default"), permission);
+        }
 
         Optional<Boolean> b = getPermissionState(getPermissions(u), permission);
         if(b.isPresent()) return b.get();
@@ -84,6 +86,7 @@ public class AbstractPermissionModule implements IPermissionModule {
         if(out.isEmpty()) return out;
 
         out.sort(Comparator.comparingInt(Group::getPriority));
+
         return out;
     }
 
@@ -117,6 +120,7 @@ public class AbstractPermissionModule implements IPermissionModule {
 
     @Override
     public boolean registerGroup(Group g) {
+
         if(getGroup(g.getId()) != null) return false;
 
         groups.add(g);
@@ -129,9 +133,6 @@ public class AbstractPermissionModule implements IPermissionModule {
         groups.clear();
 
         loadPermissions();
-        if(getGroup("default") == null) {
-            registerGroup(new Group("default", 0));
-        }
     }
 
     protected Optional<Boolean> getPermissionState(Iterable<String> perms, String permission) {
@@ -200,9 +201,8 @@ public class AbstractPermissionModule implements IPermissionModule {
             }
         }
 
-        if(getGroup("default") == null) {
-            registerGroup(new Group("default", 0));
-        }
+        registerGroup(new Group("default", 0));
+
     }
 
 }
