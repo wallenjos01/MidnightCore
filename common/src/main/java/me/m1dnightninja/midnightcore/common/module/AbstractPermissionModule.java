@@ -155,12 +155,12 @@ public class AbstractPermissionModule implements IPermissionModule {
 
         for(int i = 0 ; i < hasParts.length ; i++) {
 
-            if(hasParts[i].equals("*")) continue;
+            if(hasParts[i].equals("*")) return true;
             if(!hasParts[i].equals(needsParts[i])) return false;
 
         }
 
-        return true;
+        return false;
     }
 
     protected void loadPermissions() {
@@ -182,11 +182,6 @@ public class AbstractPermissionModule implements IPermissionModule {
                             perms.add((String) ob);
                         }
 
-                        MidnightCoreAPI.getLogger().info(uid.toString());
-                        for(String s : perms) {
-                            MidnightCoreAPI.getLogger().info(s);
-                        }
-
                         permissions.put(uid, perms);
                     }
                 }
@@ -196,7 +191,7 @@ public class AbstractPermissionModule implements IPermissionModule {
                 for(Object o : section.getList("groups")) {
                     if (!(o instanceof ConfigSection)) continue;
                     try {
-                        groups.add(Group.parse((ConfigSection) o));
+                        registerGroup(Group.parse((ConfigSection) o));
                     } catch (IllegalArgumentException | NullPointerException ex) {
                         MidnightCoreAPI.getLogger().warn("An exception occurred while trying to parse a group!");
                         ex.printStackTrace();

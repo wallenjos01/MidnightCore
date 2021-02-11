@@ -3,7 +3,6 @@ package me.m1dnightninja.midnightcore.spigot;
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.spigot.api.InventoryGUI;
 import me.m1dnightninja.midnightcore.spigot.api.Timer;
