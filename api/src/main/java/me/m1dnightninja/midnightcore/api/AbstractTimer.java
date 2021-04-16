@@ -28,13 +28,12 @@ public abstract class AbstractTimer {
 
             @Override
             public void run() {
-                AbstractTimer.this.display();
-                AbstractTimer.this.callTick(AbstractTimer.this.secondsLeft);
-                if (countUp && AbstractTimer.this.secondsLeft == seconds || !countUp && AbstractTimer.this.secondsLeft == 0) {
-                    AbstractTimer.this.callFinish();
-                    AbstractTimer.this.timer.cancel();
+                display();
+                callTick(secondsLeft);
+                if (countUp && secondsLeft == seconds || !countUp && secondsLeft == 0) {
+                    timer.cancel();
                 } else {
-                    AbstractTimer.this.secondsLeft = countUp ? AbstractTimer.this.secondsLeft + 1 : AbstractTimer.this.secondsLeft - 1;
+                    secondsLeft = countUp ? secondsLeft + 1 : secondsLeft - 1;
                 }
             }
         };
@@ -64,7 +63,7 @@ public abstract class AbstractTimer {
     }
 
     public final void stop() {
-        this.callFinish();
+        this.callTick(0);
         this.cancel();
     }
 
@@ -83,16 +82,12 @@ public abstract class AbstractTimer {
         this.secondsLeft = this.countUp ? 0 : this.seconds;
     }
 
-    protected abstract void callTick(int var1);
-
-    protected abstract void callFinish();
+    protected abstract void callTick(int seconds);
 
     protected abstract void display();
 
     public interface TimerCallback {
-        void tick(int var1);
-
-        void finish();
+        void tick(int seconds);
     }
 }
 

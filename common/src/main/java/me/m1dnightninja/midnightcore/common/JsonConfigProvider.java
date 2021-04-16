@@ -33,6 +33,11 @@ public class JsonConfigProvider implements ConfigProvider {
 
     }
 
+    @Override
+    public String getFileExtension() {
+        return ".json";
+    }
+
     private JsonObject toJson(ConfigSection sec) {
 
         JsonObject out = new JsonObject();
@@ -90,7 +95,7 @@ public class JsonConfigProvider implements ConfigProvider {
 
     }
 
-    private JsonElement toJsonElement(Object obj) {
+    private <T> JsonElement toJsonElement(T obj) {
 
         if(obj instanceof ConfigSection) {
 
@@ -101,7 +106,7 @@ public class JsonConfigProvider implements ConfigProvider {
             JsonArray arr = new JsonArray();
 
             List<?> lst = (List<?>) obj;
-            for(Object o : lst) {
+            for (Object o : lst) {
                 arr.add(toJsonElement(o));
             }
 

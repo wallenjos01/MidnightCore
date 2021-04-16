@@ -28,7 +28,7 @@ public class EmptyGenerator extends ChunkGenerator {
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
 
     public EmptyGenerator(ResourceLocation biome) {
-        super(createBiomeSource(biome), new StructureSettings(Optional.empty(), Collections.emptyMap()));
+        super(createFixedBiomeSource(biome), new StructureSettings(Optional.empty(), Collections.emptyMap()));
         this.biome = biome;
     }
 
@@ -77,7 +77,7 @@ public class EmptyGenerator extends ChunkGenerator {
         return 0;
     }
 
-    private static BiomeSource createBiomeSource(ResourceLocation biome) {
+    public static BiomeSource createFixedBiomeSource(ResourceLocation biome) {
         return new FixedBiomeSource(MidnightCore.getServer().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).get(biome));
     }
 }

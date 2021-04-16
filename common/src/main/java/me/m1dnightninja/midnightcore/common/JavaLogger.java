@@ -1,12 +1,12 @@
-package me.m1dnightninja.midnightcore.spigot;
+package me.m1dnightninja.midnightcore.common;
 
 import me.m1dnightninja.midnightcore.api.ILogger;
 
-public class Logger implements ILogger {
+public class JavaLogger implements ILogger {
 
     private final java.util.logging.Logger base;
 
-    Logger(java.util.logging.Logger base) {
+    public JavaLogger(java.util.logging.Logger base) {
         this.base = base;
     }
 

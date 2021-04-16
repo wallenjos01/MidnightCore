@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.common.module;
 
+import me.m1dnightninja.midnightcore.api.ModuleIdentifier;
 import me.m1dnightninja.midnightcore.api.module.ISavePointModule;
 
 import java.util.HashMap;
@@ -7,11 +8,13 @@ import java.util.UUID;
 
 public abstract class AbstractSavePointModule<T> implements ISavePointModule {
 
+    protected static final ModuleIdentifier ID = ModuleIdentifier.create("midnightcore","save_point");
+
     private final HashMap<UUID, HashMap<String, T>> saves = new HashMap<>();
 
     @Override
-    public String getId() {
-        return "save_point";
+    public ModuleIdentifier getId() {
+        return ID;
     }
 
     public void savePlayer(UUID u, String id) {

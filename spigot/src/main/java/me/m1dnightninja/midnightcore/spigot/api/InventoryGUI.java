@@ -65,7 +65,7 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> implements Lis
             return;
         }
         try {
-            act.onClick(ClickType.valueOf(ev.getClick().name()));
+            act.onClick(ClickType.valueOf(ev.getClick().name()), ev.getWhoClicked().getUniqueId());
         }
         catch (IllegalArgumentException illegalArgumentException) {
             // Ignore

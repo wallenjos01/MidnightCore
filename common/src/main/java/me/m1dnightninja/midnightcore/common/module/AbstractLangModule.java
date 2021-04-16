@@ -2,17 +2,21 @@ package me.m1dnightninja.midnightcore.common.module;
 
 import java.util.HashMap;
 
+import me.m1dnightninja.midnightcore.api.ModuleIdentifier;
 import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
 import me.m1dnightninja.midnightcore.api.module.ILangModule;
 
 public abstract class AbstractLangModule<T> implements ILangModule<T> {
+
+    protected static final ModuleIdentifier ID = ModuleIdentifier.create("midnightcore", "lang");
+
     protected final HashMap<String, AbstractLangProvider> providers = new HashMap<>();
     protected final HashMap<String, PlaceholderSupplier<T>> rawPlaceholders = new HashMap<>();
     protected final HashMap<String, PlaceholderSupplier<String>> stringPlaceholders = new HashMap<>();
 
     @Override
-    public String getId() {
-        return "lang";
+    public ModuleIdentifier getId() {
+        return ID;
     }
 
     @Override

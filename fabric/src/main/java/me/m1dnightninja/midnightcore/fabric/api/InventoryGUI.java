@@ -5,6 +5,7 @@ import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.api.event.ContainerClickEvent;
 import me.m1dnightninja.midnightcore.fabric.api.event.MenuCloseEvent;
+import me.m1dnightninja.midnightcore.fabric.api.event.PlayerDisconnectEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.mixin.AccessorServerPlayer;
 import me.m1dnightninja.midnightcore.fabric.util.TextUtil;
@@ -27,11 +28,8 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> {
     @Override
     protected void onClosed(UUID u) {
         ServerPlayer pl = MidnightCore.getServer().getPlayerList().getPlayer(u);
-        if(pl != null) {
+        if(pl != null && pl.containerMenu != pl.inventoryMenu) {
             pl.closeContainer();
-        }
-        if(players.size() == 0) {
-            Event.unregisterAll(this);
         }
     }
 
@@ -63,19 +61,14 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> {
 
         SimpleContainer inv = new SimpleContainer(rows * 9);
 
-        for(int i = 0; i < entries.size() ; i++) {
+        for(Entry ent : entries.values()) {
 
-            Entry ent = entries.get(i);
             if(ent.slot < offset || ent.slot > max) {
                 continue;
             }
 
-            MidnightCoreAPI.getLogger().info(ent.item + "");
-
             inv.setItem(ent.slot - offset, ent.item);
         }
-
-        MidnightCoreAPI.getLogger().info(rows + "!");
 
         ChestMenu handler = createScreen(rows, player, inv);
         if(player.containerMenu != player.inventoryMenu) {
@@ -83,16 +76,11 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> {
         }
 
         player.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), TextUtil.parse(title)));
-        handler.addSlotListener(player);
         player.containerMenu = handler;
-
-        if(players.size() == 1) {
-            Event.register(ContainerClickEvent.class, this, this::onClick);
-            Event.register(MenuCloseEvent.class, this, this::onClose);
-        }
+        player.refreshContainer(handler);
     }
 
-    private ClickType getActionType(int action, net.minecraft.world.inventory.ClickType type) {
+    private static ClickType getActionType(int action, net.minecraft.world.inventory.ClickType type) {
         switch(type) {
             case PICKUP:
                 return action == 0 ? ClickType.LEFT : ClickType.RIGHT;
@@ -132,24 +120,40 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> {
         }
     }
 
-    private void onClick(ContainerClickEvent event) {
-        if(!players.containsKey(event.getPlayer().getUUID())) return;
+    private static void onClick(ContainerClickEvent event) {
+
+        MidnightCoreAPI.getLogger().warn("event");
+
+        AbstractInventoryGUI<?> gui = openGuis.get(event.getPlayer().getUUID());
+        if(gui == null) {
+            MidnightCoreAPI.getLogger().warn("no gui");
+            return;
+        }
 
         event.setCancelled(true);
-        int offset = players.get(event.getPlayer().getUUID()) * 54;
 
+        int offset = gui.getPlayerPage(event.getPlayer().getUUID()) * 54;
         int slot = event.getSlot();
-        ClickAction act = getAction(slot + offset);
 
-        if(act == null) return;
-        act.onClick(getActionType(event.getClickType(), event.getAction()));
+        gui.onClick(event.getPlayer().getUUID(), getActionType(event.getClickType(), event.getAction()), offset + slot);
     }
 
-    private void onClose(MenuCloseEvent event) {
+    private static void onClose(MenuCloseEvent event) {
         ServerPlayer pl = MidnightCore.getServer().getPlayerList().getPlayer(event.getPlayer().getUUID());
         if(pl != null && pl.containerMenu != pl.inventoryMenu) {
-            pl.closeContainer();
+            closeMenu(event.getPlayer().getUUID());
         }
+    }
+
+    private static void onLeave(PlayerDisconnectEvent event) {
+        closeMenu(event.getPlayer().getUUID());
+    }
+
+    public static void registerEvents(Object owner) {
+
+        Event.register(ContainerClickEvent.class, owner, InventoryGUI::onClick);
+        Event.register(MenuCloseEvent.class, owner, InventoryGUI::onClose);
+
     }
 
 }

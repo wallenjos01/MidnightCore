@@ -4,9 +4,13 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public abstract class AbstractInventoryGUI<I> {
-    protected HashMap<Integer, Entry> entries = new HashMap<>();
-    protected HashMap<UUID, Integer> players = new HashMap<>();
+
+    protected final HashMap<Integer, Entry> entries = new HashMap<>();
+    protected final HashMap<UUID, Integer> players = new HashMap<>();
     protected final String title;
+
+    protected static final HashMap<UUID, AbstractInventoryGUI<?>> openGuis = new HashMap<>();
+
 
     protected AbstractInventoryGUI(String title) {
         this.title = title;
@@ -36,6 +40,13 @@ public abstract class AbstractInventoryGUI<I> {
     }
 
     public final void open(UUID u, int page) {
+
+        if(openGuis.containsKey(u)) {
+            openGuis.get(u).close(u);
+        }
+
+        openGuis.put(u, this);
+
         this.players.put(u, page);
         this.onOpened(u, page);
     }
@@ -44,17 +55,35 @@ public abstract class AbstractInventoryGUI<I> {
         if (!this.players.containsKey(u)) {
             return;
         }
+
+        openGuis.remove(u);
+
         this.players.remove(u);
         this.onClosed(u);
+    }
+
+    public static void closeMenu(UUID u) {
+
+        if(!openGuis.containsKey(u)) return;
+        openGuis.get(u).close(u);
+
     }
 
     public final int getPlayerPage(UUID u) {
         return this.players.get(u);
     }
 
-    protected abstract void onClosed(UUID var1);
+    public final void onClick(UUID u, ClickType type, int slot) {
 
-    protected abstract void onOpened(UUID var1, int var2);
+        ClickAction act = getAction(slot);
+
+        if(act != null) {
+            act.onClick(type, u);
+        }
+    }
+
+    protected abstract void onClosed(UUID u);
+    protected abstract void onOpened(UUID u, int page);
 
     protected class Entry {
         public I item;
@@ -69,7 +98,7 @@ public abstract class AbstractInventoryGUI<I> {
     }
 
     public interface ClickAction {
-        void onClick(ClickType var1);
+        void onClick(ClickType type, UUID user);
     }
 
     public enum ClickType {

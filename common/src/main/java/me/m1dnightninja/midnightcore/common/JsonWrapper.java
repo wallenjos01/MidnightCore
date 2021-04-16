@@ -107,17 +107,30 @@ public class JsonWrapper {
         try {
 
             InputStream stream = new FileInputStream(file);
-            InputStreamReader reader = new InputStreamReader(stream);
+            load(stream);
 
-            root = GSON.fromJson(reader, JsonObject.class);
+            stream.close();
             return true;
 
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             MidnightCoreAPI.getLogger().warn("An exception occurred while trying to read file " + file.getName() + "!");
             e.printStackTrace();
             return false;
         }
 
+    }
+
+    public void load(InputStream stream) {
+
+        try {
+            InputStreamReader reader = new InputStreamReader(stream);
+            root = GSON.fromJson(reader, JsonObject.class);
+
+            reader.close();
+        } catch(IOException ex) {
+            MidnightCoreAPI.getLogger().warn("An exception occurred while trying to read JSON from stream!");
+            ex.printStackTrace();
+        }
     }
 
     public static JsonWrapper loadFromFile(File file) {

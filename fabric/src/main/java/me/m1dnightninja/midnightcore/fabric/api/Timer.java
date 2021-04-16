@@ -42,18 +42,6 @@ public class Timer extends AbstractTimer {
     }
 
     @Override
-    protected final void callFinish() {
-        MidnightCore.getServer().submit(() -> {
-            try {
-                if(callback != null) callback.finish();
-            } catch(Exception ex) {
-                MidnightCoreAPI.getLogger().warn("An exception occurred while a timer was finishing!");
-                ex.printStackTrace();
-            }
-        });
-    }
-
-    @Override
     protected final void display() {
 
         Component send = textPrefix.copy().append(new TextComponent(FormatUtil.formatTime(secondsLeft * 1000L)).setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.WHITE)));

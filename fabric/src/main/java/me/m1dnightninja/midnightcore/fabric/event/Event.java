@@ -1,5 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.event;
 
+import me.m1dnightninja.midnightcore.fabric.MidnightCore;
+
 import java.util.HashMap;
 
 public class Event {
@@ -15,6 +17,7 @@ public class Event {
 
         HandlerList<T> list = (HandlerList<T>) events.get(ev);
         list.add(listener, handler);
+
     }
 
     @SuppressWarnings("unchecked")
@@ -26,6 +29,7 @@ public class Event {
         if(handlers == null) return;
 
         handlers.invoke(event);
+
     }
 
     public static void unregisterAll(Object o) {

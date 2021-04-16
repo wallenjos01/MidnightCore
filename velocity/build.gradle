@@ -1,0 +1,85 @@
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+repositories {
+
+    mavenLocal()
+    maven {
+        url 'https://nexus.velocitypowered.com/repository/maven-public/'
+    }
+
+}
+
+dependencies {
+
+    compile "com.velocitypowered:velocity-api:1.1.4"
+
+    shade project(':api')
+    shade project(':common')
+
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include "velocity-plugin.json"
+        expand "version": project.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "velocity-plugin.json"
+    }
+}
+
+shadowJar {
+
+    archiveBaseName.set("${project.ext.archiveName}-velocity")
+    configurations = [project.configurations.shade]
+
+    dependencies {
+        include(project(':api'))
+        include(project(':common'))
+    }
+}
+
+tasks.assemble.dependsOn tasks.shadowJar
+
+artifacts {
+    archives jar
+    shadow sourcesJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifacts {
+                jar
+                sourcesJar
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        maven {
+
+            if (project.hasProperty("local") && project.getProperty("local") == "true") {
+                url "file:" + projectDir.path + "/build/maven"
+            } else if (project.hasProperty("mdUrl")) {
+                url = project.mdUrl as String
+                credentials {
+                    username project.mdUser as String
+                    password project.mdPass as String
+                }
+            }
+        }
+    }
+}

@@ -3,6 +3,7 @@ package me.m1dnightninja.midnightcore.fabric.mixin;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import me.m1dnightninja.midnightcore.fabric.api.Location;
+import me.m1dnightninja.midnightcore.fabric.api.event.PlayerInteractEntityEvent;
 import me.m1dnightninja.midnightcore.fabric.api.event.PlayerTeleportEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.api.event.PacketSendEvent;
@@ -11,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
@@ -84,6 +86,22 @@ public class MixinPacketHandler {
 
         if(ev.isCancelled()) {
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "handleInteract(Lnet/minecraft/network/protocol/game/ServerboundInteractPacket;)V", at=@At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
+    private void onInteract(ServerboundInteractPacket serverboundInteractPacket, CallbackInfo ci) {
+
+        PlayerInteractEntityEvent ev = new PlayerInteractEntityEvent(player, serverboundInteractPacket.getTarget(player.getLevel()), serverboundInteractPacket.getHand());
+        Event.invoke(ev);
+
+        if(ev.isCancelled()) {
+            ci.cancel();
+
+            if(ev.shouldSwingArm()) {
+                player.swing(serverboundInteractPacket.getHand(), true);
+            }
+
         }
     }
 }

@@ -1,12 +1,13 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id 'fabric-loom' version '0.5-SNAPSHOT'
+    id 'fabric-loom' version '0.6-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     mavenLocal()
 }
 
@@ -15,15 +16,14 @@ configurations {
     compile.extendsFrom shade
 }
 
-archivesBaseName = project.ext.archiveName
-
 dependencies {
 
-    minecraft "com.mojang:minecraft:${project.ext.minecraftVersion}"
-    mappings minecraft.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:0.11.1"
+    minecraft("com.mojang:minecraft:${project.ext.minecraftVersion}")
+    mappings(minecraft.officialMojangMappings())
+    modImplementation("net.fabricmc:fabric-loader:0.11.3")
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.30.0+1.16"
+    modImplementation("net.fabricmc.fabric-api:fabric-api:0.32.5+1.16")
+    modImplementation("me.lucko:fabric-permissions-api:0.1-SNAPSHOT")
 
     shade project(':api')
     shade project(':common')
@@ -31,11 +31,16 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.version
+
+    Map<String, ?> ex = new HashMap<>()
+    ex.put("version", project.ext.fullVersion)
+    ex.put("modid", project.ext.modid)
+    ex.put("modname", project.ext.modname)
+    ex.put("modclass", project.ext.modclass)
 
     from(sourceSets.main.resources.srcDirs) {
-        include "fabric.mod.json"
-        expand "version": project.version
+        include("fabric.mod.json")
+        expand(ex)
     }
 
     from(sourceSets.main.resources.srcDirs) {
@@ -45,7 +50,7 @@ processResources {
 
 shadowJar {
 
-    archiveBaseName.set("${project.ext.archiveName}-fabric-dev")
+    setArchivesBaseName("${project.ext.archiveName}-fabric-dev")
     configurations = [project.configurations.shade]
 
     dependencies {
@@ -61,8 +66,8 @@ task remapShadowJar(type: RemapJarTask) {
 
     archiveBaseName.set("${project.ext.archiveName}-fabric-mc${project.ext.minecraftVersion}")
 
-    dependsOn tasks.shadowJar
-    input = tasks.shadowJar.archivePath
+    dependsOn(tasks.shadowJar)
+    input = tasks.shadowJar.getArchivePath()
     addNestedDependencies = true
 
 }
@@ -77,16 +82,26 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(remapJar) {
-                builtBy remapJar
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
+            artifacts {
+                remapJar
+                remapSourcesJar
             }
         }
     }
 
     repositories {
         mavenLocal()
+        maven {
+
+            if (project.hasProperty("local") && project.getProperty("local") == "true") {
+                url "file:" + projectDir.path + "/build/maven"
+            } else if (project.hasProperty("mdUrl")) {
+                url = project.mdUrl as String
+                credentials {
+                    username project.mdUser as String
+                    password project.mdPass as String
+                }
+            }
+        }
     }
 }

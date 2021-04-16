@@ -8,7 +8,6 @@ configurations {
     compile.extendsFrom shade
 }
 
-
 repositories {
     mavenCentral()
     mavenLocal()
@@ -25,21 +24,26 @@ repositories {
 
 dependencies {
 
-    compile "org.spigotmc:spigot:${project.ext.minecraftVersion}-R0.1-SNAPSHOT"
+    compileOnly("org.spigotmc:spigot:${project.ext.minecraftVersion}-R0.1-SNAPSHOT")
 
-    compile "com.github.MilkBowl:VaultAPI:1.7"
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
 
-    shade project(":api")
-    shade project(":common")
+    shade(project(":api"))
+    shade(project(":common"))
 
 }
 
 processResources {
-    inputs.property "version", project.version
+
+    Map<String, ?> ex = new HashMap<>()
+    ex.put("version", project.ext.fullVersion)
+    ex.put("modid", project.ext.modid)
+    ex.put("modname", project.ext.modname)
+    ex.put("modclass", project.ext.modclass)
 
     from(sourceSets.main.resources.srcDirs) {
         include "plugin.yml"
-        expand "version": project.version
+        expand(ex)
     }
 
     from(sourceSets.main.resources.srcDirs) {
@@ -71,12 +75,25 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(jar)
-            artifact(sourcesJar)
+            artifacts {
+                jar
+                sourcesJar
+            }
         }
     }
-
     repositories {
         mavenLocal()
+        maven {
+
+            if (project.hasProperty("local") && project.getProperty("local") == "true") {
+                url "file:" + projectDir.path + "/build/maven"
+            } else if (project.hasProperty("mdUrl")) {
+                url = project.mdUrl as String
+                credentials {
+                    username project.mdUser as String
+                    password project.mdPass as String
+                }
+            }
+        }
     }
 }

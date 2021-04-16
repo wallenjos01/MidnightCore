@@ -2,7 +2,6 @@ package me.m1dnightninja.midnightcore.fabric.api;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
 import me.m1dnightninja.midnightcore.common.JsonWrapper;
 import me.m1dnightninja.midnightcore.fabric.module.LangModule;
@@ -91,7 +90,7 @@ public class LangProvider extends AbstractLangProvider {
         return "en_us";
     }
 
-    public Component formatMessage(String message, Object... args) {
+    public MutableComponent formatMessage(String message, Object... args) {
 
         if(message == null) return new TextComponent(" ");
 
@@ -128,49 +127,61 @@ public class LangProvider extends AbstractLangProvider {
         currentLiteral.append(currentPlaceholder);
         message = currentLiteral.toString();
 
-        currentLiteral = new StringBuilder();
-        currentPlaceholder = new StringBuilder();
-        placeholderStarted = false;
-
         MutableComponent orig = TextUtil.parse(message);
-
-        String msg = orig.getContents();
 
         TextComponent out = new TextComponent("");
         out.setStyle(orig.getStyle());
 
+        List<Component> unformatted = new ArrayList<>();
+        unformatted.add(orig);
+        unformatted.addAll(orig.getSiblings());
+
         List<Component> texts = new ArrayList<>();
 
-        for(int i = 0 ; i < msg.length() ; i++) {
+        for(Component cmp : unformatted) {
 
-            char c = msg.charAt(i);
+            placeholderStarted = false;
+            currentLiteral = new StringBuilder();
+            currentPlaceholder = new StringBuilder();
 
-            if(c == '%') {
+            String msg = cmp.getContents();
 
-                if(placeholderStarted) {
-                    placeholderStarted = false;
-                    texts.add(new TextComponent(currentLiteral.toString()));
-                    texts.add(mod.getRawPlaceholderValue(currentPlaceholder.toString(), args));
+            for (int i = 0; i < msg.length(); i++) {
 
-                    currentLiteral = new StringBuilder();
-                    currentPlaceholder = new StringBuilder();
+                char c = msg.charAt(i);
+
+                if (c == '%') {
+
+                    if (placeholderStarted) {
+                        placeholderStarted = false;
+                        texts.add(new TextComponent(currentLiteral.toString()).setStyle(cmp.getStyle()));
+
+                        Component placeholder = mod.getRawPlaceholderValue(currentPlaceholder.toString(), args);
+                        if(placeholder != null) texts.add(placeholder);
+
+                        currentLiteral = new StringBuilder();
+                        currentPlaceholder = new StringBuilder();
+                    } else {
+                        placeholderStarted = true;
+                    }
+
                 } else {
-                    placeholderStarted = true;
+
+                    if (placeholderStarted) {
+                        currentPlaceholder.append(c);
+                    } else {
+                        currentLiteral.append(c);
+                    }
+
                 }
-
-            } else {
-
-                if(placeholderStarted) {
-                    currentPlaceholder.append(c);
-                } else {
-                    currentLiteral.append(c);
-                }
-
             }
-        }
 
-        currentLiteral.append(currentPlaceholder);
-        texts.add(new TextComponent(currentLiteral.toString()));
+            currentLiteral.append(currentPlaceholder);
+            if(currentLiteral.length() > 0) {
+                texts.add(new TextComponent(currentLiteral.toString()).setStyle(cmp.getStyle()));
+            }
+
+        }
 
         for(Component c : texts) {
             out.append(c);

@@ -14,8 +14,10 @@
     "MixinLivingEntity",
     "MixinMinecraftServer",
     "MixinPacketHandler",
+    "MixinPlayer",
     "MixinPlayerManager",
     "MixinScreenHandler",
+    "MixinServerGameMode",
     "MixinServerPlayer",
     "MixinTimeCommand"
   ],

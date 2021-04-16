@@ -13,14 +13,19 @@ public abstract class AbstractLangProvider {
 
     protected AbstractLangProvider(File folder, HashMap<String, String> defaults) {
         this.defaults = defaults;
-        if (!folder.isDirectory()) {
+        if (!folder.exists() && !folder.mkdirs()) {
             throw new IllegalArgumentException();
         }
+
+
         this.folder = folder;
-        for (File f : folder.listFiles()) {
-            if (!this.verifyFile(f)) continue;
-            this.files.put(f.getName(), f);
-            loadEntries(f.getName());
+        File[] ff = folder.listFiles();
+        if(ff != null) {
+            for (File f : ff) {
+                if (!this.verifyFile(f)) continue;
+                this.files.put(f.getName(), f);
+                loadEntries(f.getName());
+            }
         }
     }
 

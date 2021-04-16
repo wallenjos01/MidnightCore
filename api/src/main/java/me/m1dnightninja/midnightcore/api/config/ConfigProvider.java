@@ -7,5 +7,7 @@ public interface ConfigProvider {
     ConfigSection loadFromFile(File file);
 
     void saveToFile(ConfigSection config, File file);
+
+    String getFileExtension();
 }
 

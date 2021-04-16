@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import me.m1dnightninja.midnightcore.api.IModule;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.ModuleIdentifier;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.api.WorldCreator;
@@ -49,6 +50,7 @@ import java.util.*;
 
 public class DimensionModule implements IModule {
 
+    private static final ModuleIdentifier ID = ModuleIdentifier.create("midnightcore", "dimension");
 
     private final HashMap<ResourceLocation, LevelStorageSource.LevelStorageAccess> loadedWorlds = new HashMap<>();
     private final HashMap<ResourceLocation, ChunkGenerator> generators = new HashMap<>();
@@ -61,8 +63,8 @@ public class DimensionModule implements IModule {
     }
 
     @Override
-    public String getId() {
-        return "dimension";
+    public ModuleIdentifier getId() {
+        return ID;
     }
 
     @Override

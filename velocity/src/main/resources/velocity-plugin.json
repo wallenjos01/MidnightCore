@@ -1,0 +1,13 @@
+{
+  "id":"midnightcore",
+  "name":"MidnightCore",
+  "version":"1.0.0",
+  "url":"",
+  "authors": [
+    "M1dnight_Ninja"
+  ],
+  "dependencies":[
+
+  ],
+  "main":"me.m1dnightninja.midnightcore.velocity.MidnightCore"
+}

@@ -18,9 +18,11 @@ import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.block.WallSignBlock;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -124,7 +126,7 @@ public class SkinModule extends AbstractSkinModule {
                 true
         );
 
-        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(player.getX(), player.getY(), player.getZ(), player.xRot, player.yRot, new HashSet<>(), 0);
+        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot, new HashSet<>(), 0);
         ClientboundPlayerAbilitiesPacket abilities = new ClientboundPlayerAbilitiesPacket(player.abilities);
 
         // Send Packets

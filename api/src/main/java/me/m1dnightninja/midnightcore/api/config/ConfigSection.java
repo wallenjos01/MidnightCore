@@ -23,8 +23,8 @@ public class ConfigSection {
     public <T> void set(String key, T obj) {
         if (obj == null) {
             this.entries.remove(key);
-        } else if (this.reg.canSerialize(obj.getClass())) {
-            this.entries.put(key, this.reg.getSerializer((Class<T>) obj.getClass()).serialize(obj));
+        } else if (reg != null && reg.canSerialize(obj.getClass())) {
+            this.entries.put(key, reg.getSerializer((Class<T>) obj.getClass()).serialize(obj));
         } else {
             this.entries.put(key, obj);
         }
@@ -34,13 +34,10 @@ public class ConfigSection {
         return this.entries.get(key);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T get(String key, Class<T> clazz) {
         Object out = this.get(key);
-        if (!clazz.isAssignableFrom(out.getClass())) {
-            throw new IllegalStateException("Invalid Type! " + out.getClass().getName() + " cannot be converted to " + clazz.getName());
-        }
-        return (T) out;
+
+        return convert(out, clazz);
     }
 
     public Iterable<String> getKeys() {
@@ -93,8 +90,28 @@ public class ConfigSection {
         return out;
     }
 
+    public <T> List<T> getList(String key, Class<T> clazz) {
+
+        List<?> lst = getList(key);
+        List<T> out = new ArrayList<>();
+        for(Object o : lst) {
+            out.add(convert(o, clazz));
+        }
+
+        return out;
+    }
+
     public ConfigSection getSection(String key) {
         return this.get(key, ConfigSection.class);
+    }
+
+    public ConfigSection getOrCreateSection(String key) {
+        if(has(key, ConfigSection.class)) {
+            return getSection(key);
+        }
+        ConfigSection sec = new ConfigSection();
+        set(key, sec);
+        return sec;
     }
 
     public void fill(ConfigSection other) {
@@ -103,6 +120,24 @@ public class ConfigSection {
                 set(ents.getKey(), ents.getValue());
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T convert(Object o, Class<T> clazz) {
+
+        if(reg != null && reg.canSerialize(clazz) && o instanceof ConfigSection) {
+            ConfigSerializer<T> ser = reg.getSerializer(clazz);
+            T ret = ser.deserialize((ConfigSection) o);
+            if(ret == null) {
+                throw new IllegalStateException("Invalid Type! " + o.getClass().getName() + " cannot be converted to " + clazz.getName());
+            }
+
+            return ret;
+        } else if (!clazz.isAssignableFrom(o.getClass())) {
+            throw new IllegalStateException("Invalid Type! " + o.getClass().getName() + " cannot be converted to " + clazz.getName());
+        }
+
+        return (T) o;
     }
 
 }

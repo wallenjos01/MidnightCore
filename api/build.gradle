@@ -6,12 +6,26 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(jar)
-            artifact(sourcesJar)
+            artifacts {
+                jar
+                sourcesJar
+            }
         }
     }
 
     repositories {
         mavenLocal()
+        maven {
+
+            if (project.hasProperty("local") && project.getProperty("local") == "true") {
+                url "file:" + projectDir.path + "/build/maven"
+            } else if (project.hasProperty("mdUrl")) {
+                url = project.mdUrl as String
+                credentials {
+                    username project.mdUser as String
+                    password project.mdPass as String
+                }
+            }
+        }
     }
 }

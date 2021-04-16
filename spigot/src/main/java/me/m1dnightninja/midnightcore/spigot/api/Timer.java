@@ -43,21 +43,6 @@ public class Timer extends AbstractTimer {
     }
 
     @Override
-    protected void callFinish() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                try {
-                    if(callback != null) callback.finish();
-                } catch(Exception ex) {
-                    MidnightCoreAPI.getLogger().warn("An exception occurred while a timer was finishing!");
-                    ex.printStackTrace();
-                }
-            }
-        }.runTask(MidnightCore.getPlugin(MidnightCore.class));
-    }
-
-    @Override
     protected void display() {
 
         TextComponent time = new TextComponent(FormatUtil.formatTime(secondsLeft * 1000L));

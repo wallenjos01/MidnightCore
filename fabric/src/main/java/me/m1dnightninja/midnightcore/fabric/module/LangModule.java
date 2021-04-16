@@ -26,7 +26,7 @@ public class LangModule extends AbstractLangModule<Component> {
     }
 
     @Override
-    public AbstractLangProvider createProvider(String name, File folder, HashMap<String, String> defaults) {
+    public LangProvider createProvider(String name, File folder, HashMap<String, String> defaults) {
 
         try {
             LangProvider prov = new LangProvider(folder, this, defaults);
@@ -45,7 +45,7 @@ public class LangModule extends AbstractLangModule<Component> {
 
     @Override
     public AbstractLangProvider getProvider(String name) {
-        return null;
+        return providers.get(name);
     }
 
     @Override
