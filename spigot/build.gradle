@@ -75,10 +75,8 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifacts {
-                jar
-                sourcesJar
-            }
+            artifact(jar)
+            artifact(sourcesJar)
         }
     }
     repositories {

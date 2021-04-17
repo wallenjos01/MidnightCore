@@ -80,9 +80,11 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifacts {
-                remapJar
-                remapSourcesJar
+            artifact(remapJar) {
+                builtBy remapJar
+            }
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
             }
         }
     }

@@ -25,10 +25,10 @@ subprojects {
     project.ext.apiVersion = project.ext.majorVersion + '.' + project.ext.minorVersion
     project.ext.fullVersion = project.ext.apiVersion + '.' + project.ext.patchVersion
 
+    def release = false
 
     group = "me.m1dnightninja.${project.ext.archiveName}"
-    version = project.ext.fullVersion
-
+    version = release ? project.ext.fullVersion : "${project.ext.apiVersion}-latest"
 
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -52,5 +52,4 @@ subprojects {
         maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
         maven { url 'https://mdmc.ddns.net/maven' }
     }
-
 }
