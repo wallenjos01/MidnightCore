@@ -26,7 +26,7 @@ subprojects {
     project.ext.fullVersion = project.ext.apiVersion + '.' + project.ext.patchVersion
 
 
-    group = 'me.m1dnightninja.midnightcore'
+    group = "me.m1dnightninja.${project.ext.archiveName}"
     version = project.ext.fullVersion
 
 
@@ -47,11 +47,10 @@ subprojects {
         from "LISENCE"
     }
 
+    repositories {
+        mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven { url 'https://mdmc.ddns.net/maven' }
+    }
 
-}
-
-repositories {
-    mavenCentral()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-    maven { url 'https://mdmc.ddns.net/maven' }
 }

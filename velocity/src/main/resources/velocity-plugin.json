@@ -1,7 +1,7 @@
 {
-  "id":"midnightcore",
-  "name":"MidnightCore",
-  "version":"1.0.0",
+  "id":"${modid}",
+  "name":"${modname}",
+  "version":"${version}",
   "url":"",
   "authors": [
     "M1dnight_Ninja"
@@ -9,5 +9,5 @@
   "dependencies":[
 
   ],
-  "main":"me.m1dnightninja.midnightcore.velocity.MidnightCore"
+  "main":"me.m1dnightninja.${modid}.velocity.${modclass}"
 }

@@ -7,8 +7,6 @@ plugins {
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-    mavenLocal()
 }
 
 configurations {
@@ -90,16 +88,12 @@ publishing {
     }
 
     repositories {
-        mavenLocal()
         maven {
-
-            if (project.hasProperty("local") && project.getProperty("local") == "true") {
-                url "file:" + projectDir.path + "/build/maven"
-            } else if (project.hasProperty("mdUrl")) {
-                url = project.mdUrl as String
+            if (project.hasProperty("pubUrl")) {
+                url = project.pubUrl as String
                 credentials {
-                    username project.mdUser as String
-                    password project.mdPass as String
+                    username project.pubUser as String
+                    password project.pubPass as String
                 }
             }
         }
