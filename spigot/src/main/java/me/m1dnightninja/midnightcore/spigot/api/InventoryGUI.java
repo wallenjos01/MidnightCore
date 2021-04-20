@@ -2,8 +2,11 @@ package me.m1dnightninja.midnightcore.spigot.api;
 
 import java.util.UUID;
 import me.m1dnightninja.midnightcore.api.AbstractInventoryGUI;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
+import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.Conversion;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -14,9 +17,9 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class InventoryGUI extends AbstractInventoryGUI<ItemStack> implements Listener {
+public class InventoryGUI extends AbstractInventoryGUI implements Listener {
 
-    public InventoryGUI(String title) {
+    public InventoryGUI(MComponent title) {
         super(title);
     }
 
@@ -42,9 +45,9 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> implements Lis
             return;
         }
         int items = Math.min(54, this.entries.size() - offset);
-        Inventory inv = Bukkit.createInventory(null, InventoryType.CHEST, this.title);
+        Inventory inv = Bukkit.createInventory(null, InventoryType.CHEST, this.title.toLegacyText(false));
         for (int i = 0; i < items; ++i) {
-            ItemStack is = (this.entries.get((offset + i))).item;
+            ItemStack is = ConversionUtil.toBukkitStack((this.entries.get((offset + i))).item);
             inv.setItem(i, is);
         }
         p.openInventory(inv);

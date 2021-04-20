@@ -10,7 +10,6 @@ repositories {
 dependencies {
 
     implementation('com.mojang:authlib:2.1.28')
-    implementation('com.google.code.gson:gson:2.8.0')
 
     compile project(":api")
 }
@@ -23,6 +22,7 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            version = project.ext.publicationVersion
             artifact(jar)
             artifact(sourcesJar)
         }

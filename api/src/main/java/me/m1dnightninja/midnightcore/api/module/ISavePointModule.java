@@ -1,7 +1,6 @@
 package me.m1dnightninja.midnightcore.api.module;
 
 import java.util.UUID;
-import me.m1dnightninja.midnightcore.api.IModule;
 
 public interface ISavePointModule
 extends IModule {

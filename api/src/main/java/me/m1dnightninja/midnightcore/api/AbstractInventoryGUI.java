@@ -1,18 +1,21 @@
 package me.m1dnightninja.midnightcore.api;
 
+import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
+
 import java.util.HashMap;
 import java.util.UUID;
 
-public abstract class AbstractInventoryGUI<I> {
+public abstract class AbstractInventoryGUI {
 
     protected final HashMap<Integer, Entry> entries = new HashMap<>();
     protected final HashMap<UUID, Integer> players = new HashMap<>();
-    protected final String title;
+    protected final MComponent title;
 
-    protected static final HashMap<UUID, AbstractInventoryGUI<?>> openGuis = new HashMap<>();
+    protected static final HashMap<UUID, AbstractInventoryGUI> openGuis = new HashMap<>();
 
 
-    protected AbstractInventoryGUI(String title) {
+    protected AbstractInventoryGUI(MComponent title) {
         this.title = title;
     }
 
@@ -20,7 +23,7 @@ public abstract class AbstractInventoryGUI<I> {
         this.entries.remove(slot);
     }
 
-    public final I getItem(int slot) {
+    public final MItemStack getItem(int slot) {
         if (!this.entries.containsKey(slot)) {
             return null;
         }
@@ -34,7 +37,7 @@ public abstract class AbstractInventoryGUI<I> {
         return this.entries.get(slot).action;
     }
 
-    public final void setItem(I item, int slot, ClickAction action) {
+    public final void setItem(MItemStack item, int slot, ClickAction action) {
         Entry ent = new Entry(item, slot, action);
         this.entries.put(slot, ent);
     }
@@ -85,12 +88,12 @@ public abstract class AbstractInventoryGUI<I> {
     protected abstract void onClosed(UUID u);
     protected abstract void onOpened(UUID u, int page);
 
-    protected class Entry {
-        public I item;
+    protected static class Entry {
+        public MItemStack item;
         public int slot;
         public ClickAction action;
 
-        public Entry(I item, int slot, ClickAction action) {
+        public Entry(MItemStack item, int slot, ClickAction action) {
             this.item = item;
             this.slot = slot;
             this.action = action;

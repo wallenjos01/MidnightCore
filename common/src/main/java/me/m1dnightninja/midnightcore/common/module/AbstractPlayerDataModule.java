@@ -1,7 +1,7 @@
 package me.m1dnightninja.midnightcore.common.module;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.ModuleIdentifier;
+import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.IPlayerDataModule;
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public abstract class AbstractPlayerDataModule implements IPlayerDataModule {
 
-    protected static final ModuleIdentifier ID = ModuleIdentifier.create("midnightcore","player_data");
+    protected static final MIdentifier ID = MIdentifier.create("midnightcore","player_data");
 
     private File folder;
     private HashMap<UUID, ConfigSection> data;
@@ -39,7 +39,7 @@ public abstract class AbstractPlayerDataModule implements IPlayerDataModule {
     }
 
     @Override
-    public ModuleIdentifier getId() {
+    public MIdentifier getId() {
         return ID;
     }
 

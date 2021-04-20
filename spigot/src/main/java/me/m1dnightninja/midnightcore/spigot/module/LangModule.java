@@ -1,50 +1,33 @@
 package me.m1dnightninja.midnightcore.spigot.module;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.UUID;
-
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
+import me.m1dnightninja.midnightcore.api.module.lang.PlaceholderSupplier;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.module.AbstractLangModule;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class LangModule extends AbstractLangModule<BaseComponent> {
+import java.util.UUID;
 
-    @Override
-    public String getLanguage(UUID player) {
-        Player p = Bukkit.getPlayer(player);
-        if (p == null) {
-            return null;
-        }
-        return p.getLocale();
-    }
+public class LangModule extends AbstractLangModule {
 
-    @Override
-    public String getServerLanguage() {
-        return "en_us";
-    }
-
-    @Override
-    public AbstractLangProvider createProvider(String name, File folder, HashMap<String, String> strs) {
-        return null;
-    }
-
-    @Override
-    public AbstractLangProvider getProvider(String name) {
-        return null;
-    }
 
     @Override
     public boolean initialize(ConfigSection configuration) {
+
+        registerPlaceholderSupplier("player_name", args -> PlaceholderSupplier.runFor(Player.class, args, pl -> MComponent.createTextComponent(pl.getName())));
+        registerPlaceholderSupplier("player_display_name", args -> PlaceholderSupplier.runFor(Player.class, args, pl -> MComponent.Serializer.parseLegacyText(pl.getDisplayName(), '§', null)));
+
         return true;
     }
 
     @Override
-    public ConfigSection getDefaultConfig() {
-        return null;
-    }
-}
+    public String getPlayerLocale(UUID u) {
 
+        Player p = Bukkit.getPlayer(u);
+        if(p == null) return getServerLanguage();
+
+        return p.getLocale();
+    }
+
+}

@@ -8,9 +8,9 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import me.m1dnightninja.midnightcore.api.IModule;
+import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.ModuleIdentifier;
+import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.velocity.MidnightCore;
@@ -46,8 +46,8 @@ public class LastJoinedModule implements IModule {
     }
 
     @Override
-    public ModuleIdentifier getId() {
-        return ModuleIdentifier.create("midnightcore","last_server_joined");
+    public MIdentifier getId() {
+        return MIdentifier.create("midnightcore","last_server_joined");
     }
 
     @Override

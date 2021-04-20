@@ -21,11 +21,24 @@ public class ConfigSection {
 
     @SuppressWarnings("unchecked")
     public <T> void set(String key, T obj) {
+        // Remove an object
         if (obj == null) {
+
             this.entries.remove(key);
+
+        // Try to serialize as a ConfigSection
         } else if (reg != null && reg.canSerialize(obj.getClass())) {
+
             this.entries.put(key, reg.getSerializer((Class<T>) obj.getClass()).serialize(obj));
+
+        // Try to serialize as a String
+        } else if(reg != null && reg.canSerializeInline(obj.getClass())) {
+
+            this.entries.put(key, reg.getInlineSerializer((Class<T>) obj.getClass()).serialize(obj));
+
+        // Put the raw data if cannot serialize
         } else {
+
             this.entries.put(key, obj);
         }
     }
@@ -125,15 +138,29 @@ public class ConfigSection {
     @SuppressWarnings("unchecked")
     private <T> T convert(Object o, Class<T> clazz) {
 
-        if(reg != null && reg.canSerialize(clazz) && o instanceof ConfigSection) {
-            ConfigSerializer<T> ser = reg.getSerializer(clazz);
-            T ret = ser.deserialize((ConfigSection) o);
-            if(ret == null) {
-                throw new IllegalStateException("Invalid Type! " + o.getClass().getName() + " cannot be converted to " + clazz.getName());
+        if(reg != null) {
+            if(reg.canSerialize(clazz) && o instanceof ConfigSection) {
+                ConfigSerializer<T> ser = reg.getSerializer(clazz);
+                T ret = ser.deserialize((ConfigSection) o);
+                if (ret == null) {
+                    throw new IllegalStateException("Invalid Type! " + o.getClass().getName() + " cannot be converted to " + clazz.getName());
+                }
+                return ret;
+            }
+            if(reg.canSerializeInline(clazz)) {
+
+                InlineSerializer<T> ser = reg.getInlineSerializer(clazz);
+                T ret = ser.deserialize(o.toString());
+                if (ret == null) {
+                    throw new IllegalStateException("Invalid Type! " + o.getClass().getName() + " cannot be converted to " + clazz.getName());
+                }
+
+                return ret;
             }
 
-            return ret;
-        } else if (!clazz.isAssignableFrom(o.getClass())) {
+        }
+
+        if (!clazz.isAssignableFrom(o.getClass())) {
             throw new IllegalStateException("Invalid Type! " + o.getClass().getName() + " cannot be converted to " + clazz.getName());
         }
 

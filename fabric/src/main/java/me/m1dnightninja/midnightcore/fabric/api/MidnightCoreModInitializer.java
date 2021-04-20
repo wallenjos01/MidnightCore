@@ -1,6 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.api;
 
-import me.m1dnightninja.midnightcore.api.IModule;
+import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import net.minecraft.resources.ResourceLocation;

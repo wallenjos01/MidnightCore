@@ -1,9 +1,10 @@
 package me.m1dnightninja.midnightcore.fabric;
 
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
-import me.m1dnightninja.midnightcore.api.IModule;
+import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JsonConfigProvider;
 import me.m1dnightninja.midnightcore.fabric.api.InventoryGUI;
 import me.m1dnightninja.midnightcore.fabric.api.MidnightCoreModInitializer;
@@ -66,12 +67,12 @@ public class MidnightCore implements ModInitializer {
         // TODO: Replace this system with a more sensible one
         ImplDelegate delegate = new ImplDelegate() {
             @Override
-            public Timer createTimer(String text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
+            public Timer createTimer(MComponent text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
                 return new Timer(text, seconds, countUp, cb);
             }
 
             @Override
-            public InventoryGUI createInventoryGUI(String title) {
+            public InventoryGUI createInventoryGUI(MComponent title) {
                 return new InventoryGUI(title);
             }
 
@@ -130,10 +131,7 @@ public class MidnightCore implements ModInitializer {
             CommandRegistrationCallback.EVENT.register(((commandDispatcher, b) -> PermissionHelper.registerVanillaPermissions(commandDispatcher)));
         }
 
-
         InventoryGUI.registerEvents(this);
-
-
     }
 
     public File getConfigDirectory() {

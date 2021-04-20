@@ -2,8 +2,10 @@ package me.m1dnightninja.midnightcore.spigot.api;
 
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.FormatUtil;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
+import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -16,15 +18,11 @@ public class Timer extends AbstractTimer {
 
     private final TextComponent textPrefix;
 
-    public Timer(TextComponent prefix, int seconds, boolean countUp, TimerCallback cb) {
-        super(prefix.toPlainText(), seconds, countUp, cb);
-        this.textPrefix = prefix;
+    public Timer(MComponent prefix, int seconds, boolean countUp, TimerCallback cb) {
+        super(prefix, seconds, countUp, cb);
+        this.textPrefix = ConversionUtil.toSpigotComponent(prefix);
     }
 
-    public Timer(String prefix, int seconds, boolean countUp, TimerCallback cb) {
-        super(prefix, seconds, countUp, cb);
-        textPrefix = new TextComponent(TextComponent.fromLegacyText(prefix));
-    }
 
     @Override
     protected void callTick(int secondsLeft) {

@@ -1,9 +1,10 @@
 package me.m1dnightninja.midnightcore.spigot;
 
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
-import me.m1dnightninja.midnightcore.api.IModule;
+import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JavaLogger;
 import me.m1dnightninja.midnightcore.spigot.api.InventoryGUI;
 import me.m1dnightninja.midnightcore.spigot.api.Timer;
@@ -11,7 +12,6 @@ import me.m1dnightninja.midnightcore.spigot.api.event.MidnightCoreLoadModulesEve
 import me.m1dnightninja.midnightcore.spigot.config.YamlConfigProvider;
 import me.m1dnightninja.midnightcore.spigot.module.LangModule;
 import me.m1dnightninja.midnightcore.spigot.module.SkinModule;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,12 +27,12 @@ public class MidnightCore extends JavaPlugin {
 
         ImplDelegate delegate = new ImplDelegate() {
             @Override
-            public Timer createTimer(String text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
-                return new Timer(new TextComponent(TextComponent.fromLegacyText(text)), seconds, countUp, cb);
+            public Timer createTimer(MComponent text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
+                return new Timer(text, seconds, countUp, cb);
             }
 
             @Override
-            public InventoryGUI createInventoryGUI(String title) {
+            public InventoryGUI createInventoryGUI(MComponent title) {
                 return new InventoryGUI(title);
             }
 

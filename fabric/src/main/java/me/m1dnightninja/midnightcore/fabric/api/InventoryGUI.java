@@ -2,12 +2,14 @@ package me.m1dnightninja.midnightcore.fabric.api;
 
 import me.m1dnightninja.midnightcore.api.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.api.event.ContainerClickEvent;
 import me.m1dnightninja.midnightcore.fabric.api.event.MenuCloseEvent;
 import me.m1dnightninja.midnightcore.fabric.api.event.PlayerDisconnectEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.mixin.AccessorServerPlayer;
+import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import me.m1dnightninja.midnightcore.fabric.util.TextUtil;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,9 +21,9 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
 
-public class InventoryGUI extends AbstractInventoryGUI<ItemStack> {
+public class InventoryGUI extends AbstractInventoryGUI {
 
-    public InventoryGUI(String title) {
+    public InventoryGUI(MComponent title) {
         super(title);
     }
 
@@ -67,7 +69,7 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> {
                 continue;
             }
 
-            inv.setItem(ent.slot - offset, ent.item);
+            inv.setItem(ent.slot - offset, ConversionUtil.toMinecraftStack(ent.item));
         }
 
         ChestMenu handler = createScreen(rows, player, inv);
@@ -75,7 +77,7 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> {
             player.closeContainer();
         }
 
-        player.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), TextUtil.parse(title)));
+        player.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), ConversionUtil.toMinecraftComponent(title)));
         player.containerMenu = handler;
         player.refreshContainer(handler);
     }
@@ -124,7 +126,7 @@ public class InventoryGUI extends AbstractInventoryGUI<ItemStack> {
 
         MidnightCoreAPI.getLogger().warn("event");
 
-        AbstractInventoryGUI<?> gui = openGuis.get(event.getPlayer().getUUID());
+        AbstractInventoryGUI gui = openGuis.get(event.getPlayer().getUUID());
         if(gui == null) {
             MidnightCoreAPI.getLogger().warn("no gui");
             return;

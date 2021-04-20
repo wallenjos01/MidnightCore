@@ -2,6 +2,7 @@ package me.m1dnightninja.midnightcore.velocity;
 
 import com.velocitypowered.api.proxy.Player;
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.FormatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
@@ -18,10 +19,10 @@ public class Timer extends AbstractTimer {
 
     private final Component prefix;
 
-    public Timer(String prefix, int seconds, boolean countUp, TimerCallback cb) {
+    public Timer(MComponent prefix, int seconds, boolean countUp, TimerCallback cb) {
         super(prefix, seconds, countUp, cb);
 
-        this.prefix = GsonComponentSerializer.gson().deserialize(prefix);
+        this.prefix = GsonComponentSerializer.gson().deserialize(MComponent.Serializer.toJsonString(prefix));
     }
 
     @Override

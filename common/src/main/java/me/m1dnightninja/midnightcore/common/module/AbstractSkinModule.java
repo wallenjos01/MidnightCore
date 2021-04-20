@@ -1,9 +1,9 @@
 package me.m1dnightninja.midnightcore.common.module;
 
-import me.m1dnightninja.midnightcore.api.ModuleIdentifier;
-import me.m1dnightninja.midnightcore.api.module.ISkinModule;
-import me.m1dnightninja.midnightcore.api.skin.Skin;
-import me.m1dnightninja.midnightcore.api.skin.SkinCallback;
+import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
+import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
+import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.module.skin.SkinCallback;
 import me.m1dnightninja.midnightcore.common.MojangUtil;
 
 import java.util.HashMap;
@@ -12,14 +12,14 @@ import java.util.UUID;
 public abstract class AbstractSkinModule implements ISkinModule {
 
 
-    protected static final ModuleIdentifier ID = ModuleIdentifier.create("midnightcore","skin");
+    protected static final MIdentifier ID = MIdentifier.create("midnightcore","skin");
 
     protected final HashMap<UUID, Skin> loginSkins = new HashMap<>();
     protected final HashMap<UUID, Skin> loadedSkins = new HashMap<>();
     protected final HashMap<UUID, Skin> activeSkins = new HashMap<>();
 
     @Override
-    public ModuleIdentifier getId() {
+    public MIdentifier getId() {
         return ID;
     }
 

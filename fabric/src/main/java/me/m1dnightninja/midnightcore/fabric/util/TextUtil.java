@@ -1,7 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.util;
 
 import com.google.gson.JsonParseException;
-import me.m1dnightninja.midnightcore.api.Color;
+import me.m1dnightninja.midnightcore.api.math.Color;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
 
@@ -32,7 +32,7 @@ public final class TextUtil {
         }
 
         if(s.isBold()) {
-            out.append("§b");
+            out.append("§l");
         }
 
         if(s.isItalic()) {

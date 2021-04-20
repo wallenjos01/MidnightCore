@@ -1,6 +1,6 @@
 package me.m1dnightninja.midnightcore.spigot.api.event;
 
-import me.m1dnightninja.midnightcore.api.IModule;
+import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

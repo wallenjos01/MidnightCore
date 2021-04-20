@@ -1,6 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.api.event;
 
-import me.m1dnightninja.midnightcore.api.skin.Skin;
+import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.server.level.ServerPlayer;
 

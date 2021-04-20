@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.api.skin;
+package me.m1dnightninja.midnightcore.api.module.skin;
 
 import java.util.UUID;
 

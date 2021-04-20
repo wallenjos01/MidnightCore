@@ -2,68 +2,57 @@ package me.m1dnightninja.midnightcore.fabric.module;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.module.AbstractLangModule;
-import me.m1dnightninja.midnightcore.fabric.api.LangProvider;
+import me.m1dnightninja.midnightcore.fabric.api.event.PlayerChangeSettingsEvent;
+import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 
-import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.UUID;
 
-public class LangModule extends AbstractLangModule<Component> {
+public class LangModule extends AbstractLangModule {
 
-
-    @Override
-    public String getLanguage(UUID player) {
-        return getServerLanguage();
-    }
+    private final HashMap<UUID, String> languages = new HashMap<>();
 
     @Override
-    public String getServerLanguage() {
-        return "en_us";
-    }
+    public boolean initialize(ConfigSection configuration) {
 
-    @Override
-    public LangProvider createProvider(String name, File folder, HashMap<String, String> defaults) {
+        Event.register(PlayerChangeSettingsEvent.class, this, event -> {
+            languages.put(event.getPlayer().getUUID(), event.getLocale());
+        });
 
-        try {
-            LangProvider prov = new LangProvider(folder, this, defaults);
-            providers.put(name, prov);
-
-            return prov;
-
-        } catch(IllegalArgumentException ex) {
-            MidnightCoreAPI.getLogger().warn("An error occurred while trying to create a lang provider!");
-            ex.printStackTrace();
-
-            return null;
-        }
-
-    }
-
-    @Override
-    public AbstractLangProvider getProvider(String name) {
-        return providers.get(name);
-    }
-
-    @Override
-    public boolean initialize(ConfigSection section) {
-
-        registerRawPlaceholder("player_display_name", createSupplier(ServerPlayer.class, Player::getDisplayName));
-        registerRawPlaceholder("player_name", createSupplier(ServerPlayer.class, Player::getName));
-        registerRawPlaceholder("player_tablist_name", createSupplier(ServerPlayer.class, ServerPlayer::getTabListDisplayName));
-        registerStringPlaceholder("player_profile_name", createSupplier(ServerPlayer.class, obj -> obj.getGameProfile().getName()));
-        registerStringPlaceholder("player_uuid_name", createSupplier(ServerPlayer.class, Player::getStringUUID));
+        registerPlaceholderSupplier("player_name", (objs) -> {
+            for(Object o : objs) {
+                if(o instanceof ServerPlayer) {
+                    return MComponent.Serializer.fromJson(Component.Serializer.toJson(((ServerPlayer) o).getName()));
+                }
+            } return null;
+        });
+        registerPlaceholderSupplier("player_display_name", (objs) -> {
+            for(Object o : objs) {
+                if(o instanceof ServerPlayer) {
+                    return MComponent.Serializer.fromJson(Component.Serializer.toJson(((ServerPlayer) o).getDisplayName()));
+                }
+            } return null;
+        });
 
         return true;
     }
 
     @Override
     public ConfigSection getDefaultConfig() {
-        return null;
+        return new ConfigSection();
     }
 
+    @Override
+    public String getPlayerLocale(UUID u) {
+        return languages.getOrDefault(u, getServerLanguage());
+    }
 
+    @Override
+    public String getServerLanguage() {
+        return MidnightCoreAPI.getInstance().getMainConfig().has("language") ? MidnightCoreAPI.getInstance().getMainConfig().getString("language") : "en_us";
+    }
 }

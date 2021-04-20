@@ -9,7 +9,10 @@ import java.util.UUID;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.api.skin.Skin;
+import me.m1dnightninja.midnightcore.api.module.IModule;
+import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 
 public class MidnightCoreAPI {
 
@@ -31,7 +34,7 @@ public class MidnightCoreAPI {
 
 
     private final ImplDelegate delegate;
-    private final HashMap<ModuleIdentifier, IModule> loadedModules = new HashMap<>();
+    private final HashMap<MIdentifier, IModule> loadedModules = new HashMap<>();
 
     private final ConfigProvider defaultConfigProvider;
     private final ConfigSection mainConfig;
@@ -68,6 +71,7 @@ public class MidnightCoreAPI {
         if(moduleConfig == null) {
             moduleConfig = new ConfigSection();
             mainConfig.set("modules", moduleConfig);
+            mainConfig.set("language", "en_us");
         }
 
         // Load list of disabled modules  from config.
@@ -153,7 +157,7 @@ public class MidnightCoreAPI {
         b.append(this.loadedModules.size());
         b.append(this.loadedModules.size() == 1 ? " module: " : " modules: ");
         int i = 1;
-        for (ModuleIdentifier s : this.loadedModules.keySet()) {
+        for (MIdentifier s : this.loadedModules.keySet()) {
             b.append(s.toString());
             if (i < this.loadedModules.size()) {
                 b.append(", ");
@@ -208,7 +212,7 @@ public class MidnightCoreAPI {
      * @return    The module with the given ID
      */
     public IModule getModuleById(String id) {
-        return this.loadedModules.get(ModuleIdentifier.parse(id));
+        return this.loadedModules.get(MIdentifier.parse(id));
     }
 
     /**
@@ -219,7 +223,7 @@ public class MidnightCoreAPI {
      */
     public boolean isModuleLoaded(String id) {
 
-        for(ModuleIdentifier mid : loadedModules.keySet()) {
+        for(MIdentifier mid : loadedModules.keySet()) {
             if(mid.toString().equals(id)) {
                 return true;
             }
@@ -251,7 +255,7 @@ public class MidnightCoreAPI {
      * @param cb       Callback to execute each tick
      * @return         A new timer object
      */
-    public AbstractTimer createTimer(String text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
+    public AbstractTimer createTimer(MComponent text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
         return this.delegate.createTimer(text, seconds, countUp, cb);
     }
 
@@ -261,7 +265,7 @@ public class MidnightCoreAPI {
      * @param title  The title of the GUI
      * @return       The Inventory GUI
      */
-    public AbstractInventoryGUI<?> createInventoryGUI(String title) {
+    public AbstractInventoryGUI createInventoryGUI(MComponent title) {
         return this.delegate.createInventoryGUI(title);
     }
 

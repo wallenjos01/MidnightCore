@@ -1,72 +1,73 @@
 package me.m1dnightninja.midnightcore.common.module;
 
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.module.lang.ILangModule;
+import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
+import me.m1dnightninja.midnightcore.api.module.lang.PlaceholderSupplier;
+import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
+import me.m1dnightninja.midnightcore.common.module.lang.LangProvider;
+
+import java.io.File;
 import java.util.HashMap;
 
-import me.m1dnightninja.midnightcore.api.ModuleIdentifier;
-import me.m1dnightninja.midnightcore.api.lang.AbstractLangProvider;
-import me.m1dnightninja.midnightcore.api.module.ILangModule;
+public abstract class AbstractLangModule implements ILangModule {
 
-public abstract class AbstractLangModule<T> implements ILangModule<T> {
+    private static final MIdentifier ID = MIdentifier.create("midnightcore", "lang");
 
-    protected static final ModuleIdentifier ID = ModuleIdentifier.create("midnightcore", "lang");
+    private final HashMap<String, PlaceholderSupplier<String>> inlineSuppliers = new HashMap<>();
+    private final HashMap<String, PlaceholderSupplier<MComponent>> suppliers = new HashMap<>();
 
-    protected final HashMap<String, AbstractLangProvider> providers = new HashMap<>();
-    protected final HashMap<String, PlaceholderSupplier<T>> rawPlaceholders = new HashMap<>();
-    protected final HashMap<String, PlaceholderSupplier<String>> stringPlaceholders = new HashMap<>();
 
     @Override
-    public ModuleIdentifier getId() {
+    public MIdentifier getId() {
         return ID;
     }
 
+
     @Override
-    public void registerStringPlaceholder(String key, PlaceholderSupplier<String> supplier) {
-        if (!this.stringPlaceholders.containsKey(key)) {
-            this.stringPlaceholders.put(key, supplier);
-        }
+    public String getServerLanguage() {
+        return MidnightCoreAPI.getInstance().getMainConfig().has("language") ? MidnightCoreAPI.getInstance().getMainConfig().getString("language") : "en_us";
     }
 
     @Override
-    public void registerRawPlaceholder(String key, PlaceholderSupplier<T> supplier) {
-        if (!this.rawPlaceholders.containsKey(key)) {
-            this.rawPlaceholders.put(key, supplier);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <P, O> PlaceholderSupplier<P> createSupplier(Class<O> clazz, TypedSupplier<P, O> supp) {
-        return objs -> {
-            for(Object o : objs) {
-                if(o == null) continue;
-                if(clazz.isAssignableFrom(o.getClass())) {
-                    try {
-                        return supp.get((O) o);
-                    } catch(Exception ex) {
-                        return null;
-                    }
-                }
-            }
-            return null;
-        };
+    public ConfigSection getDefaultConfig() {
+        return new ConfigSection();
     }
 
     @Override
-    public String getStringPlaceholderValue(String key, Object ... args) {
-
-        PlaceholderSupplier<String> supp = stringPlaceholders.get(key);
-        if(supp == null) return "%" + key + "%";
-
-        return supp.get(args);
+    public void registerInlinePlaceholderSupplier(String search, PlaceholderSupplier<String> supplier) {
+        inlineSuppliers.put(search, supplier);
     }
 
     @Override
-    public T getRawPlaceholderValue(String key, Object ... args) {
+    public void registerPlaceholderSupplier(String search, PlaceholderSupplier<MComponent> supplier) {
+        suppliers.put(search, supplier);
+    }
 
-        PlaceholderSupplier<T> supp = rawPlaceholders.get(key);
-        if(supp == null) return null;
+    @Override
+    public MComponent getPlaceholderValue(String key, Object... args) {
 
-        return supp.get(args);
+        PlaceholderSupplier<MComponent> supplier = suppliers.get(key);
+        if(supplier == null) return null;
+
+        return supplier.get(args);
+    }
+
+    @Override
+    public String getInlinePlaceholderValue(String key, Object... args) {
+
+        PlaceholderSupplier<String> supplier = inlineSuppliers.get(key);
+        if(supplier == null) return null;
+
+        return supplier.get(args);
+
+    }
+
+    @Override
+    public ILangProvider createLangProvider(File langFolder, ConfigProvider provider, ConfigSection defaults) {
+        return new LangProvider(langFolder, this, provider, defaults);
     }
 }
-

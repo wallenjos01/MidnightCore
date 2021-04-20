@@ -23,6 +23,23 @@ public class Vec3i {
         return Math.sqrt(this.getX() - vec2.getX() ^ 2 + (this.getY() - vec2.getY()) ^ 2 + (this.getZ() - vec2.getZ()) ^ 2);
     }
 
+    public static Vec3d parse(String str) {
+
+        if(str == null || str.length() == 0 || !str.contains(",")) return null;
+        String[] xyz = str.split(",");
+
+        try {
+            double x = Integer.parseInt(xyz[0]);
+            double y = Integer.parseInt(xyz[1]);
+            double z = Integer.parseInt(xyz[2]);
+
+            return new Vec3d(x,y,z);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+
+    }
+
     public Vec3i add(int i) {
         return new Vec3i(data[0] + i, data[1] + i, data[2] + i);
     }

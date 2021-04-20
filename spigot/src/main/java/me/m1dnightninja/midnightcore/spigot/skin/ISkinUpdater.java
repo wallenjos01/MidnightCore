@@ -1,7 +1,7 @@
 package me.m1dnightninja.midnightcore.spigot.skin;
 
 import com.mojang.authlib.GameProfile;
-import me.m1dnightninja.midnightcore.api.skin.Skin;
+import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;

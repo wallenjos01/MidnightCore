@@ -11,6 +11,7 @@ import me.m1dnightninja.midnightcore.api.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JavaLogger;
 import me.m1dnightninja.midnightcore.common.JsonConfigProvider;
 import me.m1dnightninja.midnightcore.velocity.module.LastJoinedModule;
@@ -46,12 +47,12 @@ public class MidnightCore {
 
         new MidnightCoreAPI(new JavaLogger(logger), new ImplDelegate() {
             @Override
-            public AbstractTimer createTimer(String name, int seconds, boolean countUp, AbstractTimer.TimerCallback callback) {
+            public AbstractTimer createTimer(MComponent name, int seconds, boolean countUp, AbstractTimer.TimerCallback callback) {
                 return new Timer(name, seconds, countUp, callback);
             }
 
             @Override
-            public AbstractInventoryGUI<?> createInventoryGUI(String name) {
+            public AbstractInventoryGUI createInventoryGUI(MComponent name) {
                 throw new IllegalStateException("Cannot create Inventory GUI on proxy!");
             }
 

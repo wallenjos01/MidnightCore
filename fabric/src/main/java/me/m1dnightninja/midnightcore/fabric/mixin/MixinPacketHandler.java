@@ -3,15 +3,13 @@ package me.m1dnightninja.midnightcore.fabric.mixin;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import me.m1dnightninja.midnightcore.fabric.api.Location;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerInteractEntityEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerTeleportEvent;
+import me.m1dnightninja.midnightcore.fabric.api.event.*;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
-import me.m1dnightninja.midnightcore.fabric.api.event.PacketSendEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerChatEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -103,5 +101,18 @@ public class MixinPacketHandler {
             }
 
         }
+    }
+
+    @Inject(method = "handleClientInformation(Lnet/minecraft/network/protocol/game/ServerboundClientInformationPacket;)V", at=@At(value = "HEAD"))
+    private void onSettings(ServerboundClientInformationPacket packet, CallbackInfo ci) {
+
+        Event.invoke(new PlayerChangeSettingsEvent(player,
+                ((AccessorClientInformationPacket) packet).getLanguage(),
+                ((AccessorClientInformationPacket) packet).getViewDistance(),
+                packet.getChatVisibility(),
+                packet.getChatColors(),
+                packet.getModelCustomisation(),
+                packet.getMainHand()
+                ));
     }
 }

@@ -2,8 +2,10 @@ package me.m1dnightninja.midnightcore.fabric.api;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.FormatUtil;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
+import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import me.m1dnightninja.midnightcore.fabric.util.TextUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -19,14 +21,9 @@ public class Timer extends AbstractTimer {
 
     private final Component textPrefix;
 
-    public Timer(String prefix, int seconds, boolean countUp, TimerCallback cb) {
+    public Timer(MComponent prefix, int seconds, boolean countUp, TimerCallback cb) {
         super(prefix, seconds, countUp, cb);
-        textPrefix = TextUtil.parse(prefix);
-    }
-
-    public Timer(Component prefix, int seconds, boolean countUp, TimerCallback cb) {
-        super(prefix.getContents(), seconds, countUp, cb);
-        textPrefix = prefix;
+        textPrefix = ConversionUtil.toMinecraftComponent(prefix);
     }
 
     @Override

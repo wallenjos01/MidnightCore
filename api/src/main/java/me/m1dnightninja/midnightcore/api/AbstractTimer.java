@@ -1,5 +1,7 @@
 package me.m1dnightninja.midnightcore.api;
 
+import me.m1dnightninja.midnightcore.api.text.MComponent;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -7,7 +9,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 public abstract class AbstractTimer {
-    protected String prefix;
+    protected MComponent prefix;
     protected int seconds;
     protected boolean countUp;
     protected List<UUID> players;
@@ -17,7 +19,7 @@ public abstract class AbstractTimer {
     private final TimerTask tick;
     private Timer timer;
 
-    public AbstractTimer(String prefix, final int seconds, final boolean countUp, TimerCallback cb) {
+    public AbstractTimer(MComponent prefix, final int seconds, final boolean countUp, TimerCallback cb) {
         this.prefix = prefix;
         this.seconds = seconds;
         this.secondsLeft = seconds;
