@@ -1,17 +1,18 @@
 package me.m1dnightninja.midnightcore.api;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
+import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
+import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
+import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 
 public class MidnightCoreAPI {
@@ -38,6 +39,8 @@ public class MidnightCoreAPI {
 
     private final ConfigProvider defaultConfigProvider;
     private final ConfigSection mainConfig;
+
+    private final Random rand;
 
     private final File dataFolder;
 
@@ -88,6 +91,7 @@ public class MidnightCoreAPI {
 
         configRegistry.registerProvider(defaultConfigProvider);
         configRegistry.registerSerializer(Skin.class, Skin.SERIALIZER);
+        configRegistry.registerSerializer(MItemStack.class, MItemStack.SERIALIZER);
 
         // Load modules
         for (IModule mod : modules) {
@@ -149,6 +153,8 @@ public class MidnightCoreAPI {
             this.loadedModules.put(mod.getId(), mod);
         }
 
+        rand = new Random();
+
         // Save the main config again
         defaultConfigProvider.saveToFile(mainConfig, configFile);
 
@@ -203,6 +209,10 @@ public class MidnightCoreAPI {
      */
     public ConfigProvider getDefaultConfigProvider() {
         return defaultConfigProvider;
+    }
+
+    public Random getRandom() {
+        return rand;
     }
 
     /**
@@ -269,6 +279,40 @@ public class MidnightCoreAPI {
         return this.delegate.createInventoryGUI(title);
     }
 
+    /**
+     * Creates a Title object that can be sent to players
+     *
+     * @param title The title itself
+     * @param opts  Options pertaining to how the title is presented
+     * @return      A new title object
+     */
+    public AbstractTitle createTitle(MComponent title, AbstractTitle.TitleOptions opts) { return this.delegate.createTitle(title, opts); }
+
+    /**
+     * Creates an ActionBar object that can be sent to players
+     *
+     * @param title The text of the ActionBar
+     * @param opts  Options pertaining to how the ActionBar is presented
+     * @return      A new ActionBar object
+     */
+    public AbstractActionBar createActionBar(MComponent title, AbstractActionBar.ActionBarOptions opts) { return this.delegate.createActionBar(title, opts); }
+
+    /**
+     * Creates a Scoreboard object that can be shown to players
+     *
+     * @param id    The ID of the objective to be sent. Should be unique and 16 characters or less
+     * @param title The title of the scoreboard
+     * @return      A new CustomScoreboard object
+     */
+    public AbstractCustomScoreboard createScoreboard(String id, MComponent title) { return this.delegate.createCustomScoreboard(id, title); }
+
+    /**
+     * Determines whether or not a player has a particular permission
+     *
+     * @param u          The user to query
+     * @param permission The permission to check
+     * @return           Whether or not a player has the permission
+     */
     public boolean hasPermission(UUID u, String permission) {
         return delegate.hasPermission(u, permission);
     }

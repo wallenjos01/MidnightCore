@@ -8,6 +8,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,13 @@ public class YamlConfigProvider implements ConfigProvider {
     public ConfigSection loadFromFile(File file) {
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        return sectionFromYaml(config);
+    }
+
+    @Override
+    public ConfigSection loadFromStream(InputStream stream) {
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(new InputStreamReader(stream));
         return sectionFromYaml(config);
     }
 

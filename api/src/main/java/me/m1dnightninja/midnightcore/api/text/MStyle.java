@@ -101,6 +101,9 @@ public class MStyle {
         if(obfuscated != null) {
             base.append("\"obfuscated\":").append(obfuscated);
         }
+        if(font != null) {
+            base.append("\"font\":\"").append(font.toString()).append("\"");
+        }
 
         return base.toString();
 
@@ -131,5 +134,7 @@ public class MStyle {
         return out.toString();
 
     }
+
+    public static final MStyle ITEM_BASE = new MStyle().withItalic(Boolean.FALSE);
 
 }

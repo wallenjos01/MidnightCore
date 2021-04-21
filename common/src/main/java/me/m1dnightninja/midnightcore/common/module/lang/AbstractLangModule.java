@@ -1,16 +1,12 @@
-package me.m1dnightninja.midnightcore.common.module;
+package me.m1dnightninja.midnightcore.common.module.lang;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangModule;
-import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
 import me.m1dnightninja.midnightcore.api.module.lang.PlaceholderSupplier;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.common.module.lang.LangProvider;
 
-import java.io.File;
 import java.util.HashMap;
 
 public abstract class AbstractLangModule implements ILangModule {
@@ -66,8 +62,5 @@ public abstract class AbstractLangModule implements ILangModule {
 
     }
 
-    @Override
-    public ILangProvider createLangProvider(File langFolder, ConfigProvider provider, ConfigSection defaults) {
-        return new LangProvider(langFolder, this, provider, defaults);
-    }
+
 }

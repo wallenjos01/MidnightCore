@@ -4,6 +4,9 @@ import me.m1dnightninja.midnightcore.api.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
+import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
+import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JavaLogger;
 import me.m1dnightninja.midnightcore.spigot.api.InventoryGUI;
@@ -34,6 +37,22 @@ public class MidnightCore extends JavaPlugin {
             @Override
             public InventoryGUI createInventoryGUI(MComponent title) {
                 return new InventoryGUI(title);
+            }
+
+            // TODO: Implement titles and scoreboards on Spigot
+            @Override
+            public AbstractTitle createTitle(MComponent comp, AbstractTitle.TitleOptions opts) {
+                return null;
+            }
+
+            @Override
+            public AbstractActionBar createActionBar(MComponent comp, AbstractActionBar.ActionBarOptions opts) {
+                return null;
+            }
+
+            @Override
+            public AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title) {
+                return null;
             }
 
             @Override

@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.common.module.lang;
 
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangModule;
@@ -9,25 +10,35 @@ import me.m1dnightninja.midnightcore.api.text.MStyle;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
-public class LangProvider implements ILangProvider {
+public abstract  class AbstractLangProvider implements ILangProvider {
 
-    private final HashMap<String, HashMap<String, String>> entries = new HashMap<>();
+    protected final HashMap<String, HashMap<String, String>> entries = new HashMap<>();
 
-    private final File folder;
-    private final ConfigProvider provider;
-    private final ILangModule module;
+    protected final File folder;
+    protected final ConfigProvider provider;
+    protected final ILangModule module;
 
-    private final HashMap<String, String> defaults;
+    protected final HashMap<String, String> defaults;
 
-    public LangProvider(File folder, ILangModule mod, ConfigProvider provider, ConfigSection defaultEntries) {
+    protected AbstractLangProvider(File folder, ILangModule mod, ConfigProvider provider, ConfigSection defaultEntries) {
 
         this.folder = folder;
         this.provider = provider;
         this.module = mod;
 
         defaults = loadEntries(defaultEntries);
+
+        if(!folder.exists()) {
+            if(!folder.mkdirs()) {
+                MidnightCoreAPI.getLogger().warn("Unable to create Language folder!");
+                return;
+            }
+            saveDefaults(module.getServerLanguage());
+        }
 
     }
 
@@ -62,6 +73,8 @@ public class LangProvider implements ILangProvider {
 
         MComponent out = MComponent.Serializer.parse(msg);
         out = applyPlaceholders(out, args);
+
+        out.format(args);
 
         return out;
     }
@@ -111,7 +124,6 @@ public class LangProvider implements ILangProvider {
                 }
 
                 placeholder = !placeholder;
-                continue;
 
             } else {
                 if(placeholder) {
@@ -120,8 +132,6 @@ public class LangProvider implements ILangProvider {
                     message.append(c);
                 }
             }
-
-            message.append(c);
         }
 
         message.append(currentPlaceholder);
@@ -161,7 +171,6 @@ public class LangProvider implements ILangProvider {
                 }
 
                 placeholder = !placeholder;
-                continue;
 
             } else {
                 if(placeholder) {
@@ -170,8 +179,6 @@ public class LangProvider implements ILangProvider {
                     currentMessage.append(c);
                 }
             }
-
-            currentMessage.append(c);
         }
 
         currentMessage.append(currentPlaceholder);
@@ -182,5 +189,46 @@ public class LangProvider implements ILangProvider {
         }
 
         return out;
+    }
+
+    @Override
+    public void reloadAllEntries() {
+
+        Set<String> langs = entries.keySet();
+        entries.clear();
+
+        for(String lang : langs) {
+            loadLanguage(lang);
+        }
+    }
+
+    @Override
+    public boolean hasKey(String key) {
+        return entries.get(module.getServerLanguage()).containsKey(key) || defaults.containsKey(key);
+    }
+
+    @Override
+    public boolean hasKey(String key, String language) {
+        return entries.containsKey(language) ? entries.get(language).containsKey(key) : hasKey(key);
+    }
+
+    @Override
+    public boolean hasKey(String key, UUID player) {
+
+        String language = module.getPlayerLocale(player);
+        return entries.containsKey(language) ? entries.get(language).containsKey(key) : hasKey(key);
+    }
+
+    @Override
+    public void saveDefaults(String file) {
+        File f = new File(folder, file + provider.getFileExtension());
+
+        ConfigSection sec = new ConfigSection();
+        for(Map.Entry<String, String> ent : defaults.entrySet()) {
+
+            sec.set(ent.getKey(), ent.getValue());
+        }
+
+        provider.saveToFile(sec, f);
     }
 }

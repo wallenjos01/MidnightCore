@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.api.inventory;
 
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.config.ConfigSerializer;
 import me.m1dnightninja.midnightcore.api.math.Color;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
@@ -15,8 +16,8 @@ import java.util.UUID;
 public class MItemStack {
 
     private final MIdentifier type;
-    private final int count;
-    private final ConfigSection tag;
+    private int count;
+    private ConfigSection tag;
 
     private MItemStack(MIdentifier type, int count) {
         this.type = type;
@@ -42,6 +43,19 @@ public class MItemStack {
         return tag;
     }
 
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public void setTag(ConfigSection tag) {
+        this.tag = tag;
+    }
+
+    public MItemStack copy() {
+
+        return new MItemStack(type, count, tag);
+    }
+
     public static class Builder {
 
         private final MIdentifier type;
@@ -52,7 +66,7 @@ public class MItemStack {
         private MComponent name = null;
         private Iterable<MComponent> lore = null;
 
-        public static final MStyle BASE_STYLE = new MStyle().withItalic(Boolean.FALSE);
+        private ConfigSection tag = new ConfigSection();
 
         private Builder(MIdentifier type) {
             this.type = type;
@@ -73,10 +87,14 @@ public class MItemStack {
             return this;
         }
 
+        public Builder withTag(ConfigSection sec) {
+            tag = sec;
+            return this;
+        }
+
         public MItemStack build() {
 
             MItemStack is = new MItemStack(type, amount);
-            ConfigSection tag = new ConfigSection();
 
             if(name != null || lore != null) {
                 ConfigSection display = new ConfigSection();
@@ -151,6 +169,52 @@ public class MItemStack {
         }
 
     }
+
+    public static final ConfigSerializer<MItemStack> SERIALIZER = new ConfigSerializer<MItemStack>() {
+        @Override
+        public MItemStack deserialize(ConfigSection section) {
+
+            Builder builder = Builder.of(MIdentifier.parse(section.getString("type")));
+
+            if(section.has("name", String.class)) {
+                builder.withName(MComponent.Serializer.parse(section.getString("name")));
+            }
+
+            if(section.has("lore", List.class)) {
+
+                List<MComponent> comp = new ArrayList<>();
+                for(String s : section.getStringList("lore")) {
+                    comp.add(MComponent.Serializer.parse(s));
+                }
+
+                builder.withLore(comp);
+            }
+
+            if(section.has("amount", Integer.class)) {
+
+                builder.withAmount(section.getInt("amount"));
+            }
+
+            if(section.has("tag", ConfigSection.class)) {
+
+                builder.withTag(section.getSection("tag"));
+            }
+
+            return builder.build();
+        }
+
+        @Override
+        public ConfigSection serialize(MItemStack object) {
+
+            ConfigSection out = new ConfigSection();
+
+            out.set("type", object.type.toString());
+            out.set("amount", object.count);
+            out.set("tag", object.tag);
+
+            return out;
+        }
+    };
 
 
 }

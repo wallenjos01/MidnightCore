@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.api.text;
 
 import com.google.gson.*;
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.math.Color;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 
@@ -56,13 +57,14 @@ public class MComponent {
     }
 
 
-    public void addChild(MComponent other) {
+    public MComponent addChild(MComponent other) {
 
         if(findChild(other, this)) {
             throw new IllegalArgumentException("Cyclical component inheritance detected!");
         }
 
         children.add(other);
+        return this;
     }
 
     public List<MComponent> getTranslateData() {
@@ -103,6 +105,25 @@ public class MComponent {
         }
 
         return false;
+    }
+
+    public MComponent copy() {
+
+        MComponent out = new MComponent(type, content);
+        out.withStyle(style);
+        for(MComponent cmp : children) {
+            out.addChild(cmp.copy());
+        }
+
+        return out;
+    }
+
+    public void format(Object... args) {
+
+        content = String.format(content, args);
+        for(MComponent comp : children) {
+            comp.format(args);
+        }
     }
 
     public enum Type {
@@ -209,12 +230,14 @@ public class MComponent {
                 for(MComponent cmp : component.data) {
                     arr.add(toJson(cmp));
                 }
+                out.add("with", arr);
             }
             if(component.children.size() > 0) {
                 JsonArray arr = new JsonArray();
                 for(MComponent cmp : component.children) {
                     arr.add(toJson(cmp));
                 }
+                out.add("extra", arr);
             }
 
             return out;
@@ -311,64 +334,63 @@ public class MComponent {
             StringBuilder currentString = new StringBuilder();
             MStyle currentStyle = new MStyle();
 
-            for(int i = 0 ; i < content.length() - 1 ; i++) {
+            for(int i = 0 ; i < content.length() ; i++) {
 
                 char c = content.charAt(i);
-                if(c == legacyColorCharacter) {
+                if(c == legacyColorCharacter && i < content.length() - 1) {
                     char next = content.charAt(i + 1);
 
-                    if((next >= '0' && next <= '9') || (next >= 'a' && next <= 'f')) {
+                    if ((next >= '0' && next <= '9') || (next >= 'a' && next <= 'f')) {
 
-                        int rgbi = Integer.parseInt(next+"", 16);
+                        int rgbi = Integer.parseInt(next + "", 16);
 
-                        out.addChild(createTextComponent(currentString.toString()).withStyle(currentStyle));
+                        if(currentString.length() > 0) out.addChild(createTextComponent(currentString.toString()).withStyle(currentStyle));
                         currentString = new StringBuilder();
 
-                        i += 2;
+                        i += 1;
 
                         currentStyle = new MStyle().withColor(Color.fromRGBI(rgbi));
                     }
-                    switch(next) {
+                    switch (next) {
                         case 'l':
                             currentStyle.withBold(true);
-                            i += 2;
+                            i += 1;
                             break;
                         case 'o':
                             currentStyle.withItalic(true);
-                            i += 2;
+                            i += 1;
                             break;
                         case 'n':
                             currentStyle.withUnderline(true);
-                            i += 2;
+                            i += 1;
                             break;
                         case 'm':
                             currentStyle.withStrikethrough(true);
-                            i += 2;
+                            i += 1;
                             break;
                         case 'k':
                             currentStyle.withObfuscated(true);
-                            i += 2;
+                            i += 1;
                             break;
                     }
 
+                } else if(c == rgbColorCharacter && i < content.length() - 7) {
+
+                    String hex = content.substring(i+1, i+7);
+
+                    out.addChild(createTextComponent(currentString.toString()).withStyle(currentStyle));
+                    currentString = new StringBuilder();
+
+                    i += 6;
+
+                    currentStyle = new MStyle().withColor(new Color(hex));
+
+                } else {
+
+                    currentString.append(c);
                 }
-                if(c == rgbColorCharacter) {
-                    if(i < content.length() - 7) {
-                        String hex = content.substring(i+1, i+7);
-
-                        out.addChild(createTextComponent(currentString.toString()).withStyle(currentStyle));
-                        currentString = new StringBuilder();
-
-                        i += 7;
-
-                        currentStyle = new MStyle().withColor(new Color(hex));
-                    }
-                }
-
-                currentString.append(c);
             }
 
-            currentString.append(content.charAt(content.length()-1));
             out.addChild(createTextComponent(currentString.toString()).withStyle(currentStyle));
 
             return out;

@@ -75,7 +75,7 @@ public class ConversionUtil {
             return null;
         }
 
-        out.setStyle(toMinecraftStyle(component.getStyle()));
+        out = out.setStyle(toMinecraftStyle(component.getStyle()));
 
         for(MComponent cmp : component.getChildren()) {
             out.append(toMinecraftComponent(cmp));
@@ -88,19 +88,21 @@ public class ConversionUtil {
 
         Style out = Style.EMPTY;
 
-        out.withColor(toTextColor(style.getColor()));
-        out.withBold(style.isBold());
-        out.withItalic(style.isItalic());
-        out.withUnderlined(style.isUnderlined());
+        out = out.withBold(style.isBold());
+        out = out.withItalic(style.isItalic());
+        out = out.withUnderlined(style.isUnderlined());
 
-        if(out.getFont() != null) {
-            out.withFont(toResourceLocation(style.getFont()));
+        if(style.getColor() != null) {
+            out = out.withColor(toTextColor(style.getColor()));
+        }
+        if(style.getFont() != null) {
+            out = out.withFont(toResourceLocation(style.getFont()));
         }
         if(style.isStrikethrough() == Boolean.TRUE) {
-            out.applyFormat(ChatFormatting.STRIKETHROUGH);
+            out = out.applyFormat(ChatFormatting.STRIKETHROUGH);
         }
         if(style.isObfuscated() == Boolean.TRUE) {
-            out.applyFormat(ChatFormatting.OBFUSCATED);
+            out = out.applyFormat(ChatFormatting.OBFUSCATED);
         }
 
         return out;

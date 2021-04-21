@@ -4,14 +4,18 @@ import me.m1dnightninja.midnightcore.api.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
+import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
+import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JsonConfigProvider;
-import me.m1dnightninja.midnightcore.fabric.api.InventoryGUI;
-import me.m1dnightninja.midnightcore.fabric.api.MidnightCoreModInitializer;
-import me.m1dnightninja.midnightcore.fabric.api.PermissionHelper;
+import me.m1dnightninja.midnightcore.fabric.api.*;
 import me.m1dnightninja.midnightcore.fabric.api.Timer;
 import me.m1dnightninja.midnightcore.fabric.dimension.EmptyGenerator;
 import me.m1dnightninja.midnightcore.fabric.module.*;
+import me.m1dnightninja.midnightcore.fabric.module.lang.LangModule;
+import me.m1dnightninja.midnightcore.fabric.text.ActionBar;
+import me.m1dnightninja.midnightcore.fabric.text.Title;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -64,7 +68,6 @@ public class MidnightCore implements ModInitializer {
             }
         }
 
-        // TODO: Replace this system with a more sensible one
         ImplDelegate delegate = new ImplDelegate() {
             @Override
             public Timer createTimer(MComponent text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
@@ -74,6 +77,21 @@ public class MidnightCore implements ModInitializer {
             @Override
             public InventoryGUI createInventoryGUI(MComponent title) {
                 return new InventoryGUI(title);
+            }
+
+            @Override
+            public AbstractTitle createTitle(MComponent comp, AbstractTitle.TitleOptions opts) {
+                return new Title(comp, opts);
+            }
+
+            @Override
+            public AbstractActionBar createActionBar(MComponent comp, AbstractActionBar.ActionBarOptions opts) {
+                return new ActionBar(comp, opts);
+            }
+
+            @Override
+            public AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title) {
+                return new CustomScoreboard(id, title);
             }
 
             @Override

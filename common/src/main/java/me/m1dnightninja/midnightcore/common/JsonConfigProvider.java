@@ -9,6 +9,7 @@ import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,14 @@ public class JsonConfigProvider implements ConfigProvider {
         if(w == null) {
             return new ConfigSection();
         }
+
+        return fromJson(w.getRoot());
+    }
+
+    @Override
+    public ConfigSection loadFromStream(InputStream stream) {
+        JsonWrapper w = new JsonWrapper();
+        w.load(stream);
 
         return fromJson(w.getRoot());
     }

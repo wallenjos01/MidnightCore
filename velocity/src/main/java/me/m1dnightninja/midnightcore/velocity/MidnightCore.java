@@ -11,6 +11,9 @@ import me.m1dnightninja.midnightcore.api.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
+import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
+import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JavaLogger;
 import me.m1dnightninja.midnightcore.common.JsonConfigProvider;
@@ -54,6 +57,22 @@ public class MidnightCore {
             @Override
             public AbstractInventoryGUI createInventoryGUI(MComponent name) {
                 throw new IllegalStateException("Cannot create Inventory GUI on proxy!");
+            }
+
+            // TODO: Implement titles and scoreboards on Proxy
+            @Override
+            public AbstractTitle createTitle(MComponent comp, AbstractTitle.TitleOptions opts) {
+                return null;
+            }
+
+            @Override
+            public AbstractActionBar createActionBar(MComponent comp, AbstractActionBar.ActionBarOptions opts) {
+                return null;
+            }
+
+            @Override
+            public AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title) {
+                return null;
             }
 
             @Override

@@ -1,9 +1,10 @@
 package me.m1dnightninja.midnightcore.fabric.api;
 
+import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
-import me.m1dnightninja.midnightcore.fabric.util.TextUtil;
+import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
@@ -19,7 +20,7 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomScoreboard {
+public class CustomScoreboard extends AbstractCustomScoreboard {
 
     private final List<ServerPlayer> players = new ArrayList<>();
 
@@ -29,12 +30,16 @@ public class CustomScoreboard {
 
     private final boolean[] updated = new boolean[15];
 
-    private Component name;
+    private Component mcName;
 
-    public CustomScoreboard(String id, Component title) {
+    public CustomScoreboard(String id, MComponent title) {
+
+        super(id, title);
+
+        mcName = ConversionUtil.toMinecraftComponent(title);
 
         board = MidnightCore.getServer().getScoreboard();
-        objective = new Objective(board, id, ObjectiveCriteria.DUMMY, title, ObjectiveCriteria.RenderType.INTEGER);
+        objective = new Objective(board, id, ObjectiveCriteria.DUMMY, mcName, ObjectiveCriteria.RenderType.INTEGER);
 
         for(int i = 0 ; i < teams.length ; i++) {
 
@@ -47,11 +52,15 @@ public class CustomScoreboard {
         }
     }
 
-    public void setName(Component cmp) {
-        objective.setDisplayName(cmp);
+    @Override
+    public void setName(MComponent cmp) {
+        super.setName(cmp);
+
+        mcName = ConversionUtil.toMinecraftComponent(cmp);
+        objective.setDisplayName(mcName);
     }
 
-    public void setLine(int line, Component message) {
+    public void setLine(int line, MComponent message) {
 
         if(line < 1 || line > 15) return;
 
@@ -59,10 +68,11 @@ public class CustomScoreboard {
             teams[line].setPlayerPrefix(null);
             board.resetPlayerScore("§" + Integer.toHexString(line), objective);
         } else {
+
+            Component mcLine = ConversionUtil.toMinecraftComponent(message);
             board.getOrCreatePlayerScore("§" + Integer.toHexString(line), objective).setScore(line);
 
-
-            teams[line].setPlayerPrefix(message);
+            teams[line].setPlayerPrefix(mcLine);
         }
 
         updated[line] = true;
@@ -115,9 +125,10 @@ public class CustomScoreboard {
 
         List<Packet<?>> packets = new ArrayList<>();
 
-        if(objective.getDisplayName() != name) {
+        if(objective.getDisplayName() != mcName) {
+
+            objective.setDisplayName(mcName);
             packets.add(new ClientboundSetObjectivePacket(objective, 2));
-            name = objective.getDisplayName();
         }
 
         for(int i = 0 ; i < teams.length ; i++) {
