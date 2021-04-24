@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric;
 
+import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
@@ -12,9 +13,11 @@ import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
 import me.m1dnightninja.midnightcore.fabric.api.*;
 import me.m1dnightninja.midnightcore.fabric.api.Timer;
 import me.m1dnightninja.midnightcore.fabric.dimension.EmptyGenerator;
+import me.m1dnightninja.midnightcore.fabric.inventory.InventoryGUI;
 import me.m1dnightninja.midnightcore.fabric.module.*;
 import me.m1dnightninja.midnightcore.fabric.module.lang.LangModule;
 import me.m1dnightninja.midnightcore.fabric.text.ActionBar;
+import me.m1dnightninja.midnightcore.fabric.text.CustomScoreboard;
 import me.m1dnightninja.midnightcore.fabric.text.Title;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.fabricmc.api.ModInitializer;
@@ -79,7 +82,7 @@ public class MidnightCore implements ModInitializer {
             }
 
             @Override
-            public InventoryGUI createInventoryGUI(MComponent title) {
+            public AbstractInventoryGUI createInventoryGUI(MComponent title) {
                 return new InventoryGUI(title);
             }
 

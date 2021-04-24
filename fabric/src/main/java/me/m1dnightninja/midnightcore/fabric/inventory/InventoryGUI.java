@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.fabric.api;
+package me.m1dnightninja.midnightcore.fabric.inventory;
 
 import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.text.MComponent;

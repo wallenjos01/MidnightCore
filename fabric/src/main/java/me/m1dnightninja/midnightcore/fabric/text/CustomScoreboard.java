@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.fabric.api;
+package me.m1dnightninja.midnightcore.fabric.text;
 
 import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
