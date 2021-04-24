@@ -101,7 +101,7 @@ public class MItemStack {
 
                 if(name != null) {
 
-                    display.set("Name", name);
+                    display.set("Name", MComponent.Serializer.toJsonString(name));
                 }
 
                 if(lore != null) {
@@ -136,6 +136,8 @@ public class MItemStack {
                 tag.set("Properties", properties);
 
             }
+
+            is.setTag(tag);
 
             return is;
         }

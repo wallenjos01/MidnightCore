@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.common;
+package me.m1dnightninja.midnightcore.common.util;
 
 import com.google.gson.*;
 import com.mojang.authlib.GameProfile;

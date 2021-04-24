@@ -1,9 +1,7 @@
 package me.m1dnightninja.midnightcore.api;
 
-import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
-import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
-import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
-import me.m1dnightninja.midnightcore.api.text.MComponent;
+import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
+import me.m1dnightninja.midnightcore.api.text.*;
 
 import java.util.UUID;
 
@@ -19,5 +17,7 @@ public interface ImplDelegate {
     AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title);
 
     boolean hasPermission(UUID u, String permission);
+
+    void sendMessage(UUID u, MComponent comp);
 }
 

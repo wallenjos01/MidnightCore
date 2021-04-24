@@ -78,6 +78,45 @@ public class MStyle {
         return font;
     }
 
+    public MStyle copy() {
+        return new MStyle().withColor(color).withFont(font).withBold(bold).withItalic(italic).withUnderline(underline).withStrikethrough(strikethrough).withObfuscated(obfuscated);
+    }
+
+    public MStyle fill(MStyle other) {
+
+        if(other.color != null) {
+            color = other.color;
+        }
+        if(other.bold != null) {
+            bold = other.bold;
+        }
+        if(other.italic != null) {
+            italic = other.italic;
+        }
+        if(other.underline != null) {
+            underline = other.underline;
+        }
+        if(other.strikethrough != null) {
+            strikethrough = other.strikethrough;
+        }
+        if(other.obfuscated != null) {
+            obfuscated = other.obfuscated;
+        }
+        if(other.font != null) {
+            font = other.font;
+        }
+
+        return this;
+    }
+
+    public MStyle merge(MStyle other) {
+
+        MStyle out = copy();
+        out.fill(other);
+
+        return out;
+    }
+
     @Override
     public String toString() {
 

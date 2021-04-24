@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.spigot.skin;
+package me.m1dnightninja.midnightcore.spigot.module.skin;
 
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
@@ -188,6 +188,7 @@ public class SkinUpdater_16 implements ISkinUpdater {
         return (GameProfile) ReflectionUtil.callMethod(ReflectionUtil.castTo(player, craftPlayer), getProfile, true);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void updatePlayer(Player player, Skin skin, Collection<? extends Player> observers) {
         if(!initialized) return;

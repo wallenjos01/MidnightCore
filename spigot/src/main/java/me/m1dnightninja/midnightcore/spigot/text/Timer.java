@@ -1,9 +1,9 @@
-package me.m1dnightninja.midnightcore.spigot.api;
+package me.m1dnightninja.midnightcore.spigot.text;
 
-import me.m1dnightninja.midnightcore.api.AbstractTimer;
+import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.common.FormatUtil;
+import me.m1dnightninja.midnightcore.common.util.FormatUtil;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
 import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import net.md_5.bungee.api.ChatMessageType;

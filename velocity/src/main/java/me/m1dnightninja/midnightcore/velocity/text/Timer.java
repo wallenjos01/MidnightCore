@@ -1,9 +1,10 @@
-package me.m1dnightninja.midnightcore.velocity;
+package me.m1dnightninja.midnightcore.velocity.text;
 
 import com.velocitypowered.api.proxy.Player;
-import me.m1dnightninja.midnightcore.api.AbstractTimer;
+import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.common.FormatUtil;
+import me.m1dnightninja.midnightcore.common.util.FormatUtil;
+import me.m1dnightninja.midnightcore.velocity.MidnightCore;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;

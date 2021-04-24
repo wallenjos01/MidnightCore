@@ -1,7 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.api;
 
-import me.m1dnightninja.midnightcore.api.AbstractInventoryGUI;
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.api.event.ContainerClickEvent;
@@ -10,7 +9,6 @@ import me.m1dnightninja.midnightcore.fabric.api.event.PlayerDisconnectEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.mixin.AccessorServerPlayer;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
-import me.m1dnightninja.midnightcore.fabric.util.TextUtil;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -65,11 +63,13 @@ public class InventoryGUI extends AbstractInventoryGUI {
 
         for(Entry ent : entries.values()) {
 
-            if(ent.slot < offset || ent.slot > max) {
+            if(ent.slot < offset || ent.slot > max || ent.item == null) {
                 continue;
             }
 
-            inv.setItem(ent.slot - offset, ConversionUtil.toMinecraftStack(ent.item));
+            ItemStack is = ConversionUtil.toMinecraftStack(ent.item);
+
+            inv.setItem(ent.slot - offset, is);
         }
 
         ChestMenu handler = createScreen(rows, player, inv);
@@ -124,11 +124,8 @@ public class InventoryGUI extends AbstractInventoryGUI {
 
     private static void onClick(ContainerClickEvent event) {
 
-        MidnightCoreAPI.getLogger().warn("event");
-
         AbstractInventoryGUI gui = openGuis.get(event.getPlayer().getUUID());
         if(gui == null) {
-            MidnightCoreAPI.getLogger().warn("no gui");
             return;
         }
 

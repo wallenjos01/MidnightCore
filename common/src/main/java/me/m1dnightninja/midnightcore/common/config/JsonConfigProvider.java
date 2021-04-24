@@ -1,10 +1,9 @@
-package me.m1dnightninja.midnightcore.common;
+package me.m1dnightninja.midnightcore.common.config;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 
@@ -119,6 +118,7 @@ public class JsonConfigProvider implements ConfigProvider {
             for (Object o : lst) {
                 arr.add(toJsonElement(o));
             }
+            return arr;
 
         } else if(obj instanceof Number) {
 
@@ -132,9 +132,6 @@ public class JsonConfigProvider implements ConfigProvider {
 
             return new JsonPrimitive(obj.toString());
         }
-
-        return null;
-
     }
 
 }

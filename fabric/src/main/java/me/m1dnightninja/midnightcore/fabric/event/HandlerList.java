@@ -1,18 +1,26 @@
 package me.m1dnightninja.midnightcore.fabric.event;
 
-import java.util.HashMap;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.PriorityQueue;
 
 public class HandlerList<T extends Event> {
 
-    private final HashMap<Object, EventHandler<T>> handlers = new HashMap<>();
+    private final PriorityQueue<WrappedHandler> handlers = new PriorityQueue<>();
 
-    void add(Object o, EventHandler<T> handler) {
-        handlers.put(o, handler);
+    void add(Object o, int priority, EventHandler<T> handler) {
+
+        WrappedHandler hand = new WrappedHandler();
+        hand.handler = handler;
+        hand.priority = priority;
+        hand.listener = o;
+
+        handlers.add(hand);
     }
 
     void invoke(T event) {
-        for(EventHandler<T> handler : handlers.values()) {
-            handler.invoke(event);
+        for(WrappedHandler handler : handlers) {
+            handler.handler.invoke(event);
         }
     }
 
@@ -21,7 +29,19 @@ public class HandlerList<T extends Event> {
     }
 
     void clear(Object o) {
-        handlers.remove(o);
+        handlers.removeIf(wrappedHandler -> wrappedHandler.listener == o);
+    }
+
+    private class WrappedHandler implements Comparable<WrappedHandler> {
+
+        Object listener;
+        int priority;
+        EventHandler<T> handler;
+
+        @Override
+        public int compareTo(@NotNull HandlerList<T>.WrappedHandler o) {
+            return priority - o.priority;
+        }
     }
 
 }

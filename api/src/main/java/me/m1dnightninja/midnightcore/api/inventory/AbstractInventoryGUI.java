@@ -1,6 +1,5 @@
-package me.m1dnightninja.midnightcore.api;
+package me.m1dnightninja.midnightcore.api.inventory;
 
-import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 
 import java.util.HashMap;

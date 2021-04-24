@@ -69,7 +69,7 @@ public class ConfigSection {
         Object out = this.get(key);
         if(out == null) return false;
 
-        return clazz.isAssignableFrom(out.getClass());
+        return canConvert(out, clazz);
     }
 
     public String getString(String key) {
@@ -165,6 +165,27 @@ public class ConfigSection {
         }
 
         return (T) o;
+    }
+
+
+    private <T> boolean canConvert(Object o, Class<T> clazz) {
+
+        if(reg != null) {
+            if(reg.canSerialize(clazz) && o instanceof ConfigSection) {
+                ConfigSerializer<T> ser = reg.getSerializer(clazz);
+                T ret = ser.deserialize((ConfigSection) o);
+                return ret != null;
+            }
+            if(reg.canSerializeInline(clazz)) {
+
+                InlineSerializer<T> ser = reg.getInlineSerializer(clazz);
+                T ret = ser.deserialize(o.toString());
+                return ret != null;
+            }
+
+        }
+
+        return clazz.isAssignableFrom(o.getClass());
     }
 
 }

@@ -1,11 +1,11 @@
-package me.m1dnightninja.midnightcore.spigot.module;
+package me.m1dnightninja.midnightcore.spigot.module.skin;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.common.MojangUtil;
+import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.common.module.AbstractSkinModule;
-import me.m1dnightninja.midnightcore.spigot.skin.ISkinUpdater;
-import me.m1dnightninja.midnightcore.spigot.skin.SkinUpdater_16;
+import me.m1dnightninja.midnightcore.spigot.module.skin.ISkinUpdater;
+import me.m1dnightninja.midnightcore.spigot.module.skin.SkinUpdater_16;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

@@ -28,6 +28,16 @@ public class Skin {
         return this.sig;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+
+        if(!(obj instanceof Skin)) return false;
+
+        Skin s = (Skin) obj;
+        return b64.equals(s.b64) && uid.equals(s.uid) && sig.equals(s.sig);
+
+    }
+
     public static final ConfigSerializer<Skin> SERIALIZER = new ConfigSerializer<Skin>(){
 
         @Override

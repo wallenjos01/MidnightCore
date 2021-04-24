@@ -16,6 +16,8 @@ public interface ILangProvider {
 
     MComponent getMessage(String key, UUID player, Object... args);
 
+    MComponent getMessage(String key);
+
     void sendMessage(String key, UUID player, Object... args);
 
     void sendMessage(String key, Iterable<UUID> players, Object... args);

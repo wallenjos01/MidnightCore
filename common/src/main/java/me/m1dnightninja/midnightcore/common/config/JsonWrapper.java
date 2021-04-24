@@ -1,12 +1,12 @@
-package me.m1dnightninja.midnightcore.common;
+package me.m1dnightninja.midnightcore.common.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class JsonWrapper {
 
@@ -80,10 +80,9 @@ public class JsonWrapper {
         try {
 
             OutputStream stream = new FileOutputStream(file);
-            OutputStreamWriter writer = new OutputStreamWriter(stream);
+            OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
 
-            JsonWriter jw = new JsonWriter(writer);
-            GSON.toJson(root, jw);
+            GSON.toJson(root, writer);
 
             writer.close();
             stream.close();
@@ -123,7 +122,7 @@ public class JsonWrapper {
     public void load(InputStream stream) {
 
         try {
-            InputStreamReader reader = new InputStreamReader(stream);
+            InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
             root = GSON.fromJson(reader, JsonObject.class);
 
             reader.close();

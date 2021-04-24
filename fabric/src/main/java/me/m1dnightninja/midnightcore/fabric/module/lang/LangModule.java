@@ -39,6 +39,8 @@ public class LangModule extends AbstractLangModule {
 
     @Override
     public String getPlayerLocale(UUID u) {
+
+        if(u == null) return getServerLanguage();
         return languages.getOrDefault(u, getServerLanguage());
     }
 

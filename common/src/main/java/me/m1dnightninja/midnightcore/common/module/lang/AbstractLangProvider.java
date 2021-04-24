@@ -57,9 +57,18 @@ public abstract  class AbstractLangProvider implements ILangProvider {
 
     private HashMap<String, String> loadEntries(ConfigSection sec) {
 
+        return populateMap(sec, "");
+    }
+
+    private HashMap<String, String> populateMap(ConfigSection section, String prefix) {
+
         HashMap<String, String> out = new HashMap<>();
-        for(String s : sec.getKeys()) {
-            out.put(s, sec.get(s, String.class));
+        for(String s : section.getKeys()) {
+            if(section.has(s, String.class)) {
+                out.put(prefix + s, section.getString(s));
+            } else if(section.has(s, ConfigSection.class)) {
+                out.putAll(populateMap(section.getSection(s), prefix + s + "."));
+            }
         }
 
         return out;
@@ -69,10 +78,12 @@ public abstract  class AbstractLangProvider implements ILangProvider {
     public MComponent getMessage(String key, String language, Object... args) {
 
         String msg = getRawMessage(key, language);
-        msg = applyInlinePlaceholders(msg, args);
+        if(msg == null) return MComponent.createTextComponent("");
+
+        msg = applyInlinePlaceholders(msg, module, args);
 
         MComponent out = MComponent.Serializer.parse(msg);
-        out = applyPlaceholders(out, args);
+        out = applyPlaceholders(out, module, args);
 
         out.format(args);
 
@@ -81,12 +92,17 @@ public abstract  class AbstractLangProvider implements ILangProvider {
 
     @Override
     public MComponent getUnformattedMessage(String key, String language) {
+
         String msg = getRawMessage(key, language);
+        if(msg == null) return MComponent.createTextComponent("");
+
         return MComponent.Serializer.parse(msg);
     }
 
     @Override
     public String getRawMessage(String key, String language) {
+
+        if(language == null) return defaults.get(key);
 
         if(!entries.containsKey(language)) {
             loadLanguage(language);
@@ -103,7 +119,12 @@ public abstract  class AbstractLangProvider implements ILangProvider {
         return getMessage(key, module.getPlayerLocale(player), args);
     }
 
-    private String applyInlinePlaceholders(String msg, Object... args) {
+    @Override
+    public MComponent getMessage(String key) {
+        return getMessage(key, module.getServerLanguage());
+    }
+
+    public static String applyInlinePlaceholders(String msg, ILangModule module, Object... args) {
 
         boolean placeholder = false;
         StringBuilder currentPlaceholder = new StringBuilder();
@@ -134,11 +155,11 @@ public abstract  class AbstractLangProvider implements ILangProvider {
             }
         }
 
-        message.append(currentPlaceholder);
+        if(!currentPlaceholder.isEmpty()) message.append("%").append(currentPlaceholder);
         return message.toString();
     }
 
-    private MComponent applyPlaceholders(MComponent msg, Object... args) {
+    public static MComponent applyPlaceholders(MComponent msg, ILangModule module, Object... args) {
 
         MStyle style = msg.getStyle();
         MComponent out = MComponent.createTextComponent("").withStyle(style);
@@ -181,11 +202,11 @@ public abstract  class AbstractLangProvider implements ILangProvider {
             }
         }
 
-        currentMessage.append(currentPlaceholder);
+        if(!currentPlaceholder.isEmpty()) currentMessage.append("%").append(currentPlaceholder);
         out.addChild(MComponent.createTextComponent(currentMessage.toString()));
 
         for(MComponent comp : msg.getChildren()) {
-            out.addChild(applyPlaceholders(comp, args));
+            out.addChild(applyPlaceholders(comp, module, args));
         }
 
         return out;
@@ -209,14 +230,16 @@ public abstract  class AbstractLangProvider implements ILangProvider {
 
     @Override
     public boolean hasKey(String key, String language) {
-        return entries.containsKey(language) ? entries.get(language).containsKey(key) : hasKey(key);
+
+        if(language == null || !entries.containsKey(language)) return hasKey(key);
+        return entries.get(language).containsKey(key) || hasKey(key);
     }
 
     @Override
     public boolean hasKey(String key, UUID player) {
 
         String language = module.getPlayerLocale(player);
-        return entries.containsKey(language) ? entries.get(language).containsKey(key) : hasKey(key);
+        return hasKey(key, language);
     }
 
     @Override

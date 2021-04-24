@@ -1,12 +1,11 @@
 package me.m1dnightninja.midnightcore.fabric.api;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.AbstractTimer;
+import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.common.FormatUtil;
+import me.m1dnightninja.midnightcore.common.util.FormatUtil;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
-import me.m1dnightninja.midnightcore.fabric.util.TextUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.ChatType;

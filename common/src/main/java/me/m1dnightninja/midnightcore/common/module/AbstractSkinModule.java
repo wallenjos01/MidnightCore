@@ -4,7 +4,7 @@ import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.module.skin.SkinCallback;
-import me.m1dnightninja.midnightcore.common.MojangUtil;
+import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 
 import java.util.HashMap;
 import java.util.UUID;

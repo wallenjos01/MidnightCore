@@ -19,10 +19,9 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class CustomScoreboard extends AbstractCustomScoreboard {
-
-    private final List<ServerPlayer> players = new ArrayList<>();
 
     private final PlayerTeam[] teams = new PlayerTeam[15];
     private final ServerScoreboard board;
@@ -78,9 +77,11 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
         updated[line] = true;
     }
 
-    public void addPlayer(ServerPlayer player) {
+    @Override
+    protected void onPlayerAdded(UUID u) {
 
-        players.add(player);
+        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+        if(player == null) return;
 
         player.connection.send(new ClientboundSetObjectivePacket(objective, 0));
 
@@ -98,7 +99,11 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
 
     }
 
-    public void removePlayer(ServerPlayer player) {
+    @Override
+    protected void onPlayerRemoved(UUID u) {
+
+        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+        if(player == null) return;
 
         player.connection.send(new ClientboundSetDisplayObjectivePacket(1, null));
 
@@ -113,12 +118,6 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
         player.connection.send(new ClientboundSetObjectivePacket(objective, 1));
 
 
-    }
-
-    public void clearPlayers() {
-        for(int i = 0 ; i < players.size() ; i++) {
-            removePlayer(players.get(0));
-        }
     }
 
     public void update() {
@@ -145,7 +144,11 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
             }
         }
 
-        for(ServerPlayer player : players) {
+        for(UUID u : players) {
+
+            ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+            if(player == null) continue;
+
             for(Packet<?> pck : packets) {
                 player.connection.send(pck);
             }

@@ -52,10 +52,6 @@ public class YamlConfigProvider implements ConfigProvider {
 
     private ConfigurationSection toYamlSection(ConfigSection sec) {
 
-        for(String s : sec.getKeys()) {
-            MidnightCoreAPI.getLogger().warn(s);
-        }
-
         if(sec.getEntries().size() == 0) return null;
 
         ConfigurationSection out = new YamlConfiguration();

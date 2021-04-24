@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.api;
+package me.m1dnightninja.midnightcore.api.text;
 
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 
@@ -26,7 +26,7 @@ public abstract class AbstractTimer {
         this.countUp = countUp;
         this.callback = cb;
         this.players = new ArrayList<>();
-        this.tick = new TimerTask(){
+        this.tick = new TimerTask() {
 
             @Override
             public void run() {

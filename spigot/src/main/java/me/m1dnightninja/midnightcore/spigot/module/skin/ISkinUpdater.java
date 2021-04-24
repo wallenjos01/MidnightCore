@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.spigot.skin;
+package me.m1dnightninja.midnightcore.spigot.module.skin;
 
 import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;

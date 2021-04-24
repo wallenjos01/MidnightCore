@@ -8,6 +8,7 @@ import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class MComponent {
 
@@ -83,6 +84,14 @@ public class MComponent {
         return out;
     }
 
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setStyle(MStyle style) {
+        this.style = style;
+    }
+
     public String toLegacyText(boolean hexSupport) {
 
         StringBuilder out = new StringBuilder();
@@ -110,7 +119,8 @@ public class MComponent {
     public MComponent copy() {
 
         MComponent out = new MComponent(type, content);
-        out.withStyle(style);
+        out.setStyle(style.copy());
+
         for(MComponent cmp : children) {
             out.addChild(cmp.copy());
         }
@@ -120,10 +130,19 @@ public class MComponent {
 
     public void format(Object... args) {
 
-        content = String.format(content, args);
+        try {
+            content = String.format(content, args);
+        } catch(Exception ex) {
+            // Ignore
+        }
+
         for(MComponent comp : children) {
             comp.format(args);
         }
+    }
+
+    public void send(UUID u) {
+        MidnightCoreAPI.getInstance().sendMessage(u, this);
     }
 
     public enum Type {

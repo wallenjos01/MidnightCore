@@ -126,8 +126,6 @@ public final class ReflectionUtil {
                 for(Class<?> clz : cons.getParameterTypes()) {
                     builder.append(clz.getName()).append(", ");
                 }
-
-                MidnightCoreAPI.getLogger().info(builder.toString());
             }
 
             throw new IllegalStateException();

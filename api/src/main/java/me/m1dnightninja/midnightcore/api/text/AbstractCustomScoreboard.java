@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public abstract class AbstractCustomScoreboard {
 
-    private final List<UUID> players = new ArrayList<>();
+    protected final List<UUID> players = new ArrayList<>();
     protected final String id;
     protected MComponent name;
 
@@ -27,11 +27,13 @@ public abstract class AbstractCustomScoreboard {
     public void addPlayer(UUID player) {
 
         players.add(player);
+        onPlayerAdded(player);
     }
 
     public void removePlayer(UUID player) {
 
         players.remove(player);
+        onPlayerRemoved(player);
     }
 
     public void clearPlayers() {
@@ -41,6 +43,9 @@ public abstract class AbstractCustomScoreboard {
     }
 
     public abstract void update();
+
+    protected abstract void onPlayerAdded(UUID u);
+    protected abstract void onPlayerRemoved(UUID u);
 
     private static final String VALUES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 

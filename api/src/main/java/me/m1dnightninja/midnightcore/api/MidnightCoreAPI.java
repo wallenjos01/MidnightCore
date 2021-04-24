@@ -6,14 +6,12 @@ import java.util.*;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
-import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
-import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
-import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
-import me.m1dnightninja.midnightcore.api.text.MComponent;
+import me.m1dnightninja.midnightcore.api.text.*;
 
 public class MidnightCoreAPI {
 
@@ -316,6 +314,8 @@ public class MidnightCoreAPI {
     public boolean hasPermission(UUID u, String permission) {
         return delegate.hasPermission(u, permission);
     }
+
+    public void sendMessage(UUID u, MComponent comp) { delegate.sendMessage(u, comp); }
 
     /**
      * Retrieves the config registry

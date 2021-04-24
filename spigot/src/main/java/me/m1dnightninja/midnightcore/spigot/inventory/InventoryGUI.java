@@ -1,12 +1,11 @@
-package me.m1dnightninja.midnightcore.spigot.api;
+package me.m1dnightninja.midnightcore.spigot.inventory;
 
 import java.util.UUID;
-import me.m1dnightninja.midnightcore.api.AbstractInventoryGUI;
+import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
 import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.Conversion;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;

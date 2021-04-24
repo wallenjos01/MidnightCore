@@ -7,8 +7,8 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import me.m1dnightninja.midnightcore.api.AbstractInventoryGUI;
-import me.m1dnightninja.midnightcore.api.AbstractTimer;
+import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
+import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
@@ -16,9 +16,12 @@ import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
 import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JavaLogger;
-import me.m1dnightninja.midnightcore.common.JsonConfigProvider;
+import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
+import me.m1dnightninja.midnightcore.velocity.listener.CustomPayloadListener;
 import me.m1dnightninja.midnightcore.velocity.module.LastJoinedModule;
 import me.m1dnightninja.midnightcore.velocity.module.PlayerDataModule;
+import me.m1dnightninja.midnightcore.velocity.text.Timer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -47,6 +50,8 @@ public class MidnightCore {
 
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
+
+        getServer().getEventManager().register(this, new CustomPayloadListener());
 
         new MidnightCoreAPI(new JavaLogger(logger), new ImplDelegate() {
             @Override
@@ -80,6 +85,14 @@ public class MidnightCore {
 
                 Optional<Player> p = server.getPlayer(u);
                 return p.map(player -> player.hasPermission(permission)).orElse(false);
+
+            }
+
+            @Override
+            public void sendMessage(UUID u, MComponent comp) {
+
+                Optional<Player> p = server.getPlayer(u);
+                p.ifPresent(player -> player.sendMessage(GsonComponentSerializer.gson().deserialize(MComponent.Serializer.toJsonString(comp))));
 
             }
         }, new JsonConfigProvider(), dataFolder.toFile(), new PlayerDataModule(), new LastJoinedModule());

@@ -1,5 +1,7 @@
 package me.m1dnightninja.midnightcore.api.math;
 
+import me.m1dnightninja.midnightcore.api.config.InlineSerializer;
+
 public class Vec3d {
     private final double[] data;
 
@@ -71,5 +73,20 @@ public class Vec3d {
     public Vec3d multiply(Vec3d i) {
         return new Vec3d(data[0] * i.data[0], data[1] * i.data[1], data[2] * i.data[2]);
     }
+
+
+    public static final InlineSerializer<Vec3d> SERIALIZER = new InlineSerializer<Vec3d>() {
+        @Override
+        public Vec3d deserialize(String s) {
+            return parse(s);
+        }
+
+        @Override
+        public String serialize(Vec3d object) {
+            return toString();
+        }
+    };
+
+
 }
 

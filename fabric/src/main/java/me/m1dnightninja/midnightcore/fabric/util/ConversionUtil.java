@@ -90,7 +90,6 @@ public class ConversionUtil {
 
         out = out.withBold(style.isBold());
         out = out.withItalic(style.isItalic());
-        out = out.withUnderlined(style.isUnderlined());
 
         if(style.getColor() != null) {
             out = out.withColor(toTextColor(style.getColor()));
@@ -103,6 +102,9 @@ public class ConversionUtil {
         }
         if(style.isObfuscated() == Boolean.TRUE) {
             out = out.applyFormat(ChatFormatting.OBFUSCATED);
+        }
+        if(style.isUnderlined() == Boolean.TRUE) {
+            out = out.applyFormat(ChatFormatting.UNDERLINE);
         }
 
         return out;
@@ -118,7 +120,6 @@ public class ConversionUtil {
 
     private static Tag toNBT(Object o) {
 
-
         if(o instanceof ConfigSection) {
             return toCompoundTag((ConfigSection) o);
 
@@ -126,10 +127,10 @@ public class ConversionUtil {
             return IntTag.valueOf((int) o);
 
         } else if(o instanceof Double) {
-            return DoubleTag.valueOf((int) o);
+            return DoubleTag.valueOf((double) o);
 
         } else if(o instanceof Float) {
-            return FloatTag.valueOf((int) o);
+            return FloatTag.valueOf((float) o);
 
         } else if(o instanceof String) {
             return StringTag.valueOf(o.toString());

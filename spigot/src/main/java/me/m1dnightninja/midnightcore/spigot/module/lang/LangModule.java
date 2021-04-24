@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.spigot.module;
+package me.m1dnightninja.midnightcore.spigot.module.lang;
 
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
