@@ -1,13 +1,11 @@
 package me.m1dnightninja.midnightcore.api.text;
 
-import java.util.UUID;
-
-public abstract class AbstractActionBar {
+public class ActionBar {
 
     protected final MComponent text;
     protected final ActionBarOptions options;
 
-    public AbstractActionBar(MComponent text, ActionBarOptions options) {
+    public ActionBar(MComponent text, ActionBarOptions options) {
         this.text = text;
         this.options = options;
     }
@@ -27,8 +25,5 @@ public abstract class AbstractActionBar {
         public int fadeOut = 20;
 
     }
-
-    public abstract void sendToPlayer(UUID u);
-    public abstract void sendToPlayers(Iterable<UUID> u);
 
 }

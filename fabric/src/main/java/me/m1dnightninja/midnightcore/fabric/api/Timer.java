@@ -1,10 +1,12 @@
 package me.m1dnightninja.midnightcore.fabric.api;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.util.FormatUtil;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
+import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -13,8 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.util.UUID;
 
 public class Timer extends AbstractTimer {
 
@@ -42,8 +42,8 @@ public class Timer extends AbstractTimer {
 
         Component send = textPrefix.copy().append(new TextComponent(FormatUtil.formatTime(secondsLeft * 1000L)).setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.WHITE)));
 
-        for(UUID player : players) {
-            ServerPlayer pl = MidnightCore.getServer().getPlayerList().getPlayer(player);
+        for(MPlayer player : players) {
+            ServerPlayer pl = ((FabricPlayer) player).getMinecraftPlayer();
             if(pl != null) pl.sendMessage(send, ChatType.GAME_INFO, Util.NIL_UUID);
         }
     }

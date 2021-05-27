@@ -4,13 +4,12 @@ import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
 import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
-import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JavaLogger;
 import me.m1dnightninja.midnightcore.spigot.inventory.InventoryGUI;
-import me.m1dnightninja.midnightcore.spigot.text.ActionBar;
+import me.m1dnightninja.midnightcore.spigot.inventory.SpigotItem;
+import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayerManager;
 import me.m1dnightninja.midnightcore.spigot.text.CustomScoreboard;
 import me.m1dnightninja.midnightcore.spigot.text.Timer;
 import me.m1dnightninja.midnightcore.spigot.api.event.MidnightCoreLoadModulesEvent;
@@ -18,7 +17,6 @@ import me.m1dnightninja.midnightcore.spigot.config.YamlConfigProvider;
 import me.m1dnightninja.midnightcore.spigot.module.lang.LangModule;
 import me.m1dnightninja.midnightcore.spigot.module.PlayerDataModule;
 import me.m1dnightninja.midnightcore.spigot.module.skin.SkinModule;
-import me.m1dnightninja.midnightcore.spigot.text.Title;
 import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -49,36 +47,8 @@ public class MidnightCore extends JavaPlugin {
             }
 
             @Override
-            public AbstractTitle createTitle(MComponent comp, AbstractTitle.TitleOptions opts) {
-                return new Title(comp, opts);
-            }
-
-            @Override
-            public AbstractActionBar createActionBar(MComponent comp, AbstractActionBar.ActionBarOptions opts) {
-                return new ActionBar(comp, opts);
-            }
-
-            @Override
             public AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title) {
                 return new CustomScoreboard(id, title);
-            }
-
-            @Override
-            public boolean hasPermission(UUID u, String permission) {
-
-                Player p = Bukkit.getPlayer(u);
-                if(p == null) return false;
-
-                return p.hasPermission(permission);
-            }
-
-            @Override
-            public void sendMessage(UUID u, MComponent comp) {
-
-                Player p = Bukkit.getPlayer(u);
-                if(p == null) return;
-
-                p.spigot().sendMessage(ConversionUtil.toSpigotComponent(comp));
             }
         };
 
@@ -90,7 +60,7 @@ public class MidnightCore extends JavaPlugin {
         getServer().getPluginManager().callEvent(new MidnightCoreLoadModulesEvent(this, modules));
 
         YamlConfigProvider prov = new YamlConfigProvider();
-        new MidnightCoreAPI(new JavaLogger(this.getLogger()), delegate, prov, getDataFolder(), modules.toArray(new IModule[0]));
+        new MidnightCoreAPI(new JavaLogger(this.getLogger()), delegate, new SpigotPlayerManager(), SpigotItem::new, prov, getDataFolder(), modules.toArray(new IModule[0]));
     }
 
     @Override

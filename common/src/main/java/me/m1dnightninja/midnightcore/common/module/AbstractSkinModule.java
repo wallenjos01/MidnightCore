@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.common.module;
 
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
@@ -14,9 +15,9 @@ public abstract class AbstractSkinModule implements ISkinModule {
 
     protected static final MIdentifier ID = MIdentifier.create("midnightcore","skin");
 
-    protected final HashMap<UUID, Skin> loginSkins = new HashMap<>();
-    protected final HashMap<UUID, Skin> loadedSkins = new HashMap<>();
-    protected final HashMap<UUID, Skin> activeSkins = new HashMap<>();
+    protected final HashMap<MPlayer, Skin> loginSkins = new HashMap<>();
+    protected final HashMap<MPlayer, Skin> loadedSkins = new HashMap<>();
+    protected final HashMap<MPlayer, Skin> activeSkins = new HashMap<>();
 
     @Override
     public MIdentifier getId() {
@@ -25,34 +26,34 @@ public abstract class AbstractSkinModule implements ISkinModule {
 
 
     @Override
-    public Skin getSkin(UUID uid) {
+    public Skin getSkin(MPlayer uid) {
 
         if(activeSkins.containsKey(uid)) {
             return activeSkins.get(uid);
         }
 
-        return getOnlineSkin(uid);
+        return getOnlineSkin(uid.getUUID());
     }
 
     @Override
-    public void getSkinAsync(UUID uid, SkinCallback callback) {
-        Thread t = new Thread(() -> callback.onSkinAvailable(uid, getSkin(uid)));
+    public void getSkinAsync(MPlayer uid, SkinCallback callback) {
+        Thread t = new Thread(() -> callback.onSkinAvailable(uid.getUUID(), getSkin(uid)));
         t.start();
     }
 
     @Override
-    public Skin getOriginalSkin(UUID uid) {
+    public Skin getOriginalSkin(MPlayer uid) {
 
         if(loginSkins.containsKey(uid)) {
             return loginSkins.get(uid);
         }
 
-        return getOnlineSkin(uid);
+        return getOnlineSkin(uid.getUUID());
     }
 
     @Override
-    public void getOriginalSkinAsync(UUID uid, SkinCallback callback) {
-        Thread t = new Thread(() -> callback.onSkinAvailable(uid, getOriginalSkin(uid)));
+    public void getOriginalSkinAsync(MPlayer uid, SkinCallback callback) {
+        Thread t = new Thread(() -> callback.onSkinAvailable(uid.getUUID(), getOriginalSkin(uid)));
         t.start();
 
     }
@@ -69,12 +70,12 @@ public abstract class AbstractSkinModule implements ISkinModule {
     }
 
     @Override
-    public void setSkin(UUID uid, Skin skin) {
+    public void setSkin(MPlayer uid, Skin skin) {
         loadedSkins.put(uid, skin);
     }
 
     @Override
-    public void resetSkin(UUID uid) {
+    public void resetSkin(MPlayer uid) {
         loadedSkins.put(uid, loginSkins.get(uid));
     }
 

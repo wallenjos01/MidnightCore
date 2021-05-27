@@ -106,10 +106,10 @@ public class JsonWrapper {
         try {
 
             InputStream stream = new FileInputStream(file);
-            load(stream);
+            boolean out = load(stream);
 
             stream.close();
-            return true;
+            return out;
 
         } catch (IOException e) {
             MidnightCoreAPI.getLogger().warn("An exception occurred while trying to read file " + file.getName() + "!");
@@ -119,16 +119,20 @@ public class JsonWrapper {
 
     }
 
-    public void load(InputStream stream) {
+    public boolean load(InputStream stream) {
 
         try {
             InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
             root = GSON.fromJson(reader, JsonObject.class);
 
             reader.close();
+            return true;
+
         } catch(IOException ex) {
             MidnightCoreAPI.getLogger().warn("An exception occurred while trying to read JSON from stream!");
             ex.printStackTrace();
+
+            return false;
         }
     }
 

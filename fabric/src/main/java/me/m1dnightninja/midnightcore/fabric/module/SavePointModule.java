@@ -4,15 +4,15 @@ import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.module.AbstractSavePointModule;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.api.Location;
+import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
-
-import java.util.UUID;
 
 public class SavePointModule extends AbstractSavePointModule<SavePointModule.SavePoint> {
 
@@ -27,8 +27,8 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
     }
 
     @Override
-    public void resetPlayer(UUID u) {
-        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+    public void resetPlayer(MPlayer u) {
+        ServerPlayer player = ((FabricPlayer) u).getMinecraftPlayer();
         if(player == null) return;
 
         player.inventory.clearContent();
@@ -42,8 +42,8 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
     }
 
     @Override
-    protected SavePoint createSavePoint(UUID u) {
-        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+    protected SavePoint createSavePoint(MPlayer u) {
+        ServerPlayer player = ((FabricPlayer) u).getMinecraftPlayer();
         if(player == null) return null;
 
         SavePoint out = new SavePoint();
@@ -55,8 +55,8 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
     }
 
     @Override
-    protected void loadSavePoint(UUID u, SavePoint point) {
-        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+    protected void loadSavePoint(MPlayer u, SavePoint point) {
+        ServerPlayer player = ((FabricPlayer) u).getMinecraftPlayer();
         if(player == null) return;
 
         resetPlayer(u);

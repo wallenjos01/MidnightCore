@@ -2,10 +2,11 @@ package me.m1dnightninja.midnightcore.spigot.module.skin;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.common.module.AbstractSkinModule;
-import me.m1dnightninja.midnightcore.spigot.module.skin.ISkinUpdater;
-import me.m1dnightninja.midnightcore.spigot.module.skin.SkinUpdater_16;
+import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,7 +17,6 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Collections;
-import java.util.UUID;
 
 public class SkinModule extends AbstractSkinModule implements Listener {
 
@@ -25,18 +25,22 @@ public class SkinModule extends AbstractSkinModule implements Listener {
     @EventHandler
     public void onLogin(PlayerLoginEvent event) {
         if(updater == null) return;
-        loginSkins.put(event.getPlayer().getUniqueId(), MojangUtil.getSkinFromProfile(updater.getProfile(event.getPlayer())));
-        activeSkins.put(event.getPlayer().getUniqueId(), loginSkins.get(event.getPlayer().getUniqueId()));
+
+        MPlayer pl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+
+        Skin s = MojangUtil.getSkinFromProfile(updater.getProfile(event.getPlayer()));
+        loginSkins.put(pl, s);
+        activeSkins.put(pl, loginSkins.get(pl));
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         if(updater == null) return;
-        for(UUID u : activeSkins.keySet()) {
+        for(MPlayer u : activeSkins.keySet()) {
 
             if(activeSkins.get(u) == loginSkins.get(u)) continue;
 
-            Player p = Bukkit.getPlayer(u);
+            Player p = ((SpigotPlayer) u).getSpigotPlayer();
             updater.updatePlayer(p, activeSkins.get(u), Collections.singletonList(event.getPlayer()));
 
         }
@@ -44,9 +48,12 @@ public class SkinModule extends AbstractSkinModule implements Listener {
 
     @EventHandler
     public void onLeave(PlayerQuitEvent event) {
-        loginSkins.remove(event.getPlayer().getUniqueId());
-        loadedSkins.remove(event.getPlayer().getUniqueId());
-        activeSkins.remove(event.getPlayer().getUniqueId());
+
+        MPlayer pl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+
+        loginSkins.remove(pl);
+        loadedSkins.remove(pl);
+        activeSkins.remove(pl);
     }
 
     @Override
@@ -75,17 +82,17 @@ public class SkinModule extends AbstractSkinModule implements Listener {
     }
 
     @Override
-    public void updateSkin(UUID uid) {
+    public void updateSkin(MPlayer pl) {
 
         if(updater == null) return;
 
-        Player p = Bukkit.getPlayer(uid);
+        Player p = ((SpigotPlayer) pl).getSpigotPlayer();
         if(p == null) return;
 
-        activeSkins.put(uid, loadedSkins.get(uid));
-        loadedSkins.remove(uid);
+        activeSkins.put(pl, loadedSkins.get(pl));
+        loadedSkins.remove(pl);
 
-        updater.updatePlayer(p, activeSkins.get(uid), Bukkit.getOnlinePlayers());
+        updater.updatePlayer(p, activeSkins.get(pl), Bukkit.getOnlinePlayers());
 
     }
 

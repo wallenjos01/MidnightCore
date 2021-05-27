@@ -31,7 +31,7 @@ public class DynamicLevelStorageSource extends LevelStorageSource {
     private final Path baseDir;
 
     public DynamicLevelStorageSource(Path baseDir) {
-        super(baseDir, baseDir.resolve("../" + baseDir.toString() + "_backups"), DataFixers.getDataFixer());
+        super(baseDir, baseDir.resolve("../" + baseDir + "_backups"), DataFixers.getDataFixer());
 
         this.baseDir = baseDir;
     }

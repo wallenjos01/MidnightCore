@@ -1,14 +1,14 @@
 package me.m1dnightninja.midnightcore.api.text;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class AbstractCustomScoreboard {
 
-    protected final List<UUID> players = new ArrayList<>();
+    protected final List<MPlayer> players = new ArrayList<>();
     protected final String id;
     protected MComponent name;
 
@@ -24,13 +24,13 @@ public abstract class AbstractCustomScoreboard {
 
     public abstract void setLine(int line, MComponent message);
 
-    public void addPlayer(UUID player) {
+    public void addPlayer(MPlayer player) {
 
         players.add(player);
         onPlayerAdded(player);
     }
 
-    public void removePlayer(UUID player) {
+    public void removePlayer(MPlayer player) {
 
         players.remove(player);
         onPlayerRemoved(player);
@@ -44,8 +44,8 @@ public abstract class AbstractCustomScoreboard {
 
     public abstract void update();
 
-    protected abstract void onPlayerAdded(UUID u);
-    protected abstract void onPlayerRemoved(UUID u);
+    protected abstract void onPlayerAdded(MPlayer u);
+    protected abstract void onPlayerRemoved(MPlayer u);
 
     private static final String VALUES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 

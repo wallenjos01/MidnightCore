@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.api.inventory;
 
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.config.ConfigSerializer;
 import me.m1dnightninja.midnightcore.api.math.Color;
@@ -13,19 +14,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class MItemStack {
+public abstract class MItemStack {
 
-    private final MIdentifier type;
-    private int count;
-    private ConfigSection tag;
+    protected final MIdentifier type;
+    protected int count;
+    protected ConfigSection tag;
 
-    private MItemStack(MIdentifier type, int count) {
+    protected MItemStack(MIdentifier type, int count) {
         this.type = type;
         this.count = count;
         this.tag = new ConfigSection();
     }
 
-    private MItemStack(MIdentifier type, int count, ConfigSection tag) {
+    protected MItemStack(MIdentifier type, int count, ConfigSection tag) {
         this.type = type;
         this.count = count;
         this.tag = tag;
@@ -51,9 +52,13 @@ public class MItemStack {
         this.tag = tag;
     }
 
+    public abstract void update();
+
+    public abstract MComponent getName();
+
     public MItemStack copy() {
 
-        return new MItemStack(type, count, tag);
+        return Builder.of(type).withAmount(count).withTag(tag).build();
     }
 
     public static class Builder {
@@ -78,6 +83,12 @@ public class MItemStack {
         }
 
         public Builder withName(MComponent name) {
+            name.getStyle().fill(MStyle.ITEM_BASE);
+            this.name = name;
+            return this;
+        }
+
+        public Builder withNameRaw(MComponent name) {
             this.name = name;
             return this;
         }
@@ -93,8 +104,6 @@ public class MItemStack {
         }
 
         public MItemStack build() {
-
-            MItemStack is = new MItemStack(type, amount);
 
             if(name != null || lore != null) {
                 ConfigSection display = new ConfigSection();
@@ -132,14 +141,11 @@ public class MItemStack {
                 textures.add(property);
                 properties.set("textures", textures);
 
+                skullOwner.set("Properties", properties);
                 tag.set("SkullOwner", skullOwner);
-                tag.set("Properties", properties);
-
             }
 
-            is.setTag(tag);
-
-            return is;
+            return MidnightCoreAPI.getInstance().getItemConverter().createItem(type, amount, tag);
         }
 
 

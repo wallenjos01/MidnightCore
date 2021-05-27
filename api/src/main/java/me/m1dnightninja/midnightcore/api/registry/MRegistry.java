@@ -4,8 +4,9 @@ import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
-public class MRegistry<T> {
+public class MRegistry<T> implements Iterable<T>{
 
     private final ArrayList<MIdentifier> ids = new ArrayList<>();
     private final ArrayList<T> values = new ArrayList<>();
@@ -44,7 +45,7 @@ public class MRegistry<T> {
         Integer index = indexById.get(id);
 
         if(index == null || index < 0) {
-            throw new IllegalStateException("Attempt to get an unregistered item!");
+            return null;
         }
 
         return values.get(index);
@@ -59,7 +60,7 @@ public class MRegistry<T> {
         Integer index = indexByValue.get(value);
 
         if(index == null || index < 0) {
-            throw new IllegalStateException("Attempt to get ID of unregistered item!");
+            return null;
         }
 
         return ids.get(index);
@@ -178,4 +179,23 @@ public class MRegistry<T> {
         }
     }
 
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return index < size;
+            }
+
+            @Override
+            public T next() {
+                 T out = valueAtIndex(index);
+                 index++;
+                 return out;
+            }
+        };
+    }
 }

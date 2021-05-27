@@ -1,18 +1,19 @@
 package me.m1dnightninja.midnightcore.api.text;
 
-import me.m1dnightninja.midnightcore.api.text.MComponent;
+
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 
 public abstract class AbstractTimer {
+
     protected MComponent prefix;
     protected int seconds;
     protected boolean countUp;
-    protected List<UUID> players;
+    protected List<MPlayer> players;
     private boolean running;
     protected int secondsLeft;
     protected final TimerCallback callback;
@@ -41,13 +42,13 @@ public abstract class AbstractTimer {
         };
     }
 
-    public final void addPlayer(UUID player) {
+    public final void addPlayer(MPlayer player) {
         if (!this.players.contains(player)) {
             this.players.add(player);
         }
     }
 
-    public final void removePlayer(UUID player) {
+    public final void removePlayer(MPlayer player) {
         this.players.remove(player);
     }
 

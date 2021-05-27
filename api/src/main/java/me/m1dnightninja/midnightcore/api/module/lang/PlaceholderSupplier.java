@@ -11,7 +11,7 @@ public interface PlaceholderSupplier<T> {
 
         return args -> {
             for(Object o : args) {
-                if(o.getClass() == clazz || o.getClass().isAssignableFrom(clazz)) {
+                if(o.getClass() == clazz || clazz.isAssignableFrom(o.getClass())) {
                     return run.apply((P) o);
                 }
             }

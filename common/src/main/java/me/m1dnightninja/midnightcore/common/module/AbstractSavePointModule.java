@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.common.module;
 
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.module.ISavePointModule;
 
@@ -10,14 +11,14 @@ public abstract class AbstractSavePointModule<T> implements ISavePointModule {
 
     protected static final MIdentifier ID = MIdentifier.create("midnightcore","save_point");
 
-    private final HashMap<UUID, HashMap<String, T>> saves = new HashMap<>();
+    private final HashMap<MPlayer, HashMap<String, T>> saves = new HashMap<>();
 
     @Override
     public MIdentifier getId() {
         return ID;
     }
 
-    public void savePlayer(UUID u, String id) {
+    public void savePlayer(MPlayer u, String id) {
         HashMap<String, T> map = saves.computeIfAbsent(u, k -> new HashMap<>());
 
         if(map.containsKey(id)) {
@@ -28,19 +29,19 @@ public abstract class AbstractSavePointModule<T> implements ISavePointModule {
         map.put(id, point);
     }
 
-    public void loadPlayer(UUID u, String id) {
+    public void loadPlayer(MPlayer u, String id) {
         if(!saves.containsKey(u) || !saves.get(u).containsKey(id)) return;
         loadSavePoint(u, saves.get(u).get(id));
     }
 
-    public void removeSavePoint(UUID u, String id) {
+    public void removeSavePoint(MPlayer u, String id) {
         if(!saves.containsKey(u)) return;
         saves.get(u).remove(id);
     }
 
-    public abstract void resetPlayer(UUID u);
+    public abstract void resetPlayer(MPlayer u);
 
-    protected abstract T createSavePoint(UUID u);
-    protected abstract void loadSavePoint(UUID u, T point);
+    protected abstract T createSavePoint(MPlayer u);
+    protected abstract void loadSavePoint(MPlayer u, T point);
 
 }

@@ -3,6 +3,7 @@ package me.m1dnightninja.midnightcore.api.module.lang;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.IModule;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 
 import java.io.File;
@@ -18,10 +19,18 @@ public interface ILangModule extends IModule {
 
     String getInlinePlaceholderValue(String key, Object... args);
 
-    String getPlayerLocale(UUID u);
+    String getPlayerLocale(MPlayer u);
 
     String getServerLanguage();
 
     ILangProvider createLangProvider(File langFolder, ConfigProvider provider, ConfigSection defaults);
+
+    MComponent applyPlaceholders(MComponent input, Object... args);
+
+    String applyInlinePlaceholders(String input, Object... args);
+
+    MComponent parseText(String input, Object... args);
+
+    String applyPlaceholdersFlattened(String input, Object... args);
 
 }

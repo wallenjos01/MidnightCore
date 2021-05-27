@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.fabric.api.event.ContainerClickEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,8 +26,6 @@ public class MixinScreenHandler {
 
     @Inject(method = "doClick", at=@At("HEAD"), cancellable = true)
     private void onClick(int i, int j, ClickType slotActionType, Player playerEntity, CallbackInfoReturnable<ItemStack> cir) {
-
-        if(!(playerEntity instanceof ServerPlayer)) return;
 
         AbstractContainerMenu handler = (AbstractContainerMenu) (Object) this;
 

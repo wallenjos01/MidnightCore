@@ -36,6 +36,10 @@ public class Vec3d {
         return other.getX() == this.getX() && other.getY() == this.getY() && other.getZ() == this.getZ();
     }
 
+    public Vec3i truncate() {
+        return new Vec3i((int) data[0], (int) data[1], (int) data[2]);
+    }
+
     @Override
     public String toString() {
         return getX() + "," + getY() + "," + getZ();

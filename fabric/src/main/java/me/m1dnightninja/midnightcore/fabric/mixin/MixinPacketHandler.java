@@ -2,6 +2,7 @@ package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.fabric.api.Location;
 import me.m1dnightninja.midnightcore.fabric.api.event.*;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
@@ -10,9 +11,11 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.InteractionHand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
@@ -91,6 +94,22 @@ public class MixinPacketHandler {
     private void onInteract(ServerboundInteractPacket serverboundInteractPacket, CallbackInfo ci) {
 
         PlayerInteractEntityEvent ev = new PlayerInteractEntityEvent(player, serverboundInteractPacket.getTarget(player.getLevel()), serverboundInteractPacket.getHand());
+        Event.invoke(ev);
+
+        if(ev.isCancelled()) {
+            ci.cancel();
+
+            if(ev.shouldSwingArm()) {
+                player.swing(serverboundInteractPacket.getHand(), true);
+            }
+
+        }
+    }
+
+    @Inject(method = "handleInteract(Lnet/minecraft/network/protocol/game/ServerboundInteractPacket;)V", at=@At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V"), cancellable = true)
+    private void onAttack(ServerboundInteractPacket serverboundInteractPacket, CallbackInfo ci) {
+
+        PlayerInteractEvent ev = new PlayerInteractEvent(player, player.getMainHandItem(), InteractionHand.MAIN_HAND, ServerboundInteractPacket.Action.INTERACT, null);
         Event.invoke(ev);
 
         if(ev.isCancelled()) {

@@ -1,10 +1,9 @@
 package me.m1dnightninja.midnightcore.api.module.lang;
 
-import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
-import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
+import me.m1dnightninja.midnightcore.api.text.ActionBar;
+import me.m1dnightninja.midnightcore.api.text.Title;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-
-import java.util.UUID;
 
 public interface ILangProvider {
 
@@ -14,21 +13,21 @@ public interface ILangProvider {
 
     String getRawMessage(String key, String language);
 
-    MComponent getMessage(String key, UUID player, Object... args);
+    MComponent getMessage(String key, MPlayer player, Object... args);
 
     MComponent getMessage(String key);
 
-    void sendMessage(String key, UUID player, Object... args);
+    void sendMessage(String key, MPlayer player, Object... args);
 
-    void sendMessage(String key, Iterable<UUID> players, Object... args);
+    void sendMessage(String key, Iterable<MPlayer> players, Object... args);
 
-    void sendTitle(String key, UUID player, AbstractTitle.TitleOptions opts, Object... args);
+    void sendTitle(String key, MPlayer player, Title.TitleOptions opts, Object... args);
 
-    void sendTitle(String key, Iterable<UUID> players, AbstractTitle.TitleOptions opts, Object... args);
+    void sendTitle(String key, Iterable<MPlayer> players, Title.TitleOptions opts, Object... args);
 
-    void sendActionBar(String key, UUID player, AbstractActionBar.ActionBarOptions opts, Object... args);
+    void sendActionBar(String key, MPlayer player, ActionBar.ActionBarOptions opts, Object... args);
 
-    void sendActionBar(String key, Iterable<UUID> players, AbstractActionBar.ActionBarOptions opts, Object... args);
+    void sendActionBar(String key, Iterable<MPlayer> players, ActionBar.ActionBarOptions opts, Object... args);
 
     void reloadAllEntries();
 
@@ -38,6 +37,8 @@ public interface ILangProvider {
 
     boolean hasKey(String key, String language);
 
-    boolean hasKey(String key, UUID player);
+    boolean hasKey(String key, MPlayer player);
+
+    ILangModule getModule();
 
 }

@@ -11,9 +11,9 @@ import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.text.AbstractActionBar;
+import me.m1dnightninja.midnightcore.api.text.ActionBar;
 import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
-import me.m1dnightninja.midnightcore.api.text.AbstractTitle;
+import me.m1dnightninja.midnightcore.api.text.Title;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JavaLogger;
 import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
@@ -53,6 +53,8 @@ public class MidnightCore {
 
         getServer().getEventManager().register(this, new CustomPayloadListener());
 
+
+
         new MidnightCoreAPI(new JavaLogger(logger), new ImplDelegate() {
             @Override
             public AbstractTimer createTimer(MComponent name, int seconds, boolean countUp, AbstractTimer.TimerCallback callback) {
@@ -64,38 +66,12 @@ public class MidnightCore {
                 throw new IllegalStateException("Cannot create Inventory GUI on proxy!");
             }
 
-            // TODO: Implement titles and scoreboards on Proxy
-            @Override
-            public AbstractTitle createTitle(MComponent comp, AbstractTitle.TitleOptions opts) {
-                return null;
-            }
-
-            @Override
-            public AbstractActionBar createActionBar(MComponent comp, AbstractActionBar.ActionBarOptions opts) {
-                return null;
-            }
-
             @Override
             public AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title) {
                 return null;
             }
 
-            @Override
-            public boolean hasPermission(UUID u, String permission) {
-
-                Optional<Player> p = server.getPlayer(u);
-                return p.map(player -> player.hasPermission(permission)).orElse(false);
-
-            }
-
-            @Override
-            public void sendMessage(UUID u, MComponent comp) {
-
-                Optional<Player> p = server.getPlayer(u);
-                p.ifPresent(player -> player.sendMessage(GsonComponentSerializer.gson().deserialize(MComponent.Serializer.toJsonString(comp))));
-
-            }
-        }, new JsonConfigProvider(), dataFolder.toFile(), new PlayerDataModule(), new LastJoinedModule());
+        }, null, null, new JsonConfigProvider(), dataFolder.toFile(), new PlayerDataModule(), new LastJoinedModule());
     }
 
     public ProxyServer getServer() {

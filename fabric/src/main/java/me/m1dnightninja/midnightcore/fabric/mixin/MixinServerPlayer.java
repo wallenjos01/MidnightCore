@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayer.class)
 public class MixinServerPlayer {
 
-    @Inject(method = "closeContainer()V", at = @At("HEAD"))
+    @Inject(method = "doCloseContainer()V", at = @At("HEAD"))
     private void onClose(CallbackInfo ci) {
 
         ServerPlayer pl = (ServerPlayer) (Object) this;

@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.*;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.StructureSettings;
 
@@ -78,6 +80,6 @@ public class EmptyGenerator extends ChunkGenerator {
     }
 
     public static BiomeSource createFixedBiomeSource(ResourceLocation biome) {
-        return new FixedBiomeSource(MidnightCore.getServer().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).get(biome));
+        return new FixedBiomeSource(MidnightCore.getServer().registryAccess().registry(Registry.BIOME_REGISTRY).get().get(biome));
     }
 }

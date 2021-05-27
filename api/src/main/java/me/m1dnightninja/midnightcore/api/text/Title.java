@@ -1,13 +1,11 @@
 package me.m1dnightninja.midnightcore.api.text;
 
-import java.util.UUID;
-
-public abstract class AbstractTitle {
+public class Title {
 
     protected final MComponent text;
     protected final TitleOptions options;
 
-    public AbstractTitle(MComponent text, TitleOptions options) {
+    public Title(MComponent text, TitleOptions options) {
         this.text = text;
         this.options = options;
     }
@@ -39,9 +37,6 @@ public abstract class AbstractTitle {
         }
 
     }
-
-    public abstract void sendToPlayer(UUID u);
-    public abstract void sendToPlayers(Iterable<UUID> u);
 
     public static final TitleOptions TITLE  = TitleOptions.create(false, false, 20, 80, 20);
     public static final TitleOptions SUBTITLE  = TitleOptions.create(false, true, 20, 80, 20);

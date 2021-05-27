@@ -1,34 +1,33 @@
 package me.m1dnightninja.midnightcore.fabric.module.lang;
 
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.api.module.lang.PlaceholderSupplier;
-import me.m1dnightninja.midnightcore.api.text.MComponent;
+import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.module.lang.AbstractLangModule;
-import me.m1dnightninja.midnightcore.fabric.MidnightCore;
+import me.m1dnightninja.midnightcore.common.module.lang.LangProvider;
 import me.m1dnightninja.midnightcore.fabric.api.event.PlayerChangeSettingsEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
-import net.minecraft.network.chat.Component;
+import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.UUID;
-import java.util.function.Function;
 
 public class LangModule extends AbstractLangModule {
 
-    private final HashMap<UUID, String> languages = new HashMap<>();
+    private final HashMap<MPlayer, String> languages = new HashMap<>();
 
     @Override
     public boolean initialize(ConfigSection configuration) {
 
-        Event.register(PlayerChangeSettingsEvent.class, this, event -> languages.put(event.getPlayer().getUUID(), event.getLocale()));
+        super.initialize(configuration);
 
-        registerPlaceholderSupplier("player_name", playerOrUUID(player -> MComponent.Serializer.fromJson(Component.Serializer.toJson(player.getName()))));
-        registerPlaceholderSupplier("player_display_name", playerOrUUID(player -> MComponent.Serializer.fromJson(Component.Serializer.toJson(player.getDisplayName()))));
-
+        Event.register(PlayerChangeSettingsEvent.class, this, event -> languages.put(MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUUID()), event.getLocale()));
         return true;
     }
 
@@ -38,7 +37,7 @@ public class LangModule extends AbstractLangModule {
     }
 
     @Override
-    public String getPlayerLocale(UUID u) {
+    public String getPlayerLocale(MPlayer u) {
 
         if(u == null) return getServerLanguage();
         return languages.getOrDefault(u, getServerLanguage());
@@ -54,22 +53,34 @@ public class LangModule extends AbstractLangModule {
         return new LangProvider(langFolder, this, provider, defaults);
     }
 
-    public static <T> PlaceholderSupplier<T> playerOrUUID(Function<ServerPlayer, T> run) {
-        return args -> {
-            for(Object o : args) {
-                if(o instanceof ServerPlayer) {
-                    return run.apply((ServerPlayer) o);
-                }
-                if(o instanceof UUID) {
+    public static void sendCommandSuccess(CommandContext<CommandSourceStack> context, ILangProvider langProvider, boolean notify, String key, Object... args) {
 
-                    ServerPlayer pl = MidnightCore.getServer().getPlayerList().getPlayer((UUID) o);
-                    if(pl == null) return null;
+        MPlayer u = null;
+        try {
+            ServerPlayer pl = context.getSource().getPlayerOrException();
+            u = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(pl.getUUID());
 
-                    return run.apply(pl);
-                }
-            }
-            return null;
-        };
+        } catch(CommandSyntaxException ex) {
+            // Ignore
+        }
+
+        context.getSource().sendSuccess(ConversionUtil.toMinecraftComponent(langProvider.getMessage(key, u, args)), notify);
+
+    }
+
+    public static void sendCommandFailure(CommandContext<CommandSourceStack> context, ILangProvider langProvider, String key, Object... args) {
+
+        MPlayer u = null;
+        try {
+            ServerPlayer pl = context.getSource().getPlayerOrException();
+            u = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(pl.getUUID());
+
+        } catch(CommandSyntaxException ex) {
+            // Ignore
+        }
+
+        context.getSource().sendFailure(ConversionUtil.toMinecraftComponent(langProvider.getMessage(key, u, args)));
+
     }
 
 }

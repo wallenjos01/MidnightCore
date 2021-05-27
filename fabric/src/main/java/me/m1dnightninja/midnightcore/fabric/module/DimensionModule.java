@@ -117,7 +117,7 @@ public class DimensionModule implements IModule {
         return ids;
     }
 
-    public List<ResourceLocation> getSupplementalWorldIds() {
+    public List<ResourceLocation> getDynamicWorldIds() {
         return new ArrayList<>(loadedWorlds.keySet());
     }
 

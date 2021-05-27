@@ -1,6 +1,5 @@
 package me.m1dnightninja.midnightcore.common.config;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -15,11 +14,13 @@ import java.util.Map;
 
 public class JsonConfigProvider implements ConfigProvider {
 
+    public static final JsonConfigProvider INSTANCE = new JsonConfigProvider();
+
     @Override
     public ConfigSection loadFromFile(File file) {
 
         JsonWrapper w = JsonWrapper.loadFromFile(file);
-        if(w == null) {
+        if(w == null || w.getRoot() == null) {
             return new ConfigSection();
         }
 
@@ -49,14 +50,7 @@ public class JsonConfigProvider implements ConfigProvider {
 
     private JsonObject toJson(ConfigSection sec) {
 
-        JsonObject out = new JsonObject();
-        for(Map.Entry<String,Object> ent : sec.getEntries().entrySet()) {
-
-            out.add(ent.getKey(), toJsonElement(ent.getValue()));
-        }
-
-        return out;
-
+        return sec.toJson();
     }
 
     private ConfigSection fromJson(JsonObject obj) {
@@ -103,35 +97,4 @@ public class JsonConfigProvider implements ConfigProvider {
         return ele.toString();
 
     }
-
-    private <T> JsonElement toJsonElement(T obj) {
-
-        if(obj instanceof ConfigSection) {
-
-            return toJson((ConfigSection) obj);
-
-        } else if(obj instanceof List) {
-
-            JsonArray arr = new JsonArray();
-
-            List<?> lst = (List<?>) obj;
-            for (Object o : lst) {
-                arr.add(toJsonElement(o));
-            }
-            return arr;
-
-        } else if(obj instanceof Number) {
-
-            return new JsonPrimitive((Number) obj);
-
-        } else if(obj instanceof Boolean) {
-
-            return new JsonPrimitive((Boolean) obj);
-
-        } else {
-
-            return new JsonPrimitive(obj.toString());
-        }
-    }
-
 }

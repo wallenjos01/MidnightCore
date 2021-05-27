@@ -1,15 +1,15 @@
 package me.m1dnightninja.midnightcore.api.module;
 
-import java.util.UUID;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 
-public interface ISavePointModule
-extends IModule {
-    void savePlayer(UUID var1, String var2);
+public interface ISavePointModule extends IModule {
 
-    void loadPlayer(UUID var1, String var2);
+    void savePlayer(MPlayer pl, String id);
 
-    void removeSavePoint(UUID var1, String var2);
+    void loadPlayer(MPlayer pl, String id);
 
-    void resetPlayer(UUID var1);
+    void removeSavePoint(MPlayer pl, String id);
+
+    void resetPlayer(MPlayer pl);
 }
 

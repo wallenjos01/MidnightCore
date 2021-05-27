@@ -7,9 +7,13 @@ import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
+import me.m1dnightninja.midnightcore.api.inventory.ItemConverter;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
+import me.m1dnightninja.midnightcore.api.math.Vec3d;
+import me.m1dnightninja.midnightcore.api.math.Vec3i;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.player.PlayerManager;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.text.*;
 
@@ -38,11 +42,14 @@ public class MidnightCoreAPI {
     private final ConfigProvider defaultConfigProvider;
     private final ConfigSection mainConfig;
 
+    private final PlayerManager playerManager;
+    private final ItemConverter itemConverter;
+
     private final Random rand;
 
     private final File dataFolder;
 
-    public MidnightCoreAPI(ILogger logger, ImplDelegate delegate, ConfigProvider def, File dataFolder, IModule... modules) {
+    public MidnightCoreAPI(ILogger logger, ImplDelegate delegate, PlayerManager playerManager, ItemConverter converter, ConfigProvider def, File dataFolder, IModule... modules) {
 
         // Register static variables if they haven't been already
         if (INSTANCE == null) {
@@ -54,6 +61,8 @@ public class MidnightCoreAPI {
         this.defaultConfigProvider = def;
         this.delegate = delegate;
         this.dataFolder = dataFolder;
+        this.playerManager = playerManager;
+        this.itemConverter = converter;
 
         // Load config
         File configFile = new File(dataFolder, "config" + def.getFileExtension());
@@ -90,6 +99,9 @@ public class MidnightCoreAPI {
         configRegistry.registerProvider(defaultConfigProvider);
         configRegistry.registerSerializer(Skin.class, Skin.SERIALIZER);
         configRegistry.registerSerializer(MItemStack.class, MItemStack.SERIALIZER);
+        configRegistry.registerInlineSerializer(MIdentifier.class, MIdentifier.SERIALIZER);
+        configRegistry.registerInlineSerializer(Vec3d.class, Vec3d.SERIALIZER);
+        configRegistry.registerInlineSerializer(Vec3i.class, Vec3i.SERIALIZER);
 
         // Load modules
         for (IModule mod : modules) {
@@ -278,24 +290,6 @@ public class MidnightCoreAPI {
     }
 
     /**
-     * Creates a Title object that can be sent to players
-     *
-     * @param title The title itself
-     * @param opts  Options pertaining to how the title is presented
-     * @return      A new title object
-     */
-    public AbstractTitle createTitle(MComponent title, AbstractTitle.TitleOptions opts) { return this.delegate.createTitle(title, opts); }
-
-    /**
-     * Creates an ActionBar object that can be sent to players
-     *
-     * @param title The text of the ActionBar
-     * @param opts  Options pertaining to how the ActionBar is presented
-     * @return      A new ActionBar object
-     */
-    public AbstractActionBar createActionBar(MComponent title, AbstractActionBar.ActionBarOptions opts) { return this.delegate.createActionBar(title, opts); }
-
-    /**
      * Creates a Scoreboard object that can be shown to players
      *
      * @param id    The ID of the objective to be sent. Should be unique and 16 characters or less
@@ -304,18 +298,11 @@ public class MidnightCoreAPI {
      */
     public AbstractCustomScoreboard createScoreboard(String id, MComponent title) { return this.delegate.createCustomScoreboard(id, title); }
 
-    /**
-     * Determines whether or not a player has a particular permission
-     *
-     * @param u          The user to query
-     * @param permission The permission to check
-     * @return           Whether or not a player has the permission
-     */
-    public boolean hasPermission(UUID u, String permission) {
-        return delegate.hasPermission(u, permission);
-    }
+    public PlayerManager getPlayerManager() { return playerManager; }
 
-    public void sendMessage(UUID u, MComponent comp) { delegate.sendMessage(u, comp); }
+    public ItemConverter getItemConverter() {
+        return itemConverter;
+    }
 
     /**
      * Retrieves the config registry

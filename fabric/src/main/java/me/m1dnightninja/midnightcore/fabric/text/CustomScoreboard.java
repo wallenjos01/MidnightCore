@@ -1,8 +1,10 @@
 package me.m1dnightninja.midnightcore.fabric.text;
 
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
+import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -19,7 +21,6 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class CustomScoreboard extends AbstractCustomScoreboard {
 
@@ -78,9 +79,9 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
     }
 
     @Override
-    protected void onPlayerAdded(UUID u) {
+    protected void onPlayerAdded(MPlayer u) {
 
-        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+        ServerPlayer player = ((FabricPlayer) u).getMinecraftPlayer();
         if(player == null) return;
 
         player.connection.send(new ClientboundSetObjectivePacket(objective, 0));
@@ -100,9 +101,9 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
     }
 
     @Override
-    protected void onPlayerRemoved(UUID u) {
+    protected void onPlayerRemoved(MPlayer u) {
 
-        ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+        ServerPlayer player = ((FabricPlayer) u).getMinecraftPlayer();
         if(player == null) return;
 
         player.connection.send(new ClientboundSetDisplayObjectivePacket(1, null));
@@ -144,9 +145,9 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
             }
         }
 
-        for(UUID u : players) {
+        for(MPlayer u : players) {
 
-            ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(u);
+            ServerPlayer player = ((FabricPlayer) u).getMinecraftPlayer();
             if(player == null) continue;
 
             for(Packet<?> pck : packets) {

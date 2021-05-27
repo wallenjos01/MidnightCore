@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.velocity.text;
 
 import com.velocitypowered.api.proxy.Player;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.util.FormatUtil;
@@ -13,7 +14,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class Timer extends AbstractTimer {
@@ -43,9 +43,9 @@ public class Timer extends AbstractTimer {
 
         Component send = builder.build();
 
-        for(UUID u : players) {
+        for(MPlayer u : players) {
 
-            Optional<Player> optionalPlayer = MidnightCore.getInstance().getServer().getPlayer(u);
+            Optional<Player> optionalPlayer = MidnightCore.getInstance().getServer().getPlayer(u.getUUID());
             optionalPlayer.ifPresent(player -> player.sendActionBar(send));
 
         }

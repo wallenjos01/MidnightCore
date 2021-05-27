@@ -1,7 +1,8 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.fabric.api.PermissionHelper;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,8 +18,9 @@ public class MixinPlayer {
         if(MidnightCoreAPI.getInstance().getMainConfig().getBoolean("vanilla_permissions")) {
 
             Player pl = (Player) (Object) this;
+            if(!(pl instanceof SharedSuggestionProvider)) return;
 
-            cir.setReturnValue(Permissions.check(pl, "minecraft.adminblocks"));
+            cir.setReturnValue(PermissionHelper.checkOrOp((SharedSuggestionProvider) pl, "minecraft.adminblocks", 2));
             cir.cancel();
         }
 

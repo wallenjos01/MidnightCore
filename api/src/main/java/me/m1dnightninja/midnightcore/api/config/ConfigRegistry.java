@@ -1,5 +1,8 @@
 package me.m1dnightninja.midnightcore.api.config;
 
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+
+import java.io.File;
 import java.util.HashMap;
 
 public class ConfigRegistry {
@@ -12,28 +15,43 @@ public class ConfigRegistry {
         this.serializers.put(clazz, serializer);
     }
 
+    public <T> void registerInlineSerializer(Class<T> clazz, InlineSerializer<T> serializer) {
+        this.inlineSerializers.put(clazz, serializer);
+    }
+
     @SuppressWarnings("unchecked")
     public <T> ConfigSerializer<T> getSerializer(Class<T> clazz) {
-        if (!this.serializers.containsKey(clazz)) {
-            return null;
+        for(Class<?> ser : serializers.keySet()) {
+            if(ser == clazz || ser.isAssignableFrom(clazz)) return (ConfigSerializer<T>) serializers.get(ser);
         }
-        return (ConfigSerializer<T>) this.serializers.get(clazz);
+
+        return null;
     }
 
     @SuppressWarnings("unchecked")
     public <T> InlineSerializer<T> getInlineSerializer(Class<T> clazz) {
-        if (!this.inlineSerializers.containsKey(clazz)) {
-            return null;
+        for(Class<?> ser : inlineSerializers.keySet()) {
+            if(ser == clazz || ser.isAssignableFrom(clazz)) return (InlineSerializer<T>) inlineSerializers.get(ser);
         }
-        return (InlineSerializer<T>) this.inlineSerializers.get(clazz);
+
+        return null;
     }
 
     public boolean canSerialize(Class<?> clazz) {
-        return this.serializers.containsKey(clazz);
+
+        for(Class<?> ser : serializers.keySet()) {
+            if(ser == clazz || ser.isAssignableFrom(clazz)) return true;
+        }
+
+        return false;
     }
 
     public boolean canSerializeInline(Class<?> clazz) {
-        return this.inlineSerializers.containsKey(clazz);
+        for(Class<?> ser : inlineSerializers.keySet()) {
+            if(ser == clazz || ser.isAssignableFrom(clazz)) return true;
+        }
+
+        return false;
     }
 
     public void registerProvider(ConfigProvider prov) {
@@ -42,8 +60,21 @@ public class ConfigRegistry {
         this.providers.put(prov.getFileExtension(), prov);
     }
 
-    public ConfigProvider getProfiderForFileType(String extension) {
+    public ConfigProvider getProviderForFileType(String extension) {
         return providers.get(extension);
     }
+
+    public ConfigProvider getProviderForFile(File f) {
+
+        String name = f.getName();
+        if(name.contains(".")) {
+            return getProviderForFileType(name.substring(name.lastIndexOf(".")));
+
+        } else {
+            return MidnightCoreAPI.getInstance().getDefaultConfigProvider();
+        }
+
+    }
+
 }
 

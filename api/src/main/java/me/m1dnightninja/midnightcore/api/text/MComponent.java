@@ -1,20 +1,22 @@
 package me.m1dnightninja.midnightcore.api.text;
 
 import com.google.gson.*;
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.math.Color;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class MComponent {
 
     protected Type type;
     protected String content;
     protected MStyle style;
+
+    protected MHoverEvent hoverEvent;
+    protected MClickEvent clickEvent;
 
     protected List<MComponent> data = new ArrayList<>();
     protected List<MComponent> children = new ArrayList<>();
@@ -68,6 +70,14 @@ public class MComponent {
         return this;
     }
 
+    public void clearStyle() {
+
+        setStyle(new MStyle());
+        for(MComponent cmp : children) {
+            cmp.clearStyle();
+        }
+    }
+
     public List<MComponent> getTranslateData() {
         return data;
     }
@@ -116,6 +126,11 @@ public class MComponent {
         return false;
     }
 
+    public MComponent withHoverEvent(MHoverEvent event) {
+        this.hoverEvent = event;
+        return this;
+    }
+
     public MComponent copy() {
 
         MComponent out = new MComponent(type, content);
@@ -128,21 +143,37 @@ public class MComponent {
         return out;
     }
 
-    public void format(Object... args) {
+    public MComponent plainCopy() {
 
-        try {
-            content = String.format(content, args);
-        } catch(Exception ex) {
-            // Ignore
+        MComponent out = new MComponent(type, content);
+        for(MComponent cmp : children) {
+            out.addChild(cmp.plainCopy());
         }
 
-        for(MComponent comp : children) {
-            comp.format(args);
-        }
+        return out;
     }
 
-    public void send(UUID u) {
-        MidnightCoreAPI.getInstance().sendMessage(u, this);
+    public String allContent() {
+
+        StringBuilder current = new StringBuilder();
+        current.append(getContent());
+        for(MComponent cmp : children) {
+            current.append(cmp.allContent());
+        }
+
+        return current.toString();
+    }
+
+    public MHoverEvent getHoverEvent() {
+        return hoverEvent;
+    }
+
+    public MClickEvent getClickEvent() {
+        return clickEvent;
+    }
+
+    public void send(MPlayer u) {
+        u.sendMessage(this);
     }
 
     public enum Type {
@@ -225,6 +256,11 @@ public class MComponent {
                 out = MComponent.createTextComponent(content).withStyle(style);
             }
 
+            if(json.has("hoverEvent") && json.get("hoverEvent").isJsonObject()) {
+
+                out.withHoverEvent(MHoverEvent.fromJson(json.get("hoverEvent").getAsJsonObject()));
+            }
+
             if(json.has("extra") && json.get("extra").isJsonArray()) {
 
                 for(JsonElement ele : json.get("extra").getAsJsonArray()) {
@@ -243,6 +279,10 @@ public class MComponent {
             fillJson(out, component.style);
 
             out.addProperty(component.getType().getId(), component.content);
+
+            if(component.hoverEvent != null) {
+                out.add("hoverEvent", component.hoverEvent.toJson());
+            }
 
             if(component.data.size() > 0) {
                 JsonArray arr = new JsonArray();
@@ -335,6 +375,10 @@ public class MComponent {
         }
 
         public static MComponent parse(String s) {
+
+            if(!s.startsWith("{")) {
+                return parseLegacyText(s, '&', '#');
+            }
 
             try {
                 JsonObject obj = GSON.fromJson(s, JsonObject.class);

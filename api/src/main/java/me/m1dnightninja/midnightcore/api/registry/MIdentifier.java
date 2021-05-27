@@ -1,5 +1,7 @@
 package me.m1dnightninja.midnightcore.api.registry;
 
+import me.m1dnightninja.midnightcore.api.config.InlineSerializer;
+
 public class MIdentifier {
 
     private final String namespace;
@@ -28,6 +30,8 @@ public class MIdentifier {
 
     public static MIdentifier parse(String toParse) throws IllegalArgumentException {
 
+        if(toParse == null) throw EXCEPTION;
+
         if(!toParse.contains(":")) {
             throw EXCEPTION;
         }
@@ -38,6 +42,19 @@ public class MIdentifier {
         }
 
         return create(ss[0], ss[1]);
+    }
+
+    public static MIdentifier parseOrDefault(String toParse) {
+        return parseOrDefault(toParse, "minecraft");
+    }
+
+    public static MIdentifier parseOrDefault(String toParse, String defaultNamespace) {
+
+        if(toParse == null) throw EXCEPTION;
+
+        String[] ss = toParse.split(":");
+
+        return ss.length == 1 ? create(defaultNamespace, toParse) : create(ss[0], ss[1]);
     }
 
     @Override
@@ -70,4 +87,17 @@ public class MIdentifier {
     public int hashCode() {
         return namespace.hashCode() + path.hashCode();
     }
+
+    public static final InlineSerializer<MIdentifier> SERIALIZER = new InlineSerializer<MIdentifier>() {
+        @Override
+        public MIdentifier deserialize(String s) {
+            return parse(s);
+        }
+
+        @Override
+        public String serialize(MIdentifier object) {
+            return object.toString();
+        }
+    };
+
 }

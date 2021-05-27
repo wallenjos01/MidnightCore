@@ -1,9 +1,11 @@
 package me.m1dnightninja.midnightcore.spigot.inventory;
 
-import java.util.UUID;
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
+import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
 import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -23,8 +25,9 @@ public class InventoryGUI extends AbstractInventoryGUI implements Listener {
     }
 
     @Override
-    protected void onClosed(UUID u) {
-        Player p = Bukkit.getPlayer(u);
+    protected void onClosed(MPlayer u) {
+        Player p = ((SpigotPlayer) u).getSpigotPlayer();
+
         if (p != null) {
             p.closeInventory();
         }
@@ -34,8 +37,8 @@ public class InventoryGUI extends AbstractInventoryGUI implements Listener {
     }
 
     @Override
-    protected void onOpened(UUID u, int page) {
-        Player p = Bukkit.getPlayer(u);
+    protected void onOpened(MPlayer u, int page) {
+        Player p = ((SpigotPlayer) u).getSpigotPlayer();
         if (p == null) {
             return;
         }
@@ -57,17 +60,18 @@ public class InventoryGUI extends AbstractInventoryGUI implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent ev) {
-        if (!this.players.containsKey(ev.getWhoClicked().getUniqueId())) {
+        MPlayer pl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(ev.getWhoClicked().getUniqueId());
+        if (!this.players.containsKey(pl)) {
             return;
         }
         ev.setCancelled(true);
-        int offset = this.players.get(ev.getWhoClicked().getUniqueId()) * 54;
+        int offset = this.players.get(pl) * 54;
         ClickAction act = (this.entries.get((ev.getSlot() + offset))).action;
         if (act == null) {
             return;
         }
         try {
-            act.onClick(ClickType.valueOf(ev.getClick().name()), ev.getWhoClicked().getUniqueId());
+            act.onClick(ClickType.valueOf(ev.getClick().name()), pl);
         }
         catch (IllegalArgumentException illegalArgumentException) {
             // Ignore
@@ -76,10 +80,11 @@ public class InventoryGUI extends AbstractInventoryGUI implements Listener {
 
     @EventHandler
     public void onClose(InventoryCloseEvent ev) {
-        if (!this.players.containsKey(ev.getPlayer().getUniqueId())) {
+        MPlayer pl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(ev.getPlayer().getUniqueId());
+        if (!this.players.containsKey(pl)) {
             return;
         }
-        this.close(ev.getPlayer().getUniqueId());
+        this.close(pl);
     }
 }
 

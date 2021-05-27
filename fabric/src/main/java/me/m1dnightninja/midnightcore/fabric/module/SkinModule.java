@@ -3,8 +3,10 @@ package me.m1dnightninja.midnightcore.fabric.module;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.common.module.AbstractSkinModule;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
@@ -14,6 +16,7 @@ import me.m1dnightninja.midnightcore.fabric.api.event.PlayerLoginEvent;
 import me.m1dnightninja.midnightcore.fabric.api.event.PlayerSkinUpdateEvent;
 import me.m1dnightninja.midnightcore.fabric.event.*;
 import me.m1dnightninja.midnightcore.fabric.mixin.AccessorPlayerListPacket;
+import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -34,13 +37,19 @@ public class SkinModule extends AbstractSkinModule {
     public boolean initialize(ConfigSection config) {
 
         Event.register(PlayerLoginEvent.class, this, event -> {
-            loginSkins.put(event.getPlayer().getUUID(), MojangUtil.getSkinFromProfile(event.getProfile()));
-            activeSkins.put(event.getPlayer().getUUID(), MojangUtil.getSkinFromProfile(event.getProfile()));
+
+            MPlayer player = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUUID());
+
+            loginSkins.put(player, MojangUtil.getSkinFromProfile(event.getProfile()));
+            activeSkins.put(player, MojangUtil.getSkinFromProfile(event.getProfile()));
         });
         Event.register(PlayerDisconnectEvent.class, this, event -> {
-            loginSkins.remove(event.getPlayer().getUUID());
-            loadedSkins.remove(event.getPlayer().getUUID());
-            activeSkins.remove(event.getPlayer().getUUID());
+
+            MPlayer player = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUUID());
+
+            loginSkins.remove(player);
+            loadedSkins.remove(player);
+            activeSkins.remove(player);
         });
         Event.register(PacketSendEvent.class, this, event -> {
             if(event.getPacket() instanceof ClientboundPlayerInfoPacket) {
@@ -58,10 +67,10 @@ public class SkinModule extends AbstractSkinModule {
     }
 
     @Override
-    public void updateSkin(UUID uid) {
+    public void updateSkin(MPlayer uid) {
         if(!loadedSkins.containsKey(uid) || !activeSkins.containsKey(uid)) return;
 
-        ServerPlayer pl = MidnightCore.getServer().getPlayerList().getPlayer(uid);
+        ServerPlayer pl = ((FabricPlayer) uid).getMinecraftPlayer();
         if(pl == null) return;
 
         Skin oldSkin = activeSkins.get(uid);
@@ -162,8 +171,8 @@ public class SkinModule extends AbstractSkinModule {
 
         GameProfile profile = null;
         for(ClientboundPlayerInfoPacket.PlayerUpdate ent : entries) {
-            for(UUID u : loginSkins.keySet()) {
-                if(u.equals(ent.getProfile().getId())) {
+            for(MPlayer u : loginSkins.keySet()) {
+                if(u.getUUID().equals(ent.getProfile().getId())) {
                     profile = ent.getProfile();
                     break;
                 }
@@ -173,7 +182,7 @@ public class SkinModule extends AbstractSkinModule {
 
         if(profile == null) return;
 
-        Skin skin = activeSkins.get(profile.getId());
+        Skin skin = activeSkins.get(MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(profile.getId()));
 
         if(skin == null) return;
 

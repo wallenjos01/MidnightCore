@@ -1,7 +1,9 @@
 package me.m1dnightninja.midnightcore.spigot.util;
 
+import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.lang.reflect.*;
 
@@ -165,4 +167,5 @@ public final class ReflectionUtil {
     public static <T> Class<T> getArrayClass(Class<T> clazz) {
         return (Class<T>) Array.newInstance(clazz, 0).getClass();
     }
+
 }

@@ -1,10 +1,12 @@
 package me.m1dnightninja.midnightcore.spigot.text;
 
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.util.FormatUtil;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
+import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
 import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -49,10 +51,9 @@ public class Timer extends AbstractTimer {
         TextComponent comp = textPrefix.duplicate();
         comp.addExtra(time);
 
-        for(UUID u : players) {
+        for(MPlayer u : players) {
 
-            Player p = Bukkit.getPlayer(u);
-            if(p == null) continue;
+            Player p = ((SpigotPlayer) u).getSpigotPlayer();
 
             p.spigot().sendMessage(ChatMessageType.ACTION_BAR, comp);
         }

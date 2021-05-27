@@ -1,21 +1,40 @@
 package me.m1dnightninja.midnightcore.api.inventory;
 
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.UUID;
+import java.util.List;
 
 public abstract class AbstractInventoryGUI {
 
     protected final HashMap<Integer, Entry> entries = new HashMap<>();
-    protected final HashMap<UUID, Integer> players = new HashMap<>();
+    protected final HashMap<MPlayer, Integer> players = new HashMap<>();
     protected final MComponent title;
+    protected int pageSize = 0;
 
-    protected static final HashMap<UUID, AbstractInventoryGUI> openGuis = new HashMap<>();
+    private final List<CloseCallback> callbacks = new ArrayList<>();
+
+    protected static final HashMap<MPlayer, AbstractInventoryGUI> openGuis = new HashMap<>();
 
 
     protected AbstractInventoryGUI(MComponent title) {
         this.title = title;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public int pageCount() {
+
+        int highestEnt = 0;
+        for(int i : entries.keySet()) {
+            if(i > highestEnt) highestEnt = i;
+        }
+
+        return highestEnt / ((pageSize == 0 ? 6 : pageSize) * 9);
     }
 
     public final void removeItem(int slot) {
@@ -41,7 +60,11 @@ public abstract class AbstractInventoryGUI {
         this.entries.put(slot, ent);
     }
 
-    public final void open(UUID u, int page) {
+    public final void addCallback(CloseCallback cb) {
+        callbacks.add(cb);
+    }
+
+    public final void open(MPlayer u, int page) {
 
         if(openGuis.containsKey(u)) {
             openGuis.get(u).close(u);
@@ -53,7 +76,7 @@ public abstract class AbstractInventoryGUI {
         this.onOpened(u, page);
     }
 
-    public final void close(UUID u) {
+    public final void close(MPlayer u) {
         if (!this.players.containsKey(u)) {
             return;
         }
@@ -62,20 +85,24 @@ public abstract class AbstractInventoryGUI {
 
         this.players.remove(u);
         this.onClosed(u);
+
+        for(CloseCallback cb : callbacks) {
+            cb.onClosed(u);
+        }
     }
 
-    public static void closeMenu(UUID u) {
+    public static void closeMenu(MPlayer u) {
 
         if(!openGuis.containsKey(u)) return;
         openGuis.get(u).close(u);
 
     }
 
-    public final int getPlayerPage(UUID u) {
+    public final int getPlayerPage(MPlayer u) {
         return this.players.get(u);
     }
 
-    public final void onClick(UUID u, ClickType type, int slot) {
+    public final void onClick(MPlayer u, ClickType type, int slot) {
 
         ClickAction act = getAction(slot);
 
@@ -84,8 +111,8 @@ public abstract class AbstractInventoryGUI {
         }
     }
 
-    protected abstract void onClosed(UUID u);
-    protected abstract void onOpened(UUID u, int page);
+    protected abstract void onClosed(MPlayer u);
+    protected abstract void onOpened(MPlayer u, int page);
 
     protected static class Entry {
         public MItemStack item;
@@ -100,7 +127,11 @@ public abstract class AbstractInventoryGUI {
     }
 
     public interface ClickAction {
-        void onClick(ClickType type, UUID user);
+        void onClick(ClickType type, MPlayer user);
+    }
+
+    public interface CloseCallback {
+        void onClosed(MPlayer player);
     }
 
     public enum ClickType {
@@ -109,7 +140,7 @@ public abstract class AbstractInventoryGUI {
         SHIFT_LEFT,
         SHIFT_RIGHT,
         MIDDLE,
-        DOUBLE_CLICK,
+        DOUBLE,
         THROW,
         THROW_ALL,
         NUMBER_KEY

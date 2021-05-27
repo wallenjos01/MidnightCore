@@ -1,7 +1,9 @@
 package me.m1dnightninja.midnightcore.spigot.text;
 
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
+import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
@@ -94,9 +96,9 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
     }
 
     @Override
-    protected void onPlayerAdded(UUID u) {
+    protected void onPlayerAdded(MPlayer u) {
 
-        Player pl = Bukkit.getPlayer(u);
+        Player pl = ((SpigotPlayer) u).getSpigotPlayer();
         if(pl == null) return;
 
         pl.setScoreboard(internal);
@@ -106,9 +108,9 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
     }
 
     @Override
-    protected void onPlayerRemoved(UUID u) {
+    protected void onPlayerRemoved(MPlayer u) {
 
-        Player pl = Bukkit.getPlayer(u);
+        Player pl = ((SpigotPlayer) u).getSpigotPlayer();
         if(pl == null) return;
 
         pl.setScoreboard(manager.getMainScoreboard());

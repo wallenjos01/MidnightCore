@@ -4,13 +4,14 @@ import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
 import me.m1dnightninja.midnightcore.api.module.lang.PlaceholderSupplier;
+import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.module.lang.AbstractLangModule;
-import org.bukkit.Bukkit;
+import me.m1dnightninja.midnightcore.common.module.lang.LangProvider;
+import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.util.UUID;
 
 public class LangModule extends AbstractLangModule {
 
@@ -25,10 +26,10 @@ public class LangModule extends AbstractLangModule {
     }
 
     @Override
-    public String getPlayerLocale(UUID u) {
+    public String getPlayerLocale(MPlayer u) {
 
-        Player p = Bukkit.getPlayer(u);
-        if(p == null) return getServerLanguage();
+        if(u == null) return getServerLanguage();
+        Player p = ((SpigotPlayer) u).getSpigotPlayer();
 
         return p.getLocale();
     }

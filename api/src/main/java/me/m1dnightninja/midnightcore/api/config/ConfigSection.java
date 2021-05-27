@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 
 public class ConfigSection {
@@ -26,6 +30,12 @@ public class ConfigSection {
 
             this.entries.remove(key);
 
+        } else if (obj instanceof Map) {
+
+            for(Map.Entry<?,?> ent : ((Map<?,?>) obj).entrySet()) {
+                set(ent.getKey().toString(), ent.getValue());
+            }
+
         // Try to serialize as a ConfigSection
         } else if (reg != null && reg.canSerialize(obj.getClass())) {
 
@@ -41,6 +51,19 @@ public class ConfigSection {
 
             this.entries.put(key, obj);
         }
+    }
+
+    public void setMap(String id, String keyLabel, String valueLabel, Map<?, ?> map) {
+
+        List<ConfigSection> lst = new ArrayList<>();
+        for(Map.Entry<?, ?> ent : map.entrySet()) {
+            ConfigSection sec = new ConfigSection();
+            sec.set(keyLabel, ent.getKey());
+            sec.set(valueLabel, ent.getValue());
+            lst.add(sec);
+        }
+
+        set(id, lst);
     }
 
     public Object get(String key) {
@@ -88,6 +111,8 @@ public class ConfigSection {
         return this.get(key, Number.class).doubleValue();
     }
 
+    public long getLong(String key) { return this.get(key, Number.class).longValue(); }
+
     public boolean getBoolean(String key) { return (boolean) this.get(key); }
 
     public List<?> getList(String key) {
@@ -106,8 +131,20 @@ public class ConfigSection {
     public <T> List<T> getList(String key, Class<T> clazz) {
 
         List<?> lst = getList(key);
+        List<T> out = new ArrayList<>(lst.size());
+        for(Object o : lst) {
+            out.add(convert(o, clazz));
+        }
+
+        return out;
+    }
+
+    public <T> List<T> getListFiltered(String key, Class<T> clazz) {
+
+        List<?> lst = getList(key);
         List<T> out = new ArrayList<>();
         for(Object o : lst) {
+            if(!canConvert(o, clazz)) continue;
             out.add(convert(o, clazz));
         }
 
@@ -186,6 +223,73 @@ public class ConfigSection {
         }
 
         return clazz.isAssignableFrom(o.getClass());
+    }
+
+    public JsonObject toJson() {
+
+        return (JsonObject) toJsonElement(this);
+    }
+
+    @Override
+    public String toString() {
+        return toJson().toString();
+    }
+
+    private static JsonElement toJsonElement(Object obj) {
+
+        if(obj instanceof ConfigSection) {
+
+            ConfigSection sec = (ConfigSection) obj;
+            JsonObject out = new JsonObject();
+            for(Map.Entry<String,Object> ent : sec.getEntries().entrySet()) {
+
+                out.add(ent.getKey(), toJsonElement(ent.getValue()));
+            }
+
+            return out;
+
+        } else if(obj instanceof List) {
+
+            JsonArray arr = new JsonArray();
+
+            List<?> lst = (List<?>) obj;
+            for (Object o : lst) {
+                arr.add(toJsonElement(o));
+            }
+            return arr;
+
+        } else if(obj instanceof Integer) {
+
+            return new JsonPrimitive((int) obj);
+
+        } else if(obj instanceof Float) {
+
+            return new JsonPrimitive((float) obj);
+
+        } else if(obj instanceof Double) {
+
+            return new JsonPrimitive((double) obj);
+
+        } else if(obj instanceof Short) {
+
+            return new JsonPrimitive((short) obj);
+
+        } else if(obj instanceof Byte) {
+
+            return new JsonPrimitive((byte) obj);
+
+        } else if(obj instanceof Long) {
+
+            return new JsonPrimitive((long) obj);
+
+        } else if(obj instanceof Boolean) {
+
+            return new JsonPrimitive((Boolean) obj);
+
+        } else {
+
+            return new JsonPrimitive(obj.toString());
+        }
     }
 
 }

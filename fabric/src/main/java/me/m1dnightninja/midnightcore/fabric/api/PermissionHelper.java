@@ -40,6 +40,12 @@ public class PermissionHelper {
         return def;
     }
 
+    public static boolean checkOrOp(SharedSuggestionProvider prov, String perm, int opLevel) {
+
+        if(prov.hasPermission(opLevel)) return true;
+        return check(prov, perm);
+    }
+
     public static boolean check(UUID u, String perm) {
         return check(u, perm, false);
     }
@@ -100,6 +106,8 @@ public class PermissionHelper {
         }
 
         Event.register(PlayerJoinedEvent.class, MidnightCore.getInstance(), event -> {
+
+            if(event.getPlayer().hasPermissions(2)) return;
 
             if(check(event.getPlayer().getUUID(), "minecraft.command.gamemode")) {
 
