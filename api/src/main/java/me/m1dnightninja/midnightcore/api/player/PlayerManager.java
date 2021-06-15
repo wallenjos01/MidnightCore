@@ -1,9 +1,8 @@
 package me.m1dnightninja.midnightcore.api.player;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
-public abstract class PlayerManager {
+public abstract class PlayerManager implements Iterable<MPlayer> {
 
     private final HashMap<UUID, MPlayer> cache = new HashMap<>();
 
@@ -27,8 +26,32 @@ public abstract class PlayerManager {
 
     protected abstract MPlayer createPlayer(UUID u);
 
-    protected void uncachePlayer(UUID u) {
-        cache.remove(u);
+    public void cleanupPlayer(UUID u) {
+
+        if(cache.containsKey(u)) {
+            cache.get(u).cleanup();
+        }
     }
 
+    @Override
+    public Iterator<MPlayer> iterator() {
+        return new Iterator<>() {
+
+            private int current = 0;
+            private final List<MPlayer> players = new ArrayList<>(cache.values());
+
+            @Override
+            public boolean hasNext() {
+                return current < players.size();
+            }
+
+            @Override
+            public MPlayer next() {
+                MPlayer out = players.get(current);
+                current++;
+
+                return out;
+            }
+        };
+    }
 }

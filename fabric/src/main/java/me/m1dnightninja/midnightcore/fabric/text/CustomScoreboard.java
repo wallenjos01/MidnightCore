@@ -87,7 +87,7 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
         player.connection.send(new ClientboundSetObjectivePacket(objective, 0));
 
         for(int i = 0 ; i < teams.length ; i++) {
-            player.connection.send(new ClientboundSetPlayerTeamPacket(teams[i], 0));
+            player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(teams[i], true));
 
             String name = "§" + Integer.toHexString(i);
             Score s = board.getOrCreatePlayerScore(name, objective);
@@ -109,7 +109,7 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
         player.connection.send(new ClientboundSetDisplayObjectivePacket(1, null));
 
         for(int i = 0 ; i < teams.length ; i++) {
-            player.connection.send(new ClientboundSetPlayerTeamPacket(teams[i], 1));
+            player.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(teams[i]));
 
             String name = "§" + Integer.toHexString(i);
             player.connection.send(new ClientboundSetScorePacket(ServerScoreboard.Method.REMOVE, objective.getName(), name, 0));
@@ -134,7 +134,7 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
         for(int i = 0 ; i < teams.length ; i++) {
             if(updated[i]) {
 
-                packets.add(new ClientboundSetPlayerTeamPacket(teams[i], 2));
+                packets.add(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(teams[i], false));
 
                 if(teams[i].getPlayerPrefix() == null) {
                     packets.add(new ClientboundSetScorePacket(ServerScoreboard.Method.REMOVE, objective.getName(), "§" + Integer.toHexString(i), 0));

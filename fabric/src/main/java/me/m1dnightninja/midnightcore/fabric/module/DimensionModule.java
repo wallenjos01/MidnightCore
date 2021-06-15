@@ -185,7 +185,7 @@ public class DimensionModule implements IModule {
         DimensionType type;
         if (options == null) {
             MidnightCoreAPI.getLogger().warn("Unable to find dimension " + cre.getDimension() + "! Defaulting to overworld!");
-            type = registryManager.dimensionTypes().get(DimensionType.OVERWORLD_LOCATION);
+            type = registryManager.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(DimensionType.OVERWORLD_LOCATION);
         } else {
             type = options.type();
         }
@@ -209,7 +209,7 @@ public class DimensionModule implements IModule {
 
         if (!props.isInitialized()) {
             if (cre.getSpawnPosition() == null) {
-                AccessorMinecraftServer.callSetInitialSpawn(world, props, false, false, true);
+                AccessorMinecraftServer.callSetInitialSpawn(world, props, false, false);
             } else {
                 props.setSpawn(cre.getSpawnPosition(), 0.0f);
             }
@@ -231,7 +231,7 @@ public class DimensionModule implements IModule {
 
                 worlds.put(key, world);
 
-                ForcedChunksSavedData state = world.getDataStorage().get(ForcedChunksSavedData::new, "chunks");
+                ForcedChunksSavedData state = world.getDataStorage().get(ForcedChunksSavedData::load, "chunks");
 
                 listener.stop();
 

@@ -1,15 +1,14 @@
 package me.m1dnightninja.midnightcore.spigot.util;
 
-import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 import java.lang.reflect.*;
 
 public final class ReflectionUtil {
 
     public static final String API_VERSION = Bukkit.getServer().getClass().getPackage().getName().replace(".",",").split(",")[3];
+    public static final Integer MAJOR_VERISON = Integer.parseInt(API_VERSION.substring(API_VERSION.indexOf("_") + 1, API_VERSION.lastIndexOf("_")));
 
     public static Class<?> getNMSClass(String name) {
         try {
@@ -160,6 +159,7 @@ public final class ReflectionUtil {
                 }
             }
         }
+        MidnightCoreAPI.getLogger().warn("Unable to find enum value " + name + "!");
         throw new IllegalStateException();
     }
 

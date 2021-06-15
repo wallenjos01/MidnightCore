@@ -10,8 +10,6 @@ public interface ISkinUpdater {
 
     boolean initialize();
 
-    GameProfile getProfile(Player player);
-
     void updatePlayer(Player player, Skin skin, Collection<? extends Player> observers);
 }
 

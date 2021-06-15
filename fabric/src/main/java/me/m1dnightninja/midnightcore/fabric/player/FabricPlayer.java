@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.player;
 
+import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Vec3d;
@@ -18,9 +19,10 @@ import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.Util;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesPacket;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -42,7 +44,13 @@ public class FabricPlayer extends MPlayer {
     public MComponent getName() {
 
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
-        if(player == null) return null;
+        if(player == null) {
+            GameProfile prof = MidnightCore.getServer().getProfileCache().get(getUUID());
+            if(prof != null) {
+                return MComponent.createTextComponent(prof.getName());
+            }
+            return MComponent.createTextComponent(getUUID().toString());
+        }
 
         return MComponent.Serializer.fromJson(Component.Serializer.toJson(player.getName()));
     }
@@ -87,6 +95,21 @@ public class FabricPlayer extends MPlayer {
     }
 
     @Override
+    public float getYaw() {
+        return player.getRotationVector().x;
+    }
+
+    @Override
+    public float getPitch() {
+        return player.getRotationVector().y;
+    }
+
+    @Override
+    public boolean isOffline() {
+        return player == null;
+    }
+
+    @Override
     public void sendMessage(MComponent comp) {
 
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
@@ -102,13 +125,18 @@ public class FabricPlayer extends MPlayer {
         if(player == null) return;
 
         if(title.getOptions().clear) {
-            ClientboundSetTitlesPacket packet = new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.CLEAR, null, 0, 0, 0);
-            player.connection.send(packet);
+            player.connection.send(new ClientboundClearTitlesPacket(true));
         }
 
-        ClientboundSetTitlesPacket packet = new ClientboundSetTitlesPacket(
-                title.getOptions().subtitle ? ClientboundSetTitlesPacket.Type.SUBTITLE : ClientboundSetTitlesPacket.Type.TITLE,
-                ConversionUtil.toMinecraftComponent(title.getText()),
+        if(title.getOptions().subtitle) {
+
+            player.connection.send(new ClientboundSetSubtitleTextPacket(ConversionUtil.toMinecraftComponent(title.getText())));
+        } else {
+
+            player.connection.send(new ClientboundSetTitleTextPacket(ConversionUtil.toMinecraftComponent(title.getText())));
+        }
+
+        ClientboundSetTitlesAnimationPacket packet = new ClientboundSetTitlesAnimationPacket(
                 title.getOptions().fadeIn,
                 title.getOptions().stay,
                 title.getOptions().fadeOut
@@ -123,15 +151,7 @@ public class FabricPlayer extends MPlayer {
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) return;
 
-        ClientboundSetTitlesPacket packet = new ClientboundSetTitlesPacket(
-                ClientboundSetTitlesPacket.Type.ACTIONBAR,
-                ConversionUtil.toMinecraftComponent(ab.getText()),
-                ab.getOptions().fadeIn,
-                ab.getOptions().stay,
-                ab.getOptions().fadeOut
-        );
-
-        player.connection.send(packet);
+        player.connection.send(new ClientboundSetActionBarTextPacket(ConversionUtil.toMinecraftComponent(ab.getText())));
     }
 
     @Override
@@ -160,8 +180,13 @@ public class FabricPlayer extends MPlayer {
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) return;
 
-        player.inventory.add(ConversionUtil.toMinecraftStack(item));
+        player.getInventory().add(ConversionUtil.toMinecraftStack(item));
 
+    }
+
+    @Override
+    protected void cleanup() {
+        player = null;
     }
 
     @Override

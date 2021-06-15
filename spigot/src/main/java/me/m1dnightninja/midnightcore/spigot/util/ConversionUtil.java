@@ -30,9 +30,10 @@ public class ConversionUtil {
         out.setStrikethrough(comp.getStyle().isBold());
         out.setObfuscated(comp.getStyle().isBold());
         out.setColor(ChatColor.getByChar(Integer.toHexString(comp.getStyle().getColor().toRGBI()).charAt(0)));
-        out.setFont(comp.getStyle().getFont().toString());
 
-
+        if(ReflectionUtil.MAJOR_VERISON >= 16) {
+            out.setFont(comp.getStyle().getFont().toString());
+        }
 
         for(MComponent child : comp.getChildren()) {
             out.addExtra(toSpigotComponent(child));

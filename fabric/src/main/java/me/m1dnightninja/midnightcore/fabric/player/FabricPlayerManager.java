@@ -9,14 +9,6 @@ import java.util.UUID;
 
 public class FabricPlayerManager extends PlayerManager {
 
-    public FabricPlayerManager() {
-
-        Event.register(PlayerDisconnectEvent.class, this, 100, event -> {
-            uncachePlayer(event.getPlayer().getUUID());
-        });
-
-    }
-
     @Override
     protected MPlayer createPlayer(UUID u) {
 

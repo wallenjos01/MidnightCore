@@ -89,7 +89,7 @@ public abstract class AbstractLangModule implements ILangModule {
                 }
             }
             return null;
-        };
+        }
 
         return supplier.get(args);
 
@@ -110,7 +110,7 @@ public abstract class AbstractLangModule implements ILangModule {
                 if(placeholder) {
 
                     String rep = getInlinePlaceholderValue(currentPlaceholder.toString(), args);
-                    message.append(rep == null ? "%" + currentPlaceholder.toString() + "%" : rep);
+                    message.append(rep == null ? "%" + currentPlaceholder + "%" : rep);
 
                     currentPlaceholder = new StringBuilder();
 

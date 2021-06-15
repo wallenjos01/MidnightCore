@@ -28,7 +28,6 @@ import net.minecraft.world.level.biome.BiomeManager;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 public class SkinModule extends AbstractSkinModule {
 
@@ -53,8 +52,7 @@ public class SkinModule extends AbstractSkinModule {
         });
         Event.register(PacketSendEvent.class, this, event -> {
             if(event.getPacket() instanceof ClientboundPlayerInfoPacket) {
-                ClientboundPlayerInfoPacket pck = (ClientboundPlayerInfoPacket) event.getPacket();
-                applyActiveProfile(pck);
+                applyActiveProfile((ClientboundPlayerInfoPacket) event.getPacket());
             }
         });
 
@@ -103,14 +101,14 @@ public class SkinModule extends AbstractSkinModule {
 
         items.add(new Pair<>(EquipmentSlot.MAINHAND, player.getMainHandItem()));
         items.add(new Pair<>(EquipmentSlot.OFFHAND, player.getOffhandItem()));
-        items.add(new Pair<>(EquipmentSlot.HEAD, player.inventory.armor.get(3)));
-        items.add(new Pair<>(EquipmentSlot.CHEST, player.inventory.armor.get(2)));
-        items.add(new Pair<>(EquipmentSlot.LEGS, player.inventory.armor.get(1)));
-        items.add(new Pair<>(EquipmentSlot.FEET, player.inventory.armor.get(0)));
+        items.add(new Pair<>(EquipmentSlot.HEAD, player.getInventory().armor.get(3)));
+        items.add(new Pair<>(EquipmentSlot.CHEST, player.getInventory().armor.get(2)));
+        items.add(new Pair<>(EquipmentSlot.LEGS, player.getInventory().armor.get(1)));
+        items.add(new Pair<>(EquipmentSlot.FEET, player.getInventory().armor.get(0)));
 
         ClientboundSetEquipmentPacket equip = new ClientboundSetEquipmentPacket(player.getId(), items);
 
-        ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(player.getId());
+        ClientboundRemoveEntityPacket destroy = new ClientboundRemoveEntityPacket(player.getId());
         ClientboundAddPlayerPacket spawn = new ClientboundAddPlayerPacket(player);
         ClientboundSetEntityDataPacket tracker = new ClientboundSetEntityDataPacket(player.getId(), player.getEntityData(), true);
 
@@ -133,8 +131,8 @@ public class SkinModule extends AbstractSkinModule {
                 true
         );
 
-        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot, new HashSet<>(), 0);
-        ClientboundPlayerAbilitiesPacket abilities = new ClientboundPlayerAbilitiesPacket(player.abilities);
+        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(player.getX(), player.getY(), player.getZ(), player.getRotationVector().y, player.getRotationVector().x, new HashSet<>(), 0, false);
+        ClientboundPlayerAbilitiesPacket abilities = new ClientboundPlayerAbilitiesPacket(player.getAbilities());
 
         // Send Packets
 
@@ -161,7 +159,7 @@ public class SkinModule extends AbstractSkinModule {
         server.getPlayerList().sendPlayerPermissionLevel(player);
         server.getPlayerList().sendAllPlayerInfo(player);
 
-        player.inventory.tick();
+        player.getInventory().tick();
     }
 
     private void applyActiveProfile(ClientboundPlayerInfoPacket packet) {
@@ -200,7 +198,7 @@ public class SkinModule extends AbstractSkinModule {
         profile.getProperties().get("textures").clear();
         profile.getProperties().put("textures", new Property("textures", skin.getBase64(), skin.getSignature()));
 
-        entries.set(0, packet.new PlayerUpdate(
+        entries.set(0, new ClientboundPlayerInfoPacket.PlayerUpdate(
                 profile,
                 player.latency,
                 player.gameMode.getGameModeForPlayer(),

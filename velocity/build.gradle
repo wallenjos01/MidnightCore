@@ -5,7 +5,7 @@ plugins {
 
 configurations {
     shade
-    compile.extendsFrom shade
+    compileOnly.extendsFrom shade
 }
 
 repositories {
@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
 
-    compile("com.velocitypowered:velocity-api:1.1.4")
+    compileOnly("com.velocitypowered:velocity-api:1.1.7")
 
     shade(project(':api'))
     shade(project(':common'))
@@ -33,13 +33,8 @@ processResources {
     ex.put("modname", project.ext.modname)
     ex.put("modclass", project.ext.modclass)
 
-    from(sourceSets.main.resources.srcDirs) {
-        include "velocity-plugin.json"
+    filesMatching("velocity-plugin.json") {
         expand(ex)
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude "velocity-plugin.json"
     }
 }
 

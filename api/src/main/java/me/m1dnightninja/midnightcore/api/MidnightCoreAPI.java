@@ -3,9 +3,7 @@ package me.m1dnightninja.midnightcore.api;
 import java.io.File;
 import java.util.*;
 
-import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
-import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
-import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.config.*;
 import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
 import me.m1dnightninja.midnightcore.api.inventory.ItemConverter;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
@@ -102,6 +100,7 @@ public class MidnightCoreAPI {
         configRegistry.registerInlineSerializer(MIdentifier.class, MIdentifier.SERIALIZER);
         configRegistry.registerInlineSerializer(Vec3d.class, Vec3d.SERIALIZER);
         configRegistry.registerInlineSerializer(Vec3i.class, Vec3i.SERIALIZER);
+        configRegistry.registerInlineSerializer(UUID.class, Skin.UID_SERIALIZER);
 
         // Load modules
         for (IModule mod : modules) {

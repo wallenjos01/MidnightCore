@@ -1,11 +1,12 @@
-package me.m1dnightninja.midnightcore.spigot.module.skin;
+package me.m1dnightninja.midnightcore.spigot.version.v1_13;
 
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.datafixers.util.Pair;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
+import me.m1dnightninja.midnightcore.spigot.module.skin.ISkinUpdater;
+import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,9 +16,15 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
-public class SkinUpdater_16 implements ISkinUpdater {
+public class SkinUpdater_13 implements ISkinUpdater {
 
     private boolean initialized;
 
@@ -29,10 +36,10 @@ public class SkinUpdater_16 implements ISkinUpdater {
     private Class<?> enumPlayerInfoAction;
 
     private Class<?> enumItemSlot;
-
+    private Class<?> enumDifficulty;
     private Class<?> enumGameMode;
 
-    private Class<?> biomeManager;
+    //private Class<?> biomeManager;
 
     private Method getProfile;
     private Method getHandle;
@@ -40,16 +47,17 @@ public class SkinUpdater_16 implements ISkinUpdater {
     private Method asNMSCopy;
     private Method getId;
     private Method sendPacket;
+    private Method getWorldProvider;
     private Method getDimensionManager;
-    private Method getDimensionKey;
-    private Method hashSeed;
+    //private Method hashSeed;
     private Method getGameMode;
-    private Method getPreviousGameMode;
-    private Method isDebugWorld;
-    private Method isFlatWorld;
+    //private Method getPreviousGameMode;
+    //private Method isDebugWorld;
+    //private Method isFlatWorld;
     private Method triggerHealthUpdate;
     private Method getPlayerListName;
     private Method getWorldServer;
+    private Method getWorldType;
 
     private Field playerConnection;
     private Field playerInteractManager;
@@ -116,11 +124,13 @@ public class SkinUpdater_16 implements ISkinUpdater {
             worldServer = ReflectionUtil.getNMSClass("WorldServer");
             Class<?> dimensionManager;
             dimensionManager = ReflectionUtil.getNMSClass("DimensionManager");
-            Class<?> resourceKey;
-            resourceKey = ReflectionUtil.getNMSClass("ResourceKey");
+            Class<?> worldType;
+            worldType = ReflectionUtil.getNMSClass("WorldType");
 
             Class<?> packetPlayOutRespawn;
             packetPlayOutRespawn = ReflectionUtil.getNMSClass("PacketPlayOutRespawn");
+
+            Class<?> worldProvider = ReflectionUtil.getNMSClass("WorldProvider");
 
             Class<?> packetPlayOutPosition = ReflectionUtil.getNMSClass("PacketPlayOutPosition");
 
@@ -131,11 +141,13 @@ public class SkinUpdater_16 implements ISkinUpdater {
             plConnection = ReflectionUtil.getNMSClass("PlayerConnection");
             Class<?> world;
             world = ReflectionUtil.getNMSClass("World");
-            biomeManager = ReflectionUtil.getNMSClass("BiomeManager");
+            //biomeManager = ReflectionUtil.getNMSClass("BiomeManager");
             Class<?> interactManager;
             interactManager = ReflectionUtil.getNMSClass("PlayerInteractManager");
             Class<?> playerAbilities;
             playerAbilities = ReflectionUtil.getNMSClass("PlayerAbilities");
+
+            enumDifficulty = ReflectionUtil.getNMSClass("EnumDifficulty");
 
             // Methods
 
@@ -145,16 +157,18 @@ public class SkinUpdater_16 implements ISkinUpdater {
             asNMSCopy = ReflectionUtil.getMethodByReturnType(craftItemStack, itemStack, ItemStack.class);
             getId = ReflectionUtil.getMethod(entity, "getId");
             sendPacket = ReflectionUtil.getMethod(plConnection, "sendPacket", packet);
-            getDimensionManager = ReflectionUtil.getMethodByReturnType(world, dimensionManager);
-            getDimensionKey = ReflectionUtil.getMethod(world, "getDimensionKey");
-            hashSeed = ReflectionUtil.getMethodByReturnType(biomeManager, long.class, long.class);
+            getWorldProvider = ReflectionUtil.getMethodByReturnType(world, worldProvider);
+            getDimensionManager = ReflectionUtil.getMethodByReturnType(worldProvider, dimensionManager);
+            //getDimensionKey = ReflectionUtil.getMethod(world, "getDimensionKey");
+            //hashSeed = ReflectionUtil.getMethodByReturnType(biomeManager, long.class, long.class);
             getGameMode = ReflectionUtil.getMethod(interactManager, "getGameMode");
-            getPreviousGameMode = ReflectionUtil.getMethod(interactManager, "c");
-            isDebugWorld = ReflectionUtil.getMethod(world, "isDebugWorld");
-            isFlatWorld = ReflectionUtil.getMethod(worldServer, "isFlatWorld");
+            //getPreviousGameMode = ReflectionUtil.getMethod(interactManager, "c");
+            //isDebugWorld = ReflectionUtil.getMethod(world, "isDebugWorld");
+            //isFlatWorld = ReflectionUtil.getMethod(worldServer, "isFlatWorld");
             triggerHealthUpdate = ReflectionUtil.getMethod(entityPlayer, "triggerHealthUpdate");
             getPlayerListName = ReflectionUtil.getMethod(entityPlayer, "getPlayerListName");
             getWorldServer = ReflectionUtil.getMethodByReturnType(entityPlayer, worldServer);
+            getWorldType = ReflectionUtil.getMethodByReturnType(world, worldType);
 
             // Fields
 
@@ -165,12 +179,12 @@ public class SkinUpdater_16 implements ISkinUpdater {
 
             playerInfoConstructor = ReflectionUtil.getConstructor(packetPlayOutPlayerInfo, enumPlayerInfoAction, ReflectionUtil.getArrayClass(entityPlayer));
             playerInfoDataConstructor = ReflectionUtil.getConstructor(playerInfoData, packetPlayOutPlayerInfo, GameProfile.class, int.class, enumGameMode, iChatBaseComponent);
-            entityEquipmentConstructor = ReflectionUtil.getConstructor(packetPlayOutEntityEquipment, int.class, List.class);
+            entityEquipmentConstructor = ReflectionUtil.getConstructor(packetPlayOutEntityEquipment, int.class, enumItemSlot, itemStack);
             entityDestroyConstructor = ReflectionUtil.getConstructor(packetPlayOutEntityDestroy, int[].class);
             namedEntitySpawnConstructor = ReflectionUtil.getConstructor(packetPlayOutNamedEntitySpawn, entityHuman);
             entityHeadRotationConstructor = ReflectionUtil.getConstructor(packetPlayOutHeadRotation, entity, byte.class);
             entityMetadataConstructor = ReflectionUtil.getConstructor(packetPlayOutEntityMetadata, int.class, dataWatcher, boolean.class);
-            respawnConstructor = ReflectionUtil.getConstructor(packetPlayOutRespawn, dimensionManager, resourceKey, long.class, enumGameMode, enumGameMode, boolean.class, boolean.class, boolean.class);
+            respawnConstructor = ReflectionUtil.getConstructor(packetPlayOutRespawn, dimensionManager, enumDifficulty, worldType, enumGameMode);
             positionConstructor = ReflectionUtil.getConstructor(packetPlayOutPosition, double.class, double.class, double.class, float.class, float.class, Set.class, int.class);
             abilitiesConstructor = ReflectionUtil.getConstructor(packetPlayOutAbilities, playerAbilities);
         } catch(IllegalStateException ex) {
@@ -181,20 +195,13 @@ public class SkinUpdater_16 implements ISkinUpdater {
         return true;
     }
 
-    @Override
-    public GameProfile getProfile(Player player) {
-        if(!initialized) return null;
-
-        return (GameProfile) ReflectionUtil.callMethod(ReflectionUtil.castTo(player, craftPlayer), getProfile, true);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void updatePlayer(Player player, Skin skin, Collection<? extends Player> observers) {
         if(!initialized) return;
 
         Object ep = ReflectionUtil.callMethod(ReflectionUtil.castTo(player, craftPlayer), getHandle, false);
-        GameProfile old = getProfile(player);
+        GameProfile old = NMSWrapper.getGameProfile(player);
 
         Object oid = ReflectionUtil.callMethod(ep, getId, false);
         if(!(oid instanceof Integer)) return;
@@ -234,16 +241,14 @@ public class SkinUpdater_16 implements ISkinUpdater {
             ex.printStackTrace();
         }
 
-        List<Pair<Object, Object>> items = new ArrayList<>();
+        List<Object> items = new ArrayList<>();
 
-        items.add(new Pair<>(ReflectionUtil.getEnumValue(enumItemSlot, "MAINHAND"), ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getItemInMainHand(), craftItemStack))));
-        items.add(new Pair<>(ReflectionUtil.getEnumValue(enumItemSlot, "OFFHAND"), ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getItemInOffHand(), craftItemStack))));
-        items.add(new Pair<>(ReflectionUtil.getEnumValue(enumItemSlot, "HEAD"), ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getHelmet(), craftItemStack))));
-        items.add(new Pair<>(ReflectionUtil.getEnumValue(enumItemSlot, "CHEST"), ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getChestplate(), craftItemStack))));
-        items.add(new Pair<>(ReflectionUtil.getEnumValue(enumItemSlot, "LEGS"), ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getLeggings(), craftItemStack))));
-        items.add(new Pair<>(ReflectionUtil.getEnumValue(enumItemSlot, "FEET"), ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getBoots(), craftItemStack))));
-
-        Object equip = ReflectionUtil.construct(entityEquipmentConstructor, id, items);
+        items.add(ReflectionUtil.construct(entityEquipmentConstructor, id, ReflectionUtil.getEnumValue(enumItemSlot, "MAINHAND"), ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getItemInMainHand(), craftItemStack))));
+        items.add(ReflectionUtil.construct(entityEquipmentConstructor, id, ReflectionUtil.getEnumValue(enumItemSlot, "OFFHAND"),  ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getItemInOffHand(),  craftItemStack))));
+        items.add(ReflectionUtil.construct(entityEquipmentConstructor, id, ReflectionUtil.getEnumValue(enumItemSlot, "HEAD"),     ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getHelmet(),         craftItemStack))));
+        items.add(ReflectionUtil.construct(entityEquipmentConstructor, id, ReflectionUtil.getEnumValue(enumItemSlot, "CHEST"),    ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getChestplate(),     craftItemStack))));
+        items.add(ReflectionUtil.construct(entityEquipmentConstructor, id, ReflectionUtil.getEnumValue(enumItemSlot, "LEGS"),     ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getLeggings(),       craftItemStack))));
+        items.add(ReflectionUtil.construct(entityEquipmentConstructor, id, ReflectionUtil.getEnumValue(enumItemSlot, "FEET"),     ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, ReflectionUtil.castTo(player.getInventory().getBoots(),          craftItemStack))));
 
         Object is = Array.newInstance(int.class, 1);
         Array.set(is, 0, id);
@@ -265,7 +270,10 @@ public class SkinUpdater_16 implements ISkinUpdater {
             Object conn = ReflectionUtil.getFieldValue(op, playerConnection, false);
             ReflectionUtil.callMethod(conn, sendPacket, false, remove);
             ReflectionUtil.callMethod(conn, sendPacket, false, add);
-            ReflectionUtil.callMethod(conn, sendPacket, false, equip);
+
+            for(Object o : items) {
+                ReflectionUtil.callMethod(conn, sendPacket, false, o);
+            }
 
 
             if(p == player || !p.getWorld().equals(player.getWorld())) continue;
@@ -279,18 +287,15 @@ public class SkinUpdater_16 implements ISkinUpdater {
         if (observers.contains(player)) {
 
             Object world = ReflectionUtil.callMethod(ep, getWorldServer, false);
+            Object worldProv = ReflectionUtil.callMethod(world, getWorldProvider, false);
 
             Object interactionManager = ReflectionUtil.getFieldValue(ep, playerInteractManager, false);
 
             Object respawn = ReflectionUtil.construct(respawnConstructor,
-                    ReflectionUtil.callMethod(world, getDimensionManager, false),
-                    ReflectionUtil.callMethod(world, getDimensionKey, false),
-                    ReflectionUtil.callMethod(biomeManager, hashSeed, false, player.getWorld().getSeed()),
-                    ReflectionUtil.callMethod(interactionManager, getGameMode, false),
-                    ReflectionUtil.callMethod(interactionManager, getPreviousGameMode, false),
-                    ReflectionUtil.callMethod(world, isDebugWorld, false),
-                    ReflectionUtil.callMethod(world, isFlatWorld, false),
-                    true
+                    ReflectionUtil.callMethod(worldProv, getDimensionManager, false),
+                    ReflectionUtil.getEnumValue(enumDifficulty, player.getWorld().getDifficulty().name()),
+                    ReflectionUtil.callMethod(world, getWorldType, false),
+                    ReflectionUtil.callMethod(interactionManager, getGameMode, false)
             );
 
             Object position = ReflectionUtil.construct(positionConstructor, player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ(), player.getLocation().getYaw(), player.getLocation().getPitch(), Sets.newHashSet(), 0);

@@ -2,10 +2,8 @@ package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.commands.TimeCommand;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.DerivedLevelData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -48,16 +45,19 @@ public class MixinTimeCommand {
 
         ServerLevel level = stack.getLevel();
 
+        List<Level> levels = new ArrayList<>();
+        levels.add(level);
+
         for(Level l : MidnightCore.getServer().getAllLevels()) {
+            if(l == level) continue;
 
             if(l.getLevelData() == level.getLevelData() || (level.getLevelData() instanceof DerivedLevelData && ((AccessorDerivedLevelData) level.getLevelData()).getWrapped() == l.getLevelData())) {
 
-                stack.sendSuccess(new TextComponent(l.dimension().location().toString()), false);
-                return Collections.singleton(l);
+                levels.add(l);
             }
         }
 
-        return Collections.singleton(level);
+        return levels;
 
     }
 

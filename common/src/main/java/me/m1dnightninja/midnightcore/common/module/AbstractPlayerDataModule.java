@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.common.module;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.FileConfig;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
@@ -8,7 +9,9 @@ import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.IPlayerDataModule;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public abstract class AbstractPlayerDataModule implements IPlayerDataModule {
@@ -75,9 +78,10 @@ public abstract class AbstractPlayerDataModule implements IPlayerDataModule {
         if(!data.containsKey(u)) return;
 
         ConfigProvider prov = MidnightCoreAPI.getInstance().getDefaultConfigProvider();
-        File f = new File(folder, u.toString() + prov.getFileExtension());
+        File file = new File(folder, u.toString() + prov.getFileExtension());
 
-        prov.saveToFile(data.get(u), f);
+        prov.saveToFile(data.get(u), file);
+
         data.remove(u);
     }
 
@@ -96,7 +100,8 @@ public abstract class AbstractPlayerDataModule implements IPlayerDataModule {
 
     protected void onShutdown() {
 
-        for(UUID u : data.keySet()) {
+        List<UUID> us = new ArrayList<>(data.keySet());
+        for(UUID u : us) {
             savePlayerData(u);
         }
     }

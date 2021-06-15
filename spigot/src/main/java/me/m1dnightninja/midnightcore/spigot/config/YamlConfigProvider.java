@@ -1,8 +1,11 @@
 package me.m1dnightninja.midnightcore.spigot.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -33,12 +36,19 @@ public class YamlConfigProvider implements ConfigProvider {
     @Override
     public void saveToFile(ConfigSection config, File file) {
 
-        ConfigurationSection sec = toYamlSection(config);
-        if(sec == null) return;
+        if(file.exists() && !file.delete()) {
+            MidnightCoreAPI.getLogger().warn("Unable to clear " + file.getName() + "!");
+        }
 
-        YamlConfiguration out = (YamlConfiguration) sec;
+        YamlConfiguration sec = toYamlSection(config);
+        if(sec == null) {
+            System.out.println("Got null data when trying to save config file!");
+            return;
+        }
+
         try {
-            out.save(file);
+
+            sec.save(file);
         } catch (IOException ex) {
             MidnightCoreAPI.getLogger().warn("An error occurred while trying to save a config file!");
             ex.printStackTrace();
@@ -50,11 +60,11 @@ public class YamlConfigProvider implements ConfigProvider {
         return ".yml";
     }
 
-    private ConfigurationSection toYamlSection(ConfigSection sec) {
+    private YamlConfiguration toYamlSection(ConfigSection sec) {
 
         if(sec.getEntries().size() == 0) return null;
 
-        ConfigurationSection out = new YamlConfiguration();
+        YamlConfiguration out = new YamlConfiguration();
 
         for(Map.Entry<String, Object> ent : sec.getEntries().entrySet()) {
             out.set(ent.getKey(), toYaml(ent.getValue()));

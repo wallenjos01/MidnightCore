@@ -23,18 +23,16 @@ public class DynamicLevel extends ServerLevel {
         super(minecraftServer, executor, levelStorageAccess, serverLevelData, resourceKey, dimensionType, chunkProgressListener, chunkGenerator, bl, l, list, bl2);
     }
 
-    @Override
-    public @Nullable MapItemSavedData getMapData(String id) {
-        return getDataStorage().get(() -> new MapItemSavedData(id), id);
+    @Nullable
+    public MapItemSavedData getMapData(String string) {
+        return getDataStorage().get(MapItemSavedData::load, string);
     }
 
-    @Override
-    public void setMapData(MapItemSavedData mapState) {
-        getDataStorage().set(mapState);
+    public void setMapData(String string, MapItemSavedData mapItemSavedData) {
+        getDataStorage().set(string, mapItemSavedData);
     }
 
-    @Override
     public int getFreeMapId() {
-        return getDataStorage().computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
+        return getDataStorage().computeIfAbsent(MapIndex::load, MapIndex::new, "idcounts").getFreeAuxValueForMap();
     }
 }

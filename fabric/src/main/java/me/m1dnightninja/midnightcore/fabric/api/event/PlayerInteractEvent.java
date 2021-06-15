@@ -1,5 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.api.event;
 
+import me.m1dnightninja.midnightcore.api.math.Vec3d;
+import me.m1dnightninja.midnightcore.api.math.Vec3i;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,13 +14,13 @@ public class PlayerInteractEvent extends Event {
     private final ServerPlayer player;
     private final ItemStack item;
     private final InteractionHand hand;
-    private final ServerboundInteractPacket.Action action;
+    private final InteractionType action;
     private final BlockHitResult result;
 
     private boolean cancelled = false;
     private boolean shouldSwingArm = false;
 
-    public PlayerInteractEvent(ServerPlayer player, ItemStack item, InteractionHand hand, ServerboundInteractPacket.Action action, BlockHitResult result) {
+    public PlayerInteractEvent(ServerPlayer player, ItemStack item, InteractionHand hand, InteractionType action, BlockHitResult result) {
         this.player = player;
         this.item = item;
         this.hand = hand;
@@ -43,7 +45,7 @@ public class PlayerInteractEvent extends Event {
     }
 
     public boolean isLeftClick() {
-        return action == ServerboundInteractPacket.Action.ATTACK;
+        return action == InteractionType.ATTACK;
     }
 
     public boolean isCancelled() {
@@ -61,4 +63,13 @@ public class PlayerInteractEvent extends Event {
     public void setShouldSwingArm(boolean shouldSwingArm) {
         this.shouldSwingArm = shouldSwingArm;
     }
+
+    public enum InteractionType {
+
+        INTERACT,
+        INTERACT_BLOCK,
+        ATTACK
+
+    }
+
 }

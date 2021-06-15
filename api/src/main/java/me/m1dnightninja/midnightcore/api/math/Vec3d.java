@@ -36,8 +36,13 @@ public class Vec3d {
         return other.getX() == this.getX() && other.getY() == this.getY() && other.getZ() == this.getZ();
     }
 
+    private static int truncate(double d) {
+        return d < 0 ? ((int) d - 1) : (int) d;
+    }
+
     public Vec3i truncate() {
-        return new Vec3i((int) data[0], (int) data[1], (int) data[2]);
+
+        return new Vec3i(truncate(data[0]), truncate(data[1]), truncate(data[2]));
     }
 
     @Override
@@ -79,7 +84,7 @@ public class Vec3d {
     }
 
 
-    public static final InlineSerializer<Vec3d> SERIALIZER = new InlineSerializer<Vec3d>() {
+    public static final InlineSerializer<Vec3d> SERIALIZER = new InlineSerializer<>() {
         @Override
         public Vec3d deserialize(String s) {
             return parse(s);
@@ -87,7 +92,7 @@ public class Vec3d {
 
         @Override
         public String serialize(Vec3d object) {
-            return toString();
+            return object.toString();
         }
     };
 

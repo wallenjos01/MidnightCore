@@ -166,7 +166,7 @@ public class ConfigSection {
 
     public void fill(ConfigSection other) {
         for(Map.Entry<String, Object> ents : other.getEntries().entrySet()) {
-            if(!has(ents.getKey(), ents.getValue().getClass())) {
+            if(!has(ents.getKey())) {
                 set(ents.getKey(), ents.getValue());
             }
         }
@@ -258,29 +258,9 @@ public class ConfigSection {
             }
             return arr;
 
-        } else if(obj instanceof Integer) {
+        } else if(obj instanceof Number) {
 
-            return new JsonPrimitive((int) obj);
-
-        } else if(obj instanceof Float) {
-
-            return new JsonPrimitive((float) obj);
-
-        } else if(obj instanceof Double) {
-
-            return new JsonPrimitive((double) obj);
-
-        } else if(obj instanceof Short) {
-
-            return new JsonPrimitive((short) obj);
-
-        } else if(obj instanceof Byte) {
-
-            return new JsonPrimitive((byte) obj);
-
-        } else if(obj instanceof Long) {
-
-            return new JsonPrimitive((long) obj);
+            return new JsonPrimitive((Number) obj);
 
         } else if(obj instanceof Boolean) {
 

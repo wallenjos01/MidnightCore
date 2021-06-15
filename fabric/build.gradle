@@ -1,7 +1,7 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id 'fabric-loom' version '0.6-SNAPSHOT'
+    id 'fabric-loom' version '0.8-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
@@ -11,7 +11,7 @@ repositories {
 
 configurations {
     shade
-    compile.extendsFrom shade
+    implementation.extendsFrom shade
 }
 
 dependencies {
@@ -20,11 +20,13 @@ dependencies {
     mappings(minecraft.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:0.11.3")
 
-    modImplementation("net.fabricmc.fabric-api:fabric-api:0.32.5+1.16")
-    modImplementation("me.lucko:fabric-permissions-api:0.1-SNAPSHOT")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:0.34.9+1.17")
+    modImplementation("me.lucko:fabric-permissions-api:0.1-SNAPSHOT") {
+        transitive = false
+    }
 
-    shade project(':api')
-    shade project(':common')
+    shade(project(':api'))
+    shade(project(':common'))
 
 }
 
@@ -35,14 +37,10 @@ processResources {
     ex.put("modid", project.ext.modid)
     ex.put("modname", project.ext.modname)
     ex.put("modclass", project.ext.modclass)
+    ex.put("minecraftVersion", project.ext.minecraftMajorVersion)
 
-    from(sourceSets.main.resources.srcDirs) {
-        include("fabric.mod.json")
+    filesMatching("fabric.mod.json") {
         expand(ex)
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude "fabric.mod.json"
     }
 }
 

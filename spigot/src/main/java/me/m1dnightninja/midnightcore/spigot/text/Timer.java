@@ -48,12 +48,13 @@ public class Timer extends AbstractTimer {
         TextComponent time = new TextComponent(FormatUtil.formatTime(secondsLeft * 1000L));
         time.setBold(true);
 
-        TextComponent comp = textPrefix.duplicate();
+        TextComponent comp = new TextComponent(textPrefix.duplicate());
         comp.addExtra(time);
 
         for(MPlayer u : players) {
 
             Player p = ((SpigotPlayer) u).getSpigotPlayer();
+            if(p == null) continue;
 
             p.spigot().sendMessage(ChatMessageType.ACTION_BAR, comp);
         }

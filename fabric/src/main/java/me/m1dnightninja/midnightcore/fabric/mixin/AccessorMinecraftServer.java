@@ -18,7 +18,7 @@ import java.util.Map;
 public interface AccessorMinecraftServer {
 
     @Invoker
-    static void callSetInitialSpawn(ServerLevel world, ServerLevelData serverWorldProperties, boolean bonusChest, boolean debugWorld, boolean bl) {
+    static void callSetInitialSpawn(ServerLevel world, ServerLevelData serverWorldProperties, boolean bonusChest, boolean debugWorld) {
         throw new UnsupportedOperationException();
     }
 

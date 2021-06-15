@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.fabric.api.event.PlayerJoinedEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.api.event.PlayerDisconnectEvent;
@@ -45,7 +46,9 @@ public class MixinPlayerManager {
 
     @Inject(method="remove", at=@At("HEAD"))
     public void onQuit(final ServerPlayer ent, final CallbackInfo info) {
+
         Event.invoke(new PlayerDisconnectEvent(ent));
+        MidnightCoreAPI.getInstance().getPlayerManager().cleanupPlayer(ent.getUUID());
     }
 
 }

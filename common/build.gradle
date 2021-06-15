@@ -10,8 +10,7 @@ repositories {
 dependencies {
 
     implementation('com.mojang:authlib:2.1.28')
-
-    compile project(":api")
+    implementation(project(":api"))
 }
 
 artifacts {

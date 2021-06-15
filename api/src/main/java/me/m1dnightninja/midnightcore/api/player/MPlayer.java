@@ -29,6 +29,11 @@ public abstract class MPlayer {
     public abstract Skin getSkin();
     public abstract Vec3d getLocation();
 
+    public abstract float getYaw();
+    public abstract float getPitch();
+
+    public abstract boolean isOffline();
+
     public abstract boolean hasPermission(String perm);
 
     public abstract void sendMessage(MComponent comp);
@@ -39,6 +44,8 @@ public abstract class MPlayer {
     public abstract void teleport(Vec3d location, float yaw, float pitch);
 
     public abstract void giveItem(MItemStack item);
+
+    protected abstract void cleanup();
 
     @Override
     public boolean equals(Object obj) {

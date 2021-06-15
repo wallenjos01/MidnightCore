@@ -42,6 +42,11 @@ public class Vec3i {
 
     }
 
+    @Override
+    public String toString() {
+        return getX() + "," + getY() + "," + getZ();
+    }
+
     public Vec3i add(int i) {
         return new Vec3i(data[0] + i, data[1] + i, data[2] + i);
     }
@@ -67,7 +72,7 @@ public class Vec3i {
     }
 
 
-    public static final InlineSerializer<Vec3i> SERIALIZER = new InlineSerializer<Vec3i>() {
+    public static final InlineSerializer<Vec3i> SERIALIZER = new InlineSerializer<>() {
         @Override
         public Vec3i deserialize(String s) {
             return parse(s);

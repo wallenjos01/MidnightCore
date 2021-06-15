@@ -102,7 +102,7 @@ public class Location {
 
         BlockPos pos = toBlockPos();
 
-        if(!Level.isInWorldBounds(pos)) {
+        if(!world.isInWorldBounds(pos)) {
             MidnightCoreAPI.getLogger().warn("Unable to teleport entity! Position is invalid!");
             return;
         }
@@ -110,7 +110,6 @@ public class Location {
         if(ent instanceof ServerPlayer) {
 
             ServerPlayer player = (ServerPlayer) ent;
-
             ChunkPos chunkPos = new ChunkPos(pos);
             world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ent.getId());
 
@@ -151,8 +150,8 @@ public class Location {
                 ent.moveTo(x, y, z, wrappedYaw, wrappedPitch);
                 ent.setYHeadRot(wrappedYaw);
 
-                world.addFromAnotherDimension(ent);
-                oldEnt.removed = true;
+                world.addDuringTeleport(ent);
+                oldEnt.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
 
             }
         }
@@ -175,7 +174,7 @@ public class Location {
 
     public static Location getEntityLocation(Entity ent) {
 
-        return new Location(ent.level.dimension().location(), ent.getX(), ent.getY(), ent.getZ(), ent.yRot, ent.xRot);
+        return new Location(ent.level.dimension().location(), ent.getX(), ent.getY(), ent.getZ(), ent.getRotationVector().y, ent.getRotationVector().x);
     }
 
     public static Location getPlayerSpawnLocation(ServerPlayer player) {

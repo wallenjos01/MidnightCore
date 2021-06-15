@@ -11,7 +11,7 @@ import me.m1dnightninja.midnightcore.api.text.ActionBar;
 import me.m1dnightninja.midnightcore.api.text.Title;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
-import me.m1dnightninja.midnightcore.spigot.util.NMSUtil;
+import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -25,43 +25,72 @@ public class SpigotPlayer extends MPlayer {
     protected SpigotPlayer(UUID u) {
         super(u);
 
-        this.player = Bukkit.getPlayer(u);
+        updatePlayer();
+    }
+
+    private void updatePlayer() {
+        if(player == null) player = Bukkit.getPlayer(getUUID());
     }
 
     @Override
     public MComponent getName() {
+        updatePlayer();
         return MComponent.createTextComponent(player.getName());
     }
 
     @Override
     public MComponent getDisplayName() {
+        updatePlayer();
         return MComponent.createTextComponent(player.getDisplayName());
     }
 
     @Override
     public MIdentifier getDimension() {
+        updatePlayer();
         return MIdentifier.parseOrDefault(player.getWorld().getName());
     }
 
     @Override
     public Skin getSkin() {
+        updatePlayer();
 
         ISkinModule mod = MidnightCoreAPI.getInstance().getModule(ISkinModule.class);
         if(mod != null) {
             return mod.getSkin(MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(player.getUniqueId()));
         }
 
-        return MojangUtil.getSkinFromProfile(NMSUtil.getGameProfile(player));
+        return MojangUtil.getSkinFromProfile(NMSWrapper.getGameProfile(player));
     }
 
     @Override
     public Vec3d getLocation() {
+        updatePlayer();
         return new Vec3d(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
     }
 
     @Override
+    public float getYaw() {
+        updatePlayer();
+        return player.getEyeLocation().getYaw();
+    }
+
+    @Override
+    public float getPitch() {
+        updatePlayer();
+        return player.getEyeLocation().getPitch();
+    }
+
+    @Override
+    public boolean isOffline() {
+        updatePlayer();
+        return player == null;
+    }
+
+    @Override
     public void sendMessage(MComponent comp) {
-        NMSUtil.sendMessage(player, comp);
+        updatePlayer();
+
+        NMSWrapper.sendMessage(player, comp);
     }
 
     @Override
@@ -90,14 +119,24 @@ public class SpigotPlayer extends MPlayer {
     }
 
     @Override
+    protected void cleanup() {
+        player = null;
+    }
+
+    @Override
     public boolean hasPermission(String perm) {
 
+        updatePlayer();
         return player.hasPermission(perm);
     }
 
     @Nullable
     public Player getSpigotPlayer() {
-        if(player == null) player = Bukkit.getPlayer(getUUID());
+        updatePlayer();
         return player;
+    }
+
+    public static SpigotPlayer wrap(Player player) {
+        return (SpigotPlayer) MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
     }
 }

@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -12,4 +13,7 @@ public interface AccessorServerPlayer {
 
     @Accessor
     int getContainerCounter();
+
+    @Invoker
+    void callInitMenu(AbstractContainerMenu menu);
 }

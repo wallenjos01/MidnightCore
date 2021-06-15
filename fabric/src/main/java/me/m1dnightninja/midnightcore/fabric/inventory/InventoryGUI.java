@@ -78,7 +78,7 @@ public class InventoryGUI extends AbstractInventoryGUI {
 
         for(Entry ent : entries.values()) {
 
-            if(ent.slot < offset || ent.slot > (offset + (rows * 9)) || ent.item == null) {
+            if(ent.slot < offset || ent.slot >= (offset + (rows * 9)) || ent.item == null) {
                 continue;
             }
 
@@ -92,29 +92,20 @@ public class InventoryGUI extends AbstractInventoryGUI {
         player.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), ConversionUtil.toMinecraftComponent(title)));
         player.containerMenu = handler;
 
-        handler.addSlotListener(player);
-        handler.setSynched(player, true);
-
-        player.refreshContainer(handler);
+        ((AccessorServerPlayer) player).callInitMenu(handler);
     }
 
     private static ClickType getActionType(int action, net.minecraft.world.inventory.ClickType type) {
-        switch(type) {
-            case PICKUP:
-                return action == 0 ? ClickType.LEFT : ClickType.RIGHT;
-            case QUICK_MOVE:
-                return action == 0 ? ClickType.SHIFT_LEFT : ClickType.SHIFT_RIGHT;
-            case SWAP:
-                return ClickType.NUMBER_KEY;
-            case CLONE:
-                return ClickType.MIDDLE;
-            case THROW:
-                return action == 0 ? ClickType.THROW : ClickType.THROW_ALL;
-            case PICKUP_ALL:
-                return ClickType.DOUBLE;
-        }
+        return switch (type) {
+            case PICKUP -> action == 0 ? ClickType.LEFT : ClickType.RIGHT;
+            case QUICK_MOVE -> action == 0 ? ClickType.SHIFT_LEFT : ClickType.SHIFT_RIGHT;
+            case SWAP -> ClickType.NUMBER_KEY;
+            case CLONE -> ClickType.MIDDLE;
+            case THROW -> action == 0 ? ClickType.THROW : ClickType.THROW_ALL;
+            case PICKUP_ALL -> ClickType.DOUBLE;
+            default -> null;
+        };
 
-        return null;
     }
 
     private ChestMenu createScreen(int rows, ServerPlayer player, Container inv) {
@@ -122,20 +113,14 @@ public class InventoryGUI extends AbstractInventoryGUI {
         ((AccessorServerPlayer) player).callNextContainerCounter();
         int syncId = ((AccessorServerPlayer) player).getContainerCounter();
 
-        switch(rows) {
-            case 1:
-                return new ChestMenu(MenuType.GENERIC_9x1, syncId, player.inventory, inv, rows);
-            case 2:
-                return new ChestMenu(MenuType.GENERIC_9x2, syncId, player.inventory, inv, rows);
-            case 3:
-                return new ChestMenu(MenuType.GENERIC_9x3, syncId, player.inventory, inv, rows);
-            case 4:
-                return new ChestMenu(MenuType.GENERIC_9x4, syncId, player.inventory, inv, rows);
-            case 5:
-                return new ChestMenu(MenuType.GENERIC_9x5, syncId, player.inventory, inv, rows);
-            default:
-                return new ChestMenu(MenuType.GENERIC_9x6, syncId, player.inventory, inv, rows);
-        }
+        return switch (rows) {
+            case 1 -> new ChestMenu(MenuType.GENERIC_9x1, syncId, player.getInventory(), inv, rows);
+            case 2 -> new ChestMenu(MenuType.GENERIC_9x2, syncId, player.getInventory(), inv, rows);
+            case 3 -> new ChestMenu(MenuType.GENERIC_9x3, syncId, player.getInventory(), inv, rows);
+            case 4 -> new ChestMenu(MenuType.GENERIC_9x4, syncId, player.getInventory(), inv, rows);
+            case 5 -> new ChestMenu(MenuType.GENERIC_9x5, syncId, player.getInventory(), inv, rows);
+            default -> new ChestMenu(MenuType.GENERIC_9x6, syncId, player.getInventory(), inv, rows);
+        };
     }
 
     private static void onClick(ContainerClickEvent event) {
@@ -152,9 +137,7 @@ public class InventoryGUI extends AbstractInventoryGUI {
         int offset = gui.getPlayerPage(player) * 54;
         int slot = event.getSlot();
 
-        MidnightCore.getServer().submit(() -> {
-            gui.onClick(player, getActionType(event.getClickType(), event.getAction()), offset + slot);
-        });
+        MidnightCore.getServer().submit(() -> gui.onClick(player, getActionType(event.getClickType(), event.getAction()), offset + slot));
     }
 
     private static void onClose(MenuCloseEvent event) {

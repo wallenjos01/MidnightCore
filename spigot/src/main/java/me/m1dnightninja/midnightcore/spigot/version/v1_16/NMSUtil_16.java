@@ -1,17 +1,15 @@
-package me.m1dnightninja.midnightcore.spigot.util;
+package me.m1dnightninja.midnightcore.spigot.version.v1_16;
 
 import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import net.minecraft.server.v1_16_R3.ChatMessageType;
-import net.minecraft.server.v1_16_R3.EntityPlayer;
-import net.minecraft.server.v1_16_R3.IChatBaseComponent;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
+import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
+import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-public class NMSUtil {
+public class NMSUtil_16 implements NMSWrapper.NMSUtil {
 
     public static final UUID nullUid = new UUID(0L, 0L);
 
@@ -29,14 +27,14 @@ public class NMSUtil {
 
     private static final Object ChatType_SYSTEM = ReflectionUtil.getEnumValue(chatMessageType, "SYSTEM");
 
-    public static GameProfile getGameProfile(Player player) {
+    public GameProfile getGameProfile(Player player) {
 
         Object craftp = ReflectionUtil.castTo(player, craftPlayer);
         return (GameProfile) ReflectionUtil.callMethod(craftp, getProfile, false);
 
     }
 
-    public static void sendMessage(Player player, MComponent comp) {
+    public void sendMessage(Player player, MComponent comp) {
 
         Object craftp = ReflectionUtil.castTo(player, craftPlayer);
         Object nmsPl = ReflectionUtil.callMethod(craftp, getHandle, false);

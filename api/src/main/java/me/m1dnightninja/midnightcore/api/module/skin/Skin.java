@@ -3,6 +3,7 @@ package me.m1dnightninja.midnightcore.api.module.skin;
 import java.util.UUID;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.config.ConfigSerializer;
+import me.m1dnightninja.midnightcore.api.config.InlineSerializer;
 
 public class Skin {
 
@@ -38,14 +39,30 @@ public class Skin {
 
     }
 
-    public static final ConfigSerializer<Skin> SERIALIZER = new ConfigSerializer<Skin>(){
+    public static final InlineSerializer<UUID> UID_SERIALIZER = new InlineSerializer<>() {
+        @Override
+        public UUID deserialize(String s) {
+            return UUID.fromString(s);
+        }
+
+        @Override
+        public String serialize(UUID object) {
+            return object.toString();
+        }
+    };
+
+    public static final ConfigSerializer<Skin> SERIALIZER = new ConfigSerializer<>(){
 
         @Override
         public Skin deserialize(ConfigSection sec) {
-            if (!(sec.has("uid") && sec.has("b64") && sec.has("sig"))) {
+            UUID uid   = sec.has("uid", UUID.class)   ? sec.get("uid", UUID.class) : sec.has("uuid", UUID.class)           ? sec.get("uuid", UUID.class)   : null;
+            String b64 = sec.has("b64", String.class) ? sec.getString("b64")       : sec.has("base64", String.class)       ? sec.getString("base64")       : null;
+            String sig = sec.has("sig", String.class) ? sec.getString("sig")       : sec.has("signedBase64", String.class) ? sec.getString("signedBase64") : null;
+
+            if (uid == null || b64 == null || sig == null) {
                 throw new IllegalStateException("Not a skin object!");
             }
-            return new Skin(UUID.fromString(sec.getString("uid")), sec.getString("b64"), sec.getString("sig"));
+            return new Skin(uid, b64, sig);
         }
 
         @Override

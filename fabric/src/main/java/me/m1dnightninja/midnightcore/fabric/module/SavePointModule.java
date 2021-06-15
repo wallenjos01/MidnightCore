@@ -31,7 +31,7 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         ServerPlayer player = ((FabricPlayer) u).getMinecraftPlayer();
         if(player == null) return;
 
-        player.inventory.clearContent();
+        player.getInventory().clearContent();
         player.removeAllEffects();
         player.setRemainingFireTicks(0);
         player.setHealth(player.getMaxHealth());
