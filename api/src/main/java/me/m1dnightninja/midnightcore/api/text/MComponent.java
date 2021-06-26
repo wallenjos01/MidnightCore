@@ -176,6 +176,11 @@ public class MComponent {
         u.sendMessage(this);
     }
 
+    @Override
+    public String toString() {
+        return allContent();
+    }
+
     public enum Type {
 
         TEXT("text"),
@@ -415,26 +420,26 @@ public class MComponent {
                         currentStyle = new MStyle().withColor(Color.fromRGBI(rgbi));
                     }
                     switch (next) {
-                        case 'l':
+                        case 'l' -> {
                             currentStyle.withBold(true);
                             i += 1;
-                            break;
-                        case 'o':
+                        }
+                        case 'o' -> {
                             currentStyle.withItalic(true);
                             i += 1;
-                            break;
-                        case 'n':
+                        }
+                        case 'n' -> {
                             currentStyle.withUnderline(true);
                             i += 1;
-                            break;
-                        case 'm':
+                        }
+                        case 'm' -> {
                             currentStyle.withStrikethrough(true);
                             i += 1;
-                            break;
-                        case 'k':
+                        }
+                        case 'k' -> {
                             currentStyle.withObfuscated(true);
                             i += 1;
-                            break;
+                        }
                     }
 
                 } else if(c == rgbColorCharacter && i < content.length() - 7) {

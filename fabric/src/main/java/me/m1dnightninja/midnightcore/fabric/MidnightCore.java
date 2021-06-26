@@ -56,6 +56,7 @@ public class MidnightCore implements ModInitializer {
         modules.add(new DimensionModule());
         modules.add(new SavePointModule());
         modules.add(new PlayerDataModule());
+        modules.add(new VanishModule());
 
         // Find sub-mods
         List<MidnightCoreModInitializer> inits = FabricLoader.getInstance().getEntrypoints("midnightcore:mod", MidnightCoreModInitializer.class);
@@ -133,10 +134,7 @@ public class MidnightCore implements ModInitializer {
         // Register vanilla permissions
         if(api.getMainConfig().has("vanilla_permissions", Boolean.class) && api.getMainConfig().getBoolean("vanilla_permissions")) {
 
-            CommandRegistrationCallback.EVENT.register(((commandDispatcher, b) -> {
-                PermissionHelper.registerVanillaPermissions(commandDispatcher);
-
-            }));
+            CommandRegistrationCallback.EVENT.register(((commandDispatcher, b) -> PermissionHelper.registerVanillaPermissions(commandDispatcher)));
         }
 
         InventoryGUI.registerEvents(this);

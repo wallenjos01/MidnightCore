@@ -10,10 +10,7 @@ import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.common.module.AbstractSkinModule;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
-import me.m1dnightninja.midnightcore.fabric.api.event.PacketSendEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerDisconnectEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerLoginEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerSkinUpdateEvent;
+import me.m1dnightninja.midnightcore.fabric.api.event.*;
 import me.m1dnightninja.midnightcore.fabric.event.*;
 import me.m1dnightninja.midnightcore.fabric.mixin.AccessorPlayerListPacket;
 import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
@@ -55,6 +52,9 @@ public class SkinModule extends AbstractSkinModule {
                 applyActiveProfile((ClientboundPlayerInfoPacket) event.getPacket());
             }
         });
+
+        Event.register(SavePointCreatedEvent.class, this, event -> event.getSavePoint().extraData.set("skin", getSkin(FabricPlayer.wrap(event.getPlayer()))));
+        Event.register(SavePointLoadEvent.class, this, event -> setSkin(FabricPlayer.wrap(event.getPlayer()), event.getSavePoint().extraData.get("skin", Skin.class)));
 
         return true;
     }

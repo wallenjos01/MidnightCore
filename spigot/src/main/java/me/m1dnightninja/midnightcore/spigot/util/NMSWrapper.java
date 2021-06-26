@@ -1,10 +1,12 @@
 package me.m1dnightninja.midnightcore.spigot.util;
 
 import com.mojang.authlib.GameProfile;
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.ActionBar;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.api.text.Title;
+import me.m1dnightninja.midnightcore.spigot.version.NMSUtil_Other;
 import me.m1dnightninja.midnightcore.spigot.version.v1_16.NMSUtil_16;
 import me.m1dnightninja.midnightcore.spigot.version.v1_17.NMSUtil_17;
 import org.bukkit.entity.Player;
@@ -20,10 +22,16 @@ public class NMSWrapper {
 
         if(CACHED_UTIL == null) {
 
-            if(ReflectionUtil.MAJOR_VERISON <= 16) {
-                CACHED_UTIL = new NMSUtil_16();
-            } else {
-                CACHED_UTIL = new NMSUtil_17();
+            try {
+                if (ReflectionUtil.MAJOR_VERISON <= 16) {
+                    CACHED_UTIL = new NMSUtil_16();
+                } else {
+                    CACHED_UTIL = new NMSUtil_17();
+                }
+            } catch (IllegalStateException ex) {
+
+                MidnightCoreAPI.getLogger().warn("Warning: Unable to find supported NMS Util! Functions involving Skins and RGB text may not work properly!");
+                CACHED_UTIL = new NMSUtil_Other();
             }
         }
 

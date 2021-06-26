@@ -6,10 +6,14 @@ import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.module.AbstractSavePointModule;
+import me.m1dnightninja.midnightcore.spigot.api.event.SavePointCreatedEvent;
+import me.m1dnightninja.midnightcore.spigot.api.event.SavePointLoadEvent;
 import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -43,9 +47,14 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         }
 
         pl.setFireTicks(0);
-        pl.setHealth(pl.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
         pl.setFoodLevel(20);
         pl.setSaturation(20);
+
+
+        AttributeInstance inst = pl.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        double val = inst == null ? 20 : inst.getBaseValue();
+
+        pl.setHealth(val);
 
     }
 
@@ -73,6 +82,11 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         }
         out.potionEffects.addAll(pl.getActivePotionEffects());
         out.fireTicks = pl.getFireTicks();
+
+        out.extraData = new ConfigSection();
+
+        SavePointCreatedEvent ev = new SavePointCreatedEvent(pl, this, out);
+        Bukkit.getPluginManager().callEvent(ev);
 
         return out;
     }
@@ -105,9 +119,12 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
 
         pl.teleport(point.location);
         pl.setFireTicks(point.fireTicks);
+
+        SavePointLoadEvent ev = new SavePointLoadEvent(pl, this, point);
+        Bukkit.getPluginManager().callEvent(ev);
     }
 
-    protected static class SavePoint {
+    public static class SavePoint {
 
         Location location;
         Skin skin;
@@ -115,6 +132,8 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         HashMap<ItemStack, Integer> inventory = new HashMap<>();
         List<PotionEffect> potionEffects = new ArrayList<>();
         int fireTicks;
+
+        ConfigSection extraData;
 
     }
 

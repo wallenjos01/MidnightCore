@@ -1,17 +1,15 @@
 package me.m1dnightninja.midnightcore.fabric.module;
 
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
-import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.module.AbstractSavePointModule;
-import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.api.Location;
+import me.m1dnightninja.midnightcore.fabric.api.event.SavePointCreatedEvent;
+import me.m1dnightninja.midnightcore.fabric.api.event.SavePointLoadEvent;
+import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
-import net.minecraft.server.commands.TeleportCommand;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.GameType;
@@ -50,9 +48,13 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
 
         SavePoint out = new SavePoint();
         out.location = Location.getEntityLocation(player);
-        out.skin = MidnightCoreAPI.getInstance().getModule(ISkinModule.class).getSkin(u);
         out.tag = player.saveWithoutId(new CompoundTag());
         out.gameMode = player.gameMode.getGameModeForPlayer();
+
+        out.extraData = new ConfigSection();
+
+        SavePointCreatedEvent ev = new SavePointCreatedEvent(player, this, out);
+        Event.invoke(ev);
 
         return out;
     }
@@ -62,12 +64,14 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         ServerPlayer player = ((FabricPlayer) u).getMinecraftPlayer();
         if(player == null) return;
 
+        SavePointLoadEvent ev = new SavePointLoadEvent(player, this, point);
+        Event.invoke(ev);
+        if(ev.isCancelled() || ev.getSavePoint() == null) return;
+
+        point = ev.getSavePoint();
+
         resetPlayer(u);
-
         player.load(point.tag);
-
-        MidnightCoreAPI.getInstance().getModule(ISkinModule.class).setSkin(u, point.skin);
-        MidnightCoreAPI.getInstance().getModule(ISkinModule.class).updateSkin(u);
 
         point.location.teleport(player);
 
@@ -79,12 +83,13 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
 
     }
 
-    protected static class SavePoint {
+    public static class SavePoint {
 
         Location location;
-        Skin skin;
         CompoundTag tag;
         GameType gameMode;
+
+        ConfigSection extraData;
 
     }
 
