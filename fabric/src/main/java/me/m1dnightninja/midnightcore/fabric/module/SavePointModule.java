@@ -11,8 +11,10 @@ import me.m1dnightninja.midnightcore.fabric.api.Location;
 import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.server.commands.TeleportCommand;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.level.GameType;
 
 public class SavePointModule extends AbstractSavePointModule<SavePointModule.SavePoint> {
 
@@ -50,6 +52,7 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         out.location = Location.getEntityLocation(player);
         out.skin = MidnightCoreAPI.getInstance().getModule(ISkinModule.class).getSkin(u);
         out.tag = player.saveWithoutId(new CompoundTag());
+        out.gameMode = player.gameMode.getGameModeForPlayer();
 
         return out;
     }
@@ -72,6 +75,8 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
             player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), inst));
         }
 
+        player.setGameMode(point.gameMode);
+
     }
 
     protected static class SavePoint {
@@ -79,6 +84,7 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         Location location;
         Skin skin;
         CompoundTag tag;
+        GameType gameMode;
 
     }
 

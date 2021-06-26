@@ -18,6 +18,7 @@
     "MixinExplosion",
     "MixinGameruleCommand",
     "MixinHungerManager",
+    "MixinItemStack",
     "MixinLivingEntity",
     "MixinMinecraftServer",
     "MixinPacketHandler",

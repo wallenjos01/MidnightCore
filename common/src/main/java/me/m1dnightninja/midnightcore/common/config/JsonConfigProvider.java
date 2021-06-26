@@ -44,6 +44,13 @@ public class JsonConfigProvider implements ConfigProvider {
     }
 
     @Override
+    public String saveToString(ConfigSection config) {
+        JsonObject obj = toJson(config);
+
+        return obj.toString();
+    }
+
+    @Override
     public String getFileExtension() {
         return ".json";
     }

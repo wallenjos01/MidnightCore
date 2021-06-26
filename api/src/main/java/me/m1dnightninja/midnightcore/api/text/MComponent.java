@@ -108,7 +108,7 @@ public class MComponent {
         out.append(style.toLegacyText(hexSupport)).append(content);
 
         for(MComponent cmp : children) {
-            out.append(toLegacyText(hexSupport));
+            out.append(cmp.toLegacyText(hexSupport));
         }
 
         return out.toString();

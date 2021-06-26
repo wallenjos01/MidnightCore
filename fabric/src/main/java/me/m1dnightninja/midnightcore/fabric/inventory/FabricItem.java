@@ -9,6 +9,7 @@ import me.m1dnightninja.midnightcore.api.text.MHoverEvent;
 import me.m1dnightninja.midnightcore.api.text.MStyle;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,7 +22,8 @@ public class FabricItem extends MItemStack {
         super(ConversionUtil.fromResourceLocation(Registry.ITEM.getKey(is.getItem())), is.getCount());
         stack = is;
 
-        tag = ConversionUtil.fromCompoundTag(is.getOrCreateTag());
+        CompoundTag mtag = is.getTag();
+        tag = mtag == null ? new ConfigSection() : ConversionUtil.fromCompoundTag(mtag);
     }
 
     public FabricItem(MIdentifier type, int count) {

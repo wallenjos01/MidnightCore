@@ -25,13 +25,16 @@ public class ConversionUtil {
 
         TextComponent out = new TextComponent(comp.getContent());
         out.setBold(comp.getStyle().isBold());
-        out.setItalic(comp.getStyle().isBold());
-        out.setUnderlined(comp.getStyle().isBold());
-        out.setStrikethrough(comp.getStyle().isBold());
-        out.setObfuscated(comp.getStyle().isBold());
-        out.setColor(ChatColor.getByChar(Integer.toHexString(comp.getStyle().getColor().toRGBI()).charAt(0)));
+        out.setItalic(comp.getStyle().isItalic());
+        out.setUnderlined(comp.getStyle().isUnderlined());
+        out.setStrikethrough(comp.getStyle().isStrikethrough());
+        out.setObfuscated(comp.getStyle().isObfuscated());
 
-        if(ReflectionUtil.MAJOR_VERISON >= 16) {
+        if(comp.getStyle().getColor() != null) {
+            out.setColor(ChatColor.getByChar(Integer.toHexString(comp.getStyle().getColor().toRGBI()).charAt(0)));
+        }
+
+        if(ReflectionUtil.MAJOR_VERISON >= 16 && comp.getStyle().getFont() != null) {
             out.setFont(comp.getStyle().getFont().toString());
         }
 

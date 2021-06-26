@@ -16,6 +16,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -174,7 +175,7 @@ public class DimensionModule implements IModule {
         } else {
 
             WorldData save = MidnightCore.getServer().getWorldData();
-            props = (ServerLevelData) MidnightCore.getServer().overworld().getLevelData();
+            props = save.overworldData();
             listener = ((AccessorAnvilChunkStorage) MidnightCore.getServer().overworld().getChunkSource().chunkMap).getListener();
 
             options = save.worldGenSettings().dimensions().get(cre.getDimension());

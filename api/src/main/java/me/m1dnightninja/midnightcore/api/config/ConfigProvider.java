@@ -11,6 +11,8 @@ public interface ConfigProvider {
 
     void saveToFile(ConfigSection config, File file);
 
+    String saveToString(ConfigSection config);
+
     String getFileExtension();
 }
 

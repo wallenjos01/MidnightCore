@@ -42,7 +42,6 @@ public class YamlConfigProvider implements ConfigProvider {
 
         YamlConfiguration sec = toYamlSection(config);
         if(sec == null) {
-            System.out.println("Got null data when trying to save config file!");
             return;
         }
 
@@ -53,6 +52,15 @@ public class YamlConfigProvider implements ConfigProvider {
             MidnightCoreAPI.getLogger().warn("An error occurred while trying to save a config file!");
             ex.printStackTrace();
         }
+    }
+
+    @Override
+    public String saveToString(ConfigSection config) {
+
+        YamlConfiguration sec = toYamlSection(config);
+        if(sec == null) return "";
+
+        return sec.saveToString();
     }
 
     @Override

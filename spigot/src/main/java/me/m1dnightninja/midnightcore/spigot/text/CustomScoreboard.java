@@ -103,8 +103,6 @@ public class CustomScoreboard extends AbstractCustomScoreboard {
 
         pl.setScoreboard(internal);
 
-
-
     }
 
     @Override

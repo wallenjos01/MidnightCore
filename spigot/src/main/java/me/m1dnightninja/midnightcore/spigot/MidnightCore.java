@@ -9,6 +9,7 @@ import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.JavaLogger;
 import me.m1dnightninja.midnightcore.spigot.inventory.InventoryGUI;
 import me.m1dnightninja.midnightcore.spigot.inventory.SpigotItem;
+import me.m1dnightninja.midnightcore.spigot.module.SavePointModule;
 import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayerManager;
 import me.m1dnightninja.midnightcore.spigot.text.CustomScoreboard;
 import me.m1dnightninja.midnightcore.spigot.text.Timer;
@@ -56,6 +57,7 @@ public class MidnightCore extends JavaPlugin {
         modules.add(new SkinModule());
         modules.add(new LangModule());
         modules.add(new PlayerDataModule());
+        modules.add(new SavePointModule());
 
         getServer().getPluginManager().callEvent(new MidnightCoreLoadModulesEvent(this, modules));
 

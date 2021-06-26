@@ -124,8 +124,9 @@ public class Location {
                 player.teleportTo(world, x, y, z, yaw, pitch);
             }
 
-        } else {
+            player.setYHeadRot(yaw);
 
+        } else {
 
             float wrappedYaw = Mth.wrapDegrees(yaw);
             float wrappedPitch = Mth.clamp(Mth.wrapDegrees(pitch), -90.0f, 90.0f);
@@ -150,8 +151,8 @@ public class Location {
                 ent.moveTo(x, y, z, wrappedYaw, wrappedPitch);
                 ent.setYHeadRot(wrappedYaw);
 
-                world.addDuringTeleport(ent);
                 oldEnt.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+                world.addDuringTeleport(ent);
 
             }
         }
@@ -165,6 +166,11 @@ public class Location {
             ((PathfinderMob) ent).getNavigation().stop();
         }
 
+    }
+
+    @Override
+    public String toString() {
+        return worldId.toString() + " - (%s,%s,%s) (%s,%s)".formatted(x,y,z,yaw,pitch);
     }
 
     public Vec3d toVector() {

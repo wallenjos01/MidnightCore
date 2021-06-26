@@ -36,7 +36,7 @@ public class MixinBucketItem {
     @Inject(method="use", at=@At(value = "INVOKE", target = "Lnet/minecraft/world/phys/BlockHitResult;getBlockPos()Lnet/minecraft/core/BlockPos;"), cancellable = true)
     private void onUse(Level level, Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
 
-        if(result == null) return;
+        if(result == null || !(player instanceof ServerPlayer)) return;
         ItemStack is = player.getItemInHand(interactionHand);
 
         BlockHitResult res = result;

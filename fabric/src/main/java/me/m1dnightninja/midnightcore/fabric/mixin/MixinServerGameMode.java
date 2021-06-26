@@ -47,21 +47,6 @@ public class MixinServerGameMode {
 
     }
 
-    @Inject(method = "useItem(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;", at=@At("HEAD"), cancellable = true)
-    private void onRightClick(ServerPlayer player, Level level, ItemStack item, InteractionHand hand, CallbackInfoReturnable<InteractionResult> ci) {
-
-        if(!item.isEmpty() && item.getItem() instanceof BucketItem) return;
-
-        PlayerInteractEvent event = new PlayerInteractEvent(player, item, hand, PlayerInteractEvent.InteractionType.INTERACT, null);
-        Event.invoke(event);
-
-        if(event.isCancelled()) {
-            ci.setReturnValue(event.shouldSwingArm() ? InteractionResult.SUCCESS : InteractionResult.PASS);
-            ci.cancel();
-        }
-
-    }
-
     @Inject(method = "useItemOn(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;", at=@At("HEAD"), cancellable = true)
     private void onRightClickBlock(ServerPlayer player, Level level, ItemStack item, InteractionHand hand, BlockHitResult res, CallbackInfoReturnable<InteractionResult> ci) {
 
