@@ -70,10 +70,13 @@ public class SkinModule extends AbstractSkinModule {
 
     @Override
     public void updateSkin(MPlayer uid) {
-        if(!loadedSkins.containsKey(uid) || !activeSkins.containsKey(uid)) return;
+
+        if(!loadedSkins.containsKey(uid) && !activeSkins.containsKey(uid)) return;
+
 
         ServerPlayer pl = ((FabricPlayer) uid).getMinecraftPlayer();
         if(pl == null) return;
+
 
         Skin oldSkin = activeSkins.get(uid);
         Skin newSkin = loadedSkins.get(uid);

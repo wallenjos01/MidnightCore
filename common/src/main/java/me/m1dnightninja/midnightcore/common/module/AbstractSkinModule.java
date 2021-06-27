@@ -1,7 +1,6 @@
 package me.m1dnightninja.midnightcore.common.module;
 
 import com.mojang.authlib.GameProfile;
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;

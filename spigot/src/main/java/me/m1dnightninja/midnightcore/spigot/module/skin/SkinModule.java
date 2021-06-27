@@ -44,8 +44,6 @@ public class SkinModule extends AbstractSkinModule implements Listener {
         Skin s = MojangUtil.getSkinFromProfile(prof);
         loginSkins.put(pl, s);
 
-        MidnightCoreAPI.getLogger().warn("Login Detected: " + getOfflineModeSkins + ", " + Bukkit.getServer().getOnlineMode());
-
         if(getOfflineModeSkins && !Bukkit.getServer().getOnlineMode()) {
 
             findOfflineSkin(pl, prof);
