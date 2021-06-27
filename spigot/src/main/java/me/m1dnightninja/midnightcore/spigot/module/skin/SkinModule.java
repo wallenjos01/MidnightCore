@@ -38,9 +38,25 @@ public class SkinModule extends AbstractSkinModule implements Listener {
 
         MPlayer pl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
 
-        Skin s = MojangUtil.getSkinFromProfile(NMSWrapper.getGameProfile(event.getPlayer()));
-        loginSkins.put(pl, s);
-        activeSkins.put(pl, loginSkins.get(pl));
+        if(Bukkit.getServer().getOnlineMode()) {
+
+            Skin s = MojangUtil.getSkinFromProfile(NMSWrapper.getGameProfile(event.getPlayer()));
+            loginSkins.put(pl, s);
+            activeSkins.put(pl, loginSkins.get(pl));
+
+        } else {
+
+            getOnlineSkinAsync(event.getPlayer().getUniqueId(), (pl1, skin) -> {
+
+                loginSkins.put(pl, skin);
+
+                if(!activeSkins.containsKey(pl)) {
+
+                    activeSkins.put(pl, skin);
+                    updateSkin(pl);
+                }
+            });
+        }
     }
 
     @EventHandler
@@ -52,7 +68,6 @@ public class SkinModule extends AbstractSkinModule implements Listener {
 
             Player p = ((SpigotPlayer) u).getSpigotPlayer();
             updater.updatePlayer(p, activeSkins.get(u), Collections.singletonList(event.getPlayer()));
-
         }
     }
 

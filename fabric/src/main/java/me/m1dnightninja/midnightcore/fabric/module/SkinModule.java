@@ -34,10 +34,29 @@ public class SkinModule extends AbstractSkinModule {
 
         Event.register(PlayerLoginEvent.class, this, event -> {
 
-            MPlayer player = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUUID());
+            MPlayer player = FabricPlayer.wrap(event.getPlayer());
 
-            loginSkins.put(player, MojangUtil.getSkinFromProfile(event.getProfile()));
-            activeSkins.put(player, MojangUtil.getSkinFromProfile(event.getProfile()));
+            if(MidnightCore.getServer().usesAuthentication()) {
+
+                Skin s = MojangUtil.getSkinFromProfile(event.getProfile());
+                loginSkins.put(player, s);
+                activeSkins.put(player, s);
+
+            } else {
+
+                getOnlineSkinAsync(player.getUUID(), (pl, skin) -> {
+
+                    loginSkins.put(player, skin);
+
+                    if(!activeSkins.containsKey(player)) {
+
+                        activeSkins.put(player, skin);
+                        updateSkin(player);
+                    }
+                });
+
+            }
+
         });
         Event.register(PlayerDisconnectEvent.class, this, event -> {
 
