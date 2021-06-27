@@ -1,11 +1,13 @@
 package me.m1dnightninja.midnightcore.spigot.module.skin;
 
+import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.common.module.AbstractSkinModule;
+import me.m1dnightninja.midnightcore.spigot.MidnightCore;
 import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
 import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
@@ -38,24 +40,19 @@ public class SkinModule extends AbstractSkinModule implements Listener {
 
         MPlayer pl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
 
-        if(Bukkit.getServer().getOnlineMode()) {
+        GameProfile prof = NMSWrapper.getGameProfile(event.getPlayer());
+        Skin s = MojangUtil.getSkinFromProfile(prof);
+        loginSkins.put(pl, s);
 
-            Skin s = MojangUtil.getSkinFromProfile(NMSWrapper.getGameProfile(event.getPlayer()));
-            loginSkins.put(pl, s);
-            activeSkins.put(pl, loginSkins.get(pl));
+        MidnightCoreAPI.getLogger().warn("Login Detected: " + getOfflineModeSkins + ", " + Bukkit.getServer().getOnlineMode());
+
+        if(getOfflineModeSkins && !Bukkit.getServer().getOnlineMode()) {
+
+            findOfflineSkin(pl, prof);
 
         } else {
 
-            getOnlineSkinAsync(event.getPlayer().getUniqueId(), (pl1, skin) -> {
-
-                loginSkins.put(pl, skin);
-
-                if(!activeSkins.containsKey(pl)) {
-
-                    activeSkins.put(pl, skin);
-                    updateSkin(pl);
-                }
-            });
+            activeSkins.put(pl, loginSkins.get(pl));
         }
     }
 
@@ -64,7 +61,7 @@ public class SkinModule extends AbstractSkinModule implements Listener {
         if(updater == null) return;
         for(MPlayer u : activeSkins.keySet()) {
 
-            if(activeSkins.get(u) == loginSkins.get(u)) continue;
+            if(!getOfflineModeSkins && activeSkins.get(u) == loginSkins.get(u)) continue;
 
             Player p = ((SpigotPlayer) u).getSpigotPlayer();
             updater.updatePlayer(p, activeSkins.get(u), Collections.singletonList(event.getPlayer()));
@@ -83,6 +80,8 @@ public class SkinModule extends AbstractSkinModule implements Listener {
 
     @Override
     public boolean initialize(ConfigSection section) {
+
+        super.initialize(section);
 
         switch(ReflectionUtil.API_VERSION) {
             case "v1_8_R1":
@@ -128,17 +127,14 @@ public class SkinModule extends AbstractSkinModule implements Listener {
 
         }
 
+        Bukkit.getPluginManager().registerEvents(this, MidnightCore.getInstance());
+
         if(!updater.initialize()) {
             MidnightCoreAPI.getLogger().warn("Can't enable skin module! Version unsupported!");
             return false;
         }
 
         return true;
-    }
-
-    @Override
-    public ConfigSection getDefaultConfig() {
-        return null;
     }
 
     @Override

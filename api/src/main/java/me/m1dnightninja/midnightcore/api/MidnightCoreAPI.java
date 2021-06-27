@@ -146,7 +146,7 @@ public class MidnightCoreAPI {
             }
             if(sec == null && defs != null) {
                 sec = new ConfigSection();
-                moduleConfig.set(modId, sec);
+                moduleConfig.set(modId, defs);
             }
 
             // Copy defaults

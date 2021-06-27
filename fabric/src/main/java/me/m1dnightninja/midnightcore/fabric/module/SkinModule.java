@@ -28,35 +28,25 @@ import java.util.List;
 
 public class SkinModule extends AbstractSkinModule {
 
-
     @Override
     public boolean initialize(ConfigSection config) {
+
+        super.initialize(config);
 
         Event.register(PlayerLoginEvent.class, this, event -> {
 
             MPlayer player = FabricPlayer.wrap(event.getPlayer());
 
-            if(MidnightCore.getServer().usesAuthentication()) {
+            Skin s = MojangUtil.getSkinFromProfile(event.getProfile());
+            loginSkins.put(player, s);
+            if(getOfflineModeSkins && !MidnightCore.getServer().usesAuthentication()) {
 
-                Skin s = MojangUtil.getSkinFromProfile(event.getProfile());
-                loginSkins.put(player, s);
-                activeSkins.put(player, s);
+                findOfflineSkin(player, event.getProfile());
 
             } else {
 
-                getOnlineSkinAsync(player.getUUID(), (pl, skin) -> {
-
-                    loginSkins.put(player, skin);
-
-                    if(!activeSkins.containsKey(player)) {
-
-                        activeSkins.put(player, skin);
-                        updateSkin(player);
-                    }
-                });
-
+                activeSkins.put(player, s);
             }
-
         });
         Event.register(PlayerDisconnectEvent.class, this, event -> {
 
@@ -76,11 +66,6 @@ public class SkinModule extends AbstractSkinModule {
         Event.register(SavePointLoadEvent.class, this, event -> setSkin(FabricPlayer.wrap(event.getPlayer()), event.getSavePoint().extraData.get("skin", Skin.class)));
 
         return true;
-    }
-
-    @Override
-    public ConfigSection getDefaultConfig() {
-        return null;
     }
 
     @Override

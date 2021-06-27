@@ -1,5 +1,8 @@
 package me.m1dnightninja.midnightcore.common.module;
 
+import com.mojang.authlib.GameProfile;
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
@@ -19,11 +22,28 @@ public abstract class AbstractSkinModule implements ISkinModule {
     protected final HashMap<MPlayer, Skin> loadedSkins = new HashMap<>();
     protected final HashMap<MPlayer, Skin> activeSkins = new HashMap<>();
 
+    protected boolean getOfflineModeSkins = true;
+
     @Override
     public MIdentifier getId() {
         return ID;
     }
 
+    @Override
+    public boolean initialize(ConfigSection configuration) {
+
+        getOfflineModeSkins = configuration.getBoolean("get_skins_in_offline_mode");
+        return true;
+    }
+
+    @Override
+    public ConfigSection getDefaultConfig() {
+
+        ConfigSection out = new ConfigSection();
+        out.set("get_skins_in_offline_mode", true);
+
+        return out;
+    }
 
     @Override
     public Skin getSkin(MPlayer uid) {
@@ -77,6 +97,28 @@ public abstract class AbstractSkinModule implements ISkinModule {
     @Override
     public void resetSkin(MPlayer uid) {
         loadedSkins.put(uid, loginSkins.get(uid));
+    }
+
+    protected void findOfflineSkin(MPlayer player, GameProfile prof) {
+
+        String name = prof.getName();
+
+        new Thread(() -> {
+
+            UUID onlineUid = MojangUtil.getUUID(name);
+            if(onlineUid == null) return;
+
+            Skin s = MojangUtil.getSkin(onlineUid);
+
+            loginSkins.put(player, s);
+
+            if(!activeSkins.containsKey(player)) {
+
+                setSkin(player, s);
+                updateSkin(player);
+            }
+
+        }).start();
     }
 
 }
