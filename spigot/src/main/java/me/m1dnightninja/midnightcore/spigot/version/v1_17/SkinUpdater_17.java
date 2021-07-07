@@ -3,10 +3,14 @@ package me.m1dnightninja.midnightcore.spigot.version.v1_17;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.EmptyByteBuf;
+import io.netty.buffer.Unpooled;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
 import me.m1dnightninja.midnightcore.spigot.module.skin.ISkinUpdater;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
+import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
@@ -95,7 +99,12 @@ public class SkinUpdater_17 implements ISkinUpdater {
         PacketPlayOutEntityEquipment equip = new PacketPlayOutEntityEquipment(player.getId(), items);
 
 
-        PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(player.getId());
+        // Hack to fix 1.17.0
+        PacketDataSerializer serializer = new PacketDataSerializer(Unpooled.buffer());
+        serializer.writeInt(player.getId());
+
+        PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(serializer);
+
         PacketPlayOutNamedEntitySpawn spawn = new PacketPlayOutNamedEntitySpawn(player);
         PacketPlayOutEntityMetadata tracker = new PacketPlayOutEntityMetadata(player.getId(), player.getDataWatcher(), true);
 

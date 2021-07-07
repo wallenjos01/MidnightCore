@@ -115,7 +115,7 @@ public class SkinModule extends AbstractSkinModule {
 
         ClientboundSetEquipmentPacket equip = new ClientboundSetEquipmentPacket(player.getId(), items);
 
-        ClientboundRemoveEntityPacket destroy = new ClientboundRemoveEntityPacket(player.getId());
+        ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(player.getId());
         ClientboundAddPlayerPacket spawn = new ClientboundAddPlayerPacket(player);
         ClientboundSetEntityDataPacket tracker = new ClientboundSetEntityDataPacket(player.getId(), player.getEntityData(), true);
 

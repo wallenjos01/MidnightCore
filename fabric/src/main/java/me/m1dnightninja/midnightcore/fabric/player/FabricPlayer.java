@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class FabricPlayer extends MPlayer {
@@ -45,11 +46,8 @@ public class FabricPlayer extends MPlayer {
 
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) {
-            GameProfile prof = MidnightCore.getServer().getProfileCache().get(getUUID());
-            if(prof != null) {
-                return MComponent.createTextComponent(prof.getName());
-            }
-            return MComponent.createTextComponent(getUUID().toString());
+            Optional<GameProfile> prof = MidnightCore.getServer().getProfileCache().get(getUUID());
+            return prof.map(gameProfile -> MComponent.createTextComponent(gameProfile.getName())).orElseGet(() -> MComponent.createTextComponent(getUUID().toString()));
         }
 
         return MComponent.Serializer.fromJson(Component.Serializer.toJson(player.getName()));

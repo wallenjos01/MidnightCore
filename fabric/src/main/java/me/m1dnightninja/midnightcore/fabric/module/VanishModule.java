@@ -60,7 +60,7 @@ public class VanishModule extends AbstractVanishModule {
         ServerPlayer op = ((FabricPlayer) other).getMinecraftPlayer();
         if(pp == null || op == null) return;
 
-        op.connection.send(new ClientboundRemoveEntityPacket(pp.getId()));
+        op.connection.send(new ClientboundRemoveEntitiesPacket(pp.getId()));
         op.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, pp));
 
     }
