@@ -1,19 +1,17 @@
 package me.m1dnightninja.midnightcore.api.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LinkedTreeMap;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 
 public class ConfigSection {
     private final ConfigRegistry reg;
-    private final HashMap<String, Object> entries = new HashMap<>();
+    private final LinkedTreeMap<String, Object> entries = new LinkedTreeMap<>();
 
     public ConfigSection() {
         this(MidnightCoreAPI.getConfigRegistry());
@@ -23,34 +21,50 @@ public class ConfigSection {
         this.reg = reg;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> void set(String key, T obj) {
         // Remove an object
         if (obj == null) {
 
             this.entries.remove(key);
 
-        } else if (obj instanceof Map) {
+        } else {
 
-            for(Map.Entry<?,?> ent : ((Map<?,?>) obj).entrySet()) {
-                set(ent.getKey().toString(), ent.getValue());
+            this.entries.put(key, serialize(obj));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Object serialize(T obj) {
+
+        // Try to Serialize Map
+        if (obj instanceof Map) {
+
+            HashMap<String, Object> out = new HashMap<>();
+            for (Map.Entry<?, ?> ent : ((Map<?, ?>) obj).entrySet()) {
+                out.put(ent.getKey().toString(), serialize(ent.getValue()));
             }
+            return out;
+
+        // Try to serialize List elements
+        } else if(obj instanceof List) {
+            List<Object> serialized = new ArrayList<>();
+            for(Object o : (List<?>) obj) {
+                serialized.add(serialize(o));
+            }
+            return serialized;
 
         // Try to serialize as a ConfigSection
         } else if (reg != null && reg.canSerialize(obj.getClass())) {
 
-            this.entries.put(key, reg.getSerializer((Class<T>) obj.getClass()).serialize(obj));
+            return reg.getSerializer((Class<T>) obj.getClass()).serialize(obj);
 
         // Try to serialize as a String
         } else if(reg != null && reg.canSerializeInline(obj.getClass())) {
 
-            this.entries.put(key, reg.getInlineSerializer((Class<T>) obj.getClass()).serialize(obj));
-
-        // Put the raw data if cannot serialize
-        } else {
-
-            this.entries.put(key, obj);
+            return reg.getInlineSerializer((Class<T>) obj.getClass()).serialize(obj);
         }
+        // Return the raw data if cannot serialize
+        return obj;
     }
 
     public void setMap(String id, String keyLabel, String valueLabel, Map<?, ?> map) {
@@ -241,9 +255,9 @@ public class ConfigSection {
 
             ConfigSection sec = (ConfigSection) obj;
             JsonObject out = new JsonObject();
-            for(Map.Entry<String,Object> ent : sec.getEntries().entrySet()) {
+            for(String s : sec.getKeys()) {
 
-                out.add(ent.getKey(), toJsonElement(ent.getValue()));
+                out.add(s, toJsonElement(sec.get(s)));
             }
 
             return out;

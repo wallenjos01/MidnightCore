@@ -61,6 +61,7 @@ public class JsonWrapper {
             MidnightCoreAPI.getLogger().warn("Unable to create file to save JSON file!");
             return false;
         }
+
         if(!file.exists()) {
             try {
                 if(!(file.createNewFile() && file.setWritable(true) && file.setReadable(true))) {

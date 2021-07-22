@@ -395,6 +395,20 @@ public class MComponent {
             }
         }
 
+        public static String toLegacyText(MComponent component, boolean hexSupport) {
+            return component.toLegacyText(hexSupport);
+        }
+
+        public static String serialize(MComponent component) {
+
+            if(component.style.getFont() != null || component.hoverEvent != null || component.clickEvent != null) {
+                return toJsonString(component);
+            }
+
+            return toLegacyText(component, true);
+
+        }
+
         public static MComponent parseLegacyText(String content, Character legacyColorCharacter, Character rgbColorCharacter) {
 
             MComponent out = new MComponent(Type.TEXT, "");
