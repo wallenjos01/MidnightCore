@@ -11,8 +11,10 @@ import me.m1dnightninja.midnightcore.api.text.ActionBar;
 import me.m1dnightninja.midnightcore.api.text.Title;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
+import me.m1dnightninja.midnightcore.spigot.inventory.SpigotItem;
 import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
+import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -78,6 +80,23 @@ public class SpigotPlayer extends MPlayer {
         updatePlayer();
         if(player == null) return null;
         return new Vec3d(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public MItemStack getItemInMainHand() {
+
+        if (ReflectionUtil.MAJOR_VERISON > 8) {
+
+            return new SpigotItem(player.getInventory().getItemInMainHand());
+        } else {
+            return new SpigotItem(player.getInventory().getItemInHand());
+        }
+    }
+
+    @Override
+    public MItemStack getItemInOffHand() {
+        return null;
     }
 
     @Override

@@ -1,24 +1,34 @@
 package me.m1dnightninja.midnightcore.spigot.util;
 
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
+import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Locale;
 
 public class ConversionUtil {
 
     public static ItemStack toBukkitStack(MItemStack is) {
 
-        Material mat = Material.getMaterial(is.getType().toString());
-        if(mat == null) return null;
+        Material mat = Material.matchMaterial(is.getType().toString());
+
+        if(mat == null) {
+            MidnightCoreAPI.getLogger().warn("Unable to find material for " + is.getType().getPath().toUpperCase(Locale.ROOT));
+            return null;
+        }
 
         ItemStack out = new ItemStack(mat, is.getCount());
+        return NMSWrapper.setItemTag(out, is.getTag());
+    }
 
-        out.getItemMeta();
-
-        return out;
+    public static MIdentifier fromNamespacedKey(NamespacedKey key) {
+        return MIdentifier.create(key.getNamespace(), key.getKey());
     }
 
     public static TextComponent toSpigotComponent(MComponent comp) {
@@ -44,5 +54,4 @@ public class ConversionUtil {
 
         return out;
     }
-
 }

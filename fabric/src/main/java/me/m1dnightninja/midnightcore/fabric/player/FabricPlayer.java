@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.player;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.StringReader;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Vec3d;
@@ -15,12 +16,18 @@ import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
 import me.m1dnightninja.midnightcore.fabric.api.Location;
 import me.m1dnightninja.midnightcore.fabric.api.PermissionHelper;
+import me.m1dnightninja.midnightcore.fabric.inventory.FabricItem;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.Util;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.commands.GiveCommand;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.Nullable;
@@ -90,6 +97,24 @@ public class FabricPlayer extends MPlayer {
     @Override
     public Vec3d getLocation() {
         return new Vec3d(player.getX(), player.getY(), player.getZ());
+    }
+
+    @Override
+    public MItemStack getItemInMainHand() {
+
+        if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
+        if(player == null) return null;
+
+        return new FabricItem(player.getMainHandItem());
+    }
+
+    @Override
+    public MItemStack getItemInOffHand() {
+
+        if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
+        if(player == null) return null;
+
+        return new FabricItem(player.getOffhandItem());
     }
 
     @Override

@@ -63,7 +63,13 @@ public class SkinModule extends AbstractSkinModule {
         });
 
         Event.register(SavePointCreatedEvent.class, this, event -> event.getSavePoint().extraData.set("skin", getSkin(FabricPlayer.wrap(event.getPlayer()))));
-        Event.register(SavePointLoadEvent.class, this, event -> setSkin(FabricPlayer.wrap(event.getPlayer()), event.getSavePoint().extraData.get("skin", Skin.class)));
+        Event.register(SavePointLoadEvent.class, this, event -> {
+
+            MPlayer player = FabricPlayer.wrap(event.getPlayer());
+
+            setSkin(player, event.getSavePoint().extraData.get("skin", Skin.class));
+            updateSkin(player);
+        });
 
         return true;
     }

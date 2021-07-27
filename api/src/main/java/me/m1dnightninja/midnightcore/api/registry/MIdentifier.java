@@ -88,7 +88,7 @@ public class MIdentifier {
         return namespace.hashCode() + path.hashCode();
     }
 
-    public static final InlineSerializer<MIdentifier> SERIALIZER = new InlineSerializer<MIdentifier>() {
+    public static final InlineSerializer<MIdentifier> SERIALIZER = new InlineSerializer<>() {
         @Override
         public MIdentifier deserialize(String s) {
             return parse(s);

@@ -6,8 +6,8 @@ import com.google.gson.JsonPrimitive;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +33,10 @@ public class JsonConfigProvider implements ConfigProvider {
         w.load(stream);
 
         return fromJson(w.getRoot());
+    }
+
+    public ConfigSection loadFromString(String s) {
+        return loadFromStream(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override

@@ -29,6 +29,9 @@ public abstract class MPlayer {
     public abstract Skin getSkin();
     public abstract Vec3d getLocation();
 
+    public abstract MItemStack getItemInMainHand();
+    public abstract MItemStack getItemInOffHand();
+
     public abstract float getYaw();
     public abstract float getPitch();
 

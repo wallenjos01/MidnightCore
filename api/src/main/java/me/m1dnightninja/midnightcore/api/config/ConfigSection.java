@@ -249,6 +249,84 @@ public class ConfigSection {
         return toJson().toString();
     }
 
+    public String toNBT() {
+
+        StringBuilder builder = new StringBuilder("{");
+
+        List<String> keys = new ArrayList<>();
+
+        for(String s : getKeys()) {
+            keys.add(s);
+        }
+
+        for(int i = 0 ; i < keys.size() ; i++) {
+
+            if(i > 0) {
+                builder.append(",");
+            }
+
+            String s = keys.get(i);
+            Object o = get(s);
+            builder.append("\"").append(s).append("\":").append(toNBTString(o));
+        }
+
+        builder.append("}");
+        return builder.toString();
+    }
+
+    private static String toNBTString(Object o) {
+
+        StringBuilder builder = new StringBuilder();
+
+        if(o instanceof ConfigSection) {
+
+            builder.append(((ConfigSection) o).toNBT());
+
+        } else if(o instanceof List) {
+
+            builder.append("[");
+
+            int ints = 0;
+            int longs = 0;
+            int bytes = 0;
+
+            List<?> l = (List<?>) o;
+
+            for(Object obj : l) {
+                if(obj instanceof Integer) ints++;
+                if(obj instanceof Long) longs++;
+                if(obj instanceof Byte) bytes++;
+            }
+
+            if(ints == l.size()) {
+                builder.append("I;");
+            } else if(longs == l.size()) {
+                builder.append("L;");
+            } else if(bytes == l.size()) {
+                builder.append("B;");
+            }
+
+            for(int i = 0 ; i < l.size() ; i++) {
+                if(i > 0) {
+                    builder.append(",");
+                }
+                builder.append(toNBTString(l.get(i)));
+            }
+
+            builder.append("]");
+
+        } else if(o instanceof String) {
+
+            builder.append("\"").append(o.toString().replace("\"", "\\\"")).append("\"");
+
+        } else {
+
+            builder.append(o.toString());
+        }
+
+        return builder.toString();
+    }
+
     private static JsonElement toJsonElement(Object obj) {
 
         if(obj instanceof ConfigSection) {
