@@ -1,9 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.event;
 
 import me.m1dnightninja.midnightcore.api.math.Vec3d;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerAttackEntityEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerInteractEntityEvent;
-import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;

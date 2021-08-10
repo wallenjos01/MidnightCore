@@ -4,8 +4,8 @@ import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Vec3d;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
-import me.m1dnightninja.midnightcore.api.text.ActionBar;
-import me.m1dnightninja.midnightcore.api.text.Title;
+import me.m1dnightninja.midnightcore.api.text.MActionBar;
+import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 
 import java.util.UUID;
@@ -40,8 +40,11 @@ public abstract class MPlayer {
     public abstract boolean hasPermission(String perm);
 
     public abstract void sendMessage(MComponent comp);
-    public abstract void sendTitle(Title title);
-    public abstract void sendActionBar(ActionBar ab);
+    public abstract void sendTitle(MTitle title);
+    public abstract void sendActionBar(MActionBar ab);
+
+    public abstract void executeCommand(String cmd);
+    public abstract void sendChatMessage(String message);
 
     public abstract void teleport(MIdentifier dimension, Vec3d location, float yaw, float pitch);
     public abstract void teleport(Vec3d location, float yaw, float pitch);

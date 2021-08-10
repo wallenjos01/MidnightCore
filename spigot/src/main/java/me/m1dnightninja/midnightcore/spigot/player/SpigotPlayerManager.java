@@ -1,17 +1,16 @@
 package me.m1dnightninja.midnightcore.spigot.player;
 
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
-import me.m1dnightninja.midnightcore.api.player.PlayerManager;
+import me.m1dnightninja.midnightcore.api.player.MPlayerManager;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
 
-public class SpigotPlayerManager extends PlayerManager implements Listener {
+public class SpigotPlayerManager extends MPlayerManager implements Listener {
 
     public SpigotPlayerManager() {
 

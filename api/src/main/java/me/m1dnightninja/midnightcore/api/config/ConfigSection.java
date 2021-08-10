@@ -14,7 +14,7 @@ public class ConfigSection {
     private final LinkedTreeMap<String, Object> entries = new LinkedTreeMap<>();
 
     public ConfigSection() {
-        this(MidnightCoreAPI.getConfigRegistry());
+        this(MidnightCoreAPI.getInstance().getConfigRegistry());
     }
 
     public ConfigSection(ConfigRegistry reg) {
@@ -63,7 +63,7 @@ public class ConfigSection {
 
             return reg.getInlineSerializer((Class<T>) obj.getClass()).serialize(obj);
         }
-        // Return the raw data if cannot serialize
+        // Return the raw data if we cannot serialize
         return obj;
     }
 
@@ -179,9 +179,9 @@ public class ConfigSection {
     }
 
     public void fill(ConfigSection other) {
-        for(Map.Entry<String, Object> ents : other.getEntries().entrySet()) {
-            if(!has(ents.getKey())) {
-                set(ents.getKey(), ents.getValue());
+        for(Map.Entry<String, Object> entry : other.getEntries().entrySet()) {
+            if(!has(entry.getKey())) {
+                set(entry.getKey(), entry.getValue());
             }
         }
     }
@@ -282,15 +282,13 @@ public class ConfigSection {
 
             builder.append(((ConfigSection) o).toNBT());
 
-        } else if(o instanceof List) {
+        } else if(o instanceof List<?> l) {
 
             builder.append("[");
 
             int ints = 0;
             int longs = 0;
             int bytes = 0;
-
-            List<?> l = (List<?>) o;
 
             for(Object obj : l) {
                 if(obj instanceof Integer) ints++;
@@ -329,9 +327,8 @@ public class ConfigSection {
 
     private static JsonElement toJsonElement(Object obj) {
 
-        if(obj instanceof ConfigSection) {
+        if(obj instanceof ConfigSection sec) {
 
-            ConfigSection sec = (ConfigSection) obj;
             JsonObject out = new JsonObject();
             for(String s : sec.getKeys()) {
 
@@ -340,11 +337,10 @@ public class ConfigSection {
 
             return out;
 
-        } else if(obj instanceof List) {
+        } else if(obj instanceof List<?> lst) {
 
             JsonArray arr = new JsonArray();
 
-            List<?> lst = (List<?>) obj;
             for (Object o : lst) {
                 arr.add(toJsonElement(o));
             }

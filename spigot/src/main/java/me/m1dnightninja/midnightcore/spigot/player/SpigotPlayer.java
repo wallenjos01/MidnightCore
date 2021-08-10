@@ -7,13 +7,13 @@ import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
-import me.m1dnightninja.midnightcore.api.text.ActionBar;
-import me.m1dnightninja.midnightcore.api.text.Title;
+import me.m1dnightninja.midnightcore.api.text.MActionBar;
+import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.spigot.inventory.SpigotItem;
 import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
-import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
+import me.m1dnightninja.midnightcore.spigot.util.NMSUtil;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -72,7 +72,7 @@ public class SpigotPlayer extends MPlayer {
             return mod.getSkin(MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(player.getUniqueId()));
         }
 
-        return MojangUtil.getSkinFromProfile(NMSWrapper.getGameProfile(player));
+        return MojangUtil.getSkinFromProfile(NMSUtil.getGameProfile(player));
     }
 
     @Override
@@ -124,23 +124,40 @@ public class SpigotPlayer extends MPlayer {
         updatePlayer();
         if(player == null) return;
 
-        NMSWrapper.sendMessage(player, comp);
+        NMSUtil.sendMessage(player, comp);
     }
 
     @Override
-    public void sendTitle(Title title) {
+    public void sendTitle(MTitle title) {
         updatePlayer();
         if(player == null) return;
 
-        NMSWrapper.sendTitle(player, title);
+        NMSUtil.sendTitle(player, title);
     }
 
     @Override
-    public void sendActionBar(ActionBar ab) {
+    public void sendActionBar(MActionBar ab) {
         updatePlayer();
         if(player == null) return;
 
-        NMSWrapper.sendActionBar(player, ab);
+        NMSUtil.sendActionBar(player, ab);
+    }
+
+    @Override
+    public void executeCommand(String cmd) {
+        updatePlayer();
+        if(player == null) return;
+
+        Bukkit.dispatchCommand(player, cmd);
+    }
+
+    @Override
+    public void sendChatMessage(String message) {
+
+        updatePlayer();
+        if(player == null) return;
+
+        player.chat(message);
     }
 
     @Override

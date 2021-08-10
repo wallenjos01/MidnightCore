@@ -6,10 +6,10 @@ import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
-import me.m1dnightninja.midnightcore.common.module.AbstractSkinModule;
+import me.m1dnightninja.midnightcore.common.module.skin.AbstractSkinModule;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
 import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
-import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
+import me.m1dnightninja.midnightcore.spigot.util.NMSUtil;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import me.m1dnightninja.midnightcore.spigot.version.v1_10.SkinUpdater_10_12;
 import me.m1dnightninja.midnightcore.spigot.version.v1_13.SkinUpdater_13;
@@ -40,7 +40,7 @@ public class SkinModule extends AbstractSkinModule implements Listener {
 
         MPlayer pl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
 
-        GameProfile prof = NMSWrapper.getGameProfile(event.getPlayer());
+        GameProfile prof = NMSUtil.getGameProfile(event.getPlayer());
         Skin s = MojangUtil.getSkinFromProfile(prof);
         loginSkins.put(pl, s);
 
@@ -116,6 +116,7 @@ public class SkinModule extends AbstractSkinModule implements Listener {
                 break;
             case "v1_16_R1":
                 updater = new SkinUpdater_16_R1();
+                break;
             case "v1_16_R2":
             case "v1_16_R3":
                 updater = new SkinUpdater_16_R3();

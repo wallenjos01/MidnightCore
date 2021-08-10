@@ -5,7 +5,7 @@ import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
-import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
+import me.m1dnightninja.midnightcore.spigot.util.NMSUtil;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -27,14 +27,14 @@ public class SpigotItem extends MItemStack {
     }
 
     public SpigotItem(ItemStack is) {
-        super(ConversionUtil.fromNamespacedKey(is.getType().getKey()), is.getAmount(), NMSWrapper.getItemTag(is));
+        super(ConversionUtil.fromNamespacedKey(is.getType().getKey()), is.getAmount(), NMSUtil.getItemTag(is));
         stack = is;
     }
 
     @Override
     public void update() {
 
-        NMSWrapper.setItemTag(stack, tag);
+        NMSUtil.setItemTag(stack, tag);
         stack.setAmount(count);
 
     }

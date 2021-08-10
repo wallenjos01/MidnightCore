@@ -1,7 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.m1dnightninja.midnightcore.fabric.api.event.EntityDamageEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.EntityDeathEvent;
+import me.m1dnightninja.midnightcore.fabric.event.EntityDamageEvent;
+import me.m1dnightninja.midnightcore.fabric.event.EntityDeathEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;

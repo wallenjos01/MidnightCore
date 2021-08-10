@@ -3,13 +3,18 @@ package me.m1dnightninja.midnightcore.api.config;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ConfigRegistry {
 
     private final HashMap<Class<?>, ConfigSerializer<?>> serializers = new HashMap<>();
     private final HashMap<Class<?>, InlineSerializer<?>> inlineSerializers = new HashMap<>();
-    private final HashMap<String, ConfigProvider> providers = new HashMap<>();
+
+    private final List<ConfigProvider> providers = new ArrayList<>();
+    private final HashMap<String, Integer> providersByExtension = new HashMap<>();
+
 
     public <T> void registerSerializer(Class<T> clazz, ConfigSerializer<T> serializer) {
         this.serializers.put(clazz, serializer);
@@ -55,13 +60,19 @@ public class ConfigRegistry {
     }
 
     public void registerProvider(ConfigProvider prov) {
-        if(providers.containsKey(prov.getFileExtension())) return;
+        if(providersByExtension.containsKey(prov.getFileExtension())) return;
 
-        this.providers.put(prov.getFileExtension(), prov);
+        int index = providers.size();
+        providers.add(prov);
+        providersByExtension.put(prov.getFileExtension(), index);
     }
 
     public ConfigProvider getProviderForFileType(String extension) {
-        return providers.get(extension);
+
+        Integer index = providersByExtension.get(extension);
+        if(index == null) return null;
+
+        return providers.get(index);
     }
 
     public ConfigProvider getProviderForFile(File f) {

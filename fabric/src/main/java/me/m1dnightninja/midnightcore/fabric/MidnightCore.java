@@ -1,22 +1,27 @@
 package me.m1dnightninja.midnightcore.fabric;
 
-import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
-import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
+import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
+import me.m1dnightninja.midnightcore.api.inventory.MInventoryGUI;
+import me.m1dnightninja.midnightcore.api.text.MTimer;
 import me.m1dnightninja.midnightcore.api.module.IModule;
-import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
+import me.m1dnightninja.midnightcore.api.text.MScoreboard;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
+import me.m1dnightninja.midnightcore.common.MidnightCoreImpl;
 import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
-import me.m1dnightninja.midnightcore.fabric.api.*;
-import me.m1dnightninja.midnightcore.fabric.api.Timer;
-import me.m1dnightninja.midnightcore.fabric.dimension.EmptyGenerator;
+import me.m1dnightninja.midnightcore.fabric.module.dimension.DimensionModule;
+import me.m1dnightninja.midnightcore.fabric.module.playerdata.PlayerDataModule;
+import me.m1dnightninja.midnightcore.fabric.module.savepoint.SavePointModule;
+import me.m1dnightninja.midnightcore.fabric.module.skin.SkinModule;
+import me.m1dnightninja.midnightcore.fabric.module.vanish.VanishModule;
+import me.m1dnightninja.midnightcore.fabric.text.FabricTimer;
+import me.m1dnightninja.midnightcore.fabric.module.dimension.EmptyGenerator;
 import me.m1dnightninja.midnightcore.fabric.inventory.FabricItem;
-import me.m1dnightninja.midnightcore.fabric.inventory.InventoryGUI;
-import me.m1dnightninja.midnightcore.fabric.module.*;
+import me.m1dnightninja.midnightcore.fabric.inventory.FabricInventoryGUI;
 import me.m1dnightninja.midnightcore.fabric.module.lang.LangModule;
 import me.m1dnightninja.midnightcore.fabric.player.FabricPlayerManager;
-import me.m1dnightninja.midnightcore.fabric.text.CustomScoreboard;
+import me.m1dnightninja.midnightcore.fabric.text.FabricScoreboard;
+import me.m1dnightninja.midnightcore.fabric.util.PermissionUtil;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -25,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -35,15 +41,14 @@ public class MidnightCore implements ModInitializer {
     private static MidnightCore instance;
     private static MinecraftServer server;
 
-    private File configDirectory;
 
     @Override
     public void onInitialize() {
 
         instance = this;
-        Logger logger = new Logger(LogManager.getLogger());
+        Logger logger = LogManager.getLogger("MidnightCore");
 
-        configDirectory = Paths.get("config/MidnightCore").toFile();
+        File configDirectory = Paths.get("config/MidnightCore").toFile();
         if(!configDirectory.exists() && !configDirectory.mkdirs()) {
             logger.warn("Unable to create config directory!");
             return;
@@ -70,33 +75,35 @@ public class MidnightCore implements ModInitializer {
             }
         }
 
-        ImplDelegate delegate = new ImplDelegate() {
-            @Override
-            public Timer createTimer(MComponent text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
-                return new Timer(text, seconds, countUp, cb);
-            }
-
-            @Override
-            public AbstractInventoryGUI createInventoryGUI(MComponent title) {
-                return new InventoryGUI(title);
-            }
-
-            @Override
-            public AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title) {
-                return new CustomScoreboard(id, title);
-            }
-        };
-
         // Create API
-        MidnightCoreAPI api = new MidnightCoreAPI(
-                logger,
-                delegate,
+        MidnightCoreAPI api = new MidnightCoreImpl(
+                new ConfigRegistry(),
                 new FabricPlayerManager(),
                 FabricItem::new,
                 JsonConfigProvider.INSTANCE,
                 configDirectory,
                 modules.toArray(new IModule[0])
-        );
+        ) {
+            @Override
+            public MTimer createTimer(MComponent text, int seconds, boolean countUp, MTimer.TimerCallback cb) {
+                return new FabricTimer(text, seconds, countUp, cb);
+            }
+
+            @Override
+            public MInventoryGUI createInventoryGUI(MComponent title) {
+                return new FabricInventoryGUI(title);
+            }
+
+            @Override
+            public MScoreboard createScoreboard(String id, MComponent title) {
+                return new FabricScoreboard(id, title);
+            }
+
+            @Override
+            public void executeConsoleCommand(String cmd) {
+                getServer().getCommands().performCommand(getServer().createCommandSourceStack(), cmd);
+            }
+        };
 
         // Tell sub-mods that the api was created
         for(MidnightCoreModInitializer init : inits) {
@@ -134,14 +141,10 @@ public class MidnightCore implements ModInitializer {
         // Register vanilla permissions
         if(api.getMainConfig().has("vanilla_permissions", Boolean.class) && api.getMainConfig().getBoolean("vanilla_permissions")) {
 
-            CommandRegistrationCallback.EVENT.register(((commandDispatcher, b) -> PermissionHelper.registerVanillaPermissions(commandDispatcher)));
+            CommandRegistrationCallback.EVENT.register(((commandDispatcher, b) -> PermissionUtil.registerVanillaPermissions(commandDispatcher)));
         }
 
-        InventoryGUI.registerEvents(this);
-    }
-
-    public File getConfigDirectory() {
-        return configDirectory;
+        FabricInventoryGUI.registerEvents(this);
     }
 
     public static MidnightCore getInstance() {

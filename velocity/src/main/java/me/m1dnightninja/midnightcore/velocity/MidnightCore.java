@@ -5,27 +5,21 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
-import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
-import me.m1dnightninja.midnightcore.api.ImplDelegate;
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.text.ActionBar;
-import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
-import me.m1dnightninja.midnightcore.api.text.Title;
+import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
+import me.m1dnightninja.midnightcore.api.inventory.MInventoryGUI;
+import me.m1dnightninja.midnightcore.api.text.MTimer;
+import me.m1dnightninja.midnightcore.api.text.MScoreboard;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.common.JavaLogger;
+import me.m1dnightninja.midnightcore.common.MidnightCoreImpl;
 import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
-import me.m1dnightninja.midnightcore.velocity.listener.CustomPayloadListener;
-import me.m1dnightninja.midnightcore.velocity.module.LastJoinedModule;
-import me.m1dnightninja.midnightcore.velocity.module.PlayerDataModule;
-import me.m1dnightninja.midnightcore.velocity.text.Timer;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import me.m1dnightninja.midnightcore.velocity.module.lastjoined.LastJoinedModule;
+import me.m1dnightninja.midnightcore.velocity.module.playerdata.PlayerDataModule;
+import me.m1dnightninja.midnightcore.velocity.module.pluginmessage.PluginMessageModule;
+import me.m1dnightninja.midnightcore.velocity.player.VelocityPlayerManager;
+import me.m1dnightninja.midnightcore.velocity.text.VelocityTimer;
 
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 @Plugin(id = "midnightcore", name = "MidnightCore", version = "1.0.0", authors = { "M1dnight_Ninja" })
@@ -34,7 +28,6 @@ public class MidnightCore {
     private static MidnightCore instance;
     private final ProxyServer server;
 
-    private final Logger logger;
     private final Path dataFolder;
 
     @Inject
@@ -43,7 +36,6 @@ public class MidnightCore {
         instance = this;
 
         this.server = server;
-        this.logger = logger;
         this.dataFolder = dataFolder;
 
     }
@@ -51,27 +43,29 @@ public class MidnightCore {
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
 
-        getServer().getEventManager().register(this, new CustomPayloadListener());
+        new MidnightCoreImpl(new ConfigRegistry(), new VelocityPlayerManager(), null, JsonConfigProvider.INSTANCE, dataFolder.toFile(), new PlayerDataModule(), new LastJoinedModule(), new PluginMessageModule()) {
 
-
-
-        new MidnightCoreAPI(new JavaLogger(logger), new ImplDelegate() {
             @Override
-            public AbstractTimer createTimer(MComponent name, int seconds, boolean countUp, AbstractTimer.TimerCallback callback) {
-                return new Timer(name, seconds, countUp, callback);
+            public MTimer createTimer(MComponent name, int seconds, boolean countUp, MTimer.TimerCallback callback) {
+                return new VelocityTimer(name, seconds, countUp, callback);
             }
 
             @Override
-            public AbstractInventoryGUI createInventoryGUI(MComponent name) {
+            public MInventoryGUI createInventoryGUI(MComponent name) {
                 throw new IllegalStateException("Cannot create Inventory GUI on proxy!");
             }
 
             @Override
-            public AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title) {
+            public MScoreboard createScoreboard(String id, MComponent title) {
                 return null;
             }
 
-        }, null, null, new JsonConfigProvider(), dataFolder.toFile(), new PlayerDataModule(), new LastJoinedModule());
+            @Override
+            public void executeConsoleCommand(String cmd) {
+                getServer().getCommandManager().executeAsync(getServer().getConsoleCommandSource(), cmd);
+            }
+        };
+
     }
 
     public ProxyServer getServer() {

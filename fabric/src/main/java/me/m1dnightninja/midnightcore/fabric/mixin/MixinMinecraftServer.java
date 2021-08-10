@@ -1,7 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.m1dnightninja.midnightcore.fabric.api.event.ServerLoadWorldsEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.ServerTickEvent;
+import me.m1dnightninja.midnightcore.fabric.event.ServerLoadWorldsEvent;
+import me.m1dnightninja.midnightcore.fabric.event.ServerTickEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.progress.ChunkProgressListener;

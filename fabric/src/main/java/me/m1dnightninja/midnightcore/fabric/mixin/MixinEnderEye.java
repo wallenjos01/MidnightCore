@@ -2,7 +2,7 @@ package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
-import me.m1dnightninja.midnightcore.fabric.api.event.PortalCreateEvent;
+import me.m1dnightninja.midnightcore.fabric.event.PortalCreateEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;

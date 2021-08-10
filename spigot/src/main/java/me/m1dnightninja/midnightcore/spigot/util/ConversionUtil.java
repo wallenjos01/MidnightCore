@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Locale;
 
-public class ConversionUtil {
+public final class ConversionUtil {
 
     public static ItemStack toBukkitStack(MItemStack is) {
 
@@ -24,7 +24,7 @@ public class ConversionUtil {
         }
 
         ItemStack out = new ItemStack(mat, is.getCount());
-        return NMSWrapper.setItemTag(out, is.getTag());
+        return NMSUtil.setItemTag(out, is.getTag());
     }
 
     public static MIdentifier fromNamespacedKey(NamespacedKey key) {

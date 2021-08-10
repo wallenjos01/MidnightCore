@@ -2,10 +2,10 @@ package me.m1dnightninja.midnightcore.spigot.version;
 
 import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.api.text.ActionBar;
+import me.m1dnightninja.midnightcore.api.text.MActionBar;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.api.text.Title;
-import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
+import me.m1dnightninja.midnightcore.api.text.MTitle;
+import me.m1dnightninja.midnightcore.spigot.util.NMSUtil;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class NMSUtil_Other implements NMSWrapper.NMSUtil {
+public class NMSUtil_Other implements NMSUtil.NMSHandler {
 
     public static final UUID nullUid = new UUID(0L, 0L);
 
@@ -36,14 +36,14 @@ public class NMSUtil_Other implements NMSWrapper.NMSUtil {
     }
 
     @Override
-    public void sendActionBar(Player pl, ActionBar ab) {
+    public void sendActionBar(Player pl, MActionBar ab) {
 
         TextComponent comp = new TextComponent(ComponentSerializer.parse(MComponent.Serializer.toJsonString(ab.getText())));
         pl.spigot().sendMessage(ChatMessageType.ACTION_BAR, nullUid, comp);
     }
 
     @Override
-    public void sendTitle(Player pl, Title title) {
+    public void sendTitle(Player pl, MTitle title) {
 
         if(title.getOptions().clear) {
             pl.resetTitle();

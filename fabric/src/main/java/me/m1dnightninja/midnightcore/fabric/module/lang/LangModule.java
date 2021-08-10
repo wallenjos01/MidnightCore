@@ -9,7 +9,7 @@ import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.module.lang.AbstractLangModule;
 import me.m1dnightninja.midnightcore.common.module.lang.LangProvider;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerChangeSettingsEvent;
+import me.m1dnightninja.midnightcore.fabric.event.PlayerChangeSettingsEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.commands.CommandSourceStack;

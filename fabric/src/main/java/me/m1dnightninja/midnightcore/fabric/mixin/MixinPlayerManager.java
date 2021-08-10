@@ -1,11 +1,11 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerJoinedEvent;
+import me.m1dnightninja.midnightcore.fabric.event.PlayerJoinedEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerDisconnectEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerJoinEvent;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerLoginEvent;
+import me.m1dnightninja.midnightcore.fabric.event.PlayerDisconnectEvent;
+import me.m1dnightninja.midnightcore.fabric.event.PlayerJoinEvent;
+import me.m1dnightninja.midnightcore.fabric.event.PlayerLoginEvent;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;

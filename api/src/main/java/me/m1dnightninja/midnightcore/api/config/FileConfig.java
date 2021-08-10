@@ -13,7 +13,7 @@ public class FileConfig {
 
     public FileConfig(File f) {
 
-        this(f, MidnightCoreAPI.getConfigRegistry().getProviderForFile(f));
+        this(f, MidnightCoreAPI.getInstance().getConfigRegistry().getProviderForFile(f));
     }
 
     public FileConfig(File f, ConfigProvider prov) {
@@ -29,6 +29,8 @@ public class FileConfig {
         return root;
     }
 
+    public void setRoot(ConfigSection sec) { this.root = sec; }
+
     public void reload() {
         root = provider.loadFromFile(file);
     }
@@ -36,4 +38,24 @@ public class FileConfig {
     public void save() {
         provider.saveToFile(root, file);
     }
+
+    public static FileConfig findFile(File[] list, String prefix) {
+
+        if(list == null) return null;
+
+        for(File f : list) {
+
+            if(!f.getName().startsWith(prefix) || f.getName().equals(prefix)) continue;
+            String suffix = f.getName().substring(prefix.length());
+
+            ConfigProvider prov = MidnightCoreAPI.getInstance().getConfigRegistry().getProviderForFileType(suffix);
+
+            if(prov != null) {
+                return new FileConfig(f, prov);
+            }
+        }
+
+        return null;
+    }
+
 }

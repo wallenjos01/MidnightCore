@@ -1,8 +1,8 @@
 package me.m1dnightninja.midnightcore.api.module.lang;
 
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
-import me.m1dnightninja.midnightcore.api.text.ActionBar;
-import me.m1dnightninja.midnightcore.api.text.Title;
+import me.m1dnightninja.midnightcore.api.text.MActionBar;
+import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 
 public interface ILangProvider {
@@ -21,13 +21,13 @@ public interface ILangProvider {
 
     void sendMessage(String key, Iterable<MPlayer> players, Object... args);
 
-    void sendTitle(String key, MPlayer player, Title.TitleOptions opts, Object... args);
+    void sendTitle(String key, MPlayer player, MTitle.TitleOptions opts, Object... args);
 
-    void sendTitle(String key, Iterable<MPlayer> players, Title.TitleOptions opts, Object... args);
+    void sendTitle(String key, Iterable<MPlayer> players, MTitle.TitleOptions opts, Object... args);
 
-    void sendActionBar(String key, MPlayer player, ActionBar.ActionBarOptions opts, Object... args);
+    void sendActionBar(String key, MPlayer player, MActionBar.ActionBarOptions opts, Object... args);
 
-    void sendActionBar(String key, Iterable<MPlayer> players, ActionBar.ActionBarOptions opts, Object... args);
+    void sendActionBar(String key, Iterable<MPlayer> players, MActionBar.ActionBarOptions opts, Object... args);
 
     void reloadAllEntries();
 

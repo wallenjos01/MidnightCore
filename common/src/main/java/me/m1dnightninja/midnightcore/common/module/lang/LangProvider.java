@@ -6,10 +6,9 @@ import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangModule;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
-import me.m1dnightninja.midnightcore.api.text.ActionBar;
-import me.m1dnightninja.midnightcore.api.text.Title;
+import me.m1dnightninja.midnightcore.api.text.MActionBar;
+import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.api.text.MStyle;
 
 import java.io.File;
 import java.util.HashMap;
@@ -218,42 +217,42 @@ public class LangProvider implements ILangProvider {
     }
 
     @Override
-    public void sendTitle(String key, MPlayer player, Title.TitleOptions opts, Object... args) {
+    public void sendTitle(String key, MPlayer player, MTitle.TitleOptions opts, Object... args) {
 
-        Title title = new Title(getMessage(key, player, args), opts);
+        MTitle title = new MTitle(getMessage(key, player, args), opts);
         player.sendTitle(title);
 
     }
 
     @Override
-    public void sendTitle(String key, Iterable<MPlayer> players, Title.TitleOptions opts, Object... args) {
+    public void sendTitle(String key, Iterable<MPlayer> players, MTitle.TitleOptions opts, Object... args) {
 
-        HashMap<String, Title> cachedMessages = new HashMap<>();
+        HashMap<String, MTitle> cachedMessages = new HashMap<>();
         for(MPlayer u : players) {
 
             String lang = module.getPlayerLocale(u);
-            Title title = cachedMessages.computeIfAbsent(lang, k -> new Title(getMessage(key, lang, args), opts));
+            MTitle title = cachedMessages.computeIfAbsent(lang, k -> new MTitle(getMessage(key, lang, args), opts));
 
             u.sendTitle(title);
         }
     }
 
     @Override
-    public void sendActionBar(String key, MPlayer player, ActionBar.ActionBarOptions opts, Object... args) {
+    public void sendActionBar(String key, MPlayer player, MActionBar.ActionBarOptions opts, Object... args) {
 
-        ActionBar ab = new ActionBar(getMessage(key, player, args), opts);
+        MActionBar ab = new MActionBar(getMessage(key, player, args), opts);
         player.sendActionBar(ab);
 
     }
 
     @Override
-    public void sendActionBar(String key, Iterable<MPlayer> players, ActionBar.ActionBarOptions opts, Object... args) {
+    public void sendActionBar(String key, Iterable<MPlayer> players, MActionBar.ActionBarOptions opts, Object... args) {
 
-        HashMap<String, ActionBar> cachedMessages = new HashMap<>();
+        HashMap<String, MActionBar> cachedMessages = new HashMap<>();
         for(MPlayer u : players) {
 
             String lang = module.getPlayerLocale(u);
-            ActionBar ab = cachedMessages.computeIfAbsent(lang, k -> new ActionBar(getMessage(key, lang, args), opts));
+            MActionBar ab = cachedMessages.computeIfAbsent(lang, k -> new MActionBar(getMessage(key, lang, args), opts));
 
             u.sendActionBar(ab);
         }

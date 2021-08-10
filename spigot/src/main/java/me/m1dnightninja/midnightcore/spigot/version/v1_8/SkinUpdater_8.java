@@ -6,7 +6,7 @@ import com.mojang.authlib.properties.Property;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.spigot.MidnightCore;
 import me.m1dnightninja.midnightcore.spigot.module.skin.ISkinUpdater;
-import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
+import me.m1dnightninja.midnightcore.spigot.util.NMSUtil;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -17,9 +17,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -174,13 +171,13 @@ public class SkinUpdater_8 implements ISkinUpdater {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "deprecation"})
     @Override
     public void updatePlayer(Player player, Skin skin, Collection<? extends Player> observers) {
         if(!initialized) return;
 
         Object ep = ReflectionUtil.callMethod(ReflectionUtil.castTo(player, craftPlayer), getHandle, false);
-        GameProfile old = NMSWrapper.getGameProfile(player);
+        GameProfile old = NMSUtil.getGameProfile(player);
 
         Object oid = ReflectionUtil.callMethod(ep, getId, false);
         if(!(oid instanceof Integer)) return;

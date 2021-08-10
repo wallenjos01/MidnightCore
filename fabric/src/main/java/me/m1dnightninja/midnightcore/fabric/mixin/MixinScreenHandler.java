@@ -1,6 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.m1dnightninja.midnightcore.fabric.api.event.ContainerClickEvent;
+import me.m1dnightninja.midnightcore.fabric.event.ContainerClickEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;

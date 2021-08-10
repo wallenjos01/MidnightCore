@@ -3,11 +3,11 @@ package me.m1dnightninja.midnightcore.spigot.version.v1_17;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.api.text.ActionBar;
+import me.m1dnightninja.midnightcore.api.text.MActionBar;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.api.text.Title;
+import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
-import me.m1dnightninja.midnightcore.spigot.util.NMSWrapper;
+import me.m1dnightninja.midnightcore.spigot.util.NMSUtil;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import net.minecraft.nbt.MojangsonParser;
 import net.minecraft.nbt.NBTTagCompound;
@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-public class NMSUtil_17 implements NMSWrapper.NMSUtil {
+public class NMSUtil_17 implements NMSUtil.NMSHandler {
 
     public static final UUID nullUid = new UUID(0L, 0L);
 
@@ -58,7 +58,7 @@ public class NMSUtil_17 implements NMSWrapper.NMSUtil {
     }
 
     @Override
-    public void sendActionBar(Player pl, ActionBar ab) {
+    public void sendActionBar(Player pl, MActionBar ab) {
 
         EntityPlayer nmsPl = toEntityPlayer(pl);
         IChatBaseComponent message = IChatBaseComponent.ChatSerializer.a(MComponent.Serializer.toJson(ab.getText()));
@@ -67,7 +67,7 @@ public class NMSUtil_17 implements NMSWrapper.NMSUtil {
     }
 
     @Override
-    public void sendTitle(Player pl, Title title) {
+    public void sendTitle(Player pl, MTitle title) {
 
         EntityPlayer nmsPl = toEntityPlayer(pl);
 

@@ -1,6 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.m1dnightninja.midnightcore.fabric.api.event.BlockPlaceEvent;
+import me.m1dnightninja.midnightcore.fabric.event.BlockPlaceEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
 import net.minecraft.server.level.ServerPlayer;

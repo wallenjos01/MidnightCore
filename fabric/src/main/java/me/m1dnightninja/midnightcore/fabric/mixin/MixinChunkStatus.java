@@ -1,7 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import com.mojang.datafixers.util.Either;
-import me.m1dnightninja.midnightcore.fabric.api.event.ChunkLoadEvent;
+import me.m1dnightninja.midnightcore.fabric.event.ChunkLoadEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;

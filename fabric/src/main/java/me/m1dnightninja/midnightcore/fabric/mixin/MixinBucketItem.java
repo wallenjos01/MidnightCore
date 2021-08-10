@@ -1,8 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerInteractEvent;
+import me.m1dnightninja.midnightcore.fabric.event.PlayerInteractEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
-import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;

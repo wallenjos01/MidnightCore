@@ -18,7 +18,8 @@ repositories {
 
 dependencies {
 
-    compileOnly("com.velocitypowered:velocity-api:1.1.7")
+    compileOnly("com.velocitypowered:velocity-api:3.0.0")
+    compileOnly('org.apache.logging.log4j:log4j-api:2.14.1')
 
     shade(project(':api'))
     shade(project(':common'))

@@ -4,187 +4,36 @@ import java.io.File;
 import java.util.*;
 
 import me.m1dnightninja.midnightcore.api.config.*;
-import me.m1dnightninja.midnightcore.api.inventory.AbstractInventoryGUI;
+import me.m1dnightninja.midnightcore.api.inventory.MInventoryGUI;
 import me.m1dnightninja.midnightcore.api.inventory.ItemConverter;
-import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
-import me.m1dnightninja.midnightcore.api.math.Vec3d;
-import me.m1dnightninja.midnightcore.api.math.Vec3i;
 import me.m1dnightninja.midnightcore.api.module.IModule;
-import me.m1dnightninja.midnightcore.api.module.skin.Skin;
-import me.m1dnightninja.midnightcore.api.player.PlayerManager;
+import me.m1dnightninja.midnightcore.api.module.IModuleRegistry;
+import me.m1dnightninja.midnightcore.api.player.MPlayerManager;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.text.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class MidnightCoreAPI {
+public abstract class MidnightCoreAPI {
 
-    private static MidnightCoreAPI INSTANCE;
+    protected static final Logger LOGGER = LogManager.getLogger("MidnightCore");
 
-    // Default logger
-    private static ILogger LOGGER = new ILogger() {
-        @Override
-        public void info(String str) { System.out.println("[INFO] " + str); }
+    protected static MidnightCoreAPI INSTANCE;
 
-        @Override
-        public void warn(String str) { System.out.println("[WARN] " + str); }
+    protected MidnightCoreAPI() {
 
-        @Override
-        public void error(String str) { System.out.println("[ERROR] " + str); }
-    };
-
-    private static final ConfigRegistry configRegistry = new ConfigRegistry();
-
-
-    private final ImplDelegate delegate;
-    private final HashMap<MIdentifier, IModule> loadedModules = new HashMap<>();
-
-    private final ConfigProvider defaultConfigProvider;
-    private final ConfigSection mainConfig;
-
-    private final PlayerManager playerManager;
-    private final ItemConverter itemConverter;
-
-    private final Random rand;
-
-    private final File dataFolder;
-
-    public MidnightCoreAPI(ILogger logger, ImplDelegate delegate, PlayerManager playerManager, ItemConverter converter, ConfigProvider def, File dataFolder, IModule... modules) {
-
-        // Register static variables if they haven't been already
-        if (INSTANCE == null) {
+        if(INSTANCE == null) {
             INSTANCE = this;
-            LOGGER = logger;
         }
-
-        // Register variables
-        this.defaultConfigProvider = def;
-        this.delegate = delegate;
-        this.dataFolder = dataFolder;
-        this.playerManager = playerManager;
-        this.itemConverter = converter;
-
-        // Load config
-        File configFile = new File(dataFolder, "config" + def.getFileExtension());
-        if(!configFile.exists()) {
-            def.saveToFile(new ConfigSection(), configFile);
-        }
-
-        this.mainConfig = def.loadFromFile(configFile);
-
-        // Load module configs from
-        ConfigSection moduleConfig = null;
-        if(mainConfig.has("modules", ConfigSection.class)) {
-            moduleConfig = mainConfig.getSection("modules");
-        }
-
-        if(moduleConfig == null) {
-            moduleConfig = new ConfigSection();
-            mainConfig.set("modules", moduleConfig);
-            mainConfig.set("language", "en_us");
-        }
-
-        // Load list of disabled modules  from config.
-        List<String> disabled = new ArrayList<>();
-        if(mainConfig.has("disabled_modules", List.class)) {
-            for(Object o : mainConfig.getList("disabled_modules")) {
-                if(!(o instanceof String)) continue;
-                disabled.add((String) o);
-            }
-        } else {
-            mainConfig.set("disabled_modules", new ArrayList<>());
-            def.saveToFile(mainConfig, configFile);
-        }
-
-        configRegistry.registerProvider(defaultConfigProvider);
-        configRegistry.registerSerializer(Skin.class, Skin.SERIALIZER);
-        configRegistry.registerSerializer(MItemStack.class, MItemStack.SERIALIZER);
-        configRegistry.registerInlineSerializer(MIdentifier.class, MIdentifier.SERIALIZER);
-        configRegistry.registerInlineSerializer(Vec3d.class, Vec3d.SERIALIZER);
-        configRegistry.registerInlineSerializer(Vec3i.class, Vec3i.SERIALIZER);
-        configRegistry.registerInlineSerializer(UUID.class, Skin.UID_SERIALIZER);
-
-        // Load modules
-        for (IModule mod : modules) {
-
-            // Filter disabled modules
-            if(disabled.contains(mod.getId().toString())) continue;
-
-            // Filter duplicate/conflicting modules
-            if (this.loadedModules.containsKey(mod.getId())) {
-                LOGGER.warn("Attempt to load Module with duplicate ID!");
-                continue;
-            }
-
-            // Find out if modules depend on one another
-            List<Class<? extends IModule>> deps = mod.getDependencies();
-            if(deps != null) {
-                int found = 0;
-                for (IModule mod1 : modules) {
-                    for (Class<?> clazz : deps) {
-                        if(clazz.isAssignableFrom(mod1.getClass()) || clazz == mod1.getClass()) {
-                            found++;
-                        }
-                        break;
-                    }
-                    if(found == deps.size()) {
-                        break;
-                    }
-                }
-                if(found < deps.size()) {
-                    logger.warn("Unable to load module " + mod.getId() + "! Failed to find dependencies!");
-                    continue;
-                }
-            }
-
-            // Load configuration for module
-            ConfigSection sec = null;
-            ConfigSection defs = mod.getDefaultConfig();
-
-            String modId = mod.getId().toString();
-
-            if(moduleConfig.has(modId, ConfigSection.class)) {
-                sec = moduleConfig.getSection(modId);
-            }
-            if(sec == null && defs != null) {
-                sec = new ConfigSection();
-                moduleConfig.set(modId, defs);
-            }
-
-            // Copy defaults
-            if(defs != null) {
-                sec.fill(defs);
-            }
-
-            // Initialize module
-            if (!mod.initialize(sec)) {
-                LOGGER.warn("Unable to initialize module " + mod.getId() + "!");
-                continue;
-            }
-            this.loadedModules.put(mod.getId(), mod);
-        }
-
-        rand = new Random();
-
-        // Save the main config again
-        defaultConfigProvider.saveToFile(mainConfig, configFile);
-
-        // Log a list of loaded modules
-        StringBuilder b = new StringBuilder("Enabled ");
-        b.append(this.loadedModules.size());
-        b.append(this.loadedModules.size() == 1 ? " module: " : " modules: ");
-        int i = 1;
-        for (MIdentifier s : this.loadedModules.keySet()) {
-            b.append(s.toString());
-            if (i < this.loadedModules.size()) {
-                b.append(", ");
-            }
-            ++i;
-        }
-        LOGGER.info(b.toString());
     }
 
-    public File getDataFolder() {
-        return dataFolder;
-    }
+    /**
+     * Gets the plugin/mod's data folder, where all configuration is stored.
+     * Typically, "plugins/MidnightCore" on Spigot, and "config/MidnightCore" on Fabric
+     *
+     * @return The data folder as a File object
+     */
+    public abstract File getDataFolder();
 
     /**
      * Retrieves a loaded module based on its class
@@ -193,36 +42,28 @@ public class MidnightCoreAPI {
      * @param <T>    A class that implements IModule
      * @return       The module with the given class
      */
-    @SuppressWarnings("unchecked")
-    public <T extends IModule> T getModule(Class<T> clazz) {
-        for (IModule mod : this.loadedModules.values()) {
-            if (!clazz.isAssignableFrom(mod.getClass()) && clazz != mod.getClass()) continue;
-            return (T) mod;
-        }
-        return null;
-    }
+    public abstract <T extends IModule> T getModule(Class<T> clazz);
 
     /**
      * Returns the main config
      *
      * @return The main configuration
      */
-    public ConfigSection getMainConfig() {
-        return mainConfig;
-    }
+    public abstract ConfigSection getMainConfig();
 
     /**
-     * Returns the default configuration provider. (JSON for Fabric, YAML for spigot)
+     * Returns the default configuration provider. (Typically JSON for Fabric, YAML for spigot)
      *
      * @return The default config provider
      */
-    public ConfigProvider getDefaultConfigProvider() {
-        return defaultConfigProvider;
-    }
+    public abstract ConfigProvider getDefaultConfigProvider();
 
-    public Random getRandom() {
-        return rand;
-    }
+    /**
+     * Returns the global Random object.
+     *
+     * @return A Random instance
+     */
+    public abstract Random getRandom();
 
     /**
      * Returns the module specified by the given ID.
@@ -230,40 +71,57 @@ public class MidnightCoreAPI {
      * @param id  The ID of the module to find
      * @return    The module with the given ID
      */
-    public IModule getModuleById(String id) {
-        return this.loadedModules.get(MIdentifier.parse(id));
+    public abstract IModule getModuleById(MIdentifier id);
+
+    /**
+     * Returns the module specified by the given ID.
+     *
+     * @param id  The ID of the module to find as a String
+     * @return    The module with the given ID
+     */
+    public final IModule getModuleById(String id) {
+
+        return getModuleById(MIdentifier.parse(id));
     }
 
     /**
      * Returns true if a module with the specified ID is loaded
      *
      * @param id  The ID of the module to find
-     * @return    Whether or not the module is loaded
+     * @return    Whether the module is loaded
      */
-    public boolean isModuleLoaded(String id) {
+    public abstract boolean isModuleLoaded(MIdentifier id);
 
-        for(MIdentifier mid : loadedModules.keySet()) {
-            if(mid.toString().equals(id)) {
-                return true;
-            }
-        }
+    /**
+     * Returns true if a module with the specified ID is loaded
+     *
+     * @param id  The ID of the module to find as a String
+     * @return    Whether the module is loaded
+     */
+    public final boolean isModuleLoaded(String id) {
 
-        return false;
+        return isModuleLoaded(MIdentifier.parse(id));
     }
 
     /**
      * Returns true if there is a module loaded for each ID provided
      *
      * @param ids  The list of IDs to search for
-     * @return     Whether or not all modules with the IDs are loaded
+     * @return     Whether all modules with the IDs are loaded
      */
-    public boolean areAllModulesLoaded(String ... ids) {
+    public final boolean areAllModulesLoaded(String ... ids) {
         for (String s : ids) {
-            if (this.isModuleLoaded(s)) continue;
-            return false;
+            if (!this.isModuleLoaded(s)) return false;
         }
         return true;
     }
+
+    /**
+     * Returns the Module Registry associated with this instance of the API
+     *
+     * @return The Module Registry
+     */
+    public abstract IModuleRegistry getModuleRegistry();
 
     /**
      * Creates a timer with the given parameters
@@ -274,9 +132,7 @@ public class MidnightCoreAPI {
      * @param cb       Callback to execute each tick
      * @return         A new timer object
      */
-    public AbstractTimer createTimer(MComponent text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
-        return this.delegate.createTimer(text, seconds, countUp, cb);
-    }
+    public abstract MTimer createTimer(MComponent text, int seconds, boolean countUp, MTimer.TimerCallback cb);
 
     /**
      * Creates an Inventory GUI with a given title
@@ -284,40 +140,51 @@ public class MidnightCoreAPI {
      * @param title  The title of the GUI
      * @return       The Inventory GUI
      */
-    public AbstractInventoryGUI createInventoryGUI(MComponent title) {
-        return this.delegate.createInventoryGUI(title);
-    }
+    public abstract MInventoryGUI createInventoryGUI(MComponent title);
 
     /**
      * Creates a Scoreboard object that can be shown to players
      *
-     * @param id    The ID of the objective to be sent. Should be unique and 16 characters or less
+     * @param id    The ID of the objective to be sent. Should be unique and 16 characters or fewer
      * @param title The title of the scoreboard
      * @return      A new CustomScoreboard object
      */
-    public AbstractCustomScoreboard createScoreboard(String id, MComponent title) { return this.delegate.createCustomScoreboard(id, title); }
+    public abstract MScoreboard createScoreboard(String id, MComponent title);
 
-    public PlayerManager getPlayerManager() { return playerManager; }
+    /**
+     * Runs a console command on the server
+     *
+     * @param cmd The command to execute
+     */
+    public abstract void executeConsoleCommand(String cmd);
 
-    public ItemConverter getItemConverter() {
-        return itemConverter;
-    }
+    /**
+     * Returns the global Player Manager object
+     *
+     * @return The PlayerManager
+     */
+    public abstract MPlayerManager getPlayerManager();
+
+    /**
+     * Returns the global Item Converter object
+     *
+     * @return The ItemConverter
+     */
+    public abstract ItemConverter getItemConverter();
 
     /**
      * Retrieves the config registry
      *
      * @return The config registry
      */
-    public static ConfigRegistry getConfigRegistry() {
-        return configRegistry;
-    }
+    public abstract ConfigRegistry getConfigRegistry();
 
     /**
      * Retrieves the logger
      *
      * @return The logger
      */
-    public static ILogger getLogger() {
+    public static Logger getLogger() {
 
         return LOGGER;
     }
@@ -330,5 +197,5 @@ public class MidnightCoreAPI {
     public static MidnightCoreAPI getInstance() {
         return INSTANCE;
     }
-}
 
+}

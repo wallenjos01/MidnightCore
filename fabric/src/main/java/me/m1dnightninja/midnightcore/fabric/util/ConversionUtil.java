@@ -1,6 +1,5 @@
 package me.m1dnightninja.midnightcore.fabric.util;
 
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Color;
@@ -10,17 +9,15 @@ import me.m1dnightninja.midnightcore.api.text.MHoverEvent;
 import me.m1dnightninja.midnightcore.api.text.MStyle;
 import me.m1dnightninja.midnightcore.fabric.inventory.FabricItem;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConversionUtil {
+public final class ConversionUtil {
 
     public static ResourceLocation toResourceLocation(MIdentifier id) {
         return new ResourceLocation(id.getNamespace(), id.getPath());
@@ -180,9 +177,8 @@ public class ConversionUtil {
 
             return t.getAsString();
 
-        } else if(t instanceof ListTag) {
+        } else if(t instanceof ListTag lt) {
 
-            ListTag lt = (ListTag) t;
             List<Object> objs = new ArrayList<>();
             for(Tag t1 : lt) {
 
@@ -190,9 +186,8 @@ public class ConversionUtil {
             }
             return objs;
 
-        } else if(t instanceof IntArrayTag) {
+        } else if(t instanceof IntArrayTag lt) {
 
-            IntArrayTag lt = (IntArrayTag) t;
             List<Integer> objs = new ArrayList<>();
             for(IntTag t1 : lt) {
 
@@ -200,9 +195,8 @@ public class ConversionUtil {
             }
             return objs;
 
-        } else if(t instanceof LongArrayTag) {
+        } else if(t instanceof LongArrayTag lt) {
 
-            LongArrayTag lt = (LongArrayTag) t;
             List<Long> objs = new ArrayList<>();
             for(LongTag t1 : lt) {
 
@@ -210,9 +204,8 @@ public class ConversionUtil {
             }
             return objs;
 
-        } else if(t instanceof ByteArrayTag) {
+        } else if(t instanceof ByteArrayTag lt) {
 
-            ByteArrayTag lt = (ByteArrayTag) t;
             List<Byte> objs = new ArrayList<>();
             for(ByteTag t1 : lt) {
 
@@ -250,42 +243,22 @@ public class ConversionUtil {
         } else if(o instanceof String) {
             return StringTag.valueOf(o.toString());
 
-        } else if(o instanceof List) {
-
-            List<?> l = (List<?>) o;
+        } else if(o instanceof List<?> l) {
 
             if (l.size() == 0) {
                 return new ListTag();
             }
 
             Object l1 = ((List<?>) o).get(0);
-            if (l1 instanceof Integer) {
+            if (l1 instanceof Number) {
 
                 int[] values = new int[l.size()];
 
                 for (int i = 0; i < values.length; i++) {
-                    values[i] = (int) l.get(i);
+                    values[i] = ((Number) l.get(i)).intValue();
                 }
 
                 return new IntArrayTag(values);
-
-            } else if(l1 instanceof Long) {
-
-                long[] values = new long[l.size()];
-                for (int i = 0; i < values.length; i++) {
-                    values[i] = (long) l.get(i);
-                }
-
-                return new LongArrayTag(values);
-
-            } else if(l1 instanceof Byte) {
-
-                byte[] values = new byte[l.size()];
-                for (int i = 0; i < values.length; i++) {
-                    values[i] = (byte) l.get(i);
-                }
-
-                return new ByteArrayTag(values);
 
             } else {
 

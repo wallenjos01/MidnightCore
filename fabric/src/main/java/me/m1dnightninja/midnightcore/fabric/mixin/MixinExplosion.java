@@ -1,6 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.m1dnightninja.midnightcore.fabric.api.event.ExplosionEvent;
+import me.m1dnightninja.midnightcore.fabric.event.ExplosionEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;

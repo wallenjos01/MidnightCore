@@ -1,6 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.m1dnightninja.midnightcore.fabric.api.event.MenuCloseEvent;
+import me.m1dnightninja.midnightcore.fabric.event.MenuCloseEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;

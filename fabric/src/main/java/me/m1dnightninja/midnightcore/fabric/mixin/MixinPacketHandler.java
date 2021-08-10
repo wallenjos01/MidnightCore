@@ -2,10 +2,8 @@ package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import me.m1dnightninja.midnightcore.fabric.api.Location;
-import me.m1dnightninja.midnightcore.fabric.api.event.*;
-import me.m1dnightninja.midnightcore.fabric.event.Event;
-import me.m1dnightninja.midnightcore.fabric.event.WrappedHandler;
+import me.m1dnightninja.midnightcore.fabric.event.*;
+import me.m1dnightninja.midnightcore.fabric.player.Location;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;

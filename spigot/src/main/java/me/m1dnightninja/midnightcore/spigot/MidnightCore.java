@@ -1,32 +1,30 @@
 package me.m1dnightninja.midnightcore.spigot;
 
-import me.m1dnightninja.midnightcore.api.text.AbstractTimer;
+import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
+import me.m1dnightninja.midnightcore.api.text.MTimer;
 import me.m1dnightninja.midnightcore.api.module.IModule;
-import me.m1dnightninja.midnightcore.api.ImplDelegate;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.text.AbstractCustomScoreboard;
+import me.m1dnightninja.midnightcore.api.text.MScoreboard;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.common.JavaLogger;
-import me.m1dnightninja.midnightcore.spigot.inventory.InventoryGUI;
+import me.m1dnightninja.midnightcore.common.MidnightCoreImpl;
+import me.m1dnightninja.midnightcore.spigot.event.MidnightCoreAPIInitializedEvent;
+import me.m1dnightninja.midnightcore.spigot.inventory.SpigotInventoryGUI;
 import me.m1dnightninja.midnightcore.spigot.inventory.SpigotItem;
-import me.m1dnightninja.midnightcore.spigot.module.SavePointModule;
-import me.m1dnightninja.midnightcore.spigot.module.VanishModule;
+import me.m1dnightninja.midnightcore.spigot.module.savepoint.SavePointModule;
+import me.m1dnightninja.midnightcore.spigot.module.vanish.VanishModule;
 import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayerManager;
-import me.m1dnightninja.midnightcore.spigot.text.CustomScoreboard;
-import me.m1dnightninja.midnightcore.spigot.text.Timer;
-import me.m1dnightninja.midnightcore.spigot.api.event.MidnightCoreLoadModulesEvent;
+import me.m1dnightninja.midnightcore.spigot.text.SpigotScoreboard;
+import me.m1dnightninja.midnightcore.spigot.text.SpigotTimer;
+import me.m1dnightninja.midnightcore.spigot.event.MidnightCoreLoadModulesEvent;
 import me.m1dnightninja.midnightcore.spigot.config.YamlConfigProvider;
 import me.m1dnightninja.midnightcore.spigot.module.lang.LangModule;
-import me.m1dnightninja.midnightcore.spigot.module.PlayerDataModule;
+import me.m1dnightninja.midnightcore.spigot.module.playerdata.PlayerDataModule;
 import me.m1dnightninja.midnightcore.spigot.module.skin.SkinModule;
-import me.m1dnightninja.midnightcore.spigot.util.ConversionUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class MidnightCore extends JavaPlugin {
 
@@ -36,23 +34,6 @@ public class MidnightCore extends JavaPlugin {
     public void onEnable() {
 
         INSTANCE = this;
-
-        ImplDelegate delegate = new ImplDelegate() {
-            @Override
-            public Timer createTimer(MComponent text, int seconds, boolean countUp, AbstractTimer.TimerCallback cb) {
-                return new Timer(text, seconds, countUp, cb);
-            }
-
-            @Override
-            public InventoryGUI createInventoryGUI(MComponent title) {
-                return new InventoryGUI(title);
-            }
-
-            @Override
-            public AbstractCustomScoreboard createCustomScoreboard(String id, MComponent title) {
-                return new CustomScoreboard(id, title);
-            }
-        };
 
         List<IModule> modules = new ArrayList<>(2);
         modules.add(new SkinModule());
@@ -64,7 +45,29 @@ public class MidnightCore extends JavaPlugin {
         getServer().getPluginManager().callEvent(new MidnightCoreLoadModulesEvent(this, modules));
 
         YamlConfigProvider prov = new YamlConfigProvider();
-        new MidnightCoreAPI(new JavaLogger(this.getLogger()), delegate, new SpigotPlayerManager(), SpigotItem::new, prov, getDataFolder(), modules.toArray(new IModule[0]));
+        MidnightCoreAPI api = new MidnightCoreImpl(new ConfigRegistry(), new SpigotPlayerManager(), SpigotItem::new, prov, getDataFolder(), modules.toArray(new IModule[0])) {
+            @Override
+            public SpigotTimer createTimer(MComponent text, int seconds, boolean countUp, MTimer.TimerCallback cb) {
+                return new SpigotTimer(text, seconds, countUp, cb);
+            }
+
+            @Override
+            public SpigotInventoryGUI createInventoryGUI(MComponent title) {
+                return new SpigotInventoryGUI(title);
+            }
+
+            @Override
+            public MScoreboard createScoreboard(String id, MComponent title) {
+                return new SpigotScoreboard(id, title);
+            }
+
+            @Override
+            public void executeConsoleCommand(String cmd) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+            }
+        };
+
+        getServer().getPluginManager().callEvent(new MidnightCoreAPIInitializedEvent(this, api));
     }
 
     @Override

@@ -1,13 +1,11 @@
 package me.m1dnightninja.midnightcore.fabric.player;
 
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
-import me.m1dnightninja.midnightcore.api.player.PlayerManager;
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerDisconnectEvent;
-import me.m1dnightninja.midnightcore.fabric.event.Event;
+import me.m1dnightninja.midnightcore.api.player.MPlayerManager;
 
 import java.util.UUID;
 
-public class FabricPlayerManager extends PlayerManager {
+public class FabricPlayerManager extends MPlayerManager {
 
     @Override
     protected MPlayer createPlayer(UUID u) {

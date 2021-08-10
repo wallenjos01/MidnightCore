@@ -27,7 +27,7 @@ public class Vec3i {
 
     public static Vec3i parse(String str) {
 
-        if(str == null || str.length() == 0 || !str.contains(",")) return null;
+        if(str == null || !str.contains(",")) return null;
         String[] xyz = str.split(",");
 
         try {
@@ -71,6 +71,23 @@ public class Vec3i {
         return new Vec3i(data[0] - i.data[0], data[1] - i.data[1], data[2] - i.data[2]);
     }
 
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if(obj instanceof Vec3i other) {
+            return other.getX() == getX() && other.getY() == getY() && other.getZ() == getZ();
+        }
+        if(obj instanceof Vec3d other) {
+            return other.getX() == getX() && other.getY() == getY() && other.getZ() == getZ();
+        }
+
+        return false;
+    }
 
     public static final InlineSerializer<Vec3i> SERIALIZER = new InlineSerializer<>() {
         @Override

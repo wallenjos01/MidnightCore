@@ -1,6 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.mixin;
 
-import me.m1dnightninja.midnightcore.fabric.api.event.PlayerFoodLevelChangeEvent;
+import me.m1dnightninja.midnightcore.fabric.event.PlayerFoodLevelChangeEvent;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.server.level.ServerPlayer;

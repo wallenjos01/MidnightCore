@@ -4,6 +4,7 @@ import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 
 import java.util.List;
+import java.util.Set;
 
 public interface IModule {
 
@@ -13,7 +14,8 @@ public interface IModule {
 
     ConfigSection getDefaultConfig();
 
-    default List<Class<? extends IModule>> getDependencies() { return null; }
+    default Set<Class<? extends IModule>> getDependencies() { return null; }
+    default void onDisable() { }
 
 }
 

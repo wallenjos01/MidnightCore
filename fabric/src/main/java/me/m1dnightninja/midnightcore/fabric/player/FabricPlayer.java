@@ -1,7 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.player;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.brigadier.StringReader;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Vec3d;
@@ -9,27 +8,20 @@ import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
-import me.m1dnightninja.midnightcore.api.text.ActionBar;
-import me.m1dnightninja.midnightcore.api.text.Title;
+import me.m1dnightninja.midnightcore.api.text.MActionBar;
+import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
-import me.m1dnightninja.midnightcore.fabric.api.Location;
-import me.m1dnightninja.midnightcore.fabric.api.PermissionHelper;
+import me.m1dnightninja.midnightcore.fabric.util.PermissionUtil;
 import me.m1dnightninja.midnightcore.fabric.inventory.FabricItem;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.commands.GiveCommand;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -142,7 +134,7 @@ public class FabricPlayer extends MPlayer {
     }
 
     @Override
-    public void sendTitle(Title title) {
+    public void sendTitle(MTitle title) {
 
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) return;
@@ -169,12 +161,31 @@ public class FabricPlayer extends MPlayer {
     }
 
     @Override
-    public void sendActionBar(ActionBar ab) {
+    public void sendActionBar(MActionBar ab) {
 
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) return;
 
         player.connection.send(new ClientboundSetActionBarTextPacket(ConversionUtil.toMinecraftComponent(ab.getText())));
+    }
+
+    @Override
+    public void executeCommand(String cmd) {
+
+        if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
+        if(player == null) return;
+
+        MidnightCore.getServer().getCommands().performCommand(player.createCommandSourceStack(), cmd);
+    }
+
+    @Override
+    public void sendChatMessage(String message) {
+
+        if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
+        if(player == null) return;
+
+        ServerboundChatPacket packet = new ServerboundChatPacket(message);
+        player.connection.handleChat(packet);
     }
 
     @Override
@@ -218,7 +229,7 @@ public class FabricPlayer extends MPlayer {
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) return false;
 
-        return player.hasPermissions(2) || PermissionHelper.check(player.getUUID(), perm);
+        return player.hasPermissions(2) || PermissionUtil.check(player.getUUID(), perm);
     }
 
     @Nullable
