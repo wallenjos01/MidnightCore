@@ -267,7 +267,8 @@ public class ConfigSection {
 
             String s = keys.get(i);
             Object o = get(s);
-            builder.append("\"").append(s).append("\":").append(toNBTString(o));
+
+            builder.append(s).append(":").append(toNBTString(o));
         }
 
         builder.append("}");
@@ -282,7 +283,7 @@ public class ConfigSection {
 
             builder.append(((ConfigSection) o).toNBT());
 
-        } else if(o instanceof List<?> l) {
+        } else if(o instanceof List<?>) {
 
             builder.append("[");
 
@@ -290,6 +291,7 @@ public class ConfigSection {
             int longs = 0;
             int bytes = 0;
 
+            List<?> l = (List<?>) o;
             for(Object obj : l) {
                 if(obj instanceof Integer) ints++;
                 if(obj instanceof Long) longs++;
@@ -327,7 +329,9 @@ public class ConfigSection {
 
     private static JsonElement toJsonElement(Object obj) {
 
-        if(obj instanceof ConfigSection sec) {
+        if(obj instanceof ConfigSection) {
+
+            ConfigSection sec = (ConfigSection) obj;
 
             JsonObject out = new JsonObject();
             for(String s : sec.getKeys()) {
@@ -337,7 +341,9 @@ public class ConfigSection {
 
             return out;
 
-        } else if(obj instanceof List<?> lst) {
+        } else if(obj instanceof List<?>) {
+
+            List<?> lst = (List<?>) obj;
 
             JsonArray arr = new JsonArray();
 

@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.spigot.version.v1_16;
+package me.m1dnightninja.midnightcore.spigot.version.v1_13;
 
 import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
@@ -14,9 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-public class NMSUtil_16 implements NMSUtil.NMSHandler {
-
-    public static final UUID nullUid = new UUID(0L, 0L);
+public class NMSUtil_13_15 implements NMSUtil.NMSHandler {
 
     private static final Class<?> craftPlayer = ReflectionUtil.getCraftBukkitClass("entity.CraftPlayer");
     private static final Class<?> craftItemStack = ReflectionUtil.getCraftBukkitClass("inventory.CraftItemStack");
@@ -32,7 +30,7 @@ public class NMSUtil_16 implements NMSUtil.NMSHandler {
 
     private static final Method getHandle = ReflectionUtil.getMethod(craftPlayer, "getHandle");
     private static final Method getProfile = ReflectionUtil.getMethod(craftPlayer, "getProfile");
-    private static final Method sendMessage = ReflectionUtil.getMethod(serverPlayer, "a", baseComponent, chatMessageType, UUID.class);
+    private static final Method sendMessage = ReflectionUtil.getMethod(serverPlayer, "a", baseComponent, chatMessageType);
     private static final Method fromJson = ReflectionUtil.getMethod(chatSerializer, "a", String.class);
     private static final Method setTag = ReflectionUtil.getMethod(itemStack, "setTag", nbtTagCompound);
     private static final Method getTag = ReflectionUtil.getMethod(itemStack, "getTag");
@@ -58,7 +56,7 @@ public class NMSUtil_16 implements NMSUtil.NMSHandler {
 
         Object message = ReflectionUtil.callMethod(chatSerializer, fromJson, false, MComponent.Serializer.toJsonString(comp));
 
-        ReflectionUtil.callMethod(nmsPl, sendMessage, false, message, ChatType_SYSTEM, nullUid);
+        ReflectionUtil.callMethod(nmsPl, sendMessage, false, message, ChatType_SYSTEM);
 
     }
 
@@ -70,7 +68,7 @@ public class NMSUtil_16 implements NMSUtil.NMSHandler {
 
         Object message = ReflectionUtil.callMethod(chatSerializer, fromJson, false, MComponent.Serializer.toJsonString(ab.getText()));
 
-        ReflectionUtil.callMethod(nmsPl, sendMessage, false, message, ChatType_ACTION_BAR, nullUid);
+        ReflectionUtil.callMethod(nmsPl, sendMessage, false, message, ChatType_ACTION_BAR);
     }
 
     @Override

@@ -84,7 +84,7 @@ public class Vec3d {
     }
 
 
-    public static final InlineSerializer<Vec3d> SERIALIZER = new InlineSerializer<>() {
+    public static final InlineSerializer<Vec3d> SERIALIZER = new InlineSerializer<Vec3d>() {
         @Override
         public Vec3d deserialize(String s) {
             return parse(s);

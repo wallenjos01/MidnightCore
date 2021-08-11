@@ -35,7 +35,7 @@ public abstract class MPlayerManager implements Iterable<MPlayer> {
 
     @Override
     public Iterator<MPlayer> iterator() {
-        return new Iterator<>() {
+        return new Iterator<MPlayer>() {
 
             private int current = 0;
             private final List<MPlayer> players = new ArrayList<>(cache.values());

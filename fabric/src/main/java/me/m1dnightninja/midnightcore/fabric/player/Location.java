@@ -106,7 +106,9 @@ public class Location {
             return;
         }
 
-        if(ent instanceof ServerPlayer player) {
+        if(ent instanceof ServerPlayer) {
+
+            ServerPlayer player = (ServerPlayer) ent;
 
             ChunkPos chunkPos = new ChunkPos(pos);
             world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ent.getId());

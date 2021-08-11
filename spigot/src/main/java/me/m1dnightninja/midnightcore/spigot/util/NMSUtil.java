@@ -7,6 +7,9 @@ import me.m1dnightninja.midnightcore.api.text.MActionBar;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.spigot.version.NMSUtil_Other;
+import me.m1dnightninja.midnightcore.spigot.version.v1_11.NMSUtil_8_11;
+import me.m1dnightninja.midnightcore.spigot.version.v1_12.NMSUtil_12;
+import me.m1dnightninja.midnightcore.spigot.version.v1_13.NMSUtil_13_15;
 import me.m1dnightninja.midnightcore.spigot.version.v1_16.NMSUtil_16;
 import me.m1dnightninja.midnightcore.spigot.version.v1_17.NMSUtil_17;
 import org.bukkit.entity.Player;
@@ -21,14 +24,38 @@ public final class NMSUtil {
         if(CACHED_UTIL == null) {
 
             try {
-                if (ReflectionUtil.MAJOR_VERISON <= 16) {
-                    CACHED_UTIL = new NMSUtil_16();
-                } else {
-                    CACHED_UTIL = new NMSUtil_17();
+                switch (ReflectionUtil.API_VERSION) {
+                    case "v1_8_R1":
+                    case "v1_8_R2":
+                    case "v1_8_R3":
+                    case "v1_9_R1":
+                    case "v1_9_R2":
+                    case "v1_10_R1":
+                    case "v1_11_R1":
+                        CACHED_UTIL = new NMSUtil_8_11();
+                        break;
+                    case "v1_12_R1":
+                        CACHED_UTIL = new NMSUtil_12();
+                        break;
+                    case "v1_13_R1":
+                    case "v1_13_R2":
+                    case "v1_14_R1":
+                    case "v1_14_R2":
+                    case "v1_14_R3":
+                    case "v1_15_R1":
+                    case "v1_15_R2":
+                        CACHED_UTIL = new NMSUtil_13_15();
+                        break;
+                    case "v1_16_R1":
+                    case "v1_16_R2":
+                    case "v1_16_R3":
+                        CACHED_UTIL = new NMSUtil_16();
+                        break;
+                    default:
+                        CACHED_UTIL = new NMSUtil_17();
                 }
-            } catch (IllegalStateException ex) {
 
-                ex.printStackTrace();
+            } catch (Throwable ex) {
 
                 MidnightCoreAPI.getLogger().warn("Warning: Unable to find supported NMS Util! Functions involving Skins and RGB text may not work properly!");
                 CACHED_UTIL = new NMSUtil_Other();

@@ -310,7 +310,6 @@ public class SkinUpdater_10_12 implements ISkinUpdater {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    player.updateCommands();
                     player.updateInventory();
 
                 }

@@ -61,6 +61,11 @@ public class MidnightCore {
             }
 
             @Override
+            public String getGameVersion() {
+                return getServer().getVersion().getVersion();
+            }
+
+            @Override
             public void executeConsoleCommand(String cmd) {
                 getServer().getCommandManager().executeAsync(getServer().getConsoleCommandSource(), cmd);
             }

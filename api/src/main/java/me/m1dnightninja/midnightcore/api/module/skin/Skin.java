@@ -39,7 +39,7 @@ public class Skin {
 
     }
 
-    public static final InlineSerializer<UUID> UID_SERIALIZER = new InlineSerializer<>() {
+    public static final InlineSerializer<UUID> UID_SERIALIZER = new InlineSerializer<UUID>() {
         @Override
         public UUID deserialize(String s) {
             return UUID.fromString(s);
@@ -51,7 +51,7 @@ public class Skin {
         }
     };
 
-    public static final ConfigSerializer<Skin> SERIALIZER = new ConfigSerializer<>(){
+    public static final ConfigSerializer<Skin> SERIALIZER = new ConfigSerializer<Skin>(){
 
         @Override
         public Skin deserialize(ConfigSection sec) {

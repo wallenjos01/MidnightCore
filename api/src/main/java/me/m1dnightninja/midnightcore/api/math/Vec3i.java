@@ -79,17 +79,19 @@ public class Vec3i {
     @Override
     public boolean equals(Object obj) {
 
-        if(obj instanceof Vec3i other) {
+        if(obj instanceof Vec3i) {
+            Vec3i other = (Vec3i) obj;
             return other.getX() == getX() && other.getY() == getY() && other.getZ() == getZ();
         }
-        if(obj instanceof Vec3d other) {
+        if(obj instanceof Vec3d) {
+            Vec3d other = (Vec3d) obj;
             return other.getX() == getX() && other.getY() == getY() && other.getZ() == getZ();
         }
 
         return false;
     }
 
-    public static final InlineSerializer<Vec3i> SERIALIZER = new InlineSerializer<>() {
+    public static final InlineSerializer<Vec3i> SERIALIZER = new InlineSerializer<Vec3i>() {
         @Override
         public Vec3i deserialize(String s) {
             return parse(s);

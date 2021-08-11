@@ -1,4 +1,4 @@
-package me.m1dnightninja.midnightcore.spigot.version.v1_16;
+package me.m1dnightninja.midnightcore.spigot.version.v1_11;
 
 import com.mojang.authlib.GameProfile;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
@@ -11,28 +11,30 @@ import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-public class NMSUtil_16 implements NMSUtil.NMSHandler {
-
-    public static final UUID nullUid = new UUID(0L, 0L);
+public class NMSUtil_8_11 implements NMSUtil.NMSHandler {
 
     private static final Class<?> craftPlayer = ReflectionUtil.getCraftBukkitClass("entity.CraftPlayer");
     private static final Class<?> craftItemStack = ReflectionUtil.getCraftBukkitClass("inventory.CraftItemStack");
 
-
-    private static final Class<?> serverPlayer = ReflectionUtil.getNMSClass("EntityPlayer");
-    private static final Class<?> chatMessageType = ReflectionUtil.getNMSClass("ChatMessageType");
-    private static final Class<?> baseComponent = ReflectionUtil.getNMSClass("IChatBaseComponent");
-    private static final Class<?> chatSerializer = ReflectionUtil.getNMSClass("IChatBaseComponent$ChatSerializer");
     private static final Class<?> mojangsonParser = ReflectionUtil.getNMSClass("MojangsonParser");
     private static final Class<?> nbtTagCompound = ReflectionUtil.getNMSClass("NBTTagCompound");
     private static final Class<?> itemStack = ReflectionUtil.getNMSClass("ItemStack");
 
-    private static final Method getHandle = ReflectionUtil.getMethod(craftPlayer, "getHandle");
+    private static final Class<?> entityPlayer = ReflectionUtil.getNMSClass("EntityPlayer");
+    private static final Class<?> packet = ReflectionUtil.getNMSClass("Packet");
+    private static final Class<?> packetPlayOutChat = ReflectionUtil.getNMSClass("PacketPlayOutChat");
+    private static final Class<?> playerConnection = ReflectionUtil.getNMSClass("PlayerConnection");
+    private static final Class<?> iChatBaseComponent = ReflectionUtil.getNMSClass("IChatBaseComponent");
+    private static final Class<?> chatSerializer = ReflectionUtil.getNMSClass("IChatBaseComponent$ChatSerializer");
+
     private static final Method getProfile = ReflectionUtil.getMethod(craftPlayer, "getProfile");
-    private static final Method sendMessage = ReflectionUtil.getMethod(serverPlayer, "a", baseComponent, chatMessageType, UUID.class);
+    private static final Method getHandle = ReflectionUtil.getMethod(craftPlayer, "getHandle");
+    private static final Method sendPacket = ReflectionUtil.getMethod(playerConnection, "sendPacket", packet);
     private static final Method fromJson = ReflectionUtil.getMethod(chatSerializer, "a", String.class);
     private static final Method setTag = ReflectionUtil.getMethod(itemStack, "setTag", nbtTagCompound);
     private static final Method getTag = ReflectionUtil.getMethod(itemStack, "getTag");
@@ -41,8 +43,9 @@ public class NMSUtil_16 implements NMSUtil.NMSHandler {
     private static final Method asNMSCopy = ReflectionUtil.getMethod(craftItemStack, "asNMSCopy", ItemStack.class);
     private static final Method asBukkitCopy = ReflectionUtil.getMethod(craftItemStack, "asBukkitCopy", itemStack);
 
-    private static final Object ChatType_SYSTEM = ReflectionUtil.getEnumValue(chatMessageType, "SYSTEM");
-    private static final Object ChatType_ACTION_BAR = ReflectionUtil.getEnumValue(chatMessageType, "GAME_INFO");
+    private static final Field playerConnectionField = ReflectionUtil.getField(entityPlayer, "playerConnection");
+
+    private static final Constructor<?> packetPlayOutChatConstructor = ReflectionUtil.getConstructor(packetPlayOutChat, iChatBaseComponent, byte.class);
 
     public GameProfile getGameProfile(Player player) {
 
@@ -51,26 +54,27 @@ public class NMSUtil_16 implements NMSUtil.NMSHandler {
 
     }
 
+    @Override
     public void sendMessage(Player player, MComponent comp) {
 
-        Object craftp = ReflectionUtil.castTo(player, craftPlayer);
-        Object nmsPl = ReflectionUtil.callMethod(craftp, getHandle, false);
-
-        Object message = ReflectionUtil.callMethod(chatSerializer, fromJson, false, MComponent.Serializer.toJsonString(comp));
-
-        ReflectionUtil.callMethod(nmsPl, sendMessage, false, message, ChatType_SYSTEM, nullUid);
-
+        sendMessage(player, comp, (byte) 0);
     }
 
     @Override
     public void sendActionBar(Player pl, MActionBar ab) {
+        sendMessage(pl, ab.getText(), (byte) 2);
+    }
+
+    private void sendMessage(Player pl, MComponent cmp, byte data) {
 
         Object craftp = ReflectionUtil.castTo(pl, craftPlayer);
-        Object nmsPl = ReflectionUtil.callMethod(craftp, getHandle, false);
+        Object ep = ReflectionUtil.callMethod(craftp, getHandle, false);
+        Object pc = ReflectionUtil.getFieldValue(ep, playerConnectionField, false);
 
-        Object message = ReflectionUtil.callMethod(chatSerializer, fromJson, false, MComponent.Serializer.toJsonString(ab.getText()));
+        Object message = ReflectionUtil.callMethod(chatSerializer, fromJson, false, MComponent.Serializer.toJsonString(cmp));
+        Object pck = ReflectionUtil.construct(packetPlayOutChatConstructor, message, data);
 
-        ReflectionUtil.callMethod(nmsPl, sendMessage, false, message, ChatType_ACTION_BAR, nullUid);
+        ReflectionUtil.callMethod(pc, sendPacket, false, pck);
     }
 
     @Override

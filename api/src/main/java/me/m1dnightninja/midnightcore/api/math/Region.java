@@ -40,7 +40,7 @@ public class Region {
         return isWithin(new Vec3d(vector.getX(), vector.getY(), vector.getZ()));
     }
 
-    public static final InlineSerializer<Region> SERIALIZER = new InlineSerializer<>() {
+    public static final InlineSerializer<Region> SERIALIZER = new InlineSerializer<Region>() {
         @Override
         public Region deserialize(String s) {
 

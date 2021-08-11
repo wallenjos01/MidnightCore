@@ -3,6 +3,7 @@ package me.m1dnightninja.midnightcore.common.module.lang;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.config.FileConfig;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangModule;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
@@ -182,9 +183,18 @@ public class LangProvider implements ILangProvider {
         saveEntries(file, defaults);
     }
 
-    public void saveEntries(String file, HashMap<String, String> entries) {
+    @Override
+    public void saveEntries(ConfigSection sec, String file) {
 
-        File f = new File(folder, file + provider.getFileExtension());
+        FileConfig conf = FileConfig.findOrCreate(file, folder);
+
+        if(conf == null) return;
+
+        conf.getRoot().fill(sec);
+        conf.save();
+    }
+
+    public void saveEntries(String file, HashMap<String, String> entries) {
 
         ConfigSection sec = new ConfigSection();
         for(Map.Entry<String, String> ent : entries.entrySet()) {
@@ -192,7 +202,7 @@ public class LangProvider implements ILangProvider {
             sec.set(ent.getKey(), ent.getValue());
         }
 
-        provider.saveToFile(sec, f);
+        saveEntries(sec, file);
     }
 
     @Override

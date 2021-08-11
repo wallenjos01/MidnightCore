@@ -24,9 +24,14 @@ public class MHoverEvent {
         return data;
     }
 
-    public static MHoverEvent createTextHover(MComponent hover) {
 
-        return new MHoverEvent(HoverAction.SHOW_TEXT, MComponent.Serializer.toJson(hover));
+    public static MHoverEvent createTextHover(MComponent hover) {
+        return createTextHover(hover, true);
+    }
+
+    public static MHoverEvent createTextHover(MComponent hover, boolean rgb) {
+
+        return new MHoverEvent(HoverAction.SHOW_TEXT, MComponent.Serializer.toJson(hover, rgb));
     }
 
     public static MHoverEvent createItemHover(MItemStack stack) {

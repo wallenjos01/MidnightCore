@@ -127,7 +127,7 @@ public abstract class AbstractLangModule implements ILangModule {
             }
         }
 
-        if(!currentPlaceholder.isEmpty()) message.append("%").append(currentPlaceholder);
+        if(currentPlaceholder.length() > 0) message.append("%").append(currentPlaceholder);
         return message.toString();
     }
 
@@ -175,7 +175,7 @@ public abstract class AbstractLangModule implements ILangModule {
             }
         }
 
-        if(!currentPlaceholder.isEmpty()) currentMessage.append("%").append(currentPlaceholder);
+        if(currentPlaceholder.length() > 0) currentMessage.append("%").append(currentPlaceholder);
         out.addChild(MComponent.createTextComponent(currentMessage.toString()));
 
         for(MComponent comp : msg.getChildren()) {
@@ -231,7 +231,7 @@ public abstract class AbstractLangModule implements ILangModule {
             }
         }
 
-        if(!currentPlaceholder.isEmpty()) message.append("%").append(currentPlaceholder);
+        if(currentPlaceholder.length() > 0) message.append("%").append(currentPlaceholder);
         return message.toString();
     }
 }

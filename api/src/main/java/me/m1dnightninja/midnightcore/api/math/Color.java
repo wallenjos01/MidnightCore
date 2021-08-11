@@ -2,7 +2,9 @@ package me.m1dnightninja.midnightcore.api.math;
 
 public class Color {
     private static final Color[] mcLegacyColors = new Color[]{new Color(0, 0, 0), new Color(0, 0, 170), new Color(0, 170, 0), new Color(0, 170, 170), new Color(170, 0, 0), new Color(170, 0, 170), new Color(255, 170, 0), new Color(170, 170, 170), new Color(85, 85, 85), new Color(85, 85, 255), new Color(85, 255, 85), new Color(85, 255, 255), new Color(255, 85, 85), new Color(255, 85, 255), new Color(255, 255, 85), new Color(255, 255, 255)};
-    private static final String[] mcLegacyNames = new String[] { "black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white" };
+
+    private static final String[] LEGACY_COLORS = { "black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold",   "gray",       "dark_gray", "blue", "green", "aqua",       "red", "light_purple", "yellow", "white" };
+    private static final String[] DYE_COLORS    = { "black", "blue",      "green",      "cyan",      "red",      "purple",      "orange", "light_gray", "gray",      "blue", "lime",  "light_blue", "red", "pink",         "yellow", "white" };
 
     private final int red;
     private final int green;
@@ -90,65 +92,37 @@ public class Color {
     }
 
     public String toDyeColor() {
-        switch (this.toRGBI()) {
-            case 0: {
-                return "black";
-            }
-            case 1: 
-            case 9: {
-                return "blue";
-            }
-            case 2: {
-                return "green";
-            }
-            case 3: {
-                return "cyan";
-            }
-            case 4: 
-            case 12: {
-                return "red";
-            }
-            case 5: {
-                return "purple";
-            }
-            case 6: {
-                return "orange";
-            }
-            case 7: {
-                return "light_gray";
-            }
-            case 8: {
-                return "gray";
-            }
-            case 10: {
-                return "lime";
-            }
-            case 11: {
-                return "light_blue";
-            }
-            case 13: {
-                return "pink";
-            }
-            case 14: {
-                return "yellow";
-            }
-            case 15: {
-                return "white";
-            }
-        }
-        return "white";
+        return DYE_COLORS[toRGBI()];
+    }
+
+    public String toLegacyColor() {
+        return LEGACY_COLORS[toRGBI()];
     }
 
     public static Color parse(String s) {
 
-        for(int i = 0 ; i < mcLegacyNames.length ; i++) {
-            if(mcLegacyNames[i].equals(s)) {
+        Color c = fromLegacyName(s);
+        if(c == null) c = new Color(s);
+
+        return c;
+    }
+
+    public static Color fromLegacyName(String s) {
+        for(int i = 0 ; i < LEGACY_COLORS.length ; i++) {
+            if(LEGACY_COLORS[i].equals(s)) {
                 return mcLegacyColors[i];
             }
         }
+        return null;
+    }
 
-        return new Color(s);
-
+    public static Color fromDyeColor(String s) {
+        for(int i = 0 ; i < DYE_COLORS.length ; i++) {
+            if(DYE_COLORS[i].equals(s)) {
+                return mcLegacyColors[i];
+            }
+        }
+        return null;
     }
 
     @Override

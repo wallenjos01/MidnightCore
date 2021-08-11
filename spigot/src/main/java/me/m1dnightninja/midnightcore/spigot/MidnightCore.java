@@ -65,6 +65,18 @@ public class MidnightCore extends JavaPlugin {
             public void executeConsoleCommand(String cmd) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
             }
+
+            @Override
+            public String getGameVersion() {
+
+                String ver = getServer().getVersion();
+                if(ver.contains("(MC: ")) {
+
+                    ver = ver.substring(ver.indexOf("(MC: ") + 5, ver.length() - 1);
+
+                }
+                return ver;
+            }
         };
 
         getServer().getPluginManager().callEvent(new MidnightCoreAPIInitializedEvent(this, api));

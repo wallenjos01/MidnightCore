@@ -58,4 +58,16 @@ public class FileConfig {
         return null;
     }
 
+    public static FileConfig findOrCreate(String prefix, File directory) {
+
+        if(!directory.isDirectory()) return null;
+
+        FileConfig out = findFile(directory.listFiles(), prefix);
+        if(out != null) return out;
+
+        ConfigProvider provider = MidnightCoreAPI.getInstance().getDefaultConfigProvider();
+        return new FileConfig(new File(directory, prefix + provider.getFileExtension()), provider);
+
+    }
+
 }

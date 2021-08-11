@@ -152,7 +152,9 @@ public class DimensionModule implements IModule {
         ServerLevel parent = null;
 
         boolean tickTime = false;
-        if (session instanceof DynamicLevelStorageSource.DynamicLevelStorageAccess dSess) {
+        if (session instanceof DynamicLevelStorageSource.DynamicLevelStorageAccess) {
+
+            DynamicLevelStorageSource.DynamicLevelStorageAccess dSess = (DynamicLevelStorageSource.DynamicLevelStorageAccess) session;
 
             if (dSess.getProperties() == null) {
                 dSess.loadProperties(cre);

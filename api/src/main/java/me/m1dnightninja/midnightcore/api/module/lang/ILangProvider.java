@@ -1,5 +1,6 @@
 package me.m1dnightninja.midnightcore.api.module.lang;
 
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.text.MActionBar;
 import me.m1dnightninja.midnightcore.api.text.MTitle;
@@ -32,6 +33,8 @@ public interface ILangProvider {
     void reloadAllEntries();
 
     void saveDefaults(String file);
+
+    void saveEntries(ConfigSection sec, String file);
 
     boolean hasKey(String key);
 

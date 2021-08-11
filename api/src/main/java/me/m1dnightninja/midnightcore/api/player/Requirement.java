@@ -36,7 +36,7 @@ public class Requirement {
         return value;
     }
 
-    public static final ConfigSerializer<Requirement> SERIALIZER = new ConfigSerializer<>() {
+    public static final ConfigSerializer<Requirement> SERIALIZER = new ConfigSerializer<Requirement>() {
         @Override
         public Requirement deserialize(ConfigSection section) {
 

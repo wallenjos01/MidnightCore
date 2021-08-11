@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.api;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import me.m1dnightninja.midnightcore.api.config.*;
@@ -150,6 +151,24 @@ public abstract class MidnightCoreAPI {
      * @return      A new CustomScoreboard object
      */
     public abstract MScoreboard createScoreboard(String id, MComponent title);
+
+
+    /**
+     * Determines the Minecraft version the server is running on
+     *
+     * @return The Minecraft version
+     */
+    public abstract String getGameVersion();
+
+    public final int getGameMajorVersion() {
+
+        try {
+            return Integer.parseInt(getGameVersion().split("\\.")[1]);
+        } catch (NumberFormatException ex) {
+            return 8;
+        }
+
+    }
 
     /**
      * Runs a console command on the server

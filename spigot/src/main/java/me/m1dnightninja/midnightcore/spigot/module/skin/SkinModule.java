@@ -89,7 +89,6 @@ public class SkinModule extends AbstractSkinModule implements Listener {
                 break;
             case "v1_9_R1":
             case "v1_9_R2":
-            case "v1_9_R3":
                 updater = new SkinUpdater_9();
                 break;
             case "v1_10_R1":

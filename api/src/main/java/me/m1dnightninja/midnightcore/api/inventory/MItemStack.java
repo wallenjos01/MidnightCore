@@ -66,6 +66,7 @@ public abstract class MItemStack {
         private final MIdentifier type;
 
         private int amount = 1;
+        private final int majorVersion = MidnightCoreAPI.getInstance().getGameMajorVersion();
 
         private Skin headSkin = null;
         private MComponent name = null;
@@ -110,7 +111,14 @@ public abstract class MItemStack {
 
                 if(name != null) {
 
-                    display.set("Name", MComponent.Serializer.toJsonString(name));
+                    String outName;
+                    if (majorVersion <= 12) {
+                        outName = "§r" + name.toLegacyText(false);
+                    } else {
+                        outName = MComponent.Serializer.toJsonString(name);
+                    }
+
+                    display.set("Name", outName);
                 }
 
                 if(lore != null) {
@@ -130,7 +138,7 @@ public abstract class MItemStack {
 
                 ConfigSection skullOwner = new ConfigSection();
 
-                skullOwner.set("Id", UUIDtoInts(headSkin.getUUID()));
+                skullOwner.set("Id", majorVersion > 15 ? UUIDtoInts(headSkin.getUUID()) : headSkin.getUUID().toString());
 
                 ConfigSection properties = new ConfigSection();
                 List<ConfigSection> textures = new ArrayList<>();

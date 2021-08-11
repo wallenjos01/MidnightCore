@@ -26,6 +26,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -102,6 +103,16 @@ public class MidnightCore implements ModInitializer {
             @Override
             public void executeConsoleCommand(String cmd) {
                 getServer().getCommands().performCommand(getServer().createCommandSourceStack(), cmd);
+            }
+            @Override
+            public String getGameVersion() {
+
+                Optional<ModContainer> cont = FabricLoader.getInstance().getModContainer("minecraft");
+                if(cont.isPresent()) {
+                    return cont.get().getMetadata().getVersion().getFriendlyString();
+                }
+
+                return "1.17.1";
             }
         };
 

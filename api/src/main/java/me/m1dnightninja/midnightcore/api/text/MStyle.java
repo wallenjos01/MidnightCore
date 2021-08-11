@@ -123,7 +123,7 @@ public class MStyle {
         StringBuilder base = new StringBuilder();
 
         if(color != null) {
-            base.append("\"color\":\"").append(color.toString()).append("\"");
+            base.append("\"color\":\"").append(color).append("\"");
         }
         if(bold != null) {
             base.append("\"bold\":").append(bold);

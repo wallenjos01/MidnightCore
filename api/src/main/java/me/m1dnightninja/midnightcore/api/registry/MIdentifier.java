@@ -60,8 +60,9 @@ public class MIdentifier {
     @Override
     public boolean equals(Object obj) {
 
-        if(obj instanceof MIdentifier mid) {
+        if(obj instanceof MIdentifier) {
 
+            MIdentifier mid = (MIdentifier) obj;
             return mid.namespace.equals(namespace) && mid.path.equals(path);
 
         } else {
@@ -86,7 +87,7 @@ public class MIdentifier {
         return toString().hashCode();
     }
 
-    public static final InlineSerializer<MIdentifier> SERIALIZER = new InlineSerializer<>() {
+    public static final InlineSerializer<MIdentifier> SERIALIZER = new InlineSerializer<MIdentifier>() {
         @Override
         public MIdentifier deserialize(String s) {
             return parse(s);

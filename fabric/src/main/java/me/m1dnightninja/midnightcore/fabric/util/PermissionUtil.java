@@ -79,7 +79,9 @@ public final class PermissionUtil {
             Field req = CommandNode.class.getDeclaredField("requirement");
 
             for(CommandNode<CommandSourceStack> node : dispatcher.getRoot().getChildren()) {
-                if(!(node instanceof LiteralCommandNode<CommandSourceStack> lit)) continue;
+                if(!(node instanceof LiteralCommandNode)) continue;
+
+                LiteralCommandNode<CommandSourceStack> lit = (LiteralCommandNode<CommandSourceStack>) node;
 
                 for(String s : vanilla) {
                     if(s.equals(lit.getLiteral())) {

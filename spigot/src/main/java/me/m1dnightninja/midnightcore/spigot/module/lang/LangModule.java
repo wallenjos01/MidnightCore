@@ -3,13 +3,12 @@ package me.m1dnightninja.midnightcore.spigot.module.lang;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
-import me.m1dnightninja.midnightcore.api.module.lang.PlaceholderSupplier;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
-import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.module.lang.AbstractLangModule;
 import me.m1dnightninja.midnightcore.common.module.lang.LangProvider;
 import me.m1dnightninja.midnightcore.spigot.integration.PlaceholderAPIIntegration;
 import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
+import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,7 +32,7 @@ public class LangModule extends AbstractLangModule {
     @Override
     public String getPlayerLocale(MPlayer u) {
 
-        if(u == null) return getServerLanguage();
+        if(u == null || ReflectionUtil.MAJOR_VERISON < 12) return getServerLanguage();
         Player p = ((SpigotPlayer) u).getSpigotPlayer();
         if(p == null) return getServerLanguage();
 

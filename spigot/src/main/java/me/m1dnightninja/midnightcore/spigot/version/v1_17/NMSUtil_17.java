@@ -52,7 +52,7 @@ public class NMSUtil_17 implements NMSUtil.NMSHandler {
 
         EntityPlayer nmsPl = toEntityPlayer(player);
 
-        IChatBaseComponent message = IChatBaseComponent.ChatSerializer.a(MComponent.Serializer.toJson(comp));
+        IChatBaseComponent message = IChatBaseComponent.ChatSerializer.a(MComponent.Serializer.toJson(comp, true));
         nmsPl.sendMessage(message, nullUid);
 
     }
@@ -61,7 +61,7 @@ public class NMSUtil_17 implements NMSUtil.NMSHandler {
     public void sendActionBar(Player pl, MActionBar ab) {
 
         EntityPlayer nmsPl = toEntityPlayer(pl);
-        IChatBaseComponent message = IChatBaseComponent.ChatSerializer.a(MComponent.Serializer.toJson(ab.getText()));
+        IChatBaseComponent message = IChatBaseComponent.ChatSerializer.a(MComponent.Serializer.toJson(ab.getText(), true));
 
         nmsPl.a(message, true);
     }
@@ -75,7 +75,7 @@ public class NMSUtil_17 implements NMSUtil.NMSHandler {
             nmsPl.b.sendPacket(new ClientboundClearTitlesPacket(true));
         }
 
-        IChatBaseComponent message = IChatBaseComponent.ChatSerializer.a(MComponent.Serializer.toJson(title.getText()));
+        IChatBaseComponent message = IChatBaseComponent.ChatSerializer.a(MComponent.Serializer.toJson(title.getText(), true));
 
         if(title.getOptions().subtitle) {
             nmsPl.b.sendPacket(new ClientboundSetSubtitleTextPacket(message));

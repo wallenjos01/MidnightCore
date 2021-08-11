@@ -16,14 +16,29 @@ public final class ConversionUtil {
 
     public static ItemStack toBukkitStack(MItemStack is) {
 
-        Material mat = Material.matchMaterial(is.getType().toString());
+        ItemStack out;
 
-        if(mat == null) {
-            MidnightCoreAPI.getLogger().warn("Unable to find material for " + is.getType().getPath().toUpperCase(Locale.ROOT));
-            return null;
+        if(ReflectionUtil.MAJOR_VERISON >= 13) {
+            Material mat = Material.matchMaterial(is.getType().toString());
+
+            if(mat == null) {
+                MidnightCoreAPI.getLogger().warn("Unable to find material for " + is.getType().getPath().toUpperCase(Locale.ROOT));
+                return null;
+            }
+
+            out = new ItemStack(mat, is.getCount());
+        } else {
+
+            out = LegacyUtil.fromLegacyMaterial(is.getType());
+            if(out == null) {
+
+                MidnightCoreAPI.getLogger().warn("Unable to find material for " + is.getType().getPath().toUpperCase(Locale.ROOT));
+                return null;
+            }
+
+            out.setAmount(is.getCount());
         }
 
-        ItemStack out = new ItemStack(mat, is.getCount());
         return NMSUtil.setItemTag(out, is.getTag());
     }
 

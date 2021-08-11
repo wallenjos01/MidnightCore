@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.api.text;
 
 import com.google.gson.*;
+import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.math.Color;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
@@ -278,10 +279,10 @@ public class MComponent {
             return out;
         }
 
-        public static JsonObject toJson(MComponent component) {
+        public static JsonObject toJson(MComponent component, boolean rgb) {
 
             JsonObject out = new JsonObject();
-            fillJson(out, component.style);
+            fillJson(out, component.style, rgb);
 
             out.addProperty(component.getType().getId(), component.content);
 
@@ -292,14 +293,14 @@ public class MComponent {
             if(component.data.size() > 0) {
                 JsonArray arr = new JsonArray();
                 for(MComponent cmp : component.data) {
-                    arr.add(toJson(cmp));
+                    arr.add(toJson(cmp, rgb));
                 }
                 out.add("with", arr);
             }
             if(component.children.size() > 0) {
                 JsonArray arr = new JsonArray();
                 for(MComponent cmp : component.children) {
-                    arr.add(toJson(cmp));
+                    arr.add(toJson(cmp, rgb));
                 }
                 out.add("extra", arr);
             }
@@ -308,7 +309,11 @@ public class MComponent {
         }
 
         public static String toJsonString(MComponent component) {
-            JsonObject obj = toJson(component);
+            return toJsonString(component, MidnightCoreAPI.getInstance().getGameMajorVersion() >= 16);
+        }
+
+        public static String toJsonString(MComponent component, boolean rgb) {
+            JsonObject obj = toJson(component, rgb);
             return GSON.toJson(obj);
         }
 
@@ -354,10 +359,10 @@ public class MComponent {
             return out;
         }
 
-        public static void fillJson(JsonObject obj, MStyle style) {
+        public static void fillJson(JsonObject obj, MStyle style, boolean rgb) {
 
             if(style.getColor() != null) {
-                obj.addProperty("color", style.getColor().toHex());
+                obj.addProperty("color", rgb ? style.getColor().toHex() : style.getColor().toLegacyColor());
             }
             if(style.getFont() != null) {
                 obj.addProperty("font", style.getFont().toString());
@@ -434,26 +439,30 @@ public class MComponent {
                         currentStyle = new MStyle().withColor(Color.fromRGBI(rgbi));
                     }
                     switch (next) {
-                        case 'l' -> {
+                        case 'l':
                             currentStyle.withBold(true);
                             i += 1;
-                        }
-                        case 'o' -> {
+                            break;
+
+                        case 'o':
                             currentStyle.withItalic(true);
                             i += 1;
-                        }
-                        case 'n' -> {
+                            break;
+
+                        case 'n':
                             currentStyle.withUnderline(true);
                             i += 1;
-                        }
-                        case 'm' -> {
+                            break;
+
+                        case 'm':
                             currentStyle.withStrikethrough(true);
                             i += 1;
-                        }
-                        case 'k' -> {
+                            break;
+
+                        case 'k':
                             currentStyle.withObfuscated(true);
                             i += 1;
-                        }
+                            break;
                     }
 
                 } else if(c == rgbColorCharacter && i < content.length() - 7) {

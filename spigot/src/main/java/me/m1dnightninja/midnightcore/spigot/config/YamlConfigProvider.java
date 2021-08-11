@@ -1,11 +1,8 @@
 package me.m1dnightninja.midnightcore.spigot.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -13,11 +10,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class YamlConfigProvider implements ConfigProvider {
+
+    public static final YamlConfigProvider INSTANCE = new YamlConfigProvider();
 
     @Override
     public ConfigSection loadFromFile(File file) {
@@ -29,7 +29,7 @@ public class YamlConfigProvider implements ConfigProvider {
     @Override
     public ConfigSection loadFromStream(InputStream stream) {
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(new InputStreamReader(stream));
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
         return sectionFromYaml(config);
     }
 

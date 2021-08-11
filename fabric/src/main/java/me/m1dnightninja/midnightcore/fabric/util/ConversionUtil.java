@@ -177,7 +177,9 @@ public final class ConversionUtil {
 
             return t.getAsString();
 
-        } else if(t instanceof ListTag lt) {
+        } else if(t instanceof ListTag) {
+
+            ListTag lt = (ListTag) t;
 
             List<Object> objs = new ArrayList<>();
             for(Tag t1 : lt) {
@@ -186,7 +188,9 @@ public final class ConversionUtil {
             }
             return objs;
 
-        } else if(t instanceof IntArrayTag lt) {
+        } else if(t instanceof IntArrayTag) {
+
+            IntArrayTag lt = (IntArrayTag)  t;
 
             List<Integer> objs = new ArrayList<>();
             for(IntTag t1 : lt) {
@@ -195,7 +199,9 @@ public final class ConversionUtil {
             }
             return objs;
 
-        } else if(t instanceof LongArrayTag lt) {
+        } else if(t instanceof LongArrayTag) {
+
+            LongArrayTag lt = (LongArrayTag) t;
 
             List<Long> objs = new ArrayList<>();
             for(LongTag t1 : lt) {
@@ -204,7 +210,9 @@ public final class ConversionUtil {
             }
             return objs;
 
-        } else if(t instanceof ByteArrayTag lt) {
+        } else if(t instanceof ByteArrayTag) {
+
+            ByteArrayTag lt = (ByteArrayTag) t;
 
             List<Byte> objs = new ArrayList<>();
             for(ByteTag t1 : lt) {
@@ -243,7 +251,9 @@ public final class ConversionUtil {
         } else if(o instanceof String) {
             return StringTag.valueOf(o.toString());
 
-        } else if(o instanceof List<?> l) {
+        } else if(o instanceof List<?>) {
+
+            List<?> l = (List<?>) o;
 
             if (l.size() == 0) {
                 return new ListTag();

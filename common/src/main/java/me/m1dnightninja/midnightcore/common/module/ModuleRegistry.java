@@ -74,23 +74,25 @@ public class ModuleRegistry implements IModuleRegistry {
             }
         }
 
-        ConfigSection sec = config.getSection(module.getId().toString());
+        ConfigSection sec = config.has(module.getId().toString(), ConfigSection.class) ? config.getSection(module.getId().toString()) : new ConfigSection();
         ConfigSection defaults = module.getDefaultConfig();
 
-        if(sec == null) {
-
-            sec = defaults;
-            config.set(module.getId().toString(), defaults);
-
-        } else {
-
-            if(defaults != null) sec.fill(defaults);
+        if(defaults != null) {
+            sec.fill(defaults);
+            config.set(module.getId().toString(), sec);
         }
 
         int index = loadedModules.size();
 
-        module.initialize(sec);
+        try {
+            module.initialize(sec);
+        } catch (Exception ex) {
 
+            MidnightCoreAPI.getLogger().warn("An error occurred while trying to enable a module!");
+
+            ex.printStackTrace();
+            return false;
+        }
         loadedModules.add(module);
         indicesById.put(module.getId(), index);
         indicesByClass.put(module.getClass(), index);
@@ -105,7 +107,14 @@ public class ModuleRegistry implements IModuleRegistry {
 
         int index = indicesById.get(module.getId());
 
-        module.onDisable();
+        try {
+            module.onDisable();
+        } catch (Exception ex) {
+
+            MidnightCoreAPI.getLogger().warn("An error occurred while trying to disable a module!");
+            ex.printStackTrace();
+        }
+
         indicesById.remove(module.getId());
 
         List<Class<? extends IModule>> unload = new ArrayList<>();
