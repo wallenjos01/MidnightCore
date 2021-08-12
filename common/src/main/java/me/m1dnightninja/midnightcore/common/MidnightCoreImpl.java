@@ -31,7 +31,6 @@ public abstract class MidnightCoreImpl extends me.m1dnightninja.midnightcore.api
     private final MPlayerManager playerManager;
     private final ItemConverter itemConverter;
 
-
     private final File dataFolder;
 
     public MidnightCoreImpl(ConfigRegistry registry, MPlayerManager playerManager, ItemConverter converter, ConfigProvider def, File dataFolder, IModule... modules) {
@@ -67,20 +66,17 @@ public abstract class MidnightCoreImpl extends me.m1dnightninja.midnightcore.api
 
         this.mainConfig = new FileConfig(configFile, defaultConfigProvider);
 
-        // Load module configs from
-        ConfigSection moduleConfig = null;
-        if(mainConfig.getRoot().has("modules", ConfigSection.class)) {
-            moduleConfig = mainConfig.getRoot().getSection("modules");
-        }
+        // Default Config
+        ConfigSection defaultConfig = new ConfigSection();
+        defaultConfig.set("language", "en_us");
+        defaultConfig.getOrCreateSection("modules").set("disabled_modules", new ArrayList<>());
 
-        if(moduleConfig == null) {
-            moduleConfig = new ConfigSection();
-            mainConfig.getRoot().set("modules", moduleConfig);
-            mainConfig.getRoot().set("language", "en_us");
-        }
+        mainConfig.getRoot().fill(defaultConfig);
 
-        this.moduleRegistry = new ModuleRegistry(moduleConfig);
+        this.moduleRegistry = new ModuleRegistry(mainConfig.getRoot().getSection("modules"));
         moduleRegistry.loadAll(modules);
+
+        mainConfig.save();
 
         // Log a list of loaded modules
         Collection<MIdentifier> moduleIds = moduleRegistry.getLoadedModuleIds();

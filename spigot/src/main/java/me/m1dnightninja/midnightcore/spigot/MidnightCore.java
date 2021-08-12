@@ -7,6 +7,7 @@ import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.text.MScoreboard;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.MidnightCoreImpl;
+import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
 import me.m1dnightninja.midnightcore.spigot.event.MidnightCoreAPIInitializedEvent;
 import me.m1dnightninja.midnightcore.spigot.inventory.SpigotInventoryGUI;
 import me.m1dnightninja.midnightcore.spigot.inventory.SpigotItem;
@@ -78,6 +79,7 @@ public class MidnightCore extends JavaPlugin {
                 return ver;
             }
         };
+        api.getConfigRegistry().registerProvider(JsonConfigProvider.INSTANCE);
 
         getServer().getPluginManager().callEvent(new MidnightCoreAPIInitializedEvent(this, api));
     }

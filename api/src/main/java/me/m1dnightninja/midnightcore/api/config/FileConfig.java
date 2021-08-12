@@ -39,6 +39,16 @@ public class FileConfig {
         provider.saveToFile(root, file);
     }
 
+
+
+    public static FileConfig fromFile(File f) {
+
+        ConfigProvider prov = MidnightCoreAPI.getInstance().getConfigRegistry().getProviderForFile(f);
+        if(prov != null) return new FileConfig(f, prov);
+
+        return null;
+    }
+
     public static FileConfig findFile(File[] list, String prefix) {
 
         if(list == null) return null;

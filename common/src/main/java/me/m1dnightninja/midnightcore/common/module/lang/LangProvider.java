@@ -1,7 +1,6 @@
 package me.m1dnightninja.midnightcore.common.module.lang;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.config.FileConfig;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangModule;
@@ -12,264 +11,212 @@ import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class LangProvider implements ILangProvider {
 
     protected final HashMap<String, HashMap<String, String>> entries = new HashMap<>();
 
     protected final File folder;
-    protected final ConfigProvider provider;
     protected final ILangModule module;
 
     protected final HashMap<String, String> defaults;
 
-    public LangProvider(File folder, ILangModule mod, ConfigProvider provider, ConfigSection defaultEntries) {
+    public LangProvider(File folder, ILangModule mod, ConfigSection defaultEntries) {
 
         this.folder = folder;
-        this.provider = provider;
         this.module = mod;
 
-        defaults = loadEntries(defaultEntries);
+        defaults = generateDeepMap(defaultEntries, "");
 
-        if(!folder.exists()) {
-            if(!folder.mkdirs()) {
-                MidnightCoreAPI.getLogger().warn("Unable to create Language folder!");
-                return;
-            }
-            saveDefaults(module.getServerLanguage());
+        if(folder.exists() && !folder.isDirectory()) {
+            MidnightCoreAPI.getLogger().warn("Unable to create lang folder at " + folder.getAbsolutePath() + "! Conflicting file exists!");
+            return;
         }
+
+        if(!folder.exists() && !folder.mkdirs()) {
+            MidnightCoreAPI.getLogger().warn("Unable to create lang folder at " + folder.getAbsolutePath() + "!");
+            return;
+        }
+
+        saveDefaults(mod.getServerLanguage());
+        reloadAllEntries();
 
     }
 
-    public void loadLanguage(String language) {
-
-        File f = new File(folder, language + provider.getFileExtension());
-
-        ConfigSection sec;
-        if(f.exists()) {
-            sec = provider.loadFromFile(f);
-        } else {
-            sec = new ConfigSection();
-        }
-
-        HashMap<String, String> ents = loadEntries(sec);
-
-        if (addDefaults(ents)) {
-
-            saveEntries(language, ents);
-        }
-
-        entries.put(language, ents);
-
-    }
-
-    private boolean addDefaults(HashMap<String, String> sec) {
-
-        boolean out = false;
-        for(Map.Entry<String, String> ent : defaults.entrySet()) {
-
-            if(!sec.containsKey(ent.getKey())) {
-                out = true;
-                sec.put(ent.getKey(), ent.getValue());
-            }
-        }
-
-        return out;
-    }
-
-    private HashMap<String, String> loadEntries(ConfigSection sec) {
-
-        return populateMap(sec, "");
-    }
-
-    private HashMap<String, String> populateMap(ConfigSection section, String prefix) {
-
-        HashMap<String, String> out = new HashMap<>();
-        for(String s : section.getKeys()) {
-            if(section.has(s, String.class)) {
-                out.put(prefix + s, section.getString(s));
-            } else if(section.has(s, ConfigSection.class)) {
-                out.putAll(populateMap(section.getSection(s), prefix + s + "."));
-            }
-        }
-
-        return out;
-    }
 
     @Override
     public MComponent getMessage(String key, String language, Object... args) {
 
-        String msg = getRawMessage(key, language);
-        if(msg == null) return MComponent.createTextComponent("");
+        String message = getRawMessage(key, language);
+        message = module.applyInlinePlaceholders(message, args);
 
-        msg = module.applyInlinePlaceholders(msg, args);
+        MComponent comp = MComponent.Serializer.parse(message);
+        comp = module.applyPlaceholders(comp, args);
 
-        MComponent out = MComponent.Serializer.parse(msg);
-        out = module.applyPlaceholders(out, args);
-
-        return out;
+        return comp;
     }
 
     @Override
     public MComponent getUnformattedMessage(String key, String language) {
 
-        String msg = getRawMessage(key, language);
-        if(msg == null) return MComponent.createTextComponent("");
-
-        return MComponent.Serializer.parse(msg);
+        return MComponent.Serializer.parse(getRawMessage(key, language));
     }
 
     @Override
     public String getRawMessage(String key, String language) {
 
-        if(language == null) return defaults.get(key);
+        String msg = getEntries(language).get(key);
+        return msg == null ? defaults.get(key) : msg;
 
-        if(!entries.containsKey(language)) {
-            loadLanguage(language);
-        }
-
-        if(entries.containsKey(language) && entries.get(language).containsKey(key)) {
-            return entries.get(language).get(key);
-        }
-        return defaults.get(key);
     }
 
     @Override
     public MComponent getMessage(String key, MPlayer player, Object... args) {
+
         return getMessage(key, module.getPlayerLocale(player), args);
     }
 
     @Override
     public MComponent getMessage(String key) {
+
         return getMessage(key, module.getServerLanguage());
-    }
-
-    @Override
-    public void reloadAllEntries() {
-
-        Set<String> langs = entries.keySet();
-        entries.clear();
-
-        for(String lang : langs) {
-            loadLanguage(lang);
-        }
-    }
-
-    @Override
-    public boolean hasKey(String key) {
-        return entries.get(module.getServerLanguage()).containsKey(key) || defaults.containsKey(key);
-    }
-
-    @Override
-    public boolean hasKey(String key, String language) {
-
-        if(language == null || !entries.containsKey(language)) return hasKey(key);
-        return entries.get(language).containsKey(key) || hasKey(key);
-    }
-
-    @Override
-    public boolean hasKey(String key, MPlayer player) {
-
-        String language = module.getPlayerLocale(player);
-        return hasKey(key, language);
-    }
-
-    @Override
-    public void saveDefaults(String file) {
-
-        saveEntries(file, defaults);
-    }
-
-    @Override
-    public void saveEntries(ConfigSection sec, String file) {
-
-        FileConfig conf = FileConfig.findOrCreate(file, folder);
-
-        if(conf == null) return;
-
-        conf.getRoot().fill(sec);
-        conf.save();
-    }
-
-    public void saveEntries(String file, HashMap<String, String> entries) {
-
-        ConfigSection sec = new ConfigSection();
-        for(Map.Entry<String, String> ent : entries.entrySet()) {
-
-            sec.set(ent.getKey(), ent.getValue());
-        }
-
-        saveEntries(sec, file);
     }
 
     @Override
     public void sendMessage(String key, MPlayer player, Object... args) {
 
-        MComponent message = getMessage(key, player, args);
-        player.sendMessage(message);
-
+        player.sendMessage(getMessage(key, player, args));
     }
 
     @Override
     public void sendMessage(String key, Iterable<MPlayer> players, Object... args) {
 
-        HashMap<String, MComponent> cachedMessages = new HashMap<>();
         for (MPlayer u : players) {
 
-            String lang = module.getPlayerLocale(u);
-            MComponent message = cachedMessages.computeIfAbsent(lang, k -> getMessage(key, lang, args));
-
-            u.sendMessage(message);
+            sendMessage(key, u, args);
         }
     }
 
     @Override
     public void sendTitle(String key, MPlayer player, MTitle.TitleOptions opts, Object... args) {
 
-        MTitle title = new MTitle(getMessage(key, player, args), opts);
-        player.sendTitle(title);
+        player.sendTitle(new MTitle(getMessage(key, player, args), opts));
 
     }
 
     @Override
     public void sendTitle(String key, Iterable<MPlayer> players, MTitle.TitleOptions opts, Object... args) {
 
-        HashMap<String, MTitle> cachedMessages = new HashMap<>();
         for(MPlayer u : players) {
 
-            String lang = module.getPlayerLocale(u);
-            MTitle title = cachedMessages.computeIfAbsent(lang, k -> new MTitle(getMessage(key, lang, args), opts));
-
-            u.sendTitle(title);
+            sendTitle(key, u, opts, args);
         }
     }
 
     @Override
     public void sendActionBar(String key, MPlayer player, MActionBar.ActionBarOptions opts, Object... args) {
 
-        MActionBar ab = new MActionBar(getMessage(key, player, args), opts);
-        player.sendActionBar(ab);
-
+        player.sendActionBar(new MActionBar(getMessage(key, player, args), opts));
     }
 
     @Override
     public void sendActionBar(String key, Iterable<MPlayer> players, MActionBar.ActionBarOptions opts, Object... args) {
 
-        HashMap<String, MActionBar> cachedMessages = new HashMap<>();
         for(MPlayer u : players) {
 
-            String lang = module.getPlayerLocale(u);
-            MActionBar ab = cachedMessages.computeIfAbsent(lang, k -> new MActionBar(getMessage(key, lang, args), opts));
-
-            u.sendActionBar(ab);
+            sendActionBar(key, u, opts, args);
         }
+    }
+
+    @Override
+    public void reloadAllEntries() {
+
+        entries.clear();
+        File[] files = folder.listFiles();
+
+        if(files != null) for(File f : files) {
+
+            String lang = f.getName().substring(0, f.getName().lastIndexOf(".") - 1);
+            if(entries.containsKey(lang)) continue;
+
+            FileConfig conf = FileConfig.fromFile(f);
+            if(conf != null) {
+
+                entries.put(lang, generateDeepMap(conf.getRoot(), ""));
+            }
+        }
+    }
+
+    @Override
+    public void saveDefaults(String file) {
+
+        ConfigSection out = new ConfigSection();
+        for(Map.Entry<String, String> ent : defaults.entrySet()) {
+            out.set(ent.getKey(), ent.getValue());
+        }
+
+        FileConfig conf = FileConfig.findOrCreate(module.getServerLanguage(), folder);
+        if(conf == null) return;
+
+        conf.setRoot(out);
+        conf.save();
+    }
+
+    @Override
+    public boolean hasKey(String key) {
+        return defaults.containsKey(key) || hasKey(key, module.getServerLanguage());
+    }
+
+    @Override
+    public boolean hasKey(String key, String language) {
+        return entries.containsKey(language) && entries.get(language).containsKey(key);
+    }
+
+    @Override
+    public boolean hasKey(String key, MPlayer player) {
+        return defaults.containsKey(key) || hasKey(key, module.getPlayerLocale(player));
     }
 
     @Override
     public ILangModule getModule() {
         return module;
     }
+
+    private HashMap<String, String> getEntries(String locale) {
+
+        return entries.computeIfAbsent(locale, k -> {
+
+            String lang = locale.contains("_") ? locale.split("_")[0] : locale;
+            for(String loc : entries.keySet()) {
+
+                String lang2 = loc.contains("_") ? loc.split("_")[0] : loc;
+
+                if(lang.equals(lang2)) {
+                    return entries.get(loc);
+                }
+            }
+
+            return defaults;
+        });
+    }
+
+    private HashMap<String, String> generateDeepMap(ConfigSection section, String prefix) {
+
+        HashMap<String, String> out = new HashMap<>();
+        for(String s : section.getKeys()) {
+            Object o = section.get(s);
+
+            if(o instanceof String) {
+                out.put(prefix + s, (String) o);
+
+            } else if(o instanceof ConfigSection) {
+
+                out.putAll(generateDeepMap((ConfigSection) o, prefix + s + "."));
+            }
+        }
+
+        return out;
+    }
+
 }

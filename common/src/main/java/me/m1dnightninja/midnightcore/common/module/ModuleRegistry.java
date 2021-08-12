@@ -16,9 +16,13 @@ public class ModuleRegistry implements IModuleRegistry {
     private final HashMap<Class<? extends IModule>, Integer> indicesByClass = new HashMap<>();
 
     private final ConfigSection config;
+    private final Set<MIdentifier> disabledModules = new HashSet<>();
 
     public ModuleRegistry(ConfigSection config) {
         this.config = config;
+
+        disabledModules.addAll(config.getListFiltered("disabled_modules", MIdentifier.class));
+
     }
 
     @Override
@@ -145,6 +149,8 @@ public class ModuleRegistry implements IModuleRegistry {
     }
 
     private boolean loadWithDependencies(IModule mod, Queue<IModule> other) {
+
+        if(disabledModules.contains(mod.getId())) return false;
 
         Set<Class<? extends IModule>> dependencies = mod.getDependencies();
         if(dependencies == null) return loadModule(mod);

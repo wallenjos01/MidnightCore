@@ -48,11 +48,6 @@ public class LangModule extends AbstractLangModule {
         return MidnightCoreAPI.getInstance().getMainConfig().has("language") ? MidnightCoreAPI.getInstance().getMainConfig().getString("language") : "en_us";
     }
 
-    @Override
-    public LangProvider createLangProvider(File langFolder, ConfigProvider provider, ConfigSection defaults) {
-        return new LangProvider(langFolder, this, provider, defaults);
-    }
-
     public static void sendCommandSuccess(CommandContext<CommandSourceStack> context, ILangProvider langProvider, boolean notify, String key, Object... args) {
 
         MPlayer u = null;

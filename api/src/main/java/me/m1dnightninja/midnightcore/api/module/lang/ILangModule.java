@@ -23,7 +23,12 @@ public interface ILangModule extends IModule {
 
     String getServerLanguage();
 
-    ILangProvider createLangProvider(File langFolder, ConfigProvider provider, ConfigSection defaults);
+    ILangProvider createLangProvider(File langFolder, ConfigSection defaults);
+
+    @Deprecated
+    default ILangProvider createLangProvider(File langFolder, ConfigProvider provider, ConfigSection defaults) {
+        return createLangProvider(langFolder, defaults);
+    }
 
     MComponent applyPlaceholders(MComponent input, Object... args);
 

@@ -11,6 +11,7 @@ import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.api.text.MStyle;
 
+import java.io.File;
 import java.util.HashMap;
 
 public abstract class AbstractLangModule implements ILangModule {
@@ -44,6 +45,11 @@ public abstract class AbstractLangModule implements ILangModule {
     @Override
     public ConfigSection getDefaultConfig() {
         return new ConfigSection();
+    }
+
+    @Override
+    public LangProvider createLangProvider(File langFolder, ConfigSection defaults) {
+        return new LangProvider(langFolder, this, defaults);
     }
 
     @Override
@@ -234,4 +240,5 @@ public abstract class AbstractLangModule implements ILangModule {
         if(currentPlaceholder.length() > 0) message.append("%").append(currentPlaceholder);
         return message.toString();
     }
+
 }

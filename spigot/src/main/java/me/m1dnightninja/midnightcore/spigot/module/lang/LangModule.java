@@ -1,19 +1,15 @@
 package me.m1dnightninja.midnightcore.spigot.module.lang;
 
-import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangProvider;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.module.lang.AbstractLangModule;
-import me.m1dnightninja.midnightcore.common.module.lang.LangProvider;
 import me.m1dnightninja.midnightcore.spigot.integration.PlaceholderAPIIntegration;
 import me.m1dnightninja.midnightcore.spigot.player.SpigotPlayer;
 import me.m1dnightninja.midnightcore.spigot.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.io.File;
 
 public class LangModule extends AbstractLangModule {
 
@@ -58,11 +54,6 @@ public class LangModule extends AbstractLangModule {
         }
 
         return out;
-    }
-
-    @Override
-    public ILangProvider createLangProvider(File langFolder, ConfigProvider provider, ConfigSection defaults) {
-        return new LangProvider(langFolder, this, provider, defaults);
     }
 
     public static void sendMessage(CommandSender sender, ILangProvider provider, String id, Object... args) {
