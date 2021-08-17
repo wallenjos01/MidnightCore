@@ -6,6 +6,8 @@ import me.m1dnightninja.midnightcore.api.config.ConfigSerializer;
 import me.m1dnightninja.midnightcore.api.module.lang.ILangModule;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 
+import java.util.List;
+
 public class Requirement {
 
     private final RequirementType type;
@@ -18,14 +20,7 @@ public class Requirement {
 
     public boolean check(MPlayer player) {
 
-        ILangModule mod = MidnightCoreAPI.getInstance().getModule(ILangModule.class);
-        String check = value;
-
-        if (mod != null) {
-            check = mod.applyPlaceholdersFlattened(check, player);
-        }
-
-        return type.check(player, check);
+        return executeCheck(player, type, value);
     }
 
     public RequirementType getType() {
@@ -36,19 +31,38 @@ public class Requirement {
         return value;
     }
 
+    protected boolean executeCheck(MPlayer player, RequirementType req, String value) {
+        ILangModule mod = MidnightCoreAPI.getInstance().getModule(ILangModule.class);
+        String check = value;
+
+        if (mod != null) {
+            check = mod.applyPlaceholdersFlattened(check, player);
+        }
+
+        return req.check(player, this, check);
+    }
+
     public static final ConfigSerializer<Requirement> SERIALIZER = new ConfigSerializer<Requirement>() {
         @Override
         public Requirement deserialize(ConfigSection section) {
 
-            MIdentifier typeId = MIdentifier.parseOrDefault(section.getString("type"), "midnightcore");
-            RequirementType type = RequirementType.REQUIREMENT_TYPE_REGISTRY.get(typeId);
-            if(type == null) {
-                MidnightCoreAPI.getLogger().warn("Warning: Requirement type " + typeId + " does not exist!");
+            if(section.has("values", List.class)) {
+
+                MidnightCoreAPI.getLogger().warn("Creating a multi requirement");
+                return MultiRequirement.fromList(section.getListFiltered("values", Requirement.class));
+
+            } else {
+
+                MIdentifier typeId = MIdentifier.parseOrDefault(section.getString("type"), "midnightcore");
+                RequirementType type = RequirementType.REQUIREMENT_TYPE_REGISTRY.get(typeId);
+                if (type == null) {
+                    MidnightCoreAPI.getLogger().warn("Warning: Requirement type " + typeId + " does not exist!");
+                }
+
+                String value = section.getString("value");
+
+                return new Requirement(type, value);
             }
-
-            String value = section.getString("value");
-
-            return new Requirement(type, value);
         }
 
         @Override

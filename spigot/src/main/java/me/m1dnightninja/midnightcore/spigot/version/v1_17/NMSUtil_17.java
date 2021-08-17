@@ -89,7 +89,11 @@ public class NMSUtil_17 implements NMSUtil.NMSHandler {
     @Override
     public ConfigSection getItemTag(ItemStack is) {
 
+        if(is == null) return null;
+
         net.minecraft.world.item.ItemStack mis = (net.minecraft.world.item.ItemStack) ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, is);
+        if(mis == null) return new ConfigSection();
+
         NBTTagCompound compound = mis.getTag();
 
         if(compound == null) return new ConfigSection();

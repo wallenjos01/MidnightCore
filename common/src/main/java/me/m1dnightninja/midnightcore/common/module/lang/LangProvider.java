@@ -49,6 +49,8 @@ public class LangProvider implements ILangProvider {
     public MComponent getMessage(String key, String language, Object... args) {
 
         String message = getRawMessage(key, language);
+        if(message == null) return MComponent.createTextComponent("");
+
         message = module.applyInlinePlaceholders(message, args);
 
         MComponent comp = MComponent.Serializer.parse(message);
@@ -137,7 +139,7 @@ public class LangProvider implements ILangProvider {
 
         if(files != null) for(File f : files) {
 
-            String lang = f.getName().substring(0, f.getName().lastIndexOf(".") - 1);
+            String lang = f.getName().substring(0, f.getName().lastIndexOf("."));
             if(entries.containsKey(lang)) continue;
 
             FileConfig conf = FileConfig.fromFile(f);
@@ -151,16 +153,50 @@ public class LangProvider implements ILangProvider {
     @Override
     public void saveDefaults(String file) {
 
-        ConfigSection out = new ConfigSection();
-        for(Map.Entry<String, String> ent : defaults.entrySet()) {
-            out.set(ent.getKey(), ent.getValue());
-        }
-
         FileConfig conf = FileConfig.findOrCreate(module.getServerLanguage(), folder);
         if(conf == null) return;
 
-        conf.setRoot(out);
+        HashMap<String, String> existing = generateDeepMap(conf.getRoot(), "");
+        for(Map.Entry<String, String> ent : defaults.entrySet()) {
+            if(!existing.containsKey(ent.getKey())) {
+                existing.put(ent.getKey(), ent.getValue());
+            }
+        }
+
+        for(Map.Entry<String, String> ent : existing.entrySet()) {
+            conf.getRoot().set(ent.getKey(), ent.getValue());
+        }
+
         conf.save();
+    }
+
+    @Override
+    public void saveEntries(String language) {
+
+        FileConfig conf = FileConfig.findOrCreate(language, folder);
+        if(conf == null) return;
+
+        for(Map.Entry<String, String> ent : getEntries(language).entrySet()) {
+            conf.getRoot().set(ent.getKey(), ent.getValue());
+        }
+
+        conf.save();
+
+    }
+
+    @Override
+    public void loadEntries(String language, ConfigSection section) {
+
+        HashMap<String, String> ents = generateDeepMap(section, "");
+        entries.compute(language, (k,v) -> {
+            if(v == null) v = new HashMap<>();
+
+            for(Map.Entry<String, String> ent : ents.entrySet()) {
+                if(v.containsKey(ent.getKey())) continue;
+                v.put(ent.getKey(), ent.getValue());
+            }
+            return v;
+        });
     }
 
     @Override

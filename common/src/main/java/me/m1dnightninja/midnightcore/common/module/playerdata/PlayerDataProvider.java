@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.common.module.playerdata;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.config.FileConfig;
 import me.m1dnightninja.midnightcore.api.module.playerdata.IPlayerDataProvider;
@@ -62,7 +63,7 @@ public class PlayerDataProvider implements IPlayerDataProvider {
     protected FileConfig loadOrCreateDataForPlayer(UUID u) {
         FileConfig conf = FileConfig.findFile(folder.listFiles(), u.toString());
         if(conf == null) {
-            conf = new FileConfig(new File(folder, u + MidnightCoreAPI.getInstance().getDefaultConfigProvider().getFileExtension()));
+            conf = new FileConfig(new File(folder, u + ConfigRegistry.INSTANCE.getDefaultProvider().getFileExtension()));
         }
 
         return conf;

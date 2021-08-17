@@ -185,12 +185,20 @@ public class SpigotPlayer extends MPlayer {
     }
 
     @Override
+    public void teleport(me.m1dnightninja.midnightcore.api.player.Location location) {
+
+        Location l = new Location(Bukkit.getWorld(location.getWorld().toString()), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        player.teleport(l);
+
+    }
+
+    @Override
     public void giveItem(MItemStack item) {
 
         updatePlayer();
         if(player == null) return;
 
-        ItemStack is = ConversionUtil.toBukkitStack(item);
+        ItemStack is = ((SpigotItem) item).getBukkitStack();
         player.getInventory().addItem(is);
     }
 

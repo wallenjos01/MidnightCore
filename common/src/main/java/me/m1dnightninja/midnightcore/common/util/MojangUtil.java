@@ -91,6 +91,12 @@ public final class MojangUtil {
         return new Skin(profile.getId(), skin.getValue(), skin.getSignature());
     }
 
+    public static void setSkinOfProfile(GameProfile profile, Skin skin) {
+
+        profile.getProperties().get("textures").clear();
+        profile.getProperties().put("textures", new Property("textures", skin.getBase64(), skin.getSignature()));
+    }
+
 
     private static String makeHttpRequest(URL url) throws IOException {
 

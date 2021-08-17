@@ -29,7 +29,7 @@ public class SpigotScoreboard extends MScoreboard {
             throw new IllegalStateException("Cannot create a scoreboard right now!");
         }
 
-        legacyName = title.toLegacyText(false);
+        legacyName = MComponent.Serializer.toLegacyText(title);
 
         internal = manager.getNewScoreboard();
         objective = internal.registerNewObjective(id, "dummy", legacyName, RenderType.INTEGER);
@@ -55,7 +55,7 @@ public class SpigotScoreboard extends MScoreboard {
     public void setName(MComponent cmp) {
         super.setName(cmp);
 
-        legacyName = cmp.toLegacyText(false);
+        legacyName = MComponent.Serializer.toLegacyText(cmp);
         objective.setDisplayName(legacyName);
 
     }
@@ -65,7 +65,7 @@ public class SpigotScoreboard extends MScoreboard {
 
         if(line < 1 || line > 15) return;
 
-        lines[line] = message == null ? null : message.toLegacyText(false);
+        lines[line] = message == null ? null : MComponent.Serializer.toLegacyText(message);
         updated[line] = true;
 
     }

@@ -2,6 +2,9 @@ package me.m1dnightninja.midnightcore.api.text;
 
 import com.google.gson.*;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
+import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.config.ConfigSerializer;
+import me.m1dnightninja.midnightcore.api.config.InlineSerializer;
 import me.m1dnightninja.midnightcore.api.math.Color;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
@@ -103,13 +106,13 @@ public class MComponent {
         this.style = style;
     }
 
-    public String toLegacyText(boolean hexSupport) {
+    public String toLegacyText(Character colorChar, Character hexChar) {
 
         StringBuilder out = new StringBuilder();
-        out.append(style.toLegacyText(hexSupport)).append(content);
+        out.append(style.toLegacyText(colorChar, hexChar)).append(content);
 
         for(MComponent cmp : children) {
-            out.append(cmp.toLegacyText(hexSupport));
+            out.append(cmp.toLegacyText(colorChar, hexChar));
         }
 
         return out.toString();
@@ -400,8 +403,18 @@ public class MComponent {
             }
         }
 
-        public static String toLegacyText(MComponent component, boolean hexSupport) {
-            return component.toLegacyText(hexSupport);
+        public static String toLegacyText(MComponent component, Character legacyColorCharacter, Character rgbColorCharacter) {
+            return component.toLegacyText(legacyColorCharacter, rgbColorCharacter);
+        }
+
+        public static String toLegacyText(MComponent component, boolean forConfig) {
+            return forConfig ?
+                    component.toLegacyText('&', '#') :
+                    component.toLegacyText('§', null);
+        }
+
+        public static String toLegacyText(MComponent component) {
+            return toLegacyText(component, false);
         }
 
         public static String serialize(MComponent component) {
@@ -410,7 +423,7 @@ public class MComponent {
                 return toJsonString(component);
             }
 
-            return toLegacyText(component, true);
+            return toLegacyText(component, '&', '#');
 
         }
 
@@ -463,6 +476,11 @@ public class MComponent {
                             currentStyle.withObfuscated(true);
                             i += 1;
                             break;
+
+                        case 'r':
+                            currentStyle.withReset(true);
+                            i += 1;
+                            break;
                     }
 
                 } else if(c == rgbColorCharacter && i < content.length() - 7) {
@@ -487,6 +505,18 @@ public class MComponent {
             return out;
 
         }
+
+        public static final InlineSerializer<MComponent> SERIALIZER = new InlineSerializer<MComponent>() {
+            @Override
+            public MComponent deserialize(String section) {
+                return Serializer.parse(section);
+            }
+
+            @Override
+            public String serialize(MComponent object) {
+                return Serializer.serialize(object);
+            }
+        };
 
     }
 }

@@ -70,7 +70,7 @@ public class SpigotInventoryGUI extends MInventoryGUI implements Listener {
             rows = pageSize;
         }
 
-        Inventory inv = Bukkit.createInventory(null, rows * 9, this.title.toLegacyText(false));
+        Inventory inv = Bukkit.createInventory(null, rows * 9, this.title.toLegacyText('§', null));
         for(Entry ent : entries.values()) {
 
             if(ent.slot < offset || ent.slot >= (offset + (rows * 9)) || ent.item == null) {
@@ -94,7 +94,7 @@ public class SpigotInventoryGUI extends MInventoryGUI implements Listener {
         }
         ev.setCancelled(true);
 
-        int offset = openGuis.get(pl).getPlayerPage(pl) * 54;
+        int offset = openGuis.get(pl).getPlayerPage(pl) * (openGuis.get(pl).getPageSize() * 9);
         int slot = ev.getSlot();
 
         MInventoryGUI.Entry ent = (this.entries.get((offset + slot)));

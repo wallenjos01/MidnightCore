@@ -18,11 +18,10 @@ public class ModuleRegistry implements IModuleRegistry {
     private final ConfigSection config;
     private final Set<MIdentifier> disabledModules = new HashSet<>();
 
-    public ModuleRegistry(ConfigSection config) {
+    public ModuleRegistry(ConfigSection config, Collection<MIdentifier> disabled) {
         this.config = config;
 
-        disabledModules.addAll(config.getListFiltered("disabled_modules", MIdentifier.class));
-
+        disabledModules.addAll(disabled);
     }
 
     @Override

@@ -8,6 +8,8 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
+import me.m1dnightninja.midnightcore.api.config.FileConfig;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
@@ -22,22 +24,12 @@ public class LastJoinedModule implements IModule {
 
     private ProxyServer server;
 
-    private File locationFile;
-    private ConfigSection locations;
-    private ConfigProvider prov;
+    private FileConfig locations;
 
     @Override
     public boolean initialize(ConfigSection configuration) {
 
-        prov = MidnightCoreAPI.getInstance().getDefaultConfigProvider();
-
-        locationFile = new File(MidnightCoreAPI.getInstance().getDataFolder(), "locations" + prov.getFileExtension());
-
-        if(!locationFile.exists()) {
-            prov.saveToFile(new ConfigSection(), locationFile);
-        }
-
-        locations = prov.loadFromFile(locationFile);
+        locations = FileConfig.findOrCreate("locations", MidnightCoreAPI.getInstance().getDataFolder());
 
         server = MidnightCore.getInstance().getServer();
         server.getEventManager().register(MidnightCore.getInstance(), this);
@@ -59,9 +51,9 @@ public class LastJoinedModule implements IModule {
     public void onPlayerJoin(PlayerChooseInitialServerEvent event) {
 
         String uid = event.getPlayer().getUniqueId().toString();
-        if(locations.has(uid)) {
+        if(locations.getRoot().has(uid)) {
 
-            String serverId = locations.getString(uid);
+            String serverId = locations.getRoot().getString(uid);
             Optional<RegisteredServer> srv = server.getServer(serverId);
 
             srv.ifPresent(event::setInitialServer);
@@ -73,13 +65,13 @@ public class LastJoinedModule implements IModule {
     public void onPlayerLeave(DisconnectEvent event) {
 
         Optional<ServerConnection> conn = event.getPlayer().getCurrentServer();
-        conn.ifPresent(serverConnection -> locations.set(event.getPlayer().getUniqueId().toString(), serverConnection.getServerInfo().getName()));
+        conn.ifPresent(serverConnection -> locations.getRoot().set(event.getPlayer().getUniqueId().toString(), serverConnection.getServerInfo().getName()));
 
     }
 
     @Subscribe(order = PostOrder.NORMAL)
     public void onShutdown(ProxyShutdownEvent event) {
 
-        prov.saveToFile(locations, locationFile);
+        locations.save();
     }
 }

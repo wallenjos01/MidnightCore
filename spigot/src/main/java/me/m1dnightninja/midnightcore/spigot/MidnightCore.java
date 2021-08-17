@@ -36,6 +36,11 @@ public class MidnightCore extends JavaPlugin {
 
         INSTANCE = this;
 
+        ConfigRegistry.INSTANCE.registerProvider(JsonConfigProvider.INSTANCE);
+        ConfigRegistry.INSTANCE.registerProvider(YamlConfigProvider.INSTANCE);
+
+        ConfigRegistry.INSTANCE.setDefaultProvider(YamlConfigProvider.INSTANCE);
+
         List<IModule> modules = new ArrayList<>(2);
         modules.add(new SkinModule());
         modules.add(new LangModule());
@@ -45,8 +50,7 @@ public class MidnightCore extends JavaPlugin {
 
         getServer().getPluginManager().callEvent(new MidnightCoreLoadModulesEvent(this, modules));
 
-        YamlConfigProvider prov = new YamlConfigProvider();
-        MidnightCoreAPI api = new MidnightCoreImpl(new ConfigRegistry(), new SpigotPlayerManager(), SpigotItem::new, prov, getDataFolder(), modules.toArray(new IModule[0])) {
+        MidnightCoreAPI api = new MidnightCoreImpl(new SpigotPlayerManager(), SpigotItem::new, getDataFolder(), modules.toArray(new IModule[0])) {
             @Override
             public SpigotTimer createTimer(MComponent text, int seconds, boolean countUp, MTimer.TimerCallback cb) {
                 return new SpigotTimer(text, seconds, countUp, cb);

@@ -7,14 +7,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.LinkedTreeMap;
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 
 public class ConfigSection {
     private final ConfigRegistry reg;
     private final LinkedTreeMap<String, Object> entries = new LinkedTreeMap<>();
 
     public ConfigSection() {
-        this(MidnightCoreAPI.getInstance().getConfigRegistry());
+        this(ConfigRegistry.INSTANCE);
     }
 
     public ConfigSection(ConfigRegistry reg) {
@@ -127,7 +126,24 @@ public class ConfigSection {
 
     public long getLong(String key) { return this.get(key, Number.class).longValue(); }
 
-    public boolean getBoolean(String key) { return (boolean) this.get(key); }
+    public boolean getBoolean(String key) {
+
+        Object o = this.get(key);
+
+        if(o == null) return false;
+
+        if(o instanceof Boolean) {
+            return (boolean) o;
+
+        } else if(o instanceof Number) {
+            return ((Number) o).intValue() != 0;
+
+        } else if(o instanceof String) {
+            return o.equals("true");
+        }
+
+        return convert(o, Boolean.class);
+    }
 
     public List<?> getList(String key) {
         return this.get(key, List.class);
@@ -183,6 +199,12 @@ public class ConfigSection {
             if(!has(entry.getKey())) {
                 set(entry.getKey(), entry.getValue());
             }
+        }
+    }
+
+    public void fillOverwrite(ConfigSection other) {
+        for(Map.Entry<String, Object> entry : other.getEntries().entrySet()) {
+            set(entry.getKey(), entry.getValue());
         }
     }
 
@@ -288,26 +310,21 @@ public class ConfigSection {
             builder.append("[");
 
             int ints = 0;
-            int longs = 0;
-            int bytes = 0;
 
             List<?> l = (List<?>) o;
             for(Object obj : l) {
-                if(obj instanceof Integer) ints++;
-                if(obj instanceof Long) longs++;
-                if(obj instanceof Byte) bytes++;
+                if(obj instanceof Number) ints++;
             }
 
-            if(ints == l.size()) {
+            boolean intArray = ints == l.size() - 1 && "I".equals(l.get(0));
+
+            if(ints == l.size() || intArray) {
                 builder.append("I;");
-            } else if(longs == l.size()) {
-                builder.append("L;");
-            } else if(bytes == l.size()) {
-                builder.append("B;");
             }
 
-            for(int i = 0 ; i < l.size() ; i++) {
-                if(i > 0) {
+            int start = intArray ? 1 : 0;
+            for(int i = start ; i < l.size() ; i++) {
+                if(i > start) {
                     builder.append(",");
                 }
                 builder.append(toNBTString(l.get(i)));

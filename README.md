@@ -5,7 +5,6 @@ A core library for Minecraft mods and plugins.
 *Note: This library is currently in beta!*
 
 <br>
-<br>
 
 ## Overview
 - MidnightCore is a modular library for Minecraft servers and Proxies. It has a number of APIs and features, and is designed to be expandable.
@@ -20,19 +19,19 @@ A core library for Minecraft mods and plugins.
 - In that case, just drop the .jar file corresponding to your server version in the server's mods or plugins folder.
 ### For Developers:
 - For developers, this mod offers quite a few features to make creating mods and plugins easier.
-- To use it, simply add this to your `build.gradle` file:
+- To use it, simply add this to your  `build.gradle` file:
 ``` 
-    repositories {
-        maven { url 'https://mdmc.ddns.net/maven' }
-    }
-    
-    dependencies {
-        compileOnly('me.m1dnightninja.midnightcore:api:1.0-latest')
+repositories {
+    maven { url 'https://mdmc.ddns.net/maven' }
+}
 
-        compileOnly('me.m1dnightninja.midnightcore:fabric:1.0-latest') // For Fabric servers
-        compileOnly('me.m1dnightninja.midnightcore:spigot:1.0-latest') // For Spigot servers
-        compileOnly('me.m1dnightninja.midnightcore:velocity:1.0-latest') // For Velocity servers
-    }
+dependencies {
+    compileOnly('me.m1dnightninja.midnightcore:api:1.0-latest')
+
+    compileOnly('me.m1dnightninja.midnightcore:fabric:1.0-latest') // For Fabric servers
+    compileOnly('me.m1dnightninja.midnightcore:spigot:1.0-latest') // For Spigot servers
+    compileOnly('me.m1dnightninja.midnightcore:velocity:1.0-latest') // For Velocity servers
+}
 ```
 - For Fabric mods, there is a custom entrypoint available to use. While not required, using it ensures you do not try to access the MidnightCore API before it is initialized.
     - To use it, add an entrypoint to your `fabric.mod.json` file of type `midnightcore:mod` which points to a class which implements `MidnightCoreModInitializer`

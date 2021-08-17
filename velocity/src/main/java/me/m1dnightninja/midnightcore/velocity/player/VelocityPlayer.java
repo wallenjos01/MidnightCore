@@ -5,6 +5,7 @@ import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Vec3d;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.player.Location;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.text.MActionBar;
@@ -125,6 +126,11 @@ public class VelocityPlayer extends MPlayer {
 
     @Override
     public void teleport(Vec3d location, float yaw, float pitch) {
+
+    }
+
+    @Override
+    public void teleport(Location location) {
 
     }
 

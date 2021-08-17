@@ -134,7 +134,7 @@ public class FabricInventoryGUI extends MInventoryGUI {
 
         event.setCancelled(true);
 
-        int offset = gui.getPlayerPage(player) * 54;
+        int offset = gui.getPlayerPage(player) * (gui.getPageSize() * 9);
         int slot = event.getSlot();
 
         MidnightCore.getServer().submit(() -> gui.onClick(player, getActionType(event.getClickType(), event.getAction()), offset + slot));

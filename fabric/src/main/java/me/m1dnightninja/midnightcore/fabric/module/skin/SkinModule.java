@@ -155,20 +155,20 @@ public class SkinModule extends AbstractSkinModule {
             obs.connection.send(remove);
             obs.connection.send(add);
 
-            obs.connection.send(equip);
-
             if(obs == player || !player.getLevel().equals(obs.getLevel())) continue;
 
             obs.connection.send(destroy);
             obs.connection.send(spawn);
             obs.connection.send(head);
             obs.connection.send(tracker);
+            obs.connection.send(equip);
 
         }
 
         player.connection.send(respawn);
         player.connection.send(position);
         player.connection.send(abilities);
+        player.connection.send(equip);
 
         server.getPlayerList().sendPlayerPermissionLevel(player);
         server.getPlayerList().sendAllPlayerInfo(player);
@@ -201,7 +201,6 @@ public class SkinModule extends AbstractSkinModule {
         GameProfile oldProfile = profile;
 
         profile = new GameProfile(oldProfile.getId(), oldProfile.getName());
-        profile.getProperties().putAll(oldProfile.getProperties());
 
         ServerPlayer player = MidnightCore.getServer().getPlayerList().getPlayer(profile.getId());
         if(player == null) return;

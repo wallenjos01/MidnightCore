@@ -14,34 +14,6 @@ import java.util.Locale;
 
 public final class ConversionUtil {
 
-    public static ItemStack toBukkitStack(MItemStack is) {
-
-        ItemStack out;
-
-        if(ReflectionUtil.MAJOR_VERISON >= 13) {
-            Material mat = Material.matchMaterial(is.getType().toString());
-
-            if(mat == null) {
-                MidnightCoreAPI.getLogger().warn("Unable to find material for " + is.getType().getPath().toUpperCase(Locale.ROOT));
-                return null;
-            }
-
-            out = new ItemStack(mat, is.getCount());
-        } else {
-
-            out = LegacyUtil.fromLegacyMaterial(is.getType());
-            if(out == null) {
-
-                MidnightCoreAPI.getLogger().warn("Unable to find material for " + is.getType().getPath().toUpperCase(Locale.ROOT));
-                return null;
-            }
-
-            out.setAmount(is.getCount());
-        }
-
-        return NMSUtil.setItemTag(out, is.getTag());
-    }
-
     public static MIdentifier fromNamespacedKey(NamespacedKey key) {
         return MIdentifier.create(key.getNamespace(), key.getKey());
     }

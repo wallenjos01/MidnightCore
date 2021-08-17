@@ -1,5 +1,7 @@
 package me.m1dnightninja.midnightcore.fabric.util;
 
+import com.google.gson.JsonObject;
+import com.google.gson.internal.LazilyParsedNumber;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Color;
@@ -9,10 +11,12 @@ import me.m1dnightninja.midnightcore.api.text.MHoverEvent;
 import me.m1dnightninja.midnightcore.api.text.MStyle;
 import me.m1dnightninja.midnightcore.fabric.inventory.FabricItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,10 +229,27 @@ public final class ConversionUtil {
         return null;
     }
 
+    private static NumericTag toNumberTag(LazilyParsedNumber num) {
+
+        String s = num.toString();
+
+        if(s.contains(".")) {
+
+            return DoubleTag.valueOf(num.doubleValue());
+
+        } else {
+
+            return IntTag.valueOf(num.intValue());
+        }
+    }
+
     private static Tag toNBT(Object o) {
 
         if(o instanceof ConfigSection) {
             return toCompoundTag((ConfigSection) o);
+
+        } else if(o instanceof LazilyParsedNumber) {
+            return toNumberTag((LazilyParsedNumber) o);
 
         } else if(o instanceof Integer) {
             return IntTag.valueOf((int) o);
@@ -250,6 +271,9 @@ public final class ConversionUtil {
 
         } else if(o instanceof String) {
             return StringTag.valueOf(o.toString());
+
+        } else if(o instanceof Boolean) {
+            return (Boolean) o ? ByteTag.ONE : ByteTag.ZERO;
 
         } else if(o instanceof List<?>) {
 
@@ -285,7 +309,7 @@ public final class ConversionUtil {
             }
         }
 
-        return null;
+        return StringTag.valueOf(o.toString());
     }
 
 

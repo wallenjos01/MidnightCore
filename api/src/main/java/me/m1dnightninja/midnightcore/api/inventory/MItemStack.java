@@ -20,6 +20,8 @@ public abstract class MItemStack {
     protected int count;
     protected ConfigSection tag;
 
+    protected byte data;
+
     protected MItemStack(MIdentifier type, int count) {
         this.type = type;
         this.count = count;
@@ -55,6 +57,11 @@ public abstract class MItemStack {
     public abstract void update();
 
     public abstract MComponent getName();
+
+    public void setName(MComponent component) {
+
+        tag.getOrCreateSection("display").set("Name", MComponent.Serializer.toJsonString(component));
+    }
 
     public MItemStack copy() {
 
@@ -113,7 +120,7 @@ public abstract class MItemStack {
 
                     String outName;
                     if (majorVersion <= 12) {
-                        outName = "§r" + name.toLegacyText(false);
+                        outName = "§r" + name.toLegacyText('§', null);
                     } else {
                         outName = MComponent.Serializer.toJsonString(name);
                     }
@@ -190,7 +197,7 @@ public abstract class MItemStack {
         @Override
         public MItemStack deserialize(ConfigSection section) {
 
-            Builder builder = Builder.of(MIdentifier.parse(section.getString("type")));
+            Builder builder = Builder.of(MIdentifier.parseOrDefault(section.getString("type")));
 
             if(section.has("name", String.class)) {
                 builder.withName(MComponent.Serializer.parse(section.getString("name")));
@@ -216,7 +223,14 @@ public abstract class MItemStack {
                 builder.withTag(section.getSection("tag"));
             }
 
-            return builder.build();
+            MItemStack is = builder.build();
+
+            if(MidnightCoreAPI.getInstance().getGameMajorVersion() < 13 && section.has("data", Number.class)) {
+                is.data = section.get("data", Number.class).byteValue();
+                is.update();
+            }
+
+            return is;
         }
 
         @Override
@@ -224,9 +238,13 @@ public abstract class MItemStack {
 
             ConfigSection out = new ConfigSection();
 
-            out.set("type", object.type.toString());
+            out.set("type", MidnightCoreAPI.getInstance().getGameMajorVersion() >= 13 ? object.type.toString() : object.type.getPath());
             out.set("amount", object.count);
             out.set("tag", object.tag);
+
+            if(MidnightCoreAPI.getInstance().getGameMajorVersion() < 13 && object.data > 0) {
+                out.set("data", object.data);
+            }
 
             return out;
         }

@@ -7,7 +7,7 @@ public class MIdentifier {
     private final String namespace;
     private final String path;
 
-    private static final IllegalArgumentException EXCEPTION = new IllegalArgumentException("Unable to parse Module Identifier!");
+    private static final IllegalArgumentException EXCEPTION = new IllegalArgumentException("Unable to parse MIdentifier!");
 
     private MIdentifier(String namespace, String path) {
         this.namespace = namespace;
@@ -90,7 +90,7 @@ public class MIdentifier {
     public static final InlineSerializer<MIdentifier> SERIALIZER = new InlineSerializer<MIdentifier>() {
         @Override
         public MIdentifier deserialize(String s) {
-            return parse(s);
+            return parseOrDefault(s);
         }
 
         @Override

@@ -27,6 +27,10 @@ public abstract class MInventoryGUI {
         this.pageSize = pageSize;
     }
 
+    public int getPageSize() {
+        return pageSize == 0 ? 6 : pageSize;
+    }
+
     public int pageCount() {
 
         int highestEnt = 0;

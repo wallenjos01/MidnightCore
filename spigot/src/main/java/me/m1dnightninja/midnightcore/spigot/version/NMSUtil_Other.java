@@ -49,7 +49,7 @@ public class NMSUtil_Other implements NMSUtil.NMSHandler {
             pl.resetTitle();
         }
 
-        String ttl = title.getText().toLegacyText(false);
+        String ttl = MComponent.Serializer.toLegacyText(title.getText());
         if(title.getOptions().subtitle) {
             pl.sendTitle(ttl, null, 20, 80, 20);
         } else {
@@ -110,12 +110,12 @@ public class NMSUtil_Other implements NMSUtil.NMSHandler {
 
         if(tag.has("display", ConfigSection.class)) {
             ConfigSection display = tag.getSection("display");
-            if(display.has("Name")) im.setDisplayName(MComponent.Serializer.fromJson(display.getString("Name")).toLegacyText(false));
+            if(display.has("Name")) im.setDisplayName(MComponent.Serializer.toLegacyText(MComponent.Serializer.fromJson(display.getString("Name"))));
             if(display.has("Lore", List.class)) {
 
                 List<String> lore = new ArrayList<>();
                 for(String s : display.getListFiltered("Lore", String.class)) {
-                    lore.add(MComponent.Serializer.fromJson(s).toLegacyText(false));
+                    lore.add(MComponent.Serializer.toLegacyText(MComponent.Serializer.fromJson(s)));
                 }
 
                 im.setLore(lore);

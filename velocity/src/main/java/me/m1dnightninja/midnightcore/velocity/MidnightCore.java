@@ -43,7 +43,7 @@ public class MidnightCore {
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
 
-        new MidnightCoreImpl(new ConfigRegistry(), new VelocityPlayerManager(), null, JsonConfigProvider.INSTANCE, dataFolder.toFile(), new PlayerDataModule(), new LastJoinedModule(), new PluginMessageModule()) {
+        new MidnightCoreImpl(new VelocityPlayerManager(), null, dataFolder.toFile(), new PlayerDataModule(), new LastJoinedModule(), new PluginMessageModule()) {
 
             @Override
             public MTimer createTimer(MComponent name, int seconds, boolean countUp, MTimer.TimerCallback callback) {

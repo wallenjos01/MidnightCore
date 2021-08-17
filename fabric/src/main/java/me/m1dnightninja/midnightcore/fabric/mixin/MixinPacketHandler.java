@@ -2,8 +2,9 @@ package me.m1dnightninja.midnightcore.fabric.mixin;
 
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import me.m1dnightninja.midnightcore.api.player.Location;
 import me.m1dnightninja.midnightcore.fabric.event.*;
-import me.m1dnightninja.midnightcore.fabric.player.Location;
+import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
@@ -77,8 +78,8 @@ public class MixinPacketHandler {
 
     @Inject(method = "teleport(DDDFFLjava/util/Set;)V", at=@At("HEAD"), cancellable = true)
     private void onTeleport(double d, double e, double f, float g, float h, Set<ClientboundPlayerPositionPacket.RelativeArgument> set, CallbackInfo ci) {
-        Location oldLoc = new Location(player.level.dimension().location(), player.xOld, player.yOld, player.zOld, player.getRotationVector().x, player.getRotationVector().y);
-        Location newLoc = new Location(player.level.dimension().location(), d, e, f, g, h);
+        Location oldLoc = new Location(ConversionUtil.fromResourceLocation(player.level.dimension().location()), player.xOld, player.yOld, player.zOld, player.getRotationVector().x, player.getRotationVector().y);
+        Location newLoc = new Location(ConversionUtil.fromResourceLocation(player.level.dimension().location()), d, e, f, g, h);
 
         PlayerTeleportEvent ev = new PlayerTeleportEvent(player, oldLoc, newLoc);
         Event.invoke(ev);

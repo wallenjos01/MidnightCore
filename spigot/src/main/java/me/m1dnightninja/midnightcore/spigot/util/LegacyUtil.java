@@ -1,6 +1,5 @@
 package me.m1dnightninja.midnightcore.spigot.util;
 
-import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.math.Color;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import org.bukkit.Material;
@@ -11,7 +10,7 @@ import java.util.Locale;
 
 public final class LegacyUtil {
 
-    private static final byte[] data = { 15, 11, 13, 9, 14, 10, 1, 8, 7, 11, 5, 3, 14, 2, 4, 0 };
+    private static final byte[] data = { 15, 11, 13, 9, 14, 10, 1, 8, 7, 11, 5, 3, 14, 6, 4, 0 };
     private static final HashMap<String, ItemData> conversions = new HashMap<>();
 
     public static byte colorToData(Color color) {
@@ -20,51 +19,51 @@ public final class LegacyUtil {
     }
 
     @SuppressWarnings("deprecation")
-    public static ItemStack fromLegacyMaterial(MIdentifier id) {
+    public static ItemStack fromLegacyMaterial(MIdentifier id, byte data) {
 
-        if(id.getNamespace().equals("minecraft")) {
+        String s = id.getPath().toLowerCase(Locale.ENGLISH);
 
-            String s = id.getPath().toLowerCase(Locale.ROOT);
+        if(conversions.containsKey(s)) {
 
-            if(conversions.containsKey(s)) {
+            try {
 
-                try {
+                ItemData dt = conversions.get(s);
 
-                    ItemData dt = conversions.get(s);
+                Material m = Material.valueOf(dt.id);
+                return new ItemStack(m, 1, (short) 0, dt.data);
 
-                    Material m = Material.valueOf(dt.id);
-                    return new ItemStack(m, 1, (short) 0, dt.data);
-
-                } catch (IllegalArgumentException ex) {
-                    // IGNORE
-                }
-            }
-
-            if (s.contains("_")) {
-
-                String[] parts = s.split("_");
-                Color clr = Color.fromDyeColor(parts[0]);
-
-                if (clr != null) {
-
-                    StringBuilder str = new StringBuilder();
-                    for (int i = 1; i < parts.length; i++) {
-                        if(i > 1) {
-                            str.append("_");
-                        }
-                        str.append(parts[i].toUpperCase(Locale.ROOT));
-                    }
-
-                    Material m = Material.matchMaterial(str.toString());
-                    if(m != null) return new ItemStack(m, 1, (short) 0, colorToData(clr));
-                }
+            } catch (IllegalArgumentException ex) {
+                // IGNORE
             }
         }
 
-        Material m = Material.matchMaterial(id.toString());
-        if(m == null) return null;
+        if (s.contains("_")) {
 
-        return new ItemStack(m);
+            String[] parts = s.split("_");
+            Color clr = Color.fromDyeColor(parts[0]);
+
+            if (clr != null) {
+
+                StringBuilder str = new StringBuilder();
+                for (int i = 1; i < parts.length; i++) {
+                    if(i > 1) {
+                        str.append("_");
+                    }
+                    str.append(parts[i].toUpperCase(Locale.ENGLISH));
+                }
+
+                Material m = Material.matchMaterial(str.toString());
+                if(m != null) return new ItemStack(m, 1, (short) 0, colorToData(clr));
+            }
+        }
+
+        Material m = Material.matchMaterial(s);
+
+        if(m == null) {
+            return null;
+        }
+
+        return new ItemStack(m, 1, (short) 0, data);
 
     }
 

@@ -49,6 +49,8 @@ public abstract class MPlayer {
     public abstract void teleport(MIdentifier dimension, Vec3d location, float yaw, float pitch);
     public abstract void teleport(Vec3d location, float yaw, float pitch);
 
+    public abstract void teleport(Location location);
+
     public abstract void giveItem(MItemStack item);
 
     protected abstract void cleanup();

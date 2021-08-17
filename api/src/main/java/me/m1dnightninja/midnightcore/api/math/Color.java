@@ -47,6 +47,10 @@ public class Color {
     }
 
     public String toHex() {
+        return "#" + toPlainHex();
+    }
+
+    public String toPlainHex() {
         String r = Integer.toHexString(this.red);
         String g = Integer.toHexString(this.green);
         String b = Integer.toHexString(this.blue);
@@ -59,7 +63,7 @@ public class Color {
         if (b.length() == 1) {
             b = "0" + b;
         }
-        return "#" + r + g + b;
+        return r + g + b;
     }
 
     public int toDecimal() {

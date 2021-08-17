@@ -9,12 +9,26 @@ import java.util.List;
 
 public class ConfigRegistry {
 
+    public static final ConfigRegistry INSTANCE = new ConfigRegistry();
+
     private final HashMap<Class<?>, ConfigSerializer<?>> serializers = new HashMap<>();
     private final HashMap<Class<?>, InlineSerializer<?>> inlineSerializers = new HashMap<>();
 
     private final List<ConfigProvider> providers = new ArrayList<>();
     private final HashMap<String, Integer> providersByExtension = new HashMap<>();
 
+    private ConfigProvider defaultProvider;
+
+    public ConfigProvider getDefaultProvider() {
+        if(defaultProvider == null) {
+            return providers.get(0);
+        }
+        return defaultProvider;
+    }
+
+    public void setDefaultProvider(ConfigProvider defaultProvider) {
+        this.defaultProvider = defaultProvider;
+    }
 
     public <T> void registerSerializer(Class<T> clazz, ConfigSerializer<T> serializer) {
         this.serializers.put(clazz, serializer);
@@ -82,7 +96,7 @@ public class ConfigRegistry {
             return getProviderForFileType(name.substring(name.lastIndexOf(".")));
 
         } else {
-            return MidnightCoreAPI.getInstance().getDefaultConfigProvider();
+            return getDefaultProvider();
         }
 
     }

@@ -6,6 +6,7 @@ import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Vec3d;
 import me.m1dnightninja.midnightcore.api.module.skin.ISkinModule;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.player.Location;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
 import me.m1dnightninja.midnightcore.api.text.MActionBar;
@@ -13,6 +14,7 @@ import me.m1dnightninja.midnightcore.api.text.MTitle;
 import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.util.MojangUtil;
 import me.m1dnightninja.midnightcore.fabric.MidnightCore;
+import me.m1dnightninja.midnightcore.fabric.util.LocationUtil;
 import me.m1dnightninja.midnightcore.fabric.util.PermissionUtil;
 import me.m1dnightninja.midnightcore.fabric.inventory.FabricItem;
 import me.m1dnightninja.midnightcore.fabric.util.ConversionUtil;
@@ -194,8 +196,8 @@ public class FabricPlayer extends MPlayer {
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) return;
 
-        Location loc = new Location(ConversionUtil.toResourceLocation(dimension), location.getX(), location.getY(), location.getZ(), yaw, pitch);
-        loc.teleport(player);
+        Location loc = new Location(dimension, location.getX(), location.getY(), location.getZ(), yaw, pitch);
+        LocationUtil.teleport(player, loc);
     }
 
     @Override
@@ -204,8 +206,14 @@ public class FabricPlayer extends MPlayer {
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) return;
 
-        Location loc = new Location(player.level.dimension().location(), location.getX(), location.getY(), location.getZ(), yaw, pitch);
-        loc.teleport(player);
+        Location loc = new Location(ConversionUtil.fromResourceLocation(player.level.dimension().location()), location.getX(), location.getY(), location.getZ(), yaw, pitch);
+        LocationUtil.teleport(player, loc);
+    }
+
+    @Override
+    public void teleport(Location location) {
+
+        LocationUtil.teleport(player, location);
     }
 
     @Override

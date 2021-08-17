@@ -57,6 +57,7 @@ public abstract class MidnightCoreAPI {
      *
      * @return The default config provider
      */
+    @Deprecated
     public abstract ConfigProvider getDefaultConfigProvider();
 
     /**

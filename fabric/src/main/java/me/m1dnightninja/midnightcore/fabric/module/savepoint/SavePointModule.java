@@ -1,11 +1,12 @@
 package me.m1dnightninja.midnightcore.fabric.module.savepoint;
 
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
+import me.m1dnightninja.midnightcore.api.player.Location;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.common.module.savepoint.AbstractSavePointModule;
-import me.m1dnightninja.midnightcore.fabric.player.Location;
 import me.m1dnightninja.midnightcore.fabric.event.Event;
 import me.m1dnightninja.midnightcore.fabric.player.FabricPlayer;
+import me.m1dnightninja.midnightcore.fabric.util.LocationUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,7 +46,7 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         if(player == null) return null;
 
         SavePoint out = new SavePoint();
-        out.location = Location.getEntityLocation(player);
+        out.location = LocationUtil.getEntityLocation(player);
         out.tag = player.saveWithoutId(new CompoundTag());
         out.gameMode = player.gameMode.getGameModeForPlayer();
 
@@ -71,7 +72,7 @@ public class SavePointModule extends AbstractSavePointModule<SavePointModule.Sav
         resetPlayer(u);
         player.load(point.tag);
 
-        point.location.teleport(player);
+        LocationUtil.teleport(player, point.location);
 
         for(MobEffectInstance inst : player.getActiveEffects()) {
             player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), inst));

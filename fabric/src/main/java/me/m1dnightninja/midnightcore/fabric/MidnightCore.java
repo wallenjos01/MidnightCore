@@ -55,6 +55,9 @@ public class MidnightCore implements ModInitializer {
             return;
         }
 
+        ConfigRegistry.INSTANCE.registerProvider(JsonConfigProvider.INSTANCE);
+        ConfigRegistry.INSTANCE.setDefaultProvider(JsonConfigProvider.INSTANCE);
+
         // Default modules
         final List<IModule> modules = new ArrayList<>(5);
         modules.add(new SkinModule());
@@ -78,10 +81,8 @@ public class MidnightCore implements ModInitializer {
 
         // Create API
         MidnightCoreAPI api = new MidnightCoreImpl(
-                new ConfigRegistry(),
                 new FabricPlayerManager(),
                 FabricItem::new,
-                JsonConfigProvider.INSTANCE,
                 configDirectory,
                 modules.toArray(new IModule[0])
         ) {

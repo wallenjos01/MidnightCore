@@ -11,9 +11,11 @@ import me.m1dnightninja.midnightcore.api.math.Vec3i;
 import me.m1dnightninja.midnightcore.api.module.IModule;
 import me.m1dnightninja.midnightcore.api.module.IModuleRegistry;
 import me.m1dnightninja.midnightcore.api.module.skin.Skin;
+import me.m1dnightninja.midnightcore.api.player.Location;
 import me.m1dnightninja.midnightcore.api.player.MPlayerManager;
 import me.m1dnightninja.midnightcore.api.player.Requirement;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
+import me.m1dnightninja.midnightcore.api.text.MComponent;
 import me.m1dnightninja.midnightcore.common.module.ModuleRegistry;
 
 import java.io.File;
@@ -25,7 +27,6 @@ public abstract class MidnightCoreImpl extends me.m1dnightninja.midnightcore.api
     private final ModuleRegistry moduleRegistry;
 
     private final ConfigRegistry configRegistry;
-    private final ConfigProvider defaultConfigProvider;
     private final FileConfig mainConfig;
 
     private final MPlayerManager playerManager;
@@ -33,13 +34,12 @@ public abstract class MidnightCoreImpl extends me.m1dnightninja.midnightcore.api
 
     private final File dataFolder;
 
-    public MidnightCoreImpl(ConfigRegistry registry, MPlayerManager playerManager, ItemConverter converter, ConfigProvider def, File dataFolder, IModule... modules) {
+    public MidnightCoreImpl(MPlayerManager playerManager, ItemConverter converter, File dataFolder, IModule... modules) {
 
         // Register variables
         this.random = new Random();
 
-        this.configRegistry = registry;
-        this.defaultConfigProvider = def;
+        this.configRegistry = ConfigRegistry.INSTANCE;
 
         this.playerManager = playerManager;
         this.itemConverter = converter;
@@ -47,33 +47,32 @@ public abstract class MidnightCoreImpl extends me.m1dnightninja.midnightcore.api
         this.dataFolder = dataFolder;
 
         // Config Provider defaults
-        configRegistry.registerProvider(defaultConfigProvider);
-
         configRegistry.registerSerializer(Skin.class, Skin.SERIALIZER);
         configRegistry.registerSerializer(MItemStack.class, MItemStack.SERIALIZER);
         configRegistry.registerSerializer(Requirement.class, Requirement.SERIALIZER);
 
         configRegistry.registerInlineSerializer(MIdentifier.class, MIdentifier.SERIALIZER);
+        configRegistry.registerInlineSerializer(MComponent.class, MComponent.Serializer.SERIALIZER);
         configRegistry.registerInlineSerializer(Vec3d.class, Vec3d.SERIALIZER);
         configRegistry.registerInlineSerializer(Vec3i.class, Vec3i.SERIALIZER);
+        configRegistry.registerInlineSerializer(Location.class, Location.SERIALIZER);
         configRegistry.registerInlineSerializer(UUID.class, Skin.UID_SERIALIZER);
 
         // Load config
-        File configFile = new File(dataFolder, "config" + def.getFileExtension());
-        if(!configFile.exists()) {
-            def.saveToFile(new ConfigSection(), configFile);
+        this.mainConfig = FileConfig.findOrCreate("config", dataFolder);
+        if(mainConfig == null) {
+            throw new IllegalStateException("Unable to initialize MidnightCore! No ConfigProviders exist!");
         }
-
-        this.mainConfig = new FileConfig(configFile, defaultConfigProvider);
 
         // Default Config
         ConfigSection defaultConfig = new ConfigSection();
         defaultConfig.set("language", "en_us");
-        defaultConfig.getOrCreateSection("modules").set("disabled_modules", new ArrayList<>());
+        defaultConfig.set("disabled_modules", new ArrayList<>());
+        defaultConfig.set("modules", new ConfigSection());
 
         mainConfig.getRoot().fill(defaultConfig);
 
-        this.moduleRegistry = new ModuleRegistry(mainConfig.getRoot().getSection("modules"));
+        this.moduleRegistry = new ModuleRegistry(mainConfig.getRoot().getSection("modules"), mainConfig.getRoot().getListFiltered("disabled_modules", MIdentifier.class));
         moduleRegistry.loadAll(modules);
 
         mainConfig.save();
@@ -106,7 +105,7 @@ public abstract class MidnightCoreImpl extends me.m1dnightninja.midnightcore.api
 
     @Override
     public ConfigProvider getDefaultConfigProvider() {
-        return defaultConfigProvider;
+        return ConfigRegistry.INSTANCE.getDefaultProvider();
     }
 
     @Override

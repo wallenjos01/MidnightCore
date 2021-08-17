@@ -12,6 +12,7 @@ import me.m1dnightninja.midnightcore.spigot.version.v1_12.NMSUtil_12;
 import me.m1dnightninja.midnightcore.spigot.version.v1_13.NMSUtil_13_15;
 import me.m1dnightninja.midnightcore.spigot.version.v1_16.NMSUtil_16;
 import me.m1dnightninja.midnightcore.spigot.version.v1_17.NMSUtil_17;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -84,8 +85,16 @@ public final class NMSUtil {
         getUtil().sendActionBar(pl, ab);
     }
 
-    public static ConfigSection getItemTag(ItemStack im) { return getUtil().getItemTag(im); }
-    public static ItemStack setItemTag(ItemStack im, ConfigSection tag) { return getUtil().setItemTag(im, tag); }
+    public static ConfigSection getItemTag(ItemStack im) {
+
+        if(im.getType() == Material.AIR) return null;
+        return getUtil().getItemTag(im);
+    }
+    public static ItemStack setItemTag(ItemStack im, ConfigSection tag) {
+
+        if(im.getType() == Material.AIR) return im;
+        return getUtil().setItemTag(im, tag);
+    }
 
     public interface NMSHandler {
 

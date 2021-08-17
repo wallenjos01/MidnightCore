@@ -1,7 +1,6 @@
 package me.m1dnightninja.midnightcore.fabric.event;
 
-import me.m1dnightninja.midnightcore.fabric.player.Location;
-import me.m1dnightninja.midnightcore.fabric.event.Event;
+import me.m1dnightninja.midnightcore.api.player.Location;
 import net.minecraft.server.level.ServerPlayer;
 
 public class PlayerTeleportEvent extends Event {

@@ -13,6 +13,8 @@ public class MStyle {
     private Boolean obfuscated;
     private MIdentifier font;
 
+    private Boolean reset;
+
     public MStyle() { }
 
     public MStyle withColor(Color color) {
@@ -50,6 +52,11 @@ public class MStyle {
         return this;
     }
 
+    public MStyle withReset(Boolean b) {
+        this.reset = b;
+        return this;
+    }
+
     public Color getColor() {
         return color;
     }
@@ -79,7 +86,7 @@ public class MStyle {
     }
 
     public MStyle copy() {
-        return new MStyle().withColor(color).withFont(font).withBold(bold).withItalic(italic).withUnderline(underline).withStrikethrough(strikethrough).withObfuscated(obfuscated);
+        return new MStyle().withColor(color).withFont(font).withBold(bold).withItalic(italic).withUnderline(underline).withStrikethrough(strikethrough).withObfuscated(obfuscated).withReset(reset);
     }
 
     public MStyle fill(MStyle other) {
@@ -104,6 +111,9 @@ public class MStyle {
         }
         if(other.font != null) {
             font = other.font;
+        }
+        if(other.reset != null) {
+            reset = other.reset;
         }
 
         return this;
@@ -141,33 +151,38 @@ public class MStyle {
             base.append("\"obfuscated\":").append(obfuscated);
         }
         if(font != null) {
-            base.append("\"font\":\"").append(font.toString()).append("\"");
+            base.append("\"font\":\"").append(font).append("\"");
         }
 
         return base.toString();
 
     }
 
-    public String toLegacyText(boolean hexSupport) {
+    public String toLegacyText(Character colorChar, Character hexChar) {
+
+        boolean hexSupport = hexChar != null;
 
         StringBuilder out = new StringBuilder();
         if(color != null) {
-            out.append(hexSupport ? color.toHex() : "§" + Integer.toHexString(color.toRGBI()));
+            out.append(hexSupport ? hexChar + color.toPlainHex() : colorChar + Integer.toHexString(color.toRGBI()));
         }
         if(bold != null && bold) {
-            out.append("§l");
+            out.append(colorChar).append("l");
         }
         if(italic != null && italic) {
-            out.append("§o");
+            out.append(colorChar).append("o");
         }
         if(underline != null && underline) {
-            out.append("§m");
+            out.append(colorChar).append("n");
         }
         if(strikethrough != null && strikethrough) {
-            out.append("§n");
+            out.append(colorChar).append("m");
         }
         if(obfuscated != null && obfuscated) {
-            out.append("§k");
+            out.append(colorChar).append("k");
+        }
+        if(reset != null && reset) {
+            out.append(colorChar).append("r");
         }
 
         return out.toString();
@@ -175,5 +190,6 @@ public class MStyle {
     }
 
     public static final MStyle ITEM_BASE = new MStyle().withItalic(Boolean.FALSE);
+    public static final MStyle LEGACY_RESET = new MStyle().withReset(Boolean.TRUE);
 
 }

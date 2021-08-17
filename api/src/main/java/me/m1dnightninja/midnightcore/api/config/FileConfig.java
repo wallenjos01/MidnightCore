@@ -29,6 +29,14 @@ public class FileConfig {
         return root;
     }
 
+    public ConfigProvider getProvider() {
+        return provider;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
     public void setRoot(ConfigSection sec) { this.root = sec; }
 
     public void reload() {
@@ -40,10 +48,9 @@ public class FileConfig {
     }
 
 
-
     public static FileConfig fromFile(File f) {
 
-        ConfigProvider prov = MidnightCoreAPI.getInstance().getConfigRegistry().getProviderForFile(f);
+        ConfigProvider prov = ConfigRegistry.INSTANCE.getProviderForFile(f);
         if(prov != null) return new FileConfig(f, prov);
 
         return null;
@@ -58,7 +65,7 @@ public class FileConfig {
             if(!f.getName().startsWith(prefix) || f.getName().equals(prefix)) continue;
             String suffix = f.getName().substring(prefix.length());
 
-            ConfigProvider prov = MidnightCoreAPI.getInstance().getConfigRegistry().getProviderForFileType(suffix);
+            ConfigProvider prov = ConfigRegistry.INSTANCE.getProviderForFileType(suffix);
 
             if(prov != null) {
                 return new FileConfig(f, prov);
@@ -70,13 +77,23 @@ public class FileConfig {
 
     public static FileConfig findOrCreate(String prefix, File directory) {
 
+        if(!directory.exists() && !directory.mkdirs()) {
+            MidnightCoreAPI.getLogger().warn("Unable to create folder " + directory.getAbsolutePath() + "!");
+            return null;
+        }
+
         if(!directory.isDirectory()) return null;
 
         FileConfig out = findFile(directory.listFiles(), prefix);
         if(out != null) return out;
 
-        ConfigProvider provider = MidnightCoreAPI.getInstance().getDefaultConfigProvider();
-        return new FileConfig(new File(directory, prefix + provider.getFileExtension()), provider);
+        ConfigProvider provider = ConfigRegistry.INSTANCE.getDefaultProvider();
+        if(provider == null) return null;
+
+        File f = new File(directory, prefix + provider.getFileExtension());
+        provider.saveToFile(new ConfigSection(), f);
+
+        return new FileConfig(f, provider);
 
     }
 

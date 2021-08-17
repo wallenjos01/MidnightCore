@@ -74,7 +74,7 @@ public class NMSUtil_13_15 implements NMSUtil.NMSHandler {
     @Override
     public void sendTitle(Player pl, MTitle title) {
 
-        String text = title.getText().toLegacyText(false);
+        String text = MComponent.Serializer.toLegacyText(title.getText());
 
         if(title.getOptions().clear) {
             pl.resetTitle();
@@ -91,8 +91,13 @@ public class NMSUtil_13_15 implements NMSUtil.NMSHandler {
     @Override
     public ConfigSection getItemTag(ItemStack is) {
 
+        if(is == null) return null;
         Object mis = ReflectionUtil.callMethod(craftItemStack, asNMSCopy, false, is);
+
+        if(mis == null) return new ConfigSection();
         Object compound = ReflectionUtil.callMethod(mis, getTag, false);
+
+        if(compound == null) return new ConfigSection();
 
         return JsonConfigProvider.INSTANCE.loadFromString(compound.toString());
     }

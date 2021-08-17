@@ -3,6 +3,7 @@ package me.m1dnightninja.midnightcore.common.config;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LazilyParsedNumber;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 
@@ -77,6 +78,22 @@ public class JsonConfigProvider implements ConfigProvider {
 
     }
 
+    private Number fromJsonNumber(LazilyParsedNumber num) {
+
+        String s = num.toString();
+        if(s.contains(".")) {
+            return num.doubleValue();
+        } else {
+
+            long lng = num.longValue();
+            if(lng <= Integer.MAX_VALUE) {
+                return num.intValue();
+            }
+
+            return lng;
+        }
+    }
+
     private Object fromJsonElement(JsonElement ele) {
 
         if(ele.isJsonObject()) {
@@ -86,6 +103,7 @@ public class JsonConfigProvider implements ConfigProvider {
         } else if(ele.isJsonArray()) {
 
             List<Object> lst = new ArrayList<>();
+
             for(JsonElement ele1 : ele.getAsJsonArray()) {
                 lst.add(fromJsonElement(ele1));
             }
@@ -98,7 +116,14 @@ public class JsonConfigProvider implements ConfigProvider {
             if(pr.isBoolean()) {
                 return pr.getAsBoolean();
             } else if(pr.isNumber()) {
-                return pr.getAsNumber();
+
+                Number num = pr.getAsNumber();
+
+                if(num instanceof LazilyParsedNumber) {
+                    return fromJsonNumber((LazilyParsedNumber) num);
+                }
+
+                return num;
             } else if(pr.isString()) {
                 return pr.getAsString();
             }
