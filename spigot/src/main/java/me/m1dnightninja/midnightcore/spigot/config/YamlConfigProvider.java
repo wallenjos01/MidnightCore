@@ -2,6 +2,7 @@ package me.m1dnightninja.midnightcore.spigot.config;
 
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
+import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 public class YamlConfigProvider implements ConfigProvider {
 
-    public static final YamlConfigProvider INSTANCE = new YamlConfigProvider();
+    public static final YamlConfigProvider INSTANCE = ConfigRegistry.INSTANCE.registerProvider(new YamlConfigProvider());
 
     @Override
     public ConfigSection loadFromFile(File file) {

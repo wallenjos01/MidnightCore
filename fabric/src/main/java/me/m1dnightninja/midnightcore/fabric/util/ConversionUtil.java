@@ -1,6 +1,5 @@
 package me.m1dnightninja.midnightcore.fabric.util;
 
-import com.google.gson.JsonObject;
 import com.google.gson.internal.LazilyParsedNumber;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
@@ -11,12 +10,10 @@ import me.m1dnightninja.midnightcore.api.text.MHoverEvent;
 import me.m1dnightninja.midnightcore.api.text.MStyle;
 import me.m1dnightninja.midnightcore.fabric.inventory.FabricItem;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
 
 import java.util.ArrayList;
 import java.util.List;

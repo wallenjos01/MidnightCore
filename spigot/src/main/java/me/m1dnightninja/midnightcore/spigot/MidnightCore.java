@@ -36,10 +36,8 @@ public class MidnightCore extends JavaPlugin {
 
         INSTANCE = this;
 
-        ConfigRegistry.INSTANCE.registerProvider(JsonConfigProvider.INSTANCE);
-        ConfigRegistry.INSTANCE.registerProvider(YamlConfigProvider.INSTANCE);
-
         ConfigRegistry.INSTANCE.setDefaultProvider(YamlConfigProvider.INSTANCE);
+        ConfigRegistry.INSTANCE.registerProvider(JsonConfigProvider.INSTANCE);
 
         List<IModule> modules = new ArrayList<>(2);
         modules.add(new SkinModule());

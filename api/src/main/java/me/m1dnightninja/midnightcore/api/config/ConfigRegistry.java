@@ -73,12 +73,14 @@ public class ConfigRegistry {
         return false;
     }
 
-    public void registerProvider(ConfigProvider prov) {
-        if(providersByExtension.containsKey(prov.getFileExtension())) return;
+    public <T extends ConfigProvider> T registerProvider(T prov) {
+        if(providersByExtension.containsKey(prov.getFileExtension())) return null;
 
         int index = providers.size();
         providers.add(prov);
         providersByExtension.put(prov.getFileExtension(), index);
+
+        return prov;
     }
 
     public ConfigProvider getProviderForFileType(String extension) {

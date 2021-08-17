@@ -55,7 +55,6 @@ public class MidnightCore implements ModInitializer {
             return;
         }
 
-        ConfigRegistry.INSTANCE.registerProvider(JsonConfigProvider.INSTANCE);
         ConfigRegistry.INSTANCE.setDefaultProvider(JsonConfigProvider.INSTANCE);
 
         // Default modules

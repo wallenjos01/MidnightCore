@@ -39,7 +39,7 @@ public final class LocationUtil {
 
     public static void teleport(Entity ent, Location location) {
 
-        ServerLevel world = MidnightCore.getServer().getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, ConversionUtil.toResourceLocation(location.getWorld())));
+        ServerLevel world = getLevel(location);
         if(world == null) {
             MidnightCoreAPI.getLogger().warn("Unable to teleport entity! World does not exist!");
             return;
@@ -117,7 +117,11 @@ public final class LocationUtil {
         if(ent instanceof PathfinderMob) {
             ((PathfinderMob) ent).getNavigation().stop();
         }
+    }
 
+    public static ServerLevel getLevel(Location location) {
+
+        return MidnightCore.getServer().getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, ConversionUtil.toResourceLocation(location.getWorld())));
     }
 
 }

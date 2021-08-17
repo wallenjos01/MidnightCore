@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.LazilyParsedNumber;
 import me.m1dnightninja.midnightcore.api.config.ConfigProvider;
+import me.m1dnightninja.midnightcore.api.config.ConfigRegistry;
 import me.m1dnightninja.midnightcore.api.config.ConfigSection;
 
 import java.io.*;
@@ -15,7 +16,7 @@ import java.util.Map;
 
 public class JsonConfigProvider implements ConfigProvider {
 
-    public static final JsonConfigProvider INSTANCE = new JsonConfigProvider();
+    public static final JsonConfigProvider INSTANCE = ConfigRegistry.INSTANCE.registerProvider(new JsonConfigProvider());
 
     @Override
     public ConfigSection loadFromFile(File file) {
