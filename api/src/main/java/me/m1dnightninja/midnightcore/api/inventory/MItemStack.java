@@ -68,6 +68,16 @@ public abstract class MItemStack {
         return Builder.of(type).withAmount(count).withTag(tag).build();
     }
 
+    public String saveForComponent() {
+
+        ConfigSection sec = new ConfigSection();
+        sec.set("id", type.toString());
+        sec.set("Count", count);
+        sec.set("tag", tag);
+
+        return sec.toNBT();
+    }
+
     public static class Builder {
 
         private final MIdentifier type;
@@ -197,7 +207,7 @@ public abstract class MItemStack {
         @Override
         public MItemStack deserialize(ConfigSection section) {
 
-            Builder builder = Builder.of(MIdentifier.parseOrDefault(section.getString("type")));
+            Builder builder = Builder.of(section.get("type", MIdentifier.class));
 
             if(section.has("name", String.class)) {
                 builder.withName(MComponent.Serializer.parse(section.getString("name")));
@@ -247,6 +257,11 @@ public abstract class MItemStack {
             }
 
             return out;
+        }
+
+        @Override
+        public boolean canDeserialize(ConfigSection sec) {
+            return sec.has("type", MIdentifier.class);
         }
     };
 

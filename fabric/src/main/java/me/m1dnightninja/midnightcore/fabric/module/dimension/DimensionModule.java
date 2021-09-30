@@ -198,7 +198,12 @@ public class DimensionModule implements IModule {
         List<CustomSpawner> spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(props));
         long seedSha = BiomeManager.obfuscateSeed(cre.getSeed());
 
-        ServerLevel world = new DynamicLevel(MidnightCore.getServer(), Util.backgroundExecutor(), session, props, key, type, listener, generator, false, seedSha, spawners, tickTime);
+        ServerLevel world;
+        if(session instanceof DynamicLevelStorageSource.DynamicLevelStorageAccess) {
+            world = new DynamicLevel(MidnightCore.getServer(), Util.backgroundExecutor(), (DynamicLevelStorageSource.DynamicLevelStorageAccess) session, props, key, type, listener, generator, false, seedSha, spawners, tickTime);
+        } else {
+            world = new ServerLevel(MidnightCore.getServer(), Util.backgroundExecutor(), session, props, key, type, listener, generator, false, seedSha, spawners, tickTime);
+        }
 
         if (parent == null) {
             world.getWorldBorder().applySettings(props.getWorldBorder());

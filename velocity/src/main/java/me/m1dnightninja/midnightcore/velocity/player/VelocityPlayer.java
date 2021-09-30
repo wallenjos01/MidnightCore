@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.velocity.player;
 
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
 import me.m1dnightninja.midnightcore.api.inventory.MItemStack;
 import me.m1dnightninja.midnightcore.api.math.Vec3d;
@@ -8,11 +9,12 @@ import me.m1dnightninja.midnightcore.api.module.skin.Skin;
 import me.m1dnightninja.midnightcore.api.player.Location;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.registry.MIdentifier;
-import me.m1dnightninja.midnightcore.api.text.MActionBar;
-import me.m1dnightninja.midnightcore.api.text.MComponent;
-import me.m1dnightninja.midnightcore.api.text.MTitle;
+import me.m1dnightninja.midnightcore.api.text.*;
 import me.m1dnightninja.midnightcore.velocity.MidnightCore;
+import me.m1dnightninja.midnightcore.velocity.util.ConversionUtil;
+import net.kyori.adventure.text.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class VelocityPlayer extends MPlayer {
@@ -37,7 +39,10 @@ public class VelocityPlayer extends MPlayer {
     @Override
     public MComponent getDisplayName() {
 
-        return getName();
+        MComponent name = getName();
+        name.withClickEvent(new MClickEvent(MClickEvent.ClickAction.SUGGEST_COMMAND, "/tell " + name.allContent() + " ")).withHoverEvent(MHoverEvent.createPlayerHover(this));
+
+        return name;
     }
 
     @Override
@@ -56,6 +61,15 @@ public class VelocityPlayer extends MPlayer {
     public Vec3d getLocation() {
 
         return null;
+    }
+
+    @Override
+    public String getServer() {
+
+        Optional<ServerConnection> conn = player.getCurrentServer();
+        if(conn.isEmpty()) return "";
+
+        return conn.get().getServerInfo().getName();
     }
 
     @Override
@@ -85,7 +99,7 @@ public class VelocityPlayer extends MPlayer {
     @Override
     public boolean isOffline() {
 
-        return player == null || !player.isActive();
+        return player == null || !player.isActive() || player.getCurrentServer().isEmpty();
     }
 
     @Override
@@ -97,10 +111,14 @@ public class VelocityPlayer extends MPlayer {
     @Override
     public void sendMessage(MComponent comp) {
 
+        Component cmp = ConversionUtil.toKyoriComponent(comp);
+        player.sendMessage(cmp);
     }
 
     @Override
     public void sendTitle(MTitle title) {
+
+        Component cmp = ConversionUtil.toKyoriComponent(title.getText());
 
     }
 
@@ -112,32 +130,26 @@ public class VelocityPlayer extends MPlayer {
     @Override
     public void executeCommand(String cmd) {
 
+        MidnightCore.getInstance().getServer().getCommandManager().executeAsync(player, cmd);
     }
 
     @Override
     public void sendChatMessage(String message) {
 
+        player.spoofChatInput(message);
     }
 
     @Override
-    public void teleport(MIdentifier dimension, Vec3d location, float yaw, float pitch) {
-
-    }
+    public void teleport(MIdentifier dimension, Vec3d location, float yaw, float pitch) { }
 
     @Override
-    public void teleport(Vec3d location, float yaw, float pitch) {
-
-    }
+    public void teleport(Vec3d location, float yaw, float pitch) { }
 
     @Override
-    public void teleport(Location location) {
-
-    }
+    public void teleport(Location location) { }
 
     @Override
-    public void giveItem(MItemStack item) {
-
-    }
+    public void giveItem(MItemStack item) { }
 
     @Override
     protected void cleanup() {

@@ -30,6 +30,7 @@ public abstract class MPlayerManager implements Iterable<MPlayer> {
 
         if(cache.containsKey(u)) {
             cache.get(u).cleanup();
+            cache.remove(u);
         }
     }
 

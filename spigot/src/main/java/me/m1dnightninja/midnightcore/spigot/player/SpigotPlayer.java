@@ -83,6 +83,11 @@ public class SpigotPlayer extends MPlayer {
     }
 
     @Override
+    public String getServer() {
+        return "";
+    }
+
+    @Override
     @SuppressWarnings("deprecation")
     public MItemStack getItemInMainHand() {
 

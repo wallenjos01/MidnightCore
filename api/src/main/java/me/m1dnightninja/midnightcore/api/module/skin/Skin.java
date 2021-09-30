@@ -73,6 +73,13 @@ public class Skin {
             out.set("sig", s.sig);
             return out;
         }
+
+        @Override
+        public boolean canDeserialize(ConfigSection sec) {
+            return (sec.has("uid") || sec.has("uuid")) &&
+                    (sec.has("b64") || sec.has("base64")) &&
+                    (sec.has("sig") || sec.has("signedBase64"));
+        }
     };
 }
 

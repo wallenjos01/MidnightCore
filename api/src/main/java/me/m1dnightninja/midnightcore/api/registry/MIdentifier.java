@@ -23,9 +23,12 @@ public class MIdentifier {
     }
 
 
-    public static MIdentifier create(String mod, String path) {
+    public static MIdentifier create(String namespace, String path) {
 
-        return new MIdentifier(mod, path);
+        if(namespace == null || namespace.equals("")) throw new IllegalArgumentException("Cannot create MIdentifier with empty namespace!");
+        if(path == null || path.equals("")) throw new IllegalArgumentException("Cannot create MIdentifier with empty path!");
+
+        return new MIdentifier(namespace, path);
     }
 
     public static MIdentifier parse(String toParse) throws IllegalArgumentException {
@@ -77,6 +80,11 @@ public class MIdentifier {
         }
     }
 
+    private static boolean isValid(String[] strs) {
+
+        return strs.length > 1 && strs[0] != null && strs[0].length() > 0 && strs[1] != null && strs[1].length() > 0;
+    }
+
     @Override
     public String toString() {
         return namespace + ":" + path;
@@ -96,6 +104,11 @@ public class MIdentifier {
         @Override
         public String serialize(MIdentifier object) {
             return object.toString();
+        }
+
+        @Override
+        public boolean canDeserialize(String s) {
+            return s.length() > 0 && (!s.contains(":") || isValid(s.split(":")));
         }
     };
 

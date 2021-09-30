@@ -13,7 +13,7 @@ public class FileConfig {
 
     public FileConfig(File f) {
 
-        this(f, MidnightCoreAPI.getInstance().getConfigRegistry().getProviderForFile(f));
+        this(f, ConfigRegistry.INSTANCE.getProviderForFile(f));
     }
 
     public FileConfig(File f, ConfigProvider prov) {
@@ -75,7 +75,7 @@ public class FileConfig {
         return null;
     }
 
-    public static FileConfig findOrCreate(String prefix, File directory) {
+    public static FileConfig findOrCreate(String prefix, File directory, ConfigSection defaults) {
 
         if(!directory.exists() && !directory.mkdirs()) {
             MidnightCoreAPI.getLogger().warn("Unable to create folder " + directory.getAbsolutePath() + "!");
@@ -91,10 +91,15 @@ public class FileConfig {
         if(provider == null) return null;
 
         File f = new File(directory, prefix + provider.getFileExtension());
-        provider.saveToFile(new ConfigSection(), f);
+        provider.saveToFile(defaults, f);
 
         return new FileConfig(f, provider);
 
+    }
+
+    public static FileConfig findOrCreate(String prefix, File directory) {
+
+        return findOrCreate(prefix, directory, new ConfigSection());
     }
 
 }

@@ -118,5 +118,10 @@ public class Location {
         public String serialize(Location object) {
             return object.toString();
         }
+
+        @Override
+        public boolean canDeserialize(String s) {
+            return deserialize(s) != null;
+        }
     };
 }

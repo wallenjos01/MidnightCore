@@ -1,6 +1,7 @@
 package me.m1dnightninja.midnightcore.api.config;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -79,6 +80,12 @@ public class ConfigSection {
         set(id, lst);
     }
 
+    public ConfigSection with(String key, Object value) {
+
+        set(key, value);
+        return this;
+    }
+
     public Object get(String key) {
         return this.entries.get(key);
     }
@@ -87,6 +94,25 @@ public class ConfigSection {
         Object out = this.get(key);
 
         return convert(out, clazz);
+    }
+
+    public Object getOrDefault(String key, Object def) {
+
+        return entries.getOrDefault(key, def);
+    }
+
+    public <T> T getOrDefault(String key, T def, Class<T> clazz) {
+
+        Object out = this.get(key);
+        if(out != null) {
+            try {
+                return convert(out, clazz);
+            } catch (Exception ex) {
+                // Ignore
+            }
+        }
+
+        return def;
     }
 
     public Iterable<String> getKeys() {
@@ -128,9 +154,14 @@ public class ConfigSection {
 
     public boolean getBoolean(String key) {
 
+        return getBoolean(key, false);
+    }
+
+    public boolean getBoolean(String key, boolean def) {
+
         Object o = this.get(key);
 
-        if(o == null) return false;
+        if(o == null) return def;
 
         if(o instanceof Boolean) {
             return (boolean) o;
@@ -246,16 +277,13 @@ public class ConfigSection {
         if(reg != null) {
             if(reg.canSerialize(clazz) && o instanceof ConfigSection) {
                 ConfigSerializer<T> ser = reg.getSerializer(clazz);
-                T ret = ser.deserialize((ConfigSection) o);
-                return ret != null;
+                return ser.canDeserialize((ConfigSection) o);
             }
             if(reg.canSerializeInline(clazz)) {
 
                 InlineSerializer<T> ser = reg.getInlineSerializer(clazz);
-                T ret = ser.deserialize(o.toString());
-                return ret != null;
+                return ser.canDeserialize(o.toString());
             }
-
         }
 
         return clazz.isAssignableFrom(o.getClass());
@@ -297,6 +325,7 @@ public class ConfigSection {
         return builder.toString();
     }
 
+    private static final Pattern ESCAPE_QUOTES = Pattern.compile("\\w*(?<!\\\\)\"");
     private static String toNBTString(Object o) {
 
         StringBuilder builder = new StringBuilder();
@@ -334,7 +363,8 @@ public class ConfigSection {
 
         } else if(o instanceof String) {
 
-            builder.append("\"").append(o.toString().replace("\"", "\\\"")).append("\"");
+            String name = ESCAPE_QUOTES.matcher(o.toString()).replaceAll("\\\"");
+            builder.append("\"").append(name).append("\"");
 
         } else {
 

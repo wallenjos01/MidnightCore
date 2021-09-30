@@ -74,5 +74,10 @@ public class Requirement {
 
             return out;
         }
+
+        @Override
+        public boolean canDeserialize(ConfigSection sec) {
+            return sec.has("values", List.class) || (sec.has("type", MIdentifier.class) && sec.has("value", String.class));
+        }
     };
 }

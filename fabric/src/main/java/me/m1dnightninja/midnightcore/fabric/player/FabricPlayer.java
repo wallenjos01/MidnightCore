@@ -51,7 +51,7 @@ public class FabricPlayer extends MPlayer {
             return prof.map(gameProfile -> MComponent.createTextComponent(gameProfile.getName())).orElseGet(() -> MComponent.createTextComponent(getUUID().toString()));
         }
 
-        return MComponent.Serializer.fromJson(Component.Serializer.toJson(player.getName()));
+        return ConversionUtil.fromMinecraftComponent(player.getName());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class FabricPlayer extends MPlayer {
         if(player == null) player = MidnightCore.getServer().getPlayerList().getPlayer(getUUID());
         if(player == null) return null;
 
-        return MComponent.Serializer.fromJson(Component.Serializer.toJson(player.getDisplayName()));
+        return ConversionUtil.fromMinecraftComponent(player.getDisplayName());
     }
 
     @Override
@@ -91,6 +91,11 @@ public class FabricPlayer extends MPlayer {
     @Override
     public Vec3d getLocation() {
         return new Vec3d(player.getX(), player.getY(), player.getZ());
+    }
+
+    @Override
+    public String getServer() {
+        return "";
     }
 
     @Override

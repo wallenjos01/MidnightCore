@@ -80,6 +80,11 @@ public class MidnightCore extends JavaPlugin {
                 }
                 return ver;
             }
+
+            @Override
+            public boolean isProxy() {
+                return false;
+            }
         };
         api.getConfigRegistry().registerProvider(JsonConfigProvider.INSTANCE);
 

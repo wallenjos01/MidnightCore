@@ -10,6 +10,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -112,5 +113,11 @@ public class MixinPacketHandler {
                 packet.getModelCustomisation(),
                 packet.getMainHand()
                 ));
+    }
+
+    @Inject(method = "handleCustomPayload", at=@At(value="HEAD"))
+    private void onCustomPayload(ServerboundCustomPayloadPacket packet, CallbackInfo ci) {
+
+        Event.invoke(new PluginMessageEvent(packet.getData(), player));
     }
 }

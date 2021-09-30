@@ -2,8 +2,6 @@ package me.m1dnightninja.midnightcore.api.text;
 
 import com.google.gson.*;
 import me.m1dnightninja.midnightcore.api.MidnightCoreAPI;
-import me.m1dnightninja.midnightcore.api.config.ConfigSection;
-import me.m1dnightninja.midnightcore.api.config.ConfigSerializer;
 import me.m1dnightninja.midnightcore.api.config.InlineSerializer;
 import me.m1dnightninja.midnightcore.api.math.Color;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
@@ -135,6 +133,11 @@ public class MComponent {
         return this;
     }
 
+    public MComponent withClickEvent(MClickEvent event) {
+        this.clickEvent = event;
+        return this;
+    }
+
     public MComponent copy() {
 
         MComponent out = new MComponent(type, content);
@@ -211,6 +214,10 @@ public class MComponent {
 
     public static class Serializer {
 
+        public static boolean rgbSupported() {
+            return MidnightCoreAPI.getInstance().isProxy() || MidnightCoreAPI.getInstance().getGameMajorVersion() > 15;
+        }
+
         private static final Gson GSON = new GsonBuilder().create();
 
         public static MComponent fromJson(String json) {
@@ -270,6 +277,11 @@ public class MComponent {
                 out.withHoverEvent(MHoverEvent.fromJson(json.get("hoverEvent").getAsJsonObject()));
             }
 
+            if(json.has("clickEvent") && json.get("clickEvent").isJsonObject()) {
+
+                out.withClickEvent(MClickEvent.fromJson(json.get("clickEvent").getAsJsonObject()));
+            }
+
             if(json.has("extra") && json.get("extra").isJsonArray()) {
 
                 for(JsonElement ele : json.get("extra").getAsJsonArray()) {
@@ -292,6 +304,9 @@ public class MComponent {
             if(component.hoverEvent != null) {
                 out.add("hoverEvent", component.hoverEvent.toJson());
             }
+            if(component.clickEvent != null) {
+                out.add("clickEvent", component.clickEvent.toJson());
+            }
 
             if(component.data.size() > 0) {
                 JsonArray arr = new JsonArray();
@@ -312,7 +327,7 @@ public class MComponent {
         }
 
         public static String toJsonString(MComponent component) {
-            return toJsonString(component, MidnightCoreAPI.getInstance().getGameMajorVersion() >= 16);
+            return toJsonString(component, rgbSupported());
         }
 
         public static String toJsonString(MComponent component, boolean rgb) {
@@ -515,6 +530,11 @@ public class MComponent {
             @Override
             public String serialize(MComponent object) {
                 return Serializer.serialize(object);
+            }
+
+            @Override
+            public boolean canDeserialize(String s) {
+                return true;
             }
         };
 

@@ -11,6 +11,7 @@ import me.m1dnightninja.midnightcore.common.MidnightCoreImpl;
 import me.m1dnightninja.midnightcore.common.config.JsonConfigProvider;
 import me.m1dnightninja.midnightcore.fabric.module.dimension.DimensionModule;
 import me.m1dnightninja.midnightcore.fabric.module.playerdata.PlayerDataModule;
+import me.m1dnightninja.midnightcore.fabric.module.pluginmessage.PluginMessageModule;
 import me.m1dnightninja.midnightcore.fabric.module.savepoint.SavePointModule;
 import me.m1dnightninja.midnightcore.fabric.module.skin.SkinModule;
 import me.m1dnightninja.midnightcore.fabric.module.vanish.VanishModule;
@@ -65,6 +66,7 @@ public class MidnightCore implements ModInitializer {
         modules.add(new SavePointModule());
         modules.add(new PlayerDataModule());
         modules.add(new VanishModule());
+        modules.add(new PluginMessageModule());
 
         // Find sub-mods
         List<MidnightCoreModInitializer> inits = FabricLoader.getInstance().getEntrypoints("midnightcore:mod", MidnightCoreModInitializer.class);
@@ -102,7 +104,7 @@ public class MidnightCore implements ModInitializer {
 
             @Override
             public void executeConsoleCommand(String cmd) {
-                getServer().getCommands().performCommand(getServer().createCommandSourceStack(), cmd);
+                getServer().getCommands().performCommand(getServer().createCommandSourceStack().withSuppressedOutput(), cmd);
             }
             @Override
             public String getGameVersion() {
@@ -113,6 +115,11 @@ public class MidnightCore implements ModInitializer {
                 }
 
                 return "1.17.1";
+            }
+
+            @Override
+            public boolean isProxy() {
+                return false;
             }
         };
 

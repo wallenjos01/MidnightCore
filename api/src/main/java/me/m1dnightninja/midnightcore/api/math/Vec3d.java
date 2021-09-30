@@ -52,7 +52,7 @@ public class Vec3d {
 
     public static Vec3d parse(String str) {
 
-        if(str == null || str.length() == 0 || !str.contains(",")) return null;
+        if(str == null || !str.contains(",")) return null;
         String[] xyz = str.split(",");
 
         try {
@@ -93,6 +93,26 @@ public class Vec3d {
         @Override
         public String serialize(Vec3d object) {
             return object.toString();
+        }
+
+        @Override
+        public boolean canDeserialize(String s) {
+            if(s != null && s.contains(",")) {
+
+                String[] ss = s.split(",");
+                if(ss.length < 3) return false;
+
+                try {
+                    for(int i = 0 ; i < 2 ; i++) {
+                        Double.parseDouble(ss[i]);
+                    }
+
+                } catch (NumberFormatException ex) {
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
     };
 

@@ -200,6 +200,13 @@ public abstract class MidnightCoreAPI {
     public abstract ConfigRegistry getConfigRegistry();
 
     /**
+     * Determines whether the server is a proxy (Like Velocity) or not.
+     *
+     * @return Whether the server is a proxy;
+     */
+    public abstract boolean isProxy();
+
+    /**
      * Retrieves the logger
      *
      * @return The logger

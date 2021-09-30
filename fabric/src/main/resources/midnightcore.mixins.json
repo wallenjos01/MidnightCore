@@ -26,6 +26,7 @@
     "MixinPlayerManager",
     "MixinScreenHandler",
     "MixinServerGameMode",
+    "MixinServerLevel",
     "MixinServerPlayer",
     "MixinTimeCommand"
   ],

@@ -2,6 +2,7 @@ package me.m1dnightninja.midnightcore.velocity.player;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.proxy.ProxyServer;
 import me.m1dnightninja.midnightcore.api.player.MPlayer;
 import me.m1dnightninja.midnightcore.api.player.MPlayerManager;
 import me.m1dnightninja.midnightcore.velocity.MidnightCore;
@@ -12,7 +13,11 @@ public class VelocityPlayerManager extends MPlayerManager {
 
     public VelocityPlayerManager() {
 
-        MidnightCore.getInstance().getServer().getEventManager().register(MidnightCore.getInstance(), this);
+    }
+
+    public void register(ProxyServer server) {
+
+        server.getEventManager().register(MidnightCore.getInstance(), this);
     }
 
     @Subscribe

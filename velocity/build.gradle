@@ -3,12 +3,22 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+
 configurations {
     shade
     compileOnly.extendsFrom shade
 }
 
 repositories {
+
+    mavenLocal()
+
+    maven {
+        url "https://libraries.minecraft.net/"
+    }
 
     maven {
         url 'https://nexus.velocitypowered.com/repository/maven-public/'
@@ -18,7 +28,7 @@ repositories {
 
 dependencies {
 
-    compileOnly("com.velocitypowered:velocity-api:3.0.0")
+    compileOnly("com.velocitypowered:velocity-api:3.0.1")
     compileOnly('org.apache.logging.log4j:log4j-api:2.14.1')
 
     shade(project(':api'))
@@ -53,7 +63,7 @@ shadowJar {
 tasks.assemble.dependsOn tasks.shadowJar
 
 artifacts {
-    archives jar
+    archives shadowJar
     shadow sourcesJar
 }
 
