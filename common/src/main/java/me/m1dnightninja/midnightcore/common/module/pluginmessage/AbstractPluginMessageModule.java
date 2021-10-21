@@ -58,6 +58,8 @@ public abstract class AbstractPluginMessageModule implements IPluginMessageModul
 
         try {
             String channel = data.readUTF();
+
+            if(channel.isEmpty()) return;
             id = MIdentifier.parseOrDefault(channel, "midnightcore");
 
         } catch (Exception ex) {

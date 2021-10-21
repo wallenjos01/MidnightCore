@@ -14,8 +14,6 @@ configurations {
 
 repositories {
 
-    mavenLocal()
-
     maven {
         url "https://libraries.minecraft.net/"
     }
