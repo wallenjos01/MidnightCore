@@ -1,7 +1,5 @@
-main: 'me.m1dnightninja.midnightcore.spigot.MidnightCore'
-version: "${version}"
-name: 'MidnightCore'
-author: 'M1dnight_Ninja'
-api-version: 1.13
-softdepend:
-- PlaceholderAPI
+name: '${id}'
+main: '${group}.${id}.${target}.${mainClass}'
+version: '${version}'
+author: M1dnight_Ninja
+api-version: '${minecraftVersion}'

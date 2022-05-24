@@ -1,0 +1,6 @@
+{
+  "midnightcore.command.main": "MidnightCore version %midnightcore_version% for Minecraft %server_version%",
+  "midnightcore.command.modules.header": "Available Modules:",
+  "midnightcore.command.modules.enabled": "&7 - &f%module_id% - &aLOADED",
+  "midnightcore.command.modules.disabled": "&7 - &f%module_id% - &cDISABLED"
+}

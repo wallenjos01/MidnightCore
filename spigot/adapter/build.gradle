@@ -1,0 +1,9 @@
+dependencies {
+
+    compileOnly "org.spigotmc:spigot:${project.spigot_version}"
+    compileOnly 'org.wallentines:midnightlib:1.0-SNAPSHOT'
+
+    compileOnly(project(':api'))
+    compileOnly(project(':common'))
+
+}

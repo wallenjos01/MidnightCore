@@ -1,27 +1,32 @@
 {
-  "schemaVersion": 1,
-  "id": "midnightcore",
-  "version": "${version}",
-  "name": "MidnightCore",
-  "description": "A library for mods by M1dnight_Ninja",
-  "authors": [
-    "M1dnight_Ninja"
-  ],
-  "contact": {},
-  "license": "MIT",
-  "icon": "assets/midnightcore/icon.png",
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "me.m1dnightninja.midnightcore.fabric.MidnightCore"
-    ]
-  },
-  "mixins": [
-    "midnightcore.mixins.json"
-  ],
-  "depends": {
-    "fabricloader": ">=0.10.0",
-    "fabric": "*",
-    "minecraft": "${minecraftVersion}.*"
-  }
+    "schemaVersion": 1,
+    "id": "${id}",
+    "version": "${version}",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "${group}.${id}.${target}.${mainClass}"
+        ]
+    },
+    "mixins": [
+        "${id}.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${fabricLoader}",
+        "minecraft": "${minecraftVersion}",
+        "fabric-api-base": "*",
+        "fabric-permissions-api-v0": "*"
+    },
+    "name": "${name}",
+    "description": "${description}",
+    "contact": {
+        "homepage": "https://wallentines.org/"
+    },
+    "authors": [
+        {
+            "name": "M1dnight_Ninja"
+        }
+    ],
+    "lisence": "LGPL",
+    "icon": "icon.png"
 }
