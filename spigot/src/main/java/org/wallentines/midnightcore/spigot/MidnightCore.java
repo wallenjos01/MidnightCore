@@ -9,7 +9,8 @@ import org.wallentines.midnightcore.common.Registries;
 import org.wallentines.midnightcore.common.module.savepoint.AbstractSavepointModule;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
-import org.wallentines.midnightcore.spigot.adapter.Adapter_v1_18_R2;
+import org.wallentines.midnightcore.spigot.adapter.Adapters;
+import org.wallentines.midnightcore.spigot.adapter.SpigotAdapter;
 import org.wallentines.midnightcore.spigot.event.MidnightCoreInitializeEvent;
 import org.wallentines.midnightcore.spigot.event.MidnightCoreLoadModulesEvent;
 import org.wallentines.midnightcore.spigot.item.ItemConverters;
@@ -55,7 +56,8 @@ public class MidnightCore extends JavaPlugin {
                 (str, b) -> getServer().dispatchCommand(getServer().getConsoleSender(), str)
         );
 
-        AdapterManager.register(new Adapter_v1_18_R2());
+        // Adapter
+        Adapters.findAdapter();
 
         Registries.MODULE_REGISTRY.register(AbstractSavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(AbstractSkinModule.ID, SpigotSkinModule.MODULE_INFO);

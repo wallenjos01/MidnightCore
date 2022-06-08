@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.fabric.mixin;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @Mixin(PlayerList.class)
 public abstract class MixinPlayerList {
 
-    @Shadow public abstract void broadcastMessage(Component component, ChatType chatType, UUID uUID);
+    @Shadow public abstract void broadcastSystemMessage(Component par1, ResourceKey<ChatType> par2);
 
     private ServerPlayer midnight_core_currentlyLoggingIn;
 
@@ -31,8 +32,8 @@ public abstract class MixinPlayerList {
         midnight_core_currentlyLoggingIn = serverPlayer;
     }
 
-    @Redirect(method = "placeNewPlayer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"))
-    private void onSendMessage(PlayerList instance, Component component, ChatType chatType, UUID uuid) {
+    @Redirect(method = "placeNewPlayer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V"))
+    private void onSendMessage(PlayerList instance, Component component, ResourceKey<ChatType> resourceKey) {
 
         PlayerJoinEvent event = new PlayerJoinEvent(midnight_core_currentlyLoggingIn, component);
         instance.getServer().submit(() -> Event.invoke(event));
@@ -40,7 +41,7 @@ public abstract class MixinPlayerList {
         midnight_core_currentlyLoggingIn = null;
 
         Component comp = event.getJoinMessage();
-        if(comp != null) broadcastMessage(comp, chatType, uuid);
+        if(comp != null) broadcastSystemMessage(comp, resourceKey);
     }
 
 

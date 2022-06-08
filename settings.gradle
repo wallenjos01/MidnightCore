@@ -19,8 +19,8 @@ include 'velocity'
 include 'bungee'
 
 include 'spigot:adapter'
-//include 'spigot:v1_12_R1'
-//include 'spigot:v1_18_R1'
+include 'spigot:v1_12_R1'
+include 'spigot:v1_18_R1'
 include 'spigot:v1_18_R2'
 
 include 'spigot'

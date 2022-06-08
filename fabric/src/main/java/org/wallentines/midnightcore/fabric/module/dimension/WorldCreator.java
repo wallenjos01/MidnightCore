@@ -22,6 +22,10 @@ public class WorldCreator {
     private boolean safeMode = false;
     private boolean hardcore = false;
 
+    private boolean generateStructures = false;
+
+    private boolean bonusChest = false;
+
     private String levelName;
     private long seed = 0L;
     private GameType defaultGameMode = GameType.SURVIVAL;
@@ -167,4 +171,19 @@ public class WorldCreator {
         this.folderName = folderName;
     }
 
+    public boolean generateStructures() {
+        return generateStructures;
+    }
+
+    public void setGenerateStructures(boolean generateStructures) {
+        this.generateStructures = generateStructures;
+    }
+
+    public boolean bonusChest() {
+        return bonusChest;
+    }
+
+    public void setBonusChest(boolean bonusChest) {
+        this.bonusChest = bonusChest;
+    }
 }

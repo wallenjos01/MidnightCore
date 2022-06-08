@@ -4,13 +4,10 @@ import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
@@ -26,7 +23,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
@@ -125,6 +121,7 @@ public class DimensionModule implements Module<MidnightCoreAPI> {
 
         ServerLevelData data;
         ChunkProgressListener listener;
+
         LevelStem stem;
 
         ServerLevel parent = null;
@@ -155,28 +152,21 @@ public class DimensionModule implements Module<MidnightCoreAPI> {
             parent = MidnightCore.getInstance().getServer().overworld();
         }
 
-        Holder<DimensionType> type;
-        if (stem == null) {
-            LOGGER.warn("Unable to find dimension " + cre.getDimension() + "! Defaulting to overworld!");
-            DimensionType dim = registryManager.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(DimensionType.OVERWORLD_LOCATION);
-            if(dim == null) return;
-            type = Holder.direct(dim);
-        } else {
-            type = stem.typeHolder();
-        }
+        if(stem == null) stem = registryManager.registryOrThrow(Registry.LEVEL_STEM_REGISTRY).getOrThrow(LevelStem.OVERWORLD);
 
         ChunkGenerator generator = cre.getGenerator();
-        if (generator == null)
-            generator = stem == null ? MidnightCore.getInstance().getServer().overworld().getChunkSource().getGenerator() : stem.generator();
+        if (generator != null)
+            stem = new LevelStem(stem.typeHolder(), generator);
+
 
         List<CustomSpawner> spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(data));
         long seedSha = BiomeManager.obfuscateSeed(cre.getSeed());
 
         ServerLevel world;
         if(session instanceof DynamicLevelStorageSource.DynamicLevelStorageAccess) {
-            world = new DynamicServerLevel(MidnightCore.getInstance().getServer(), Util.backgroundExecutor(), (DynamicLevelStorageSource.DynamicLevelStorageAccess) session, data, key, type, listener, generator, false, seedSha, spawners, tickTime);
+            world = new DynamicServerLevel(MidnightCore.getInstance().getServer(), Util.backgroundExecutor(), (DynamicLevelStorageSource.DynamicLevelStorageAccess) session, data, key, stem, listener, false, seedSha, spawners, tickTime);
         } else {
-            world = new ServerLevel(MidnightCore.getInstance().getServer(), Util.backgroundExecutor(), session, data, key, type, listener, generator, false, seedSha, spawners, tickTime);
+            world = new ServerLevel(MidnightCore.getInstance().getServer(), Util.backgroundExecutor(), session, data, key, stem, listener, false, seedSha, spawners, tickTime);
         }
 
         if (parent == null) {

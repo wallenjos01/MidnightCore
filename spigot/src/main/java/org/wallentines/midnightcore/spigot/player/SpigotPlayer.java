@@ -17,6 +17,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class SpigotPlayer extends AbstractPlayer<Player> {
 
@@ -127,6 +128,21 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
     @Override
     public void teleport(Location newLoc) {
         run(pl -> pl.teleport(ConversionUtil.toBukkitLocation(newLoc)), () -> {});
+    }
+
+    @Override
+    public void setGameMode(GameMode gameMode) {
+
+    }
+
+    @Override
+    public GameMode getGameMode() {
+        return null;
+    }
+
+    @Override
+    public void applyResourcePack(String url, String hash, boolean force, MComponent promptMessage, Consumer<ResourcePackStatus> onResponse) {
+
     }
 
 

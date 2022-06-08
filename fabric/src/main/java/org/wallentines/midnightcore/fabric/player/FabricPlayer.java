@@ -2,14 +2,13 @@ package org.wallentines.midnightcore.fabric.player;
 
 import com.mojang.authlib.GameProfile;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.Util;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.protocol.game.*;
-import net.minecraft.server.commands.PlaySoundCommand;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.GameType;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.Location;
@@ -18,18 +17,24 @@ import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.fabric.MidnightCore;
+import org.wallentines.midnightcore.fabric.event.player.ResourcePackStatusEvent;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightcore.fabric.util.LocationUtil;
+import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
 
     String locale = "en_us";
+
+    private static final HashMap<ServerPlayer, Consumer<ResourcePackStatus>> awaitingResourcePack = new HashMap<>();
 
     protected FabricPlayer(UUID uuid) {
         super(uuid);
@@ -83,17 +88,13 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     @Override
     public void sendMessage(MComponent component) {
 
-        run(player -> player.sendMessage(ConversionUtil.toComponent(component), ChatType.SYSTEM, Util.NIL_UUID), () -> {});
+        run(player -> player.sendSystemMessage(ConversionUtil.toComponent(component), ChatType.SYSTEM), () -> {});
     }
 
     @Override
     public void sendActionBar(MComponent component) {
 
-        run(player -> {
-
-            player.sendMessage(ConversionUtil.toComponent(component), ChatType.GAME_INFO, Util.NIL_UUID);
-
-        }, () -> { });
+        run(player -> player.sendSystemMessage(ConversionUtil.toComponent(component), ChatType.GAME_INFO), () -> { });
     }
 
     @Override
@@ -135,9 +136,10 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
 
             SoundSource src = SoundSource.valueOf(category.toUpperCase(Locale.ROOT));
 
+            long seed = player.getLevel().getRandom().nextLong();
             player.connection.send(new ClientboundCustomSoundPacket(
                     ConversionUtil.toResourceLocation(soundId),
-                    src, player.position(), volume, pitch
+                    src, player.position(), volume, pitch, seed
             ));
 
         }, () -> { });
@@ -159,7 +161,8 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     @Override
     public void sendChatMessage(String message) {
 
-        run(player -> player.connection.send(new ServerboundChatPacket(message)), () -> { });
+        // Forged messages cannot be signed
+        run(player -> player.connection.send(new ServerboundChatPacket(message, MessageSignature.unsigned(), false)), () -> { });
     }
 
     @Override
@@ -186,12 +189,56 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
         run(player -> LocationUtil.teleport(player, newLoc), () -> { });
     }
 
+    @Override
+    public void setGameMode(GameMode gameMode) {
+        run(player -> {
+            GameType mc = switch (gameMode) {
+                case SURVIVAL -> GameType.SURVIVAL;
+                case CREATIVE -> GameType.CREATIVE;
+                case ADVENTURE -> GameType.ADVENTURE;
+                case SPECTATOR -> GameType.SPECTATOR;
+            };
+            player.setGameMode(mc);
+        }, () -> { });
+    }
+
+    @Override
+    public GameMode getGameMode() {
+        return run(player -> switch (player.gameMode.getGameModeForPlayer()) {
+            case SURVIVAL -> GameMode.SURVIVAL;
+            case CREATIVE -> GameMode.CREATIVE;
+            case ADVENTURE -> GameMode.ADVENTURE;
+            case SPECTATOR -> GameMode.SPECTATOR;
+        }, () -> GameMode.SURVIVAL);
+    }
+
+    @Override
+    public void applyResourcePack(String url, String hash, boolean force, MComponent promptMessage, Consumer<ResourcePackStatus> onResponse) {
+
+        run(player -> {
+            player.connection.send(new ClientboundResourcePackPacket(url, hash, force, ConversionUtil.toComponent(promptMessage)));
+            awaitingResourcePack.put(player, onResponse);
+        }, () -> { });
+
+    }
+
     public static FabricPlayer wrap(ServerPlayer player) {
         return (FabricPlayer) MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(player.getUUID());
     }
 
     public static ServerPlayer getInternal(MPlayer player) {
         return ((FabricPlayer) player).getInternal();
+    }
+
+    static {
+
+        Event.register(ResourcePackStatusEvent.class, FabricPlayer.class, ev ->
+            awaitingResourcePack.computeIfPresent(ev.getPlayer(), (k, v) -> {
+                v.accept(ev.getStatus());
+                return null;
+            }
+        ));
+
     }
 
 }

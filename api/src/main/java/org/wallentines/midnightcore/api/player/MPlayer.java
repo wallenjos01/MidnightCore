@@ -7,6 +7,7 @@ import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public interface MPlayer extends Skinnable {
 
@@ -45,4 +46,23 @@ public interface MPlayer extends Skinnable {
 
     void teleport(Location newLoc);
 
+    void setGameMode(GameMode gameMode);
+
+    GameMode getGameMode();
+
+    void applyResourcePack(String url, String hash, boolean force, MComponent promptMessage, Consumer<ResourcePackStatus> onResponse);
+
+    enum ResourcePackStatus {
+        LOADED,
+        DECLINED,
+        FAILED,
+        ACCEPTED
+    }
+
+    enum GameMode {
+        SURVIVAL,
+        CREATIVE,
+        ADVENTURE,
+        SPECTATOR
+    }
 }

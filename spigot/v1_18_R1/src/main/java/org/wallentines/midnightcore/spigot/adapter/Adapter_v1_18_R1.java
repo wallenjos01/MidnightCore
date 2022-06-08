@@ -12,14 +12,39 @@ import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.server.level.EntityPlayer;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.ItemUtil;
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
+import java.lang.reflect.Field;
+
 public class Adapter_v1_18_R1 implements SpigotAdapter {
+
+    private static Field handle;
+    public static net.minecraft.world.item.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
+
+        try {
+            return (net.minecraft.world.item.ItemStack) handle.get(is);
+
+        } catch (Exception ex) {
+            return CraftItemStack.asNMSCopy(is);
+        }
+    }
+
+    static {
+
+        try {
+            handle = CraftItemStack.class.getDeclaredField("handle");
+            handle.setAccessible(true);
+
+        } catch (Exception ex) {
+            // Ignore
+        }
+    }
+
     @Override
     public GameProfile getGameProfile(Player pl) {
         return null;
@@ -67,7 +92,7 @@ public class Adapter_v1_18_R1 implements SpigotAdapter {
     @Override
     public void setTag(ItemStack is, ConfigSection sec) {
 
-        net.minecraft.world.item.ItemStack mis = ItemUtil.getHandle(is);
+        net.minecraft.world.item.ItemStack mis = getHandle(is);
 
         try {
             NBTTagCompound cmp = MojangsonParser.a(sec.toString());
@@ -81,7 +106,7 @@ public class Adapter_v1_18_R1 implements SpigotAdapter {
     @Override
     public ConfigSection getTag(ItemStack is) {
 
-        net.minecraft.world.item.ItemStack mis = ItemUtil.getHandle(is);
+        net.minecraft.world.item.ItemStack mis = getHandle(is);
 
         NBTTagCompound cmp = mis.t();
         if(cmp == null) return null;
@@ -120,5 +145,10 @@ public class Adapter_v1_18_R1 implements SpigotAdapter {
     @Override
     public SkinUpdater getSkinUpdater() {
         return SkinUpdater_v1_18_R1.INSTANCE;
+    }
+
+    @Override
+    public boolean isVersionSupported(String str) {
+        return str.equals("v1_18_R1");
     }
 }

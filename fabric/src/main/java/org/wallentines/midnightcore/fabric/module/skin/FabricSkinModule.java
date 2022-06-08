@@ -3,12 +3,12 @@ package org.wallentines.midnightcore.fabric.module.skin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
@@ -17,7 +17,6 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.common.util.MojangUtil;
 import org.wallentines.midnightcore.fabric.MidnightCore;
-import org.wallentines.midnightcore.fabric.event.player.PacketSendEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLoginEvent;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
@@ -28,6 +27,7 @@ import org.wallentines.midnightlib.module.ModuleInfo;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 public class FabricSkinModule extends AbstractSkinModule {
 
@@ -58,12 +58,6 @@ public class FabricSkinModule extends AbstractSkinModule {
             onLeave(player);
 
         });
-        /*Event.register(PacketSendEvent.class, this, event -> {
-            if(event.getPacket() instanceof ClientboundPlayerInfoPacket) {
-
-                applyActiveProfile((ClientboundPlayerInfoPacket) event.getPacket(), getActiveSkin(FabricPlayer.wrap(event.getPlayer())));
-            }
-        });*/
 
         return true;
     }
@@ -110,14 +104,15 @@ public class FabricSkinModule extends AbstractSkinModule {
         ServerLevel world = player.getLevel();
 
         ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(
-                Holder.direct(world.dimensionType()),
+                world.dimensionTypeId(),
                 world.dimension(),
                 BiomeManager.obfuscateSeed(world.getSeed()),
                 player.gameMode.getGameModeForPlayer(),
                 player.gameMode.getPreviousGameModeForPlayer(),
                 world.isDebug(),
                 world.isFlat(),
-                true
+                true,
+                Optional.empty()
         );
 
         ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(player.getX(), player.getY(), player.getZ(), player.getRotationVector().y, player.getRotationVector().x, new HashSet<>(), 0, false);
@@ -182,11 +177,14 @@ public class FabricSkinModule extends AbstractSkinModule {
         profile.getProperties().get("textures").clear();
         profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
 
+        ProfilePublicKey.Data keyData = player.getProfilePublicKey() == null ? null : player.getProfilePublicKey().data();
+
         entries.set(0, new ClientboundPlayerInfoPacket.PlayerUpdate(
                 profile,
                 player.latency,
                 player.gameMode.getGameModeForPlayer(),
-                player.getTabListDisplayName()
+                player.getTabListDisplayName(),
+                keyData
         ));
     }
 

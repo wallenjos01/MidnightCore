@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
@@ -19,7 +20,7 @@ import java.util.List;
 @Mixin(Explosion.class)
 public class MixinExplosion {
 
-    @Shadow @Final private List<BlockPos> toBlow;
+    @Shadow @Final private ObjectArrayList<BlockPos> toBlow;
     @Shadow @Final @Nullable private Entity source;
 
     @Inject(method = "finalizeExplosion(Z)V", at=@At("HEAD"))

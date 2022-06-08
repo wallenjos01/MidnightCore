@@ -1,7 +1,5 @@
 package org.wallentines.midnightcore.fabric.module.dimension;
 
-import com.google.common.base.Charsets;
-import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
@@ -14,18 +12,15 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.WorldLoader;
 import net.minecraft.server.WorldStem;
-import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.level.progress.ChunkProgressListener;
-import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.worldupdate.WorldUpgrader;
-import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -35,17 +30,10 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.fabric.MidnightCore;
-import org.wallentines.midnightcore.fabric.mixin.AccessorDirectoryLock;
 import org.wallentines.midnightcore.fabric.mixin.AccessorMinecraftServer;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Objects;
 
 public class DynamicLevelStorageSource extends LevelStorageSource {
 
@@ -104,38 +92,29 @@ public class DynamicLevelStorageSource extends LevelStorageSource {
 
             MinecraftServer server = MidnightCore.getInstance().getServer();
 
-            WorldStem.InitConfig config = new WorldStem.InitConfig(
-                    server.getPackRepository(),
+            WorldLoader.InitConfig config = new WorldLoader.InitConfig(
+                    new WorldLoader.PackConfig(server.getPackRepository(), server.getWorldData().getDataPackConfig(), false),
                     Commands.CommandSelection.DEDICATED,
-                    server.getFunctionCompilationLevel(),
-                    false);
-
-
-            ChunkGenerator gen = creator.getGenerator();
-            String id = gen == null ? "" : gen.toString();
-
-            JsonObject obj = new JsonObject();
-            obj.addProperty("generator", id);
-            DedicatedServerProperties.WorldGenProperties properties = new DedicatedServerProperties.WorldGenProperties(Objects.toString(creator.getSeed()), obj, true, "DEFAULT");
+                    server.getFunctionCompilationLevel()
+            );
 
             WorldStem stem;
             try {
                 stem = WorldStem.load(
                     config,
-                    () -> {
-                        DataPackConfig dataPackConfig = getDataPacks();
-                        return dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig;
-                    }, (resourceManager, dataPackConfig) -> {
+                    (resourceManager, dataPackConfig) -> {
                         RegistryAccess.Writable writable = RegistryAccess.builtinCopy();
                         DynamicOps<Tag> dynamicOps = RegistryOps.createAndLoad(NbtOps.INSTANCE, writable, resourceManager);
                         WorldData worldData = getDataTag(dynamicOps, dataPackConfig, writable.allElementsLifecycle());
+
                         if (worldData != null) {
                             return Pair.of(worldData, writable.freeze());
                         } else {
 
-                            LevelSettings levelSettings = new LevelSettings(creator.getLevelName(), server.getDefaultGameType(), creator.isHardcore(), creator.getDifficulty(), false, new GameRules(), dataPackConfig);
+                            WorldGenSettings base = new WorldGenSettings(creator.getSeed(), creator.generateStructures(), creator.bonusChest(), server.getWorldData().worldGenSettings().dimensions());
 
-                            WorldGenSettings settings = WorldGenSettings.create(writable, properties);
+                            LevelSettings levelSettings = new LevelSettings(creator.getLevelName(), server.getDefaultGameType(), creator.isHardcore(), creator.getDifficulty(), false, new GameRules(), dataPackConfig);
+                            WorldGenSettings settings = WorldGenSettings.replaceOverworldGenerator(writable, base, creator.getGenerator());
 
                             PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, settings, Lifecycle.stable());
                             return Pair.of(primaryLevelData, writable.freeze());
@@ -148,9 +127,7 @@ public class DynamicLevelStorageSource extends LevelStorageSource {
                 return;
             }
 
-            stem.updateGlobals();
             this.properties = stem.worldData();
-
             this.registryAccess = stem.registryAccess();
 
             if (creator.shouldUpgradeWorld()) {

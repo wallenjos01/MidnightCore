@@ -3,6 +3,8 @@ package org.wallentines.midnightcore.fabric.util;
 import com.google.gson.internal.LazilyParsedNumber;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightcore.api.text.*;
 import org.wallentines.midnightcore.api.text.TextColor;
@@ -55,18 +57,21 @@ public class ConversionUtil {
     public static MComponent toMComponent(Component component) {
 
         MComponent out;
-        if(component instanceof TranslatableComponent) {
+
+        ComponentContents contents = component.getContents();
+
+        if(contents instanceof TranslatableContents) {
 
             List<MComponent> comps = new ArrayList<>();
-            for(Object o : ((TranslatableComponent) component).getArgs()) {
+            for(Object o : ((TranslatableContents) component).getArgs()) {
                 comps.add(toMComponent((Component) o));
             }
 
-            out = new MTranslateComponent(((TranslatableComponent) component).getKey(), comps.isEmpty() ? null : comps);
+            out = new MTranslateComponent(((TranslatableContents) contents).getKey(), comps.isEmpty() ? null : comps);
 
-        } else if(component instanceof TextComponent) {
+        } else if(contents instanceof LiteralContents) {
 
-            out = new MTextComponent(((TextComponent) component).getText());
+            out = new MTextComponent(((LiteralContents) contents).text());
 
         } else {
 
@@ -146,7 +151,7 @@ public class ConversionUtil {
         MutableComponent out;
         if(component instanceof MTextComponent) {
 
-            out = new TextComponent(component.getContent());
+            out = Component.literal(component.getContent());
 
         } else if(component instanceof MTranslateComponent) {
 
@@ -157,7 +162,7 @@ public class ConversionUtil {
                 comps[i] = toComponent(data.get(i));
             }
 
-            out = new TranslatableComponent(component.getContent(), comps);
+            out = Component.translatable(component.getContent(), comps);
 
         } else {
 

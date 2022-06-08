@@ -3,16 +3,40 @@ package org.wallentines.midnightcore.spigot.adapter;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_12_R1.*;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.ItemUtil;
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
+import java.lang.reflect.Field;
+
 public class Adapter_v1_12_R1 implements SpigotAdapter {
 
     public static final Adapter_v1_12_R1 INSTANCE = new Adapter_v1_12_R1();
+
+    private static Field handle;
+    public static net.minecraft.server.v1_12_R1.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
+
+        try {
+            return (net.minecraft.server.v1_12_R1.ItemStack) handle.get(is);
+
+        } catch (Exception ex) {
+            return CraftItemStack.asNMSCopy(is);
+        }
+    }
+
+    static {
+
+        try {
+            handle = CraftItemStack.class.getDeclaredField("handle");
+            handle.setAccessible(true);
+
+        } catch (Exception ex) {
+            // Ignore
+        }
+    }
 
     @Override
     public GameProfile getGameProfile(Player pl) {
@@ -61,7 +85,7 @@ public class Adapter_v1_12_R1 implements SpigotAdapter {
     @Override
     public void setTag(ItemStack is, ConfigSection sec) {
 
-        net.minecraft.server.v1_12_R1.ItemStack mis = ItemUtil.getHandle(is);
+        net.minecraft.server.v1_12_R1.ItemStack mis = getHandle(is);
 
         try {
             NBTTagCompound cmp = MojangsonParser.parse(sec.toString());
@@ -110,5 +134,10 @@ public class Adapter_v1_12_R1 implements SpigotAdapter {
     @Override
     public SkinUpdater getSkinUpdater() {
         return SkinUpdater_v1_12_R1.INSTANCE;
+    }
+
+    @Override
+    public boolean isVersionSupported(String str) {
+        return str.equals("v1_12_R1");
     }
 }

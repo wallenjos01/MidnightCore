@@ -8,7 +8,8 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -21,12 +22,10 @@ import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.Registries;
-import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.module.dimension.DimensionModule;
 import org.wallentines.midnightcore.fabric.module.dimension.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.dimension.WorldCreator;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
-import org.wallentines.midnightcore.fabric.util.CommandUtil;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -92,7 +91,7 @@ public class TestCommand {
                 th.printStackTrace();
                 throw th;
             }
-            context.getSource().sendSuccess(new TextComponent("Skin acquired"), false);
+            context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Skin acquired")), false);
         });
 
         return 0;
@@ -107,7 +106,7 @@ public class TestCommand {
             SavepointModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(SavepointModule.class);
             mod.savePlayer(FabricPlayer.wrap(spl), SAVEPOINT_ID);
 
-            context.getSource().sendSuccess(new TextComponent("Saved!"), false);
+            context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Saved!")), false);
 
         } catch (Throwable th) {
             th.printStackTrace();
@@ -125,7 +124,7 @@ public class TestCommand {
             SavepointModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(SavepointModule.class);
             mod.loadPlayer(FabricPlayer.wrap(spl), SAVEPOINT_ID);
 
-            context.getSource().sendSuccess(new TextComponent("Loaded!"), false);
+            context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Loaded!")), false);
 
         } catch (Throwable th) {
             th.printStackTrace();
@@ -146,11 +145,11 @@ public class TestCommand {
             if(mod.isVanished(mpl)) {
 
                 mod.revealPlayer(mpl);
-                context.getSource().sendSuccess(new TextComponent("Unvanished!"), false);
+                context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Unvanished!")), false);
             } else {
 
                 mod.vanishPlayer(mpl);
-                context.getSource().sendSuccess(new TextComponent("Vanished!"), false);
+                context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Vanished!")), false);
             }
         } catch (Throwable th) {
             th.printStackTrace();
@@ -175,9 +174,9 @@ public class TestCommand {
             WorldCreator cre = new WorldCreator(new ResourceLocation(Constants.DEFAULT_NAMESPACE, "test"), LevelStem.NETHER, EmptyGenerator.FOREST);
             cre.setFolderName(dim.getName());
 
-            context.getSource().sendSuccess(new TextComponent("Loading dimension..."), false);
+            context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Loading dimension...")), false);
             mod.createWorld(cre, dim.toPath(), w -> {
-                context.getSource().sendSuccess(new TextComponent("Dimension loaded! Teleporting..."), false);
+                context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Dimension loaded! Teleporting...")), false);
                 mpl.teleport(new Location(ConversionUtil.toIdentifier(w.dimension().location()), new Vec3d(0,100,0), 0, 0));
             });
 
@@ -200,7 +199,7 @@ public class TestCommand {
             Requirement<MPlayer> requirement = new Requirement<>(type, data);
             boolean success = requirement.check(FabricPlayer.wrap(spl));
 
-            context.getSource().sendSuccess(new TextComponent(success ? "success" : "failure"), false);
+            context.getSource().sendSuccess(MutableComponent.create(new LiteralContents(success ? "success" : "failure")), false);
 
         } catch (Throwable th) {
             th.printStackTrace();
@@ -215,7 +214,7 @@ public class TestCommand {
         try {
             spl = context.getSource().getPlayerOrException();
         } catch (CommandSyntaxException ex) {
-            context.getSource().sendFailure(new TextComponent("Only players can execute this command!"));
+            context.getSource().sendFailure(MutableComponent.create(new LiteralContents("Only players can execute this command!")));
             return null;
         }
         return spl;

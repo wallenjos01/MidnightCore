@@ -2,6 +2,8 @@ package org.wallentines.midnightcore.spigot.adapter;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.EmptyByteBuf;
 import net.minecraft.server.v1_12_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
@@ -10,7 +12,9 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.player.MPlayer;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -44,9 +48,7 @@ public class SkinUpdater_v1_12_R1 implements SkinUpdater {
         // Create Packets
 
         PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, epl);
-        PacketPlayOutPlayerInfo add = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, epl);
-
-        applyActiveProfile(add, skin);
+        PacketPlayOutPlayerInfo add = createPacket(epl, skin);
 
         PacketPlayOutEntityEquipment equipM = new PacketPlayOutEntityEquipment(epl.getId(), EnumItemSlot.MAINHAND, epl.getItemInMainHand());
         PacketPlayOutEntityEquipment equipO = new PacketPlayOutEntityEquipment(epl.getId(), EnumItemSlot.OFFHAND, epl.getItemInOffHand());
@@ -104,7 +106,34 @@ public class SkinUpdater_v1_12_R1 implements SkinUpdater {
         spl.updateInventory();
     }
 
-    @SuppressWarnings("unchecked")
+    private PacketPlayOutPlayerInfo createPacket(EntityPlayer player, Skin skin) {
+
+        PacketDataSerializer serializer = new PacketDataSerializer(new EmptyByteBuf(ByteBufAllocator.DEFAULT));
+
+        serializer.a(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
+        serializer.d(1);
+        serializer.a(player.getProfile().getId());
+        serializer.a(player.getProfile().getName());
+        serializer.d(1);
+        serializer.a("textures");
+        serializer.a(skin.getValue());
+        serializer.writeBoolean(true);
+        serializer.a(skin.getSignature());
+        serializer.a(player.playerInteractManager.getGameMode());
+        serializer.d(player.ping);
+        serializer.writeBoolean(false);
+
+        PacketPlayOutPlayerInfo out = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new ArrayList<>());
+        try {
+            out.a(serializer);
+        } catch (IOException ex) {
+            // Ignore
+        }
+
+        return out;
+    }
+
+ /*   @SuppressWarnings("unchecked")
     private void applyActiveProfile(PacketPlayOutPlayerInfo packet, Skin skin) {
 
         PacketPlayOutPlayerInfo.EnumPlayerInfoAction act;
@@ -154,6 +183,6 @@ public class SkinUpdater_v1_12_R1 implements SkinUpdater {
                 epl.playerInteractManager.getGameMode(),
                 epl.listName
         ));
-    }
+    }*/
 
 }

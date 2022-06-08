@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import org.objectweb.asm.Opcodes;
@@ -26,15 +27,8 @@ public abstract class MixinCommands {
 
     @Shadow @Final private CommandDispatcher<CommandSourceStack> dispatcher;
 
-    @Inject(method="<init>", at=@At(value="INVOKE", target="Lcom/mojang/brigadier/CommandDispatcher;findAmbiguities(Lcom/mojang/brigadier/AmbiguityConsumer;)V"))
-    private void onInit(Commands.CommandSelection commandSelection, CallbackInfo ci) {
-
-        Event.invoke(new CommandLoadEvent(dispatcher, commandSelection));
-
-    }
-
     @Inject(method = "<init>", at=@At(value = "FIELD", target="Lnet/minecraft/commands/Commands$CommandSelection;includeIntegrated:Z", opcode = Opcodes.GETFIELD))
-    private void beforeIntegrated(Commands.CommandSelection commandSelection, CallbackInfo ci) {
+    private void beforeIntegrated(Commands.CommandSelection commandSelection, CommandBuildContext ctx, CallbackInfo ci) {
 
         if(MidnightCoreAPI.getInstance().getConfig().getBoolean("vanilla_permissions")) {
 
@@ -57,6 +51,8 @@ public abstract class MixinCommands {
                 MidnightCoreAPI.getLogger().warn("Unable to register vanilla command permissions!");
             }
         }
+
+        Event.invoke(new CommandLoadEvent(dispatcher, commandSelection));
     }
 
     @Inject(method="performCommand", at=@At(value="INVOKE", target="Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)I"), cancellable = true)

@@ -8,17 +8,12 @@ import org.wallentines.midnightlib.event.Event;
 public class PlayerChatEvent extends Event {
 
     private final ServerPlayer player;
-    private String message;
-    private Component broadcast;
-
-    private boolean changed;
-
+    private final String message;
     private boolean cancelled = false;
 
-    public PlayerChatEvent(ServerPlayer player, String message, Component broadcast) {
+    public PlayerChatEvent(ServerPlayer player, String message) {
         this.player = player;
         this.message = message;
-        this.broadcast = broadcast;
     }
 
     public ServerPlayer getPlayer() {
@@ -29,22 +24,6 @@ public class PlayerChatEvent extends Event {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Component getBroadcast() {
-        return broadcast;
-    }
-
-    public void setBroadcast(Component broadcast) {
-        this.changed = true;
-        this.broadcast = broadcast;
-    }
-
-    public boolean wasMessageChanged() {
-        return changed;
-    }
 
     public boolean isCancelled() {
         return cancelled;
