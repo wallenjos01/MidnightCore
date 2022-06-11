@@ -4,11 +4,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ServerPlayer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.vanish.AbstractVanishModule;
 import org.wallentines.midnightcore.fabric.event.player.PacketSendEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerJoinEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
+import org.wallentines.midnightcore.fabric.module.skin.FabricSkinModule;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -17,7 +19,7 @@ public class FabricVanishModule extends AbstractVanishModule {
 
     @Override
     protected void doVanish(MPlayer player, MPlayer observer) {
-        if(observer.equals(player)) return;
+        if(observer.equals(player) || observer.isOffline()) return;
 
         ServerPlayer op = FabricPlayer.getInternal(observer);
         ServerPlayer sp = FabricPlayer.getInternal(player);
@@ -29,7 +31,7 @@ public class FabricVanishModule extends AbstractVanishModule {
     @Override
     protected void doReveal(MPlayer player, MPlayer observer) {
 
-        if(observer.equals(player)) return;
+        if(observer.equals(player) || observer.isOffline()) return;
         ServerPlayer op = FabricPlayer.getInternal(observer);
         ServerPlayer sp = FabricPlayer.getInternal(player);
 

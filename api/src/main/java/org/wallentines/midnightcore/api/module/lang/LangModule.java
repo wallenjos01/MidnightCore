@@ -22,9 +22,13 @@ public interface LangModule extends Module<MidnightCoreAPI> {
     MComponent parseText(String text, Object... data);
 
 
-    MComponent getPlaceholderValue(String key, Object... data);
+    default MComponent getPlaceholderValue(String key, Object... args) { return getPlaceholderValue(key, null, args); }
 
-    String getInlinePlaceholderValue(String key, Object... data);
+    MComponent getPlaceholderValue(String key, String parameter, Object... args);
+
+    default String getInlinePlaceholderValue(String key, Object... args) { return getInlinePlaceholderValue(key, null, args); }
+
+    String getInlinePlaceholderValue(String key, String parameter, Object... args);
 
     String getServerLanguage();
 

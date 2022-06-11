@@ -52,7 +52,7 @@ public abstract class MixinCommands {
             }
         }
 
-        Event.invoke(new CommandLoadEvent(dispatcher, commandSelection));
+        Event.invoke(new CommandLoadEvent(dispatcher, commandSelection, ctx));
     }
 
     @Inject(method="performCommand", at=@At(value="INVOKE", target="Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)I"), cancellable = true)

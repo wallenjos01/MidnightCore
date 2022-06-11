@@ -17,7 +17,7 @@ public class MixinBlockItem {
     @Inject(method="place",at=@At(value = "INVOKE", target = "Lnet/minecraft/world/item/BlockItem;placeBlock(Lnet/minecraft/world/item/context/BlockPlaceContext;Lnet/minecraft/world/level/block/state/BlockState;)Z"),cancellable = true)
     private void onPlace(BlockPlaceContext blockPlaceContext, CallbackInfoReturnable<InteractionResult> cir) {
 
-        if(!(blockPlaceContext.getPlayer() instanceof ServerPlayer)) return;
+        if(blockPlaceContext.getLevel().isClientSide) return;
 
         BlockItem it = (BlockItem) (Object) this;
 

@@ -34,16 +34,17 @@ public class MixinBucketItem {
         return res;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method="use", at=@At(value = "INVOKE", target = "Lnet/minecraft/world/phys/BlockHitResult;getBlockPos()Lnet/minecraft/core/BlockPos;"), cancellable = true)
     private void onUse(Level level, Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
 
-        if(midnight_core_result == null || !(player instanceof ServerPlayer)) return;
+        if(midnight_core_result == null || level.isClientSide) return;
         ItemStack is = player.getItemInHand(interactionHand);
 
         BlockHitResult res = midnight_core_result;
 
         PlayerInteractEvent event = new PlayerInteractEvent((ServerPlayer) player, is, interactionHand, PlayerInteractEvent.InteractionType.INTERACT, res);
-        player.getServer().submit(() -> Event.invoke(event));
+        level.getServer().submit(() -> Event.invoke(event));
 
         if(event.isCancelled()) {
             cir.setReturnValue(InteractionResultHolder.pass(is));

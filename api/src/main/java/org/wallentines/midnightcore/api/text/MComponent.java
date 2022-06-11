@@ -161,10 +161,12 @@ public abstract class MComponent {
 
     private static MComponent parsePlainText(String content) {
 
-        MComponent out = new MTextComponent("");
+        List<MComponent> out = new ArrayList<>();
 
         StringBuilder currentString = new StringBuilder();
         MStyle currentStyle = new MStyle();
+
+        boolean reset = false;
 
         for(int i = 0 ; i < content.length() ; i++) {
 
@@ -177,29 +179,41 @@ public abstract class MComponent {
                     int legacy = Integer.parseInt(next + "", 16);
                     if(currentString.length() > 0) {
                         MComponent comp = new MTextComponent(currentString.toString()).withStyle(currentStyle);
-
-                        out.addChild(comp);
-
+                        out.add(comp);
                     }
                     currentString = new StringBuilder();
 
                     i += 1;
                     currentStyle = new MStyle().withColor(TextColor.fromRGBI(legacy));
-                }
-                switch (next) {
-                    case 'l': { currentStyle.withBold(true); i += 1; break; }
-                    case 'o': { currentStyle.withItalic(true); i += 1; break; }
-                    case 'n': { currentStyle.withUnderlined(true); i += 1; break; }
-                    case 'm': { currentStyle.withStrikethrough(true); i += 1; break; }
-                    case 'k': { currentStyle.withObfuscated(true); i += 1; break; }
-                    case 'r': { currentStyle.withReset(true); i += 1; break; }
+
+                } else if(next == 'r') {
+
+                    if(currentString.length() > 0) {
+                        MComponent comp = new MTextComponent(currentString.toString()).withStyle(currentStyle);
+                        out.add(comp);
+                    }
+                    currentString = new StringBuilder();
+                    i += 1;
+
+                    reset = true;
+
+                    currentStyle = new MStyle();
+
+                } else {
+                    switch (next) {
+                        case 'l': { currentStyle.withBold(true); i += 1; break; }
+                        case 'o': { currentStyle.withItalic(true); i += 1; break; }
+                        case 'n': { currentStyle.withUnderlined(true); i += 1; break; }
+                        case 'm': { currentStyle.withStrikethrough(true); i += 1; break; }
+                        case 'k': { currentStyle.withObfuscated(true); i += 1; break; }
+                    }
                 }
 
             } else if(c == '#' && i < content.length() - 7) {
 
                 String hex = content.substring(i+1, i+7);
                 MComponent comp = new MTextComponent(currentString.toString()).withStyle(currentStyle);
-                out.addChild(comp);
+                out.add(comp);
 
                 currentString = new StringBuilder();
 
@@ -211,10 +225,15 @@ public abstract class MComponent {
             }
         }
 
-        MComponent comp = new MTextComponent(currentString.toString()).withStyle(currentStyle);
-        out.addChild(comp);
+        out.add(new MTextComponent(currentString.toString()).withStyle(currentStyle));
 
-        return out;
+        int i = 0;
+        MComponent outComp = reset || out.get(0).getStyle().hasFormatting() ? new MTextComponent("") : out.get(i++);
+        for(; i < out.size() ; i++) {
+            outComp.addChild(out.get(i));
+        }
+
+        return outComp;
     }
 
     // Protected Methods

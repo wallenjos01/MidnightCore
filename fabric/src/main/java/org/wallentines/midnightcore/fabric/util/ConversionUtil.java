@@ -91,6 +91,8 @@ public class ConversionUtil {
     public static MStyle toMStyle(Style style) {
 
         MStyle out = new MStyle();
+        if(style.isEmpty()) return out;
+
         if(style.getColor() != null) out.withColor(TextColor.parse(style.getColor().serialize()));
 
         String styleStr = style.toString().substring(7);

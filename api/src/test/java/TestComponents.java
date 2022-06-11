@@ -109,9 +109,9 @@ public class TestComponents {
         String legacyText = "&aHello World";
         MComponent legacyComp = MComponent.parse(legacyText);
 
-        Assert.assertEquals("green", legacyComp.getChildren().iterator().next().getStyle().getColor().toLegacyColor());
+        Assert.assertEquals("green", legacyComp.getStyle().getColor().toLegacyColor());
         Assert.assertEquals("Hello World", legacyComp.getAllContent());
-        Assert.assertEquals("{\"text\":\"\",\"extra\":[{\"text\":\"Hello World\",\"color\":\"#55ff55\"}]}", MComponent.SERIALIZER.serialize(legacyComp).toString());
+        Assert.assertEquals("{\"text\":\"Hello World\",\"color\":\"#55ff55\"}", MComponent.SERIALIZER.serialize(legacyComp).toString());
         Assert.assertEquals("#55ff55Hello World", legacyComp.toConfigText());
 
     }

@@ -6,7 +6,6 @@ import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MHoverEvent;
 import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.MTextComponent;
-import org.wallentines.midnightcore.common.util.ConfigUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
@@ -78,7 +77,7 @@ public abstract class AbstractItem implements MItemStack {
 
     @Override
     public void setName(MComponent component) {
-        MComponent newComp = new MTextComponent("").withStyle(MStyle.ITEM_BASE).withChild(component);
+        MComponent newComp = new MTextComponent("").withStyle(MStyle.ITEM_NAME_BASE).withChild(component);
         if(tag == null) tag = new ConfigSection();
 
         tag.getOrCreateSection("display").set("Name", MComponent.SERIALIZER.serialize(newComp).toString());
@@ -100,7 +99,7 @@ public abstract class AbstractItem implements MItemStack {
 
         List<MComponent> newLore = new ArrayList<>();
         for(MComponent cmp : lore) {
-            newLore.add(new MTextComponent("").withStyle(MStyle.ITEM_BASE).withChild(cmp.copy()));
+            newLore.add(new MTextComponent("").withStyle(MStyle.ITEM_LORE_BASE).withChild(cmp.copy()));
         }
 
         if(tag == null) tag = new ConfigSection();

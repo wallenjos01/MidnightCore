@@ -17,6 +17,7 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.common.util.MojangUtil;
 import org.wallentines.midnightcore.fabric.MidnightCore;
+import org.wallentines.midnightcore.fabric.event.player.PacketSendEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLoginEvent;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
@@ -56,7 +57,15 @@ public class FabricSkinModule extends AbstractSkinModule {
 
             MPlayer player = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUUID());
             onLeave(player);
+        });
 
+        Event.register(PacketSendEvent.class, this, event -> {
+
+            if(event.getPacket() instanceof ClientboundPlayerInfoPacket pck) {
+
+                MPlayer mpl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(pck.getEntries().get(0).getProfile().getId());
+                applyActiveProfile(pck, getActiveSkin(mpl));
+            }
         });
 
         return true;
@@ -78,8 +87,6 @@ public class FabricSkinModule extends AbstractSkinModule {
 
         ClientboundPlayerInfoPacket remove = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, player);
         ClientboundPlayerInfoPacket add = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, player);
-
-        applyActiveProfile(add, skin);
 
         List<Pair<EquipmentSlot, ItemStack>> items = new ArrayList<>();
 
@@ -147,6 +154,8 @@ public class FabricSkinModule extends AbstractSkinModule {
     }
 
     private void applyActiveProfile(ClientboundPlayerInfoPacket packet, Skin skin) {
+
+        if(skin == null) return;
 
         if(packet.getAction() != ClientboundPlayerInfoPacket.Action.ADD_PLAYER) return;
         List<ClientboundPlayerInfoPacket.PlayerUpdate> entries = packet.getEntries();

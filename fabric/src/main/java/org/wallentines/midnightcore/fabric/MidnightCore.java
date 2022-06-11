@@ -73,11 +73,11 @@ public class MidnightCore implements ModInitializer {
         Version version = Version.SERIALIZER.deserialize(versionStr);
 
         // Find all mods that request to be loaded now
-        List<ModInitializer> inits = FabricLoader.getInstance().getEntrypoints("midnightcore", ModInitializer.class);
+        List<ModInitializer> inits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE, ModInitializer.class);
         inits.forEach(ModInitializer::onInitialize);
 
         // Find all mods that request to be loaded with the current Minecraft version only
-        List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints("midnightcore:" + versionStr, ModInitializer.class);
+        List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
         verInits.forEach(ModInitializer::onInitialize);
 
 

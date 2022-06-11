@@ -13,7 +13,6 @@ public class MStyle {
     private Boolean underlined;
     private Boolean strikethrough;
     private Boolean obfuscated;
-    private Boolean reset;
     private Identifier font;
 
     public TextColor getColor() {
@@ -58,27 +57,41 @@ public class MStyle {
 
     public MStyle withObfuscated(Boolean value) { this.obfuscated = value; return this; }
 
-    public MStyle withReset(Boolean value) { this.reset = value; return this; }
-
     public MStyle withFont(Identifier value) { this.font = value; return this; }
 
     public MStyle fillFrom(MStyle other) {
         
-        if(other.color != null) color = other.color;
-        if(other.bold != null) bold = other.bold;
-        if(other.italic != null) italic = other.italic;
-        if(other.underlined != null) underlined = other.underlined;
-        if(other.strikethrough != null) strikethrough = other.strikethrough;
-        if(other.obfuscated != null) obfuscated = other.obfuscated;
-        if(other.reset != null) reset = other.reset;
-        if(other.font != null) font = other.font;
+        if(color == null) color = other.color;
+        if(bold == null) bold = other.bold;
+        if(italic == null) italic = other.italic;
+        if(underlined == null) underlined = other.underlined;
+        if(strikethrough == null) strikethrough = other.strikethrough;
+        if(obfuscated == null) obfuscated = other.obfuscated;
+        if(font == null) font = other.font;
+
+        return this;
+    }
+
+    public boolean hasFormatting() {
+        return bold != null || italic != null || underlined != null || strikethrough != null || obfuscated != null || font != null;
+    }
+
+    public MStyle reset() {
+
+        color = null;
+        bold = null;
+        italic = null;
+        underlined = null;
+        strikethrough = null;
+        obfuscated = null;
+        font = null;
 
         return this;
     }
 
     public MStyle copy() {
 
-        return new MStyle().withColor(color).withBold(bold).withItalic(italic).withUnderlined(underlined).withStrikethrough(strikethrough).withObfuscated(obfuscated).withReset(reset).withFont(font);
+        return new MStyle().withColor(color).withBold(bold).withItalic(italic).withUnderlined(underlined).withStrikethrough(strikethrough).withObfuscated(obfuscated).withFont(font);
     }
 
     public String toLegacyStyle(Character colorChar, Character hexChar) {
@@ -95,12 +108,11 @@ public class MStyle {
         if(underlined != null && underlined)       out.append(colorChar).append("n");
         if(strikethrough != null && strikethrough) out.append(colorChar).append("m");
         if(obfuscated != null && obfuscated)       out.append(colorChar).append("k");
-        if(reset != null && reset)                 out.append(colorChar).append("r");
 
         return out.toString();
     }
 
-    public static final ConfigSerializer<MStyle> SERIALIZER = new ConfigSerializer<MStyle>() {
+    public static final ConfigSerializer<MStyle> SERIALIZER = new ConfigSerializer<>() {
         @Override
         public MStyle deserialize(ConfigSection section) {
 
@@ -133,6 +145,7 @@ public class MStyle {
         }
     };
 
-    public static final MStyle ITEM_BASE = new MStyle().withItalic(false);
+    public static final MStyle ITEM_NAME_BASE = new MStyle().withItalic(false);
+    public static final MStyle ITEM_LORE_BASE = new MStyle().withColor(Color.WHITE).withItalic(false);
 
 }

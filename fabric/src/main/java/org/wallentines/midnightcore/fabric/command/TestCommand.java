@@ -8,12 +8,14 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.lang.LangModule;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointModule;
 import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.module.skin.Skinnable;
@@ -22,6 +24,7 @@ import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.Registries;
+import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.module.dimension.DimensionModule;
 import org.wallentines.midnightcore.fabric.module.dimension.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.dimension.WorldCreator;
@@ -43,7 +46,7 @@ public class TestCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
         dispatcher.register(Commands.literal("mcoretest")
-            .requires(Permissions.require(Constants.DEFAULT_NAMESPACE + ".command.test", 4))
+            .requires(Permissions.require(Constants.makeNode("command.test"), 4))
             .then(Commands.literal("skin")
                 .executes(TestCommand::skinTestCommand)
             )
@@ -68,6 +71,11 @@ public class TestCommand {
                     )
                 )
             )
+            .then(Commands.literal("placeholder")
+                .then(Commands.argument("value", StringArgumentType.greedyString())
+                    .executes(TestCommand::placeholderTestCommand)
+                )
+            )
         );
     }
 
@@ -82,10 +90,6 @@ public class TestCommand {
             try {
 
                 ((Skinnable) spl).setSkin(skin);
-
-                /*FabricPlayer fp = FabricPlayer.wrap(spl);
-                mod.setSkin(fp, skin);
-                mod.updateSkin(fp);*/
 
             } catch (Throwable th) {
                 th.printStackTrace();
@@ -203,6 +207,27 @@ public class TestCommand {
 
         } catch (Throwable th) {
             th.printStackTrace();
+        }
+        return 1;
+    }
+
+    private static int placeholderTestCommand(CommandContext<CommandSourceStack> context) {
+
+        try {
+
+            String arg = context.getArgument("value", String.class);
+            ServerPlayer spl = extractPlayer(context);
+
+            if(spl == null) return 0;
+
+            LangModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(LangModule.class);
+            MPlayer mpl = FabricPlayer.wrap(spl);
+
+            mpl.sendMessage(mod.parseText(arg, mpl, MidnightCore.getInstance().getLangProvider()));
+
+        } catch (Throwable th) {
+            th.printStackTrace();
+            throw th;
         }
         return 1;
     }

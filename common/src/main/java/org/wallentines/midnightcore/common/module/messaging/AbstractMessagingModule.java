@@ -1,8 +1,5 @@
 package org.wallentines.midnightcore.common.module.messaging;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.messaging.MessageHandler;
 import org.wallentines.midnightcore.api.module.messaging.MessagingModule;
@@ -12,6 +9,8 @@ import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
+
+import java.io.*;
 
 public abstract class AbstractMessagingModule implements MessagingModule {
 
@@ -33,16 +32,19 @@ public abstract class AbstractMessagingModule implements MessagingModule {
     @Override
     public void sendMessage(MPlayer player, Identifier id, ConfigSection data) {
 
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-
-        out.writeUTF(JsonConfigProvider.INSTANCE.saveToString(data));
-
-        send(player, id, out);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(stream);
+        try {
+            out.writeUTF(JsonConfigProvider.INSTANCE.saveToString(data));
+            send(player, id, stream.toByteArray());
+        } catch (IOException ex) {
+            MidnightCoreAPI.getLogger().warn("An error occurred while sending a plugin message!");
+        }
     }
 
-    protected abstract void send(MPlayer player, Identifier id, ByteArrayDataOutput data);
+    protected abstract void send(MPlayer player, Identifier id, byte[] data);
 
-    protected void handleRaw(MPlayer sender, ByteArrayDataInput data) {
+    protected void handleRaw(MPlayer sender, DataInput data) {
 
         Identifier id;
 
@@ -50,7 +52,7 @@ public abstract class AbstractMessagingModule implements MessagingModule {
             String channel = data.readUTF();
 
             if(channel.isEmpty()) return;
-            id = Identifier.parseOrDefault(channel, "midnightcore");
+            id = Identifier.parseOrDefault(channel, Constants.DEFAULT_NAMESPACE);
 
         } catch (Exception ex) {
             // Not for us
@@ -60,7 +62,7 @@ public abstract class AbstractMessagingModule implements MessagingModule {
         handle(sender, id, data);
     }
 
-    protected void handle(MPlayer sender, Identifier id, ByteArrayDataInput data) {
+    protected void handle(MPlayer sender, Identifier id, DataInput data) {
 
         MessageHandler handler = handlers.get(id);
         if(handler == null) return;

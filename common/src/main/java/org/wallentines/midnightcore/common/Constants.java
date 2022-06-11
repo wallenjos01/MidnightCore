@@ -24,6 +24,10 @@ public final class Constants {
     public static final ConfigSection CONFIG_DEFAULTS = new ConfigSection()
             .with("modules", new ConfigSection());
 
+    public static String makeNode(String node) {
+        return DEFAULT_NAMESPACE + "." + node;
+    }
+
     @SuppressWarnings("unchecked")
     public static void registerDefaults() {
 

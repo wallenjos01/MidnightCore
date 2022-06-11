@@ -17,6 +17,8 @@ import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.io.*;
+
 public class FabricMessagingModule extends AbstractMessagingModule {
 
     private FabricMessagingModule() {
@@ -25,18 +27,14 @@ public class FabricMessagingModule extends AbstractMessagingModule {
     }
 
     @Override
-    protected void send(MPlayer player, Identifier id, ByteArrayDataOutput data) {
-
-        MidnightCoreAPI.getLogger().info("Attempting to send payload...");
+    protected void send(MPlayer player, Identifier id, byte[] data) {
 
         ServerPlayer pl = ((FabricPlayer) player).getInternal();
         if(pl == null) return;
 
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeUtf(id.toString());
-        buf.writeBytes(data.toByteArray());
-
-        MidnightCoreAPI.getLogger().info("Sending custom payload to " + pl.getGameProfile().getName());
+        buf.writeBytes(data);
 
         pl.connection.send(new ClientboundCustomPayloadPacket(buf));
     }
@@ -46,10 +44,10 @@ public class FabricMessagingModule extends AbstractMessagingModule {
         MPlayer player = FabricPlayer.wrap(event.getSource());
         FriendlyByteBuf buf = event.getData();
 
-        if(buf.refCnt() == 0) return;
+        if(!buf.isReadable() || buf.refCnt() == 0) return;
 
-        ByteArrayDataInput inp = ByteStreams.newDataInput(buf.accessByteBufWithCorrectSize());
-        handleRaw(player, inp);
+        DataInput input = new DataInputStream(new ByteArrayInputStream(buf.accessByteBufWithCorrectSize()));
+        handleRaw(player, input);
     }
 
     public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(FabricMessagingModule::new, ID, new ConfigSection());

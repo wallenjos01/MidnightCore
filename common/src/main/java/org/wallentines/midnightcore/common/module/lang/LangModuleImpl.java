@@ -12,7 +12,9 @@ import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class LangModuleImpl implements LangModule {
 
@@ -21,12 +23,7 @@ public class LangModuleImpl implements LangModule {
     private final HashMap<String, PlaceholderSupplier<MComponent>> placeholders = new HashMap<>();
     private final HashMap<String, PlaceholderSupplier<String>> inlinePlaceholders = new HashMap<>();
 
-    protected LangModuleImpl() {
-
-        registerPlaceholder("player_name", PlaceholderSupplier.create(MPlayer.class, MPlayer::getName));
-        registerInlinePlaceholder("player_uuid", PlaceholderSupplier.create(MPlayer.class, mp -> mp.getUUID().toString()));
-
-    }
+    protected LangModuleImpl() { }
 
     @Override
     public LangProvider createProvider(Path folderPath, ConfigSection defaults) {
@@ -43,82 +40,103 @@ public class LangModuleImpl implements LangModule {
         inlinePlaceholders.put(key, supplier);
     }
 
-    public String applyInlinePlaceholders(String msg, Object... data) {
+    private static int readUntil(char chara, int offset, char[] buffer, StringBuilder out) {
 
-        boolean placeholder = false;
-        StringBuilder currentPlaceholder = new StringBuilder();
-        StringBuilder message = new StringBuilder();
+        int i;
+        for(i = offset ; i < buffer.length ; i++) {
 
-        for(int i = 0 ; i < msg.length() ; i++) {
+            if(buffer[i] == chara) return i;
+            out.append(buffer[i]);
 
-            char c = msg.charAt(i);
-            if(c == '%') {
+        }
+        return i;
+    }
 
-                if(placeholder) {
-                    String rep = getInlinePlaceholderValue(currentPlaceholder.toString(), data);
-                    message.append(rep == null ? "%" + currentPlaceholder + "%" : rep);
-                    currentPlaceholder = new StringBuilder();
-                }
-                placeholder = !placeholder;
+    private PlaceholderSupplier.PlaceholderContext createContext(String placeholder, Object... args) {
+        StringBuilder name = new StringBuilder();
+        String parameter = null;
 
-            } else {
-                if(placeholder) {
-                    currentPlaceholder.append(c);
-                } else {
-                    message.append(c);
-                }
+        char[] arr = placeholder.toCharArray();
+        for(int i = 0 ; i < arr.length ; i++) {
+
+            i = readUntil('<', i, arr, name);
+            if(i < arr.length) {
+
+                StringBuilder param = new StringBuilder();
+                i = readUntil('>', ++i, arr, param);
+
+                parameter = param.toString();
             }
         }
+        return new PlaceholderSupplier.PlaceholderContext(name.toString(), args, parameter);
+    }
 
-        if(currentPlaceholder.length() > 0) message.append("%").append(currentPlaceholder);
-        return message.toString();
+    private String parsePlaceholderInline(String placeholder, Object... args) {
 
+        PlaceholderSupplier.PlaceholderContext ctx = createContext(placeholder, args);
+        String s = PlaceholderSupplier.get(inlinePlaceholders.get(ctx.getName()), ctx);
+
+        return s == null ? ctx.toRawPlaceholder() : s;
+    }
+
+    private MComponent parsePlaceholder(String placeholder, Object... args) {
+
+        PlaceholderSupplier.PlaceholderContext ctx = createContext(placeholder, args);
+        return PlaceholderSupplier.get(placeholders.get(ctx.getName()), ctx);
     }
 
     @Override
-    public MComponent applyPlaceholders(MComponent msg, Object... data) {
+    public String applyInlinePlaceholders(String input, Object... args) {
+        StringBuilder out = new StringBuilder();
 
-        MStyle style = msg.getStyle();
-        MComponent out = new MTextComponent("").withStyle(style);
-        boolean placeholder = false;
-        StringBuilder currentPlaceholder = new StringBuilder();
-        StringBuilder currentMessage = new StringBuilder();
+        char[] arr = input.toCharArray();
+        for(int i = 0 ; i < arr.length ; i++) {
 
-        for(int i = 0 ; i < msg.getContent().length() ; i++) {
+            i = readUntil('%', i, arr, out);
+            if(i < arr.length) {
 
-            char c = msg.getContent().charAt(i);
+                StringBuilder placeholder = new StringBuilder();
+                i = readUntil('%', ++i, arr, placeholder);
 
-            if(c == '%') {
-
-                if(placeholder) {
-
-                    MComponent rep = getPlaceholderValue(currentPlaceholder.toString(), data);
-                    if(rep == null) {
-                        currentMessage.append("%").append(currentPlaceholder).append("%");
-
-                    } else {
-                        out.addChild(new MTextComponent(currentMessage.toString()));
-                        out.addChild(rep);
-                        currentMessage = new StringBuilder();
-                    }
-                    currentPlaceholder = new StringBuilder();
-                }
-                placeholder = !placeholder;
-
-            } else {
-                if(placeholder) {
-                    currentPlaceholder.append(c);
-                } else {
-                    currentMessage.append(c);
-                }
+                out.append(i == arr.length ? "%" + placeholder : parsePlaceholderInline(placeholder.toString(), args));
             }
         }
 
-        if(currentPlaceholder.length() > 0) currentMessage.append("%").append(currentPlaceholder);
-        out.addChild(new MTextComponent(currentMessage.toString()));
+        return out.toString();
+    }
 
-        for(MComponent comp : msg.getChildren()) {
-            out.addChild(applyPlaceholders(comp, data));
+    @Override
+    public MComponent applyPlaceholders(MComponent input, Object... args) {
+
+        MStyle style = input.getStyle();
+        List<MComponent> components = new ArrayList<>();
+
+        char[] arr = input.getContent().toCharArray();
+        for(int i = 0 ; i < arr.length ; i++) {
+
+            StringBuilder current = new StringBuilder();
+            i = readUntil('%', i, arr, current);
+            components.add(new MTextComponent(current.toString()));
+
+            if(i < arr.length) {
+
+                StringBuilder placeholder = new StringBuilder();
+                i = readUntil('%', ++i, arr, placeholder);
+
+                MComponent pl = i == arr.length ? new MTextComponent("%" + placeholder) : parsePlaceholder(placeholder.toString(), args);
+                components.add(pl);
+            }
+        }
+
+        MComponent out = components.isEmpty() ? new MTextComponent("") : components.get(0);
+        out.getStyle().fillFrom(style);
+
+        for(int i = 1 ; i < components.size() ; i++) {
+            out.addChild(components.get(i));
+        }
+
+        for(MComponent comp : input.getChildren()) {
+            out.addChild(applyPlaceholders(comp, args));
         }
 
         return out;
@@ -133,27 +151,29 @@ public class LangModuleImpl implements LangModule {
     }
 
     @Override
-    public String getInlinePlaceholderValue(String key, Object... data) {
+    public String getInlinePlaceholderValue(String key, String parameter, Object... args) {
 
-        for(Object o : data) {
-            if(o instanceof CustomPlaceholderInline) {
-                CustomPlaceholderInline cpi = (CustomPlaceholderInline) o;
+        for(Object o : args) {
+            if(o instanceof CustomPlaceholderInline cpi) {
                 if(cpi.getId().equals(key)) return cpi.get();
             }
         }
-        return inlinePlaceholders.containsKey(key) ? inlinePlaceholders.get(key).get(data) : null;
+
+        PlaceholderSupplier.PlaceholderContext ctx = new PlaceholderSupplier.PlaceholderContext(key, args, parameter);
+        return PlaceholderSupplier.get(inlinePlaceholders.get(key), ctx);
     }
 
     @Override
-    public MComponent getPlaceholderValue(String key, Object... data) {
+    public MComponent getPlaceholderValue(String key, String parameter, Object... args) {
 
-        for(Object o : data) {
-            if(o instanceof CustomPlaceholder) {
-                CustomPlaceholder cp = (CustomPlaceholder) o;
+        for(Object o : args) {
+            if(o instanceof CustomPlaceholder cp) {
                 if(cp.getId().equals(key)) return cp.get();
             }
         }
-        return placeholders.containsKey(key) ? placeholders.get(key).get(data) : null;
+
+        PlaceholderSupplier.PlaceholderContext ctx = new PlaceholderSupplier.PlaceholderContext(key, args, parameter);
+        return PlaceholderSupplier.get(placeholders.get(key), ctx);
     }
 
     @Override
@@ -166,7 +186,18 @@ public class LangModuleImpl implements LangModule {
 
         reload(section);
 
-        registerInlinePlaceholder("midnightcore_version", PlaceholderSupplier.create(Constants.VERSION.toString()));
+        registerPlaceholder("player_name", PlaceholderSupplier.create(MPlayer.class, MPlayer::getName));
+        registerInlinePlaceholder("player_uuid", PlaceholderSupplier.create(MPlayer.class, mp -> mp.getUUID().toString()));
+
+        registerPlaceholder("lang", PlaceholderSupplier.createWithParameter(
+                LangProvider.class, MPlayer.class,
+                (lp, pl, param) -> lp.getMessage(param, pl, pl),
+                (lp, param) -> lp.getMessage(param, lp.getModule().getServerLanguage()),
+                (pl, param) -> new MTextComponent(param),
+                MTextComponent::new
+        ));
+
+        registerInlinePlaceholder(Constants.DEFAULT_NAMESPACE + "_version", PlaceholderSupplier.create(Constants.VERSION.toString()));
         registerInlinePlaceholder("server_version", PlaceholderSupplier.create(MidnightCoreAPI.getInstance().getGameVersion().toString()));
 
         return true;
@@ -176,7 +207,6 @@ public class LangModuleImpl implements LangModule {
     public void reload(ConfigSection config) {
 
         serverLanguage = config.getString("locale");
-
     }
 
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "lang");

@@ -32,15 +32,15 @@ public abstract class AbstractVanishModule implements VanishModule {
                 }
             }
 
-            ev.getSavepoint().getExtraData().set("midnightcore_savepoint", new ConfigSection()
+            ev.getSavepoint().getExtraData().set(Constants.DEFAULT_NAMESPACE + "_savepoint", new ConfigSection()
                    .with("global", globalVanished.contains(ev.getPlayer()))
                    .with("vanished", uuids));
         });
 
         Event.register(SavepointLoadedEvent.class, this, ev -> {
 
-            if(!ev.getSavepoint().getExtraData().has("midnightcore_savepoint")) return;
-            ConfigSection sec = ev.getSavepoint().getExtraData().getSection("midnightcore_savepoint");
+            if(!ev.getSavepoint().getExtraData().has(Constants.DEFAULT_NAMESPACE + "_savepoint")) return;
+            ConfigSection sec = ev.getSavepoint().getExtraData().getSection(Constants.DEFAULT_NAMESPACE + "_savepoint");
 
             if(sec.getBoolean("global")) {
                 vanishPlayer(ev.getPlayer());

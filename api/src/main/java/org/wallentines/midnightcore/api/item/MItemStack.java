@@ -3,9 +3,11 @@ package org.wallentines.midnightcore.api.item;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.text.MComponent;
+import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.TextColor;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.ArrayList;
@@ -49,7 +51,7 @@ public interface MItemStack {
 
         private Skin headSkin = null;
         private MComponent name = null;
-        private Iterable<MComponent> lore = null;
+        private List<MComponent> lore = null;
 
         private ConfigSection tag = new ConfigSection();
 
@@ -63,13 +65,23 @@ public interface MItemStack {
         }
 
         public Builder withName(MComponent name) {
-            if(name.getStyle().getItalic() == null) name.getStyle().withItalic(false);
+
+            name = name.copy();
+            name.getStyle().fillFrom(MStyle.ITEM_NAME_BASE);
+
             this.name = name;
             return this;
         }
 
         public Builder withLore(Iterable<MComponent> lore) {
-            this.lore = lore;
+            this.lore = new ArrayList<>();
+            for(MComponent comp : lore) {
+
+                MComponent line = comp.copy();
+                line.getStyle().fillFrom(MStyle.ITEM_LORE_BASE);
+
+                this.lore.add(line);
+            }
             return this;
         }
 
