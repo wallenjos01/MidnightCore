@@ -72,15 +72,6 @@ public class MidnightCore implements ModInitializer {
         String versionStr = cont.isPresent() ? cont.get().getMetadata().getVersion().getFriendlyString() : "1.14";
         Version version = Version.SERIALIZER.deserialize(versionStr);
 
-        // Find all mods that request to be loaded now
-        List<ModInitializer> inits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE, ModInitializer.class);
-        inits.forEach(ModInitializer::onInitialize);
-
-        // Find all mods that request to be loaded with the current Minecraft version only
-        List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
-        verInits.forEach(ModInitializer::onInitialize);
-
-
         Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(Constants.DEFAULT_NAMESPACE, "empty"), EmptyGenerator.CODEC);
 
         // Create the API
@@ -97,6 +88,14 @@ public class MidnightCore implements ModInitializer {
                 }
         );
         MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version.toString());
+
+        // Find all mods that request to be loaded now
+        List<ModInitializer> inits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE, ModInitializer.class);
+        inits.forEach(ModInitializer::onInitialize);
+
+        // Find all mods that request to be loaded with the current Minecraft version only
+        List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
+        verInits.forEach(ModInitializer::onInitialize);
 
         // Register default fabric modules
         Registries.MODULE_REGISTRY.register(FabricSkinModule.ID, FabricSkinModule.MODULE_INFO);

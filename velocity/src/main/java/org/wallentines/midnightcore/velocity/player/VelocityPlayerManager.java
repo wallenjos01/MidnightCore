@@ -9,6 +9,7 @@ import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.common.player.AbstractPlayerManger;
 import org.wallentines.midnightcore.velocity.MidnightCore;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class VelocityPlayerManager extends AbstractPlayerManger<Player> {
@@ -31,6 +32,19 @@ public class VelocityPlayerManager extends AbstractPlayerManger<Player> {
     @Override
     protected AbstractPlayer<Player> createPlayer(UUID u) {
         return new VelocityPlayer(u);
+    }
+
+    @Override
+    protected UUID toUUID(String name) {
+
+        Optional<Player> opl =MidnightCore.getInstance().getServer().getPlayer(name);
+        if(opl.isPresent()) return opl.get().getUniqueId();
+
+        try {
+            return UUID.fromString(name);
+        } catch(IllegalArgumentException ex) {
+            return null;
+        }
     }
 
 }

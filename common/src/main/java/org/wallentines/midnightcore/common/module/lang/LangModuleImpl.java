@@ -6,6 +6,7 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.MTextComponent;
+import org.wallentines.midnightcore.api.text.MTranslateComponent;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -74,15 +75,31 @@ public class LangModuleImpl implements LangModule {
     private String parsePlaceholderInline(String placeholder, Object... args) {
 
         PlaceholderSupplier.PlaceholderContext ctx = createContext(placeholder, args);
-        String s = PlaceholderSupplier.get(inlinePlaceholders.get(ctx.getName()), ctx);
 
+        PlaceholderSupplier<String> pl = inlinePlaceholders.get(ctx.getName());
+        if(pl == null) for(Object o : args) {
+            if(o instanceof CustomPlaceholderInline ci) {
+                if(ci.getId().equals(placeholder)) pl = ci;
+            }
+        }
+
+        String s = PlaceholderSupplier.get(pl, ctx);
         return s == null ? ctx.toRawPlaceholder() : s;
     }
 
     private MComponent parsePlaceholder(String placeholder, Object... args) {
 
         PlaceholderSupplier.PlaceholderContext ctx = createContext(placeholder, args);
-        return PlaceholderSupplier.get(placeholders.get(ctx.getName()), ctx);
+
+        PlaceholderSupplier<MComponent> pl = placeholders.get(ctx.getName());
+        if(pl == null) for(Object o : args) {
+            if(o instanceof CustomPlaceholder ci) {
+                if(ci.getId().equals(placeholder)) pl = ci;
+            }
+        }
+
+        MComponent cmp = PlaceholderSupplier.get(pl, ctx);
+        return cmp == null ? new MTextComponent(ctx.toRawPlaceholder()) : cmp;
     }
 
     @Override
@@ -189,16 +206,24 @@ public class LangModuleImpl implements LangModule {
         registerPlaceholder("player_name", PlaceholderSupplier.create(MPlayer.class, MPlayer::getName));
         registerInlinePlaceholder("player_uuid", PlaceholderSupplier.create(MPlayer.class, mp -> mp.getUUID().toString()));
 
-        registerPlaceholder("lang", PlaceholderSupplier.createWithParameter(
-                LangProvider.class, MPlayer.class,
-                (lp, pl, param) -> lp.getMessage(param, pl, pl),
-                (lp, param) -> lp.getMessage(param, lp.getModule().getServerLanguage()),
-                (pl, param) -> new MTextComponent(param),
-                MTextComponent::new
-        ));
-
         registerInlinePlaceholder(Constants.DEFAULT_NAMESPACE + "_version", PlaceholderSupplier.create(Constants.VERSION.toString()));
         registerInlinePlaceholder("server_version", PlaceholderSupplier.create(MidnightCoreAPI.getInstance().getGameVersion().toString()));
+
+        registerPlaceholder("lang", ctx -> {
+
+            String param = ctx.getParameter();
+            if(param == null) return null;
+
+            MPlayer mpl = ctx.getArgument(MPlayer.class);
+            LangProvider provider = ctx.getArgument(LangProvider.class);
+
+            if(provider == null) return new MTextComponent(param);
+
+            MComponent msg = provider.getMessage(param, mpl, ctx.getArgs());
+            return msg == null ? new MTextComponent(param) : msg;
+        });
+
+        registerPlaceholder("translate", PlaceholderSupplier.createWithParameter(MTranslateComponent::new));
 
         return true;
     }

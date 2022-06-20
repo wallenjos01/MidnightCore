@@ -33,6 +33,13 @@ public abstract class AbstractPlayerManger<T> implements PlayerManager {
     }
 
     @Override
+    public MPlayer findPlayer(String s) {
+
+        UUID u = toUUID(s);
+        return getPlayer(u);
+    }
+
+    @Override
     public Iterator<MPlayer> iterator() {
         return new Iterator<MPlayer>() {
 
@@ -52,4 +59,6 @@ public abstract class AbstractPlayerManger<T> implements PlayerManager {
             }
         };
     }
+
+    protected abstract UUID toUUID(String name);
 }

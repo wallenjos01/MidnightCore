@@ -8,7 +8,7 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.resources.ResourceLocation;
@@ -22,6 +22,7 @@ import org.wallentines.midnightcore.api.module.skin.Skinnable;
 import org.wallentines.midnightcore.api.module.vanish.VanishModule;
 import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.Registries;
 import org.wallentines.midnightcore.fabric.MidnightCore;
@@ -35,7 +36,8 @@ import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.requirement.Requirement;
 import org.wallentines.midnightlib.requirement.RequirementType;
 
-import java.io.File;
+import java.io.*;
+import java.util.Optional;
 import java.util.UUID;
 
 public class TestCommand {
@@ -221,13 +223,13 @@ public class TestCommand {
             if(spl == null) return 0;
 
             LangModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(LangModule.class);
-            MPlayer mpl = FabricPlayer.wrap(spl);
+            FabricPlayer mpl = FabricPlayer.wrap(spl);
 
-            mpl.sendMessage(mod.parseText(arg, mpl, MidnightCore.getInstance().getLangProvider()));
+            MComponent txt = mod.parseText(arg, mpl, MidnightCore.getInstance().getLangProvider());
+            mpl.sendMessage(txt);
 
         } catch (Throwable th) {
             th.printStackTrace();
-            throw th;
         }
         return 1;
     }

@@ -25,6 +25,13 @@ public class SpigotPlayerManager extends AbstractPlayerManger<Player> implements
         return new SpigotPlayer(u);
     }
 
+    @Override
+    protected UUID toUUID(String name) {
+
+        Player pl = Bukkit.getPlayer(name);
+        return pl == null ? null : pl.getUniqueId();
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     private void onJoin(PlayerJoinEvent event) {
         cachePlayer(event.getPlayer().getUniqueId(), event.getPlayer());

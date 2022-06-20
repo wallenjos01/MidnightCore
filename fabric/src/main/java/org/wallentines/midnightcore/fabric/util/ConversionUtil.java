@@ -12,6 +12,7 @@ import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +55,9 @@ public class ConversionUtil {
         return out;
     }
 
-    public static MComponent toMComponent(Component component) {
+    public static MComponent toMComponent(@Nullable Component component) {
+
+        if(component == null) return null;
 
         MComponent out;
 
@@ -148,7 +151,9 @@ public class ConversionUtil {
         return new MClickEvent(MClickEvent.ClickAction.getById(event.getAction().getName()), event.getValue());
     }
 
-    public static Component toComponent(MComponent component) {
+    public static Component toComponent(@Nullable MComponent component) {
+
+        if(component == null) return null;
 
         MutableComponent out;
         if(component instanceof MTextComponent) {

@@ -1,6 +1,5 @@
 package org.wallentines.midnightcore.velocity.module.messaging;
 
-import com.google.common.io.ByteArrayDataOutput;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.proxy.Player;
@@ -41,7 +40,7 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
     }
 
     @Override
-    protected void send(MPlayer player, Identifier id, ByteArrayDataOutput data) {
+    protected void send(MPlayer player, Identifier id, byte[] data) {
 
         Player pl = ((VelocityPlayer) player).getInternal();
         Optional<ServerConnection> conn = pl.getCurrentServer();
@@ -50,15 +49,13 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
 
         ChannelIdentifier cid = MinecraftChannelIdentifier.create(id.getNamespace(), id.getPath());
 
-        conn.get().sendPluginMessage(cid, data.toByteArray());
+        conn.get().sendPluginMessage(cid, data);
     }
 
     @Subscribe
     private void onMessage(PluginMessageEvent event) {
 
         Identifier id = Identifier.parse(event.getIdentifier().getId());
-
-        MidnightCoreAPI.getLogger().warn("Received message with id " + id);
 
         MessageHandler handler = handlers.get(id);
         if(handler == null) return;
@@ -78,15 +75,12 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
 
         registerHandler(new Identifier(Constants.DEFAULT_NAMESPACE, "send"), (player, data) -> {
 
-            MidnightCoreAPI.getLogger().info("Attempting to send player to another server");
             if(!data.has("server")) {
-
                 MidnightCoreAPI.getLogger().warn("Received send request with invalid data!");
                 return;
             }
             String server = data.getString("server");
 
-            MidnightCoreAPI.getLogger().info("Attempting to send player to " + server);
             Optional<RegisteredServer> svr = MidnightCore.getInstance().getServer().getServer(server);
             if(svr.isEmpty()) return;
 

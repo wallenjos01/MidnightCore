@@ -88,18 +88,21 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     @Override
     public void sendMessage(MComponent component) {
 
+        if(component == null) return;
         run(player -> player.sendSystemMessage(ConversionUtil.toComponent(component), ChatType.SYSTEM), () -> {});
     }
 
     @Override
     public void sendActionBar(MComponent component) {
 
+        if(component == null) return;
         run(player -> player.sendSystemMessage(ConversionUtil.toComponent(component), ChatType.GAME_INFO), () -> { });
     }
 
     @Override
     public void sendTitle(MComponent component, int fadeIn, int stay, int fadeOut) {
 
+        if(component == null) return;
         run(player -> {
 
             ClientboundSetTitleTextPacket title = new ClientboundSetTitleTextPacket(ConversionUtil.toComponent(component));
@@ -113,6 +116,7 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     @Override
     public void sendSubtitle(MComponent component, int fadeIn, int stay, int fadeOut) {
 
+        if(component == null) return;
         run(player -> {
 
             ClientboundSetSubtitleTextPacket subtitle = new ClientboundSetSubtitleTextPacket(ConversionUtil.toComponent(component));
@@ -215,8 +219,12 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     @Override
     public void applyResourcePack(String url, String hash, boolean force, MComponent promptMessage, Consumer<ResourcePackStatus> onResponse) {
 
+        if(url == null) return;
+
         run(player -> {
-            player.connection.send(new ClientboundResourcePackPacket(url, hash, force, ConversionUtil.toComponent(promptMessage)));
+
+            String outHash = hash == null ? "" : hash;
+            player.connection.send(new ClientboundResourcePackPacket(url, outHash, force, ConversionUtil.toComponent(promptMessage)));
             awaitingResourcePack.put(player, onResponse);
         }, () -> { });
 

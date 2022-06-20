@@ -1,9 +1,19 @@
 package org.wallentines.midnightcore.api.module.lang;
 
-public interface CustomPlaceholderInline {
+public interface CustomPlaceholderInline extends PlaceholderSupplier<String> {
 
     String get();
     String getId();
+
+    @Override
+    default String get(PlaceholderContext ctx) {
+        return get();
+    }
+
+    @Override
+    default boolean acceptsParameters() {
+        return false;
+    }
 
     static CustomPlaceholderInline create(String id, String out) {
         return new CustomPlaceholderInline() {

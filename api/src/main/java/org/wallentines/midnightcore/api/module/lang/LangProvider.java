@@ -14,6 +14,8 @@ public interface LangProvider {
 
     boolean hasKey(String key, String language);
 
+    void fillDefaults(String language);
+
     void saveDefaults(String language);
 
     void loadEntries(ConfigSection section, String language);

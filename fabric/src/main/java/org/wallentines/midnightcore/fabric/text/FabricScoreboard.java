@@ -64,14 +64,13 @@ public class FabricScoreboard extends AbstractScoreboard {
 
         if(line < 1 || line > 15) return;
 
-        if(message == null) {
+        Component mcLine = ConversionUtil.toComponent(message);
+
+        if(mcLine == null) {
             teams[line].setPlayerPrefix(null);
             board.resetPlayerScore("§" + Integer.toHexString(line), objective);
         } else {
-
-            Component mcLine = ConversionUtil.toComponent(message);
             board.getOrCreatePlayerScore("§" + Integer.toHexString(line), objective).setScore(line);
-
             teams[line].setPlayerPrefix(mcLine);
         }
 

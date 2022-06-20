@@ -56,11 +56,12 @@ public abstract class MComponent {
     }
 
     public void addChild(MComponent comp) {
+        if(comp == null) return;
         children.add(comp);
     }
 
     public MComponent withChild(MComponent comp) {
-        children.add(comp);
+        addChild(comp);
         return this;
     }
 
@@ -152,6 +153,7 @@ public abstract class MComponent {
                 if(comp != null) return comp;
 
             } catch (Exception ex) {
+                ex.printStackTrace();
                 // Ignore
             }
         }
