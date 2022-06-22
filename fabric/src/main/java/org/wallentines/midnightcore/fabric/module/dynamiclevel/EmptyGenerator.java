@@ -1,12 +1,11 @@
-package org.wallentines.midnightcore.fabric.module.dimension;
+package org.wallentines.midnightcore.fabric.module.dynamiclevel;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.*;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
@@ -21,42 +20,33 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.fabric.MidnightCore;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+@ParametersAreNonnullByDefault
 public class EmptyGenerator extends ChunkGenerator {
-
-    private static final Logger LOGGER = LogManager.getLogger("EmptyGenerator");
 
     public static final Codec<EmptyGenerator> CODEC = RecordCodecBuilder.create(instance ->
         commonCodec(instance).and(
-            instance.group(
-                RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter((gen) -> gen.biomes),
-                Biome.CODEC.optionalFieldOf("biome").orElseGet(Optional::empty).forGetter(gen -> Optional.of(gen.biome))
-            )
-        ).apply(instance, EmptyGenerator::new)
+            EmptyGeneratorSettings.CODEC.fieldOf("settings").forGetter(gen -> gen.settings)
+        )
+        .apply(instance, instance.stable(EmptyGenerator::new))
     );
 
-    private final Registry<Biome> biomes;
-    private final Holder<Biome> biome;
+    private final EmptyGeneratorSettings settings;
 
-    public EmptyGenerator(Registry<StructureSet> structureReg, Registry<Biome> biomes, Optional<Holder<Biome>> biome) {
+    public EmptyGenerator(Registry<StructureSet> reg, EmptyGeneratorSettings settings) {
 
-        super(structureReg, Optional.empty(), new FixedBiomeSource(biome.orElseGet(() -> {
-            LOGGER.error("Unknown biome, defaulting to plains");
-            return biomes.getOrCreateHolderOrThrow(Biomes.PLAINS);
-        })),
-            b -> new BiomeGenerationSettings.Builder().build()
-        );
-
-        this.biomes = biomes;
-        this.biome = biome.orElseGet(() -> biomes.getOrCreateHolderOrThrow(Biomes.PLAINS));
+        super(reg, Optional.empty(), new FixedBiomeSource(settings.getBiome()));
+        this.settings = settings;
     }
 
     @Override
@@ -74,9 +64,18 @@ public class EmptyGenerator extends ChunkGenerator {
     public void spawnOriginalMobs(WorldGenRegion worldGenRegion) { }
 
     @Override
+    public void createStructures(RegistryAccess registryAccess, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess, StructureTemplateManager structureTemplateManager, long l) { }
+
+    @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess) {
 
-        return CompletableFuture.completedFuture(chunkAccess);
+        return CompletableFuture.supplyAsync(() -> {
+
+            if(chunkAccess.getPos().x == 0 && chunkAccess.getPos().z == 0) {
+                chunkAccess.setBlockState(new BlockPos(0,63,0), Blocks.BEDROCK.defaultBlockState(), true);
+            }
+            return chunkAccess;
+        });
     }
 
     @Override
@@ -116,6 +115,41 @@ public class EmptyGenerator extends ChunkGenerator {
     @Override
     public void addDebugScreenInfo(List<String> list, RandomState randomState, BlockPos blockPos) { }
 
-    public static final EmptyGenerator FOREST = new EmptyGenerator(BuiltinRegistries.STRUCTURE_SETS, BuiltinRegistries.BIOME, BuiltinRegistries.BIOME.getHolder(Biomes.FOREST));
+    public static EmptyGenerator create(ResourceKey<Biome> biome) {
+
+        RegistryAccess acc = MidnightCore.getInstance().getServer().registryAccess();
+
+        Registry<StructureSet> structureSets = acc.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+        Registry<Biome> biomes = acc.registryOrThrow(Registry.BIOME_REGISTRY);
+
+        return new EmptyGenerator(structureSets, new EmptyGeneratorSettings(biomes, biomes.getHolder(biome)));
+    }
+
+    public static class EmptyGeneratorSettings {
+
+        public static final Codec<EmptyGeneratorSettings> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(EmptyGeneratorSettings::getBiomeRegistry),
+                Biome.CODEC.optionalFieldOf("biome").orElseGet(Optional::empty).forGetter(settings -> Optional.of(settings.biome))
+            ).apply(instance, EmptyGeneratorSettings::new));
+
+        private final Registry<Biome> biomes;
+        private final Holder<Biome> biome;
+
+        public Registry<Biome> getBiomeRegistry() {
+
+            return biomes;
+        }
+
+        public Holder<Biome> getBiome() {
+            return biome;
+        }
+
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        public EmptyGeneratorSettings(Registry<Biome> biomes, Optional<Holder<Biome>> biome) {
+            this.biomes = biomes;
+            this.biome = biome.orElse(biomes.getOrCreateHolderOrThrow(Biomes.PLAINS));
+        }
+    }
 
 }

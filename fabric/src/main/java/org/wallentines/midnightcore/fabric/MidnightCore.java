@@ -24,8 +24,8 @@ import org.wallentines.midnightcore.fabric.event.server.CommandLoadEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
 import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
-import org.wallentines.midnightcore.fabric.module.dimension.DimensionModule;
-import org.wallentines.midnightcore.fabric.module.dimension.EmptyGenerator;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
 import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;
 import org.wallentines.midnightcore.fabric.module.skin.FabricSkinModule;
@@ -100,7 +100,8 @@ public class MidnightCore implements ModInitializer {
         // Register default fabric modules
         Registries.MODULE_REGISTRY.register(FabricSkinModule.ID, FabricSkinModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricSavepointModule.ID, FabricSavepointModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(DimensionModule.ID, DimensionModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(DynamicLevelModule.ID, DynamicLevelModule.MODULE_INFO);
+        //Registries.MODULE_REGISTRY.register(DimensionModule.ID, DimensionModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricVanishModule.ID, FabricVanishModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricMessagingModule.ID, FabricMessagingModule.MODULE_INFO);
 

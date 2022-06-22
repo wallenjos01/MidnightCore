@@ -1,12 +1,21 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.DirectoryLock;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.wallentines.midnightcore.fabric.module.dimension.DummyFileLock;
-import org.wallentines.midnightcore.fabric.module.dimension.DynamicLevelStorageSource;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.DummyFileLock;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelStorage;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -14,17 +23,29 @@ import java.nio.file.Path;
 @Mixin(LevelStorageSource.LevelStorageAccess.class)
 public class MixinLevelStorageAccess {
 
+    // Create a dummy file lock that always reports as valid in order to allow multiple dynamic levels to be created from the same world folder
     @Redirect(method="<init>", at=@At(value="INVOKE", target="Lnet/minecraft/util/DirectoryLock;create(Ljava/nio/file/Path;)Lnet/minecraft/util/DirectoryLock;"))
     private DirectoryLock injected(Path filelock) throws IOException {
 
         LevelStorageSource.LevelStorageAccess acc = (LevelStorageSource.LevelStorageAccess) (Object) this;
-
-        if(acc instanceof DynamicLevelStorageSource.DynamicLevelStorageAccess dyn && dyn.getStorageSource().getCreator().shouldIgnoreLock()) {
-
+        if(acc instanceof DynamicLevelStorage.DynamicLevelStorageAccess dyn && dyn.getContext().getConfig().shouldIgnoreSessionLock()) {
             return DummyFileLock.createDummyLock();
         }
 
         return DirectoryLock.create(filelock);
+    }
+
+    // Store the original DynamicOps created when the server starts, so additional worlds can be loaded later
+    @Inject(method="getDataTag", at=@At("HEAD"))
+    private void injectLoadData(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig, Lifecycle lifecycle, CallbackInfoReturnable<WorldData> cir) {
+
+        LevelStorageSource.LevelStorageAccess acc = (LevelStorageSource.LevelStorageAccess) (Object) this;
+        if(acc instanceof DynamicLevelStorage.DynamicLevelStorageAccess) return;
+
+        DynamicLevelModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(DynamicLevelModule.class);
+        if(mod == null) return;
+
+        mod.registryOps.set(dynamicOps);
     }
 
 }

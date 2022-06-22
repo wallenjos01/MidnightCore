@@ -1,4 +1,4 @@
-package org.wallentines.midnightcore.fabric.module.dimension;
+package org.wallentines.midnightcore.fabric.module.dynamiclevel;
 
 import net.minecraft.util.DirectoryLock;
 import org.wallentines.midnightcore.fabric.mixin.AccessorDirectoryLock;
@@ -23,9 +23,7 @@ public class DummyFileLock extends FileLock {
     }
 
     @Override
-    public void release() throws IOException {
-
-    }
+    public void release() { }
 
     public static DirectoryLock createDummyLock() {
 
@@ -36,87 +34,87 @@ public class DummyFileLock extends FileLock {
     private static class DummyFileChannel extends FileChannel {
 
         @Override
-        public int read(ByteBuffer dst) throws IOException {
+        public int read(ByteBuffer dst) {
             return 0;
         }
 
         @Override
-        public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
+        public long read(ByteBuffer[] dsts, int offset, int length) {
             return 0;
         }
 
         @Override
-        public int write(ByteBuffer src) throws IOException {
+        public int write(ByteBuffer src) {
             return 0;
         }
 
         @Override
-        public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
+        public long write(ByteBuffer[] srcs, int offset, int length) {
             return 0;
         }
 
         @Override
-        public long position() throws IOException {
+        public long position() {
             return 0;
         }
 
         @Override
-        public FileChannel position(long newPosition) throws IOException {
+        public FileChannel position(long newPosition) {
             return null;
         }
 
         @Override
-        public long size() throws IOException {
+        public long size() {
             return 0;
         }
 
         @Override
-        public FileChannel truncate(long size) throws IOException {
+        public FileChannel truncate(long size) {
             return null;
         }
 
         @Override
-        public void force(boolean metaData) throws IOException {
+        public void force(boolean metaData) {
 
         }
 
         @Override
-        public long transferTo(long position, long count, WritableByteChannel target) throws IOException {
+        public long transferTo(long position, long count, WritableByteChannel target) {
             return 0;
         }
 
         @Override
-        public long transferFrom(ReadableByteChannel src, long position, long count) throws IOException {
+        public long transferFrom(ReadableByteChannel src, long position, long count) {
             return 0;
         }
 
         @Override
-        public int read(ByteBuffer dst, long position) throws IOException {
+        public int read(ByteBuffer dst, long position) {
             return 0;
         }
 
         @Override
-        public int write(ByteBuffer src, long position) throws IOException {
+        public int write(ByteBuffer src, long position) {
             return 0;
         }
 
         @Override
-        public MappedByteBuffer map(MapMode mode, long position, long size) throws IOException {
+        public MappedByteBuffer map(MapMode mode, long position, long size) {
             return null;
         }
 
         @Override
-        public FileLock lock(long position, long size, boolean shared) throws IOException {
+        public FileLock lock(long position, long size, boolean shared) {
             return null;
         }
 
         @Override
-        public FileLock tryLock(long position, long size, boolean shared) throws IOException {
+        public FileLock tryLock(long position, long size, boolean shared) {
             return null;
         }
 
         @Override
-        protected void implCloseChannel() throws IOException {
+        protected void implCloseChannel() {
 
         }
     }

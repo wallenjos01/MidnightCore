@@ -8,11 +8,16 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.lang.LangModule;
@@ -26,9 +31,11 @@ import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.Registries;
 import org.wallentines.midnightcore.fabric.MidnightCore;
-import org.wallentines.midnightcore.fabric.module.dimension.DimensionModule;
-import org.wallentines.midnightcore.fabric.module.dimension.EmptyGenerator;
-import org.wallentines.midnightcore.fabric.module.dimension.WorldCreator;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelContext;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelStorage;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.WorldConfig;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.math.Vec3d;
@@ -36,8 +43,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.requirement.Requirement;
 import org.wallentines.midnightlib.requirement.RequirementType;
 
-import java.io.*;
-import java.util.Optional;
+import java.nio.file.Path;
 import java.util.UUID;
 
 public class TestCommand {
@@ -173,18 +179,19 @@ public class TestCommand {
 
             MPlayer mpl = FabricPlayer.wrap(spl);
 
-            DimensionModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(DimensionModule.class);
+            DynamicLevelModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(DynamicLevelModule.class);
+            if(mod == null) return 0;
 
-            File dim = new File(MidnightCoreAPI.getInstance().getDataFolder(), "test_dimension");
+            WorldConfig conf = new WorldConfig(new Identifier(Constants.DEFAULT_NAMESPACE, "test"))
+                .generator(EmptyGenerator.create(Biomes.FOREST))
+                .rootDimensionType(LevelStem.NETHER);
 
-            WorldCreator cre = new WorldCreator(new ResourceLocation(Constants.DEFAULT_NAMESPACE, "test"), LevelStem.NETHER, EmptyGenerator.FOREST);
-            cre.setFolderName(dim.getName());
+            Path dataFolder = MidnightCoreAPI.getInstance().getDataFolder().toPath();
 
-            context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Loading dimension...")), false);
-            mod.createWorld(cre, dim.toPath(), w -> {
-                context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Dimension loaded! Teleporting...")), false);
-                mpl.teleport(new Location(ConversionUtil.toIdentifier(w.dimension().location()), new Vec3d(0,100,0), 0, 0));
-            });
+            DynamicLevelStorage storage = mod.createLevelStorage(dataFolder, dataFolder.resolve("backups"));
+            DynamicLevelContext ctx = storage.createWorldContext("test", conf);
+
+            ctx.loadDimension(conf.getRootDimensionId(), w -> mpl.teleport(new Location(ConversionUtil.toIdentifier(w.dimension().location()), new Vec3d(0.0d, 100.0d, 0.0d), 0.0f, 0.0f)));
 
         } catch (Exception ex) {
             ex.printStackTrace();
