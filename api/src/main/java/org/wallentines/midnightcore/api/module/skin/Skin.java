@@ -1,6 +1,7 @@
 package org.wallentines.midnightcore.api.module.skin;
 
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
+import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 
 import java.util.UUID;
 
@@ -31,8 +32,8 @@ public class Skin {
 
     public static final ConfigSerializer<Skin> SERIALIZER = ConfigSerializer.create(
             ConfigSerializer.entry(UUID.class, "uid", Skin::getUUID),
-            ConfigSerializer.entry(String.class, "b64", Skin::getValue),
-            ConfigSerializer.entry(String.class, "sig", Skin::getSignature),
+            ConfigSerializer.entry(PrimitiveSerializers.STRING, "b64", Skin::getValue),
+            ConfigSerializer.entry(PrimitiveSerializers.STRING, "sig", Skin::getSignature),
             Skin::new
     );
 

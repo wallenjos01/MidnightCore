@@ -3,7 +3,6 @@ package org.wallentines.midnightcore.fabric.module.dynamiclevel;
 import net.minecraft.util.DirectoryLock;
 import org.wallentines.midnightcore.fabric.mixin.AccessorDirectoryLock;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;

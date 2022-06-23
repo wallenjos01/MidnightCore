@@ -5,6 +5,7 @@ import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
+import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.UUID;
@@ -63,7 +64,7 @@ public class MHoverEvent {
     }
 
     public static final ConfigSerializer<MHoverEvent> SERIALIZER = ConfigSerializer.create(
-            ConfigSerializer.entry(String.class, "action", ev -> ev.action.getId()),
+            ConfigSerializer.entry(PrimitiveSerializers.STRING, "action", ev -> ev.action.getId()),
             ConfigSerializer.entry(ConfigSection.class, "contents", ev -> ev.data),
             (action, contents) -> new MHoverEvent(HoverAction.getById(action), contents));
 

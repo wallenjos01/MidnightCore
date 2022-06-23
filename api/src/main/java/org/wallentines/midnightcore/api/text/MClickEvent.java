@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.api.text;
 
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
+import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 
 public class MClickEvent {
 
@@ -27,8 +28,8 @@ public class MClickEvent {
     }
 
     public static final ConfigSerializer<MClickEvent> SERIALIZER = ConfigSerializer.create(
-            ConfigSerializer.entry(String.class, "action", ev -> ev.action.getId()),
-            ConfigSerializer.entry(String.class, "value", ev -> ev.value),
+            ConfigSerializer.entry(PrimitiveSerializers.STRING, "action", ev -> ev.action.getId()),
+            ConfigSerializer.entry(PrimitiveSerializers.STRING, "value", ev -> ev.value),
             (action, value) -> new MClickEvent(ClickAction.getById(action), value));
 
     public enum ClickAction {

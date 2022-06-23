@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -12,14 +13,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
+import org.wallentines.midnightlib.config.serialization.InlineSerializer;
+import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GenericAdapter implements SpigotAdapter {
 
@@ -184,11 +185,11 @@ public class GenericAdapter implements SpigotAdapter {
         private final boolean allowFlight;
         private final boolean flying;
 
-        public PlayerTag(int fireTicks, List<PotionEffect> effects, List<ItemStack> inventory, List<ItemStack> armor, double health, double maxHealth, int hunger, float saturation, int exp, int expLevels, boolean allowFlight, boolean flying) {
+        public PlayerTag(int fireTicks, Collection<PotionEffect> effects, Collection<ItemStack> inventory, Collection<ItemStack> armor, double health, double maxHealth, int hunger, float saturation, int exp, int expLevels, boolean allowFlight, boolean flying) {
             this.fireTicks = fireTicks;
-            this.effects = effects;
-            this.inventory = inventory;
-            this.armor = armor;
+            this.effects = new ArrayList<>(effects);
+            this.inventory = new ArrayList<>(inventory);
+            this.armor = new ArrayList<>(armor);
             this.health = health;
             this.maxHealth = maxHealth;
             this.hunger = hunger;
@@ -243,19 +244,37 @@ public class GenericAdapter implements SpigotAdapter {
             player.setFlying(flying);
         }
 
-        public static ConfigSerializer<PlayerTag> SERIALIZER = ConfigSerializer.create(
-                ConfigSerializer.entry(Integer.class, "fire_ticks", pt -> pt.fireTicks),
-                ConfigSerializer.entry(List.class, "effects", pt -> pt.effects),
-                ConfigSerializer.entry(List.class, "items", pt -> pt.inventory),
-                ConfigSerializer.entry(List.class, "armor", pt -> pt.armor),
-                ConfigSerializer.entry(Double.class, "health", pt -> pt.health),
-                ConfigSerializer.entry(Double.class, "max_health", pt -> pt.maxHealth),
-                ConfigSerializer.entry(Integer.class, "hunger", pt -> pt.hunger),
-                ConfigSerializer.entry(Float.class, "saturation", pt -> pt.saturation),
-                ConfigSerializer.entry(Integer.class, "exp", pt -> pt.exp),
-                ConfigSerializer.entry(Integer.class, "levels", pt -> pt.expLevels),
-                ConfigSerializer.entry(Boolean.class, "allow_flight", pt -> pt.allowFlight),
-                ConfigSerializer.entry(Boolean.class, "flying", pt -> pt.flying),
+        private static final ConfigSerializer<ItemStack> ITEM_SERIALIZER = ConfigSerializer.create(
+
+            ConfigSerializer.entry(PrimitiveSerializers.STRING, "type", it -> it.getType().name()),
+            type -> new ItemStack(Material.valueOf(type))
+        );
+
+        private static final InlineSerializer<PotionEffectType> EFFECT_TYPE_SERIALIZER = InlineSerializer.of(PotionEffectType::getName, PotionEffectType::getByName);
+
+        private static final ConfigSerializer<PotionEffect> EFFECT_SERIALIZER = ConfigSerializer.create(
+                ConfigSerializer.entry(EFFECT_TYPE_SERIALIZER, "type", PotionEffect::getType),
+                ConfigSerializer.entry(PrimitiveSerializers.INT, "duration", PotionEffect::getDuration),
+                ConfigSerializer.entry(PrimitiveSerializers.INT, "amplifier", PotionEffect::getAmplifier),
+                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "ambient", PotionEffect::isAmbient),
+                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "particles", PotionEffect::hasParticles),
+                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "icon", PotionEffect::hasIcon),
+                PotionEffect::new
+        );
+
+        public static final ConfigSerializer<PlayerTag> SERIALIZER = ConfigSerializer.create(
+                ConfigSerializer.entry(PrimitiveSerializers.INT, "fire_ticks", pt -> pt.fireTicks),
+                ConfigSerializer.listEntry(EFFECT_SERIALIZER, "effects", pt -> pt.effects),
+                ConfigSerializer.listEntry(ITEM_SERIALIZER, "items", pt -> pt.inventory),
+                ConfigSerializer.listEntry(ITEM_SERIALIZER, "armor", pt -> pt.armor),
+                ConfigSerializer.entry(PrimitiveSerializers.DOUBLE, "health", pt -> pt.health),
+                ConfigSerializer.entry(PrimitiveSerializers.DOUBLE, "max_health", pt -> pt.maxHealth),
+                ConfigSerializer.entry(PrimitiveSerializers.INT, "hunger", pt -> pt.hunger),
+                ConfigSerializer.entry(PrimitiveSerializers.FLOAT, "saturation", pt -> pt.saturation),
+                ConfigSerializer.entry(PrimitiveSerializers.INT, "exp", pt -> pt.exp),
+                ConfigSerializer.entry(PrimitiveSerializers.INT, "levels", pt -> pt.expLevels),
+                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "allow_flight", pt -> pt.allowFlight),
+                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "flying", pt -> pt.flying),
                 PlayerTag::new
         );
 

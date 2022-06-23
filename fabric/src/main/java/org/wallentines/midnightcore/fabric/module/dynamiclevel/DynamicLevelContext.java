@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.*;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.*;
@@ -71,7 +72,9 @@ public class DynamicLevelContext {
         this.server = server;
         this.config = config;
 
-        Event.register(ServerStopEvent.class, this, ev -> unload(!config.shouldNotSave()));
+        Event.register(ServerStopEvent.class, this, ev -> {
+            if(!isRemoved()) unload(!config.shouldNotSave());
+        });
 
         try {
             this.storageAccess = storage.createAccess(levelName, this);

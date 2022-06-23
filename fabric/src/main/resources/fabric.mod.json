@@ -3,6 +3,7 @@
     "id": "${id}",
     "version": "${version}",
     "environment": "*",
+    "accessWidener": "midnightcore.accesswidener",
     "entrypoints": {
         "main": [
             "${group}.${id}.${target}.${mainClass}"

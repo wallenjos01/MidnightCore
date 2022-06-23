@@ -4,6 +4,7 @@
   "package": "org.wallentines.midnightcore.fabric.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AccessorArgumentTypeInfos",
     "AccessorChunkMap",
     "AccessorDerivedLevelData",
     "AccessorDirectoryLock",
@@ -14,6 +15,7 @@
     "MixinBlockItem",
     "MixinBucketItem",
     "MixinChunkStatus",
+    "MixinClientboundCommandsPacket",
     "MixinCommandBlock",
     "MixinCommands",
     "MixinConnection",

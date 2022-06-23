@@ -8,6 +8,7 @@ import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
+import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -122,7 +123,7 @@ public abstract class AbstractItem implements MItemStack {
 
     public static final ConfigSerializer<MItemStack> SERIALIZER = ConfigSerializer.create(
             ConfigSerializer.entry(Identifier.class, "type", MItemStack::getType),
-            ConfigSerializer.entry(Integer.class, "count", MItemStack::getCount).orDefault(1),
+            ConfigSerializer.entry(PrimitiveSerializers.INT, "count", MItemStack::getCount).orDefault(1),
             ConfigSerializer.entry(ConfigSection.class, "tag", MItemStack::getTag).orDefault(new ConfigSection()),
             (type, count, tag) -> MidnightCoreAPI.getInstance().createItem(type, count, tag)
     );
