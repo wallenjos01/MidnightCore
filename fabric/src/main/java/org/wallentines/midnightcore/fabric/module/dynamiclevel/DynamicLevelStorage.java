@@ -1,7 +1,6 @@
 package org.wallentines.midnightcore.fabric.module.dynamiclevel;
 
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.Level;
@@ -13,7 +12,6 @@ import org.wallentines.midnightcore.fabric.mixin.AccessorLevelStorageAccess;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 public class DynamicLevelStorage extends LevelStorageSource {
 
@@ -68,13 +66,10 @@ public class DynamicLevelStorage extends LevelStorageSource {
             if(resourceKey.equals(context.getConfig().getRootDimensionId())) {
                 return root;
             }
-            if(resourceKey == Level.OVERWORLD) {
-                return root.resolve("DIM0");
-            }
-            if(resourceKey == Level.NETHER) {
+            if(resourceKey.equals(context.getConfig().getNetherDimensionId())) {
                 return root.resolve("DIM-1");
             }
-            if(resourceKey == Level.END) {
+            if(resourceKey.equals(context.getConfig().getEndDimensionId())) {
                 return root.resolve("DIM1");
             }
 

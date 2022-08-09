@@ -7,7 +7,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.*;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.*;
@@ -59,12 +58,9 @@ public class DynamicLevelContext {
     private final MinecraftServer server;
     private final WorldConfig config;
     private final DynamicLevelStorage.DynamicLevelStorageAccess storageAccess;
-
     private final WorldData worldData;
     private final ChunkProgressListener chunkProgressListener;
-
     private final Map<ResourceKey<Level>, DynamicLevel> levels = new HashMap<>();
-
     private boolean removed = false;
 
     public DynamicLevelContext(MinecraftServer server, DynamicLevelModule module, String levelName, WorldConfig config, DynamicLevelStorage storage) {
@@ -87,6 +83,7 @@ public class DynamicLevelContext {
 
         try {
 
+            // TODO: Figure out if this can be done asynchronously
             WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(
                 new WorldLoader.PackConfig(server.getPackRepository(), server.getWorldData().getDataPackConfig(), false),
                 server.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED,
@@ -174,10 +171,22 @@ public class DynamicLevelContext {
 
     public void loadDimension(ResourceKey<Level> dimensionKey, Consumer<ServerLevel> onComplete) {
 
+        loadDimension(dimensionKey, new DynamicLevelCallback() {
+            @Override
+            public void onLoaded(ServerLevel level) {
+                onComplete.accept(level);
+            }
+
+            @Override
+            public void onProgress(float percent) { }
+        });
+    }
+    public void loadDimension(ResourceKey<Level> dimensionKey, DynamicLevelCallback callback) {
+
         if (removed) throw new IllegalStateException("Attempt to access an unloaded DynamicLevelContext!");
 
         if (levels.containsKey(dimensionKey)) {
-            onComplete.accept(levels.get(dimensionKey));
+            callback.onLoaded(levels.get(dimensionKey));
             return;
         }
 
@@ -205,47 +214,59 @@ public class DynamicLevelContext {
         ExecutorService exe = Util.backgroundExecutor();
         exe.submit(() -> {
 
-            ServerChunkCache serverChunkCache = level.getChunkSource();
-            serverChunkCache.getLightEngine().setTaskPerBatch(500);
+            try {
+                ServerChunkCache serverChunkCache = level.getChunkSource();
+                serverChunkCache.getLightEngine().setTaskPerBatch(500);
 
-            BlockPos spawn = new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn());
-            level.setDefaultSpawnPos(spawn, serverLevelData.getSpawnAngle());
-            chunkProgressListener.updateSpawnPos(new ChunkPos(spawn));
+                BlockPos spawn = new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn());
+                level.setDefaultSpawnPos(spawn, serverLevelData.getSpawnAngle());
+                chunkProgressListener.updateSpawnPos(new ChunkPos(spawn));
 
-            while(serverChunkCache.getTickingGenerated() < 441) {
-                Thread.yield();
-                LockSupport.parkNanos("waiting for tasks", 100000L);
-            }
+                while (serverChunkCache.getTickingGenerated() < 441) {
+                    Thread.yield();
+                    LockSupport.parkNanos("waiting for tasks", 100000L);
 
-            if (root) {
-                if (!serverLevelData.isInitialized()) {
-                    AccessorMinecraftServer.callSetInitialSpawn(level, serverLevelData, config.hasBonusChest(), debug);
-                    if (debug) {
-                        ((AccessorMinecraftServer) server).callSetupDebugLevel(worldData);
+                    float progress = Math.min(1.0f, (float) serverChunkCache.getTickingGenerated() / 441.0f);
+                    try {
+                        callback.onProgress(progress);
+                    } catch (Exception ex) {
+                        MidnightCoreAPI.getLogger().warn("An exception occurred while sending a dynamic dimension load progress callback!");
+                        ex.printStackTrace();
                     }
-                    serverLevelData.setInitialized(true);
                 }
-            } else {
-                WorldBorder wb = levels.get(config.getRootDimensionId()).getWorldBorder();
-                wb.addListener(new BorderChangeListener.DelegateBorderChangeListener(level.getWorldBorder()));
-            }
 
-            // Load Chunks
-            ForcedChunksSavedData chunksSavedData = level.getDataStorage().get(ForcedChunksSavedData::load, ForcedChunksSavedData.FILE_ID);
-
-            if (chunksSavedData != null) {
-                for (long l : chunksSavedData.getChunks()) {
-                    ChunkPos pos = new ChunkPos(l);
-                    serverChunkCache.updateChunkForced(pos, true);
+                if (root) {
+                    if (!serverLevelData.isInitialized()) {
+                        AccessorMinecraftServer.callSetInitialSpawn(level, serverLevelData, config.hasBonusChest(), debug);
+                        if (debug) {
+                            ((AccessorMinecraftServer) server).callSetupDebugLevel(worldData);
+                        }
+                        serverLevelData.setInitialized(true);
+                    }
+                } else {
+                    WorldBorder wb = levels.get(config.getRootDimensionId()).getWorldBorder();
+                    wb.addListener(new BorderChangeListener.DelegateBorderChangeListener(level.getWorldBorder()));
                 }
+
+                // Load Chunks
+                ForcedChunksSavedData chunksSavedData = level.getDataStorage().get(ForcedChunksSavedData::load, ForcedChunksSavedData.FILE_ID);
+
+                if (chunksSavedData != null) {
+                    for (long l : chunksSavedData.getChunks()) {
+                        ChunkPos pos = new ChunkPos(l);
+                        serverChunkCache.updateChunkForced(pos, true);
+                    }
+                }
+
+                serverChunkCache.getLightEngine().setTaskPerBatch(5);
+                level.setSpawnSettings(server.isSpawningMonsters(), server.isSpawningAnimals());
+
+                chunkProgressListener.stop();
+                callback.onLoaded(level);
+            } catch (Exception ex) {
+                MidnightCoreAPI.getLogger().warn("An exception occurred while loading a dynamic dimension!");
+                ex.printStackTrace();
             }
-
-            serverChunkCache.getLightEngine().setTaskPerBatch(5);
-            level.setSpawnSettings(server.isSpawningMonsters(), server.isSpawningAnimals());
-
-            chunkProgressListener.stop();
-            onComplete.accept(level);
-
         });
     }
 
@@ -321,6 +342,17 @@ public class DynamicLevelContext {
             super(server, executor, storageAccess, serverLevelData, dimensionKey, levelStem, chunkProgressListener, false, seed, spawners, tickTime);
         }
 
+        public ResourceKey<Level> getRoot() {
+            return config.getRootDimensionId();
+        }
+
+        public ResourceKey<Level> getNether() {
+            return config.getNetherDimensionId();
+        }
+
+        public ResourceKey<Level> getEnd() {
+            return config.getEndDimensionId();
+        }
         @Override
         public long getSeed() {
             return config.getSeed();

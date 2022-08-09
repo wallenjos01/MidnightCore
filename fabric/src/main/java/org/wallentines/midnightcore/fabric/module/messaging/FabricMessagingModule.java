@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.fabric.module.messaging;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import io.netty.buffer.AbstractByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;

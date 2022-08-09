@@ -15,8 +15,8 @@ public class FabricPlayerManager extends AbstractPlayerManger<ServerPlayer> {
 
     public FabricPlayerManager() {
 
-        Event.register(PlayerLoginEvent.class, this, event -> cachePlayer(event.getPlayer().getUUID(), event.getPlayer()));
-        Event.register(PlayerLeaveEvent.class, this, event -> cleanupPlayer(event.getPlayer().getUUID()));
+        Event.register(PlayerLoginEvent.class, this, 1, event -> cachePlayer(event.getPlayer().getUUID(), event.getPlayer()));
+        Event.register(PlayerLeaveEvent.class, this, 99, event -> cleanupPlayer(event.getPlayer().getUUID()));
         Event.register(PlayerChangeSettingsEvent.class, this, event -> FabricPlayer.wrap(event.getPlayer()).locale = event.getLocale());
 
     }

@@ -131,6 +131,36 @@ public abstract class MComponent {
         return out.toString();
     }
 
+    public int getLength() {
+
+        int out = contentLength();
+        for(MComponent comp : children) {
+            out += comp.getLength();
+        }
+
+        return out;
+    }
+
+    public MComponent subComponent(int beginIndex, int endIndex) {
+
+        int length = getLength();
+        if(beginIndex < 0 || endIndex >= length) throw new IllegalStateException("Requested sub-component with bounds (" + beginIndex + "," + endIndex + ") exceeds component bounds!");
+
+        int index = contentLength();
+
+        MComponent out = baseCopy().withStyle(style);
+        if(index > endIndex) {
+
+            out.content = out.content.substring(beginIndex, endIndex);
+        }
+
+        for(MComponent comp : children) {
+
+            out.addChild(comp.subComponent(Math.max(beginIndex - index, 0), endIndex - index));
+        }
+
+        return out;
+    }
     @Override
     public String toString() {
 
@@ -138,6 +168,8 @@ public abstract class MComponent {
     }
 
     protected abstract MComponent baseCopy();
+
+    protected abstract int contentLength();
 
     private boolean hasNonLegacyComponents() {
         return style.getFont() != null || hoverEvent != null || clickEvent != null || insertion != null;

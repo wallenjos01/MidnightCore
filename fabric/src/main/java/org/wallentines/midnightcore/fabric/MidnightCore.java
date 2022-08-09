@@ -84,7 +84,7 @@ public class MidnightCore implements ModInitializer {
                 FabricScoreboard::new,
                 (str, b) -> {
                     CommandSourceStack sta = b ? server.createCommandSourceStack().withSuppressedOutput() : server.createCommandSourceStack();
-                    server.getCommands().performCommand(sta, str);
+                    server.getCommands().performPrefixedCommand(sta, str);
                 }
         );
         MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version.toString());

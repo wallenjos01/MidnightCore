@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.event.player.PlayerInteractEvent;
 import org.wallentines.midnightlib.event.Event;
 

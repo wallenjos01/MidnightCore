@@ -1,17 +1,12 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
-import io.netty.util.concurrent.GenericFutureListener;
-import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Final;
@@ -28,8 +23,6 @@ import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.math.Vec3d;
 
 import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class MixinServerGamePacketListener {
@@ -39,8 +32,8 @@ public abstract class MixinServerGamePacketListener {
     @Shadow @Final private MinecraftServer server;
     private Entity midnight_core_currentEntity;
 
-    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", at=@At("HEAD"), cancellable = true)
-    private void onSend(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> listener, CallbackInfo ci) {
+    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V", at=@At("HEAD"), cancellable = true)
+    private void onSend(Packet<?> packet, PacketSendListener listener, CallbackInfo ci) {
 
         PacketSendEvent ev = new PacketSendEvent(player, packet);
         Event.invoke(ev);
@@ -49,9 +42,9 @@ public abstract class MixinServerGamePacketListener {
             ci.cancel();
         }
     }
-    @Inject(method = "handleChat(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Lnet/minecraft/server/network/FilteredText;)V", at=@At(value = "HEAD"), cancellable = true)
-    private void onChatSend(ServerboundChatPacket serverboundChatPacket, FilteredText<String> filteredText, CallbackInfo ci) {
-        PlayerChatEvent ev = new PlayerChatEvent(player, filteredText.raw());
+    @Inject(method = "handleChat(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;)V", at=@At(value = "HEAD"), cancellable = true)
+    private void onChatSend(ServerboundChatPacket serverboundChatPacket, CallbackInfo ci) {
+        PlayerChatEvent ev = new PlayerChatEvent(player, serverboundChatPacket.message());
         Event.invoke(ev);
 
         if(ev.isCancelled()) {
@@ -116,14 +109,14 @@ public abstract class MixinServerGamePacketListener {
         server.submit(() -> Event.invoke(new ResourcePackStatusEvent(player, status)));
     }
 
-    @Redirect(method = "onDisconnect", at=@At(value="INVOKE", target="Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V"))
-    private void onMessageSend(PlayerList instance, Component component, ResourceKey<ChatType> chatType) {
+    @Redirect(method = "onDisconnect", at=@At(value="INVOKE", target="Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
+    private void onMessageSend(PlayerList instance, Component component, boolean b) {
 
         PlayerLeaveEvent event = new PlayerLeaveEvent(player, component);
         server.submit(() -> Event.invoke(event));
 
         Component comp = event.getLeaveMessage();
-        if(comp != null) instance.broadcastSystemMessage(comp, chatType);
+        if(comp != null) instance.broadcastSystemMessage(comp, false);
     }
 
 }

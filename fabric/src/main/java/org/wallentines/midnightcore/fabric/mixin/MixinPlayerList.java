@@ -21,7 +21,7 @@ import java.util.UUID;
 @Mixin(PlayerList.class)
 public abstract class MixinPlayerList {
 
-    @Shadow public abstract void broadcastSystemMessage(Component par1, ResourceKey<ChatType> par2);
+    @Shadow public abstract void broadcastSystemMessage(Component message, boolean actionBar);
 
     private ServerPlayer midnight_core_currentlyLoggingIn;
 
@@ -32,8 +32,8 @@ public abstract class MixinPlayerList {
         midnight_core_currentlyLoggingIn = serverPlayer;
     }
 
-    @Redirect(method = "placeNewPlayer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V"))
-    private void onSendMessage(PlayerList instance, Component component, ResourceKey<ChatType> resourceKey) {
+    @Redirect(method = "placeNewPlayer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
+    private void onSendMessage(PlayerList instance, Component component, boolean b) {
 
         PlayerJoinEvent event = new PlayerJoinEvent(midnight_core_currentlyLoggingIn, component);
         instance.getServer().submit(() -> Event.invoke(event));
@@ -41,7 +41,7 @@ public abstract class MixinPlayerList {
         midnight_core_currentlyLoggingIn = null;
 
         Component comp = event.getJoinMessage();
-        if(comp != null) broadcastSystemMessage(comp, resourceKey);
+        if(comp != null) broadcastSystemMessage(comp, b);
     }
 
 

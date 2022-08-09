@@ -1,6 +1,7 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.fabric.api.permissions.v0.Permissions;
@@ -55,10 +56,10 @@ public abstract class MixinCommands {
         Event.invoke(new CommandLoadEvent(dispatcher, commandSelection, ctx));
     }
 
-    @Inject(method="performCommand", at=@At(value="INVOKE", target="Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)I"), cancellable = true)
-    private void onCommand(CommandSourceStack commandSourceStack, String string, CallbackInfoReturnable<Integer> cir) {
+    @Inject(method="performCommand", at=@At(value="INVOKE", target="Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/ParseResults;)I"), cancellable = true)
+    private void onCommand(ParseResults<CommandSourceStack> parseResults, String string, CallbackInfoReturnable<Integer> cir) {
 
-        CommandSendEvent event = new CommandSendEvent(commandSourceStack, string, dispatcher);
+        CommandSendEvent event = new CommandSendEvent(parseResults.getContext().getSource(), string, dispatcher);
         Event.invoke(event);
 
         if(event.isCancelled()) {

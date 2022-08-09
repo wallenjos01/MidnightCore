@@ -114,5 +114,7 @@ public class TestComponents {
         Assert.assertEquals("{\"text\":\"Hello World\",\"color\":\"#55ff55\"}", MComponent.SERIALIZER.serialize(legacyComp).toString());
         Assert.assertEquals("#55ff55Hello World", legacyComp.toConfigText());
 
+        Assert.assertEquals("Hello, W", new MTextComponent("Hello, World").subComponent(0, 8).getAllContent());
+
     }
 }

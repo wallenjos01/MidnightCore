@@ -26,6 +26,11 @@ public class MTranslateComponent extends MComponent {
     }
 
     @Override
+    public int contentLength() {
+        return 0;
+    }
+
+    @Override
     protected MComponent baseCopy() {
         return new MTranslateComponent(content, with);
     }

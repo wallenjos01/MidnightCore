@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.fabric.player;
 import com.mojang.authlib.GameProfile;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,6 +25,7 @@ import org.wallentines.midnightcore.fabric.util.LocationUtil;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
@@ -89,14 +91,15 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     public void sendMessage(MComponent component) {
 
         if(component == null) return;
-        run(player -> player.sendSystemMessage(ConversionUtil.toComponent(component), ChatType.SYSTEM), () -> {});
+        run(player -> player.sendSystemMessage(ConversionUtil.toComponent(component), false), () -> {});
     }
 
     @Override
     public void sendActionBar(MComponent component) {
 
         if(component == null) return;
-        run(player -> player.sendSystemMessage(ConversionUtil.toComponent(component), ChatType.GAME_INFO), () -> { });
+
+        run(player -> player.sendSystemMessage(ConversionUtil.toComponent(component), true), () -> { });
     }
 
     @Override
@@ -159,14 +162,14 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     @Override
     public void executeCommand(String cmd) {
 
-        run(player -> MidnightCore.getInstance().getServer().getCommands().performCommand(player.createCommandSourceStack(), cmd), () -> { });
+        run(player -> MidnightCore.getInstance().getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack(), cmd), () -> { });
     }
 
     @Override
     public void sendChatMessage(String message) {
 
         // Forged messages cannot be signed
-        run(player -> player.connection.send(new ServerboundChatPacket(message, MessageSignature.unsigned(), false)), () -> { });
+        run(player -> player.connection.send(new ServerboundChatPacket(message, Instant.now(), System.currentTimeMillis(), MessageSignature.EMPTY, false, new LastSeenMessages.Update(LastSeenMessages.EMPTY, Optional.empty()))), () -> { });
     }
 
     @Override

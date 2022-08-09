@@ -9,6 +9,11 @@ public class MTextComponent extends MComponent {
     }
 
     @Override
+    public int contentLength() {
+        return content.length();
+    }
+
+    @Override
     protected MComponent baseCopy() {
         return new MTextComponent(content);
     }

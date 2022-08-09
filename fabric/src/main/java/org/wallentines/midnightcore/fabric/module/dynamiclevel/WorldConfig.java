@@ -32,6 +32,8 @@ public class WorldConfig {
     private ResourceKey<WorldPreset> worldType = WorldPresets.NORMAL;
     private ResourceKey<LevelStem> rootDimensionType = LevelStem.OVERWORLD;
 
+    private ResourceKey<Level> netherOverride = null;
+    private ResourceKey<Level> endOverride = null;
     private ChunkGenerator generator;
     private ConfigSection generatorSettings = new ConfigSection();
 
@@ -115,6 +117,24 @@ public class WorldConfig {
 
     public WorldConfig rootDimensionType(ResourceKey<LevelStem> rootDimensionType) {
         this.rootDimensionType = rootDimensionType;
+        return this;
+    }
+
+    public ResourceKey<Level> getNetherDimensionId() {
+        return netherOverride;
+    }
+
+    public WorldConfig netherId(ResourceKey<Level> nether) {
+        this.netherOverride = nether;
+        return this;
+    }
+
+    public ResourceKey<Level> getEndDimensionId() {
+        return endOverride;
+    }
+
+    public WorldConfig endId(ResourceKey<Level> end) {
+        this.endOverride = end;
         return this;
     }
 
