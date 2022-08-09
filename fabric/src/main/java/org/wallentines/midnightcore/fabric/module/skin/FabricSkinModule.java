@@ -11,6 +11,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.phys.Vec3;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.player.MPlayer;
@@ -75,16 +76,19 @@ public class FabricSkinModule extends AbstractSkinModule {
     public void doUpdate(MPlayer uid, Skin skin) {
 
         ServerPlayer spl = FabricPlayer.getInternal(uid);
-        updateSkin(spl, skin);
+        updateSkin(spl);
     }
 
-    private void updateSkin(ServerPlayer player, Skin skin) {
+    private void updateSkin(ServerPlayer player) {
 
         MinecraftServer server = player.getServer();
         if(server == null) return;
 
-        // Create Packets
+        // Make sure the player is ready to receive a respawn packet
+        player.stopRiding();
+        Vec3 velocity = player.getDeltaMovement();
 
+        // Create Packets
         ClientboundPlayerInfoPacket remove = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, player);
         ClientboundPlayerInfoPacket add = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, player);
 
@@ -139,7 +143,6 @@ public class FabricSkinModule extends AbstractSkinModule {
             obs.connection.send(head);
             obs.connection.send(tracker);
             obs.connection.send(equip);
-
         }
 
         player.connection.send(respawn);
@@ -151,6 +154,9 @@ public class FabricSkinModule extends AbstractSkinModule {
         server.getPlayerList().sendAllPlayerInfo(player);
 
         player.getInventory().tick();
+
+        player.setDeltaMovement(velocity);
+        player.connection.send(new ClientboundSetEntityMotionPacket(player));
     }
 
     private void applyActiveProfile(ClientboundPlayerInfoPacket packet, Skin skin) {

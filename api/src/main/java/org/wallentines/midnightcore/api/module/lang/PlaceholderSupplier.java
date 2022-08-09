@@ -8,12 +8,9 @@ import java.util.function.Supplier;
 public interface PlaceholderSupplier<T> {
 
     T get(PlaceholderContext ctx);
-
     default boolean acceptsParameters() { return true; }
-
-
     static <T> PlaceholderSupplier<T> create(T out) {
-        return new PlaceholderSupplier<T>() {
+        return new PlaceholderSupplier<>() {
             @Override
             public T get(PlaceholderContext ctx) {
                 return out;
@@ -25,13 +22,10 @@ public interface PlaceholderSupplier<T> {
             }
         };
     }
-
     static <P, T> PlaceholderSupplier<T> create(Class<P> clazz, Functions.Function1<P, T> run) {
         return create(clazz, run, () -> null);
     }
-
     static <P, T> PlaceholderSupplier<T> create(Class<P> clazz, Functions.Function1<P, T> run, Supplier<T> def) {
-
         return new PlaceholderSupplier<>() {
             @Override
             public T get(PlaceholderContext ctx) {
@@ -47,7 +41,6 @@ public interface PlaceholderSupplier<T> {
         };
     }
 
-
     static <P, T> PlaceholderSupplier<T> createWithParameter(Class<P> clazz, Functions.Function2<P, String, T> run, Functions.Function1<String, T> def) {
 
         return ctx -> {
@@ -60,7 +53,6 @@ public interface PlaceholderSupplier<T> {
     }
 
     static <P, P2, T> PlaceholderSupplier<T> create(Class<P> clazz, Class<P2> clazz2, Functions.Function2<P, P2, T> run, Functions.Function1<P, T> onlyFirst, Functions.Function1<P2, T> onlySecond, Supplier<T> def) {
-
         return new PlaceholderSupplier<>() {
             @Override
             public T get(PlaceholderContext ctx) {
@@ -159,7 +151,7 @@ public interface PlaceholderSupplier<T> {
 
                 for(int i = 0 ; i < args.length ; i++) {
 
-                    if(args[i].getClass() == clazz || clazz.isAssignableFrom(args[i].getClass())) {
+                    if(args[i] != null && (args[i].getClass() == clazz || clazz.isAssignableFrom(args[i].getClass()))) {
                         return i;
                     }
                 }
@@ -175,10 +167,8 @@ public interface PlaceholderSupplier<T> {
     }
 
     class Tuple<X, Y> {
-
         X x;
         Y y;
-
         public Tuple(X x, Y y) {
             this.x = x;
             this.y = y;

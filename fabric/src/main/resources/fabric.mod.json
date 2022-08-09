@@ -3,7 +3,6 @@
     "id": "${id}",
     "version": "${version}",
     "environment": "*",
-    "accessWidener": "midnightcore.accesswidener",
     "entrypoints": {
         "main": [
             "${group}.${id}.${target}.${mainClass}"
@@ -14,7 +13,7 @@
     ],
     "depends": {
         "fabricloader": ">=${fabricLoader}",
-        "minecraft": "${minecraftVersion}",
+        "minecraft": ">=${minecraftVersion}",
         "fabric-api-base": "*",
         "fabric-permissions-api-v0": "*"
     },

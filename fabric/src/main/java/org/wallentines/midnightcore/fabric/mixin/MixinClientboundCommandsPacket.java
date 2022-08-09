@@ -1,12 +1,11 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
-import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.wallentines.midnightcore.fabric.command.ServerSideArgumentInfo;
 
-@Mixin(ClientboundCommandsPacket.ArgumentNodeStub.class)
+@Mixin(targets = "net.minecraft.network.protocol.game.ClientboundCommandsPacket$ArgumentNodeStub")
 public class MixinClientboundCommandsPacket {
 
     @ModifyArg(

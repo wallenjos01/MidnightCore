@@ -66,8 +66,6 @@ loom {
     interfaceInjection {
 		enableDependencyInterfaceInjection = true
 	}
-
-    accessWidenerPath = file("src/main/resources/midnightcore.accesswidener")
 }
 
 processResources {
