@@ -5,6 +5,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.netty.buffer.AbstractByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.util.IllegalReferenceCountException;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,10 +46,21 @@ public class FabricMessagingModule extends AbstractMessagingModule {
         MPlayer player = FabricPlayer.wrap(event.getSource());
         FriendlyByteBuf buf = event.getData();
 
-        if(!buf.isReadable() || buf.refCnt() == 0) return;
+        try {
+            if (!buf.isReadable() || buf.refCnt() == 0) return;
 
-        DataInput input = new DataInputStream(new ByteArrayInputStream(buf.accessByteBufWithCorrectSize()));
-        handleRaw(player, input);
+            DataInput input = new DataInputStream(new ByteArrayInputStream(buf.accessByteBufWithCorrectSize()));
+
+            try {
+                handleRaw(player, input);
+            } catch (Exception ex) {
+                MidnightCoreAPI.getLogger().warn("An exception occurred while processing a plugin message!");
+                ex.printStackTrace();
+            }
+
+        } catch (IllegalReferenceCountException ex) {
+            // Ignore
+        }
     }
 
     public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(FabricMessagingModule::new, ID, new ConfigSection());

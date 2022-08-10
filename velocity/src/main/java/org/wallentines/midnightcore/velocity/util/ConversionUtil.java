@@ -10,8 +10,16 @@ public class ConversionUtil {
 
     public static Component toComponent(MComponent component) {
 
+        if(component == null) return null;
         return GsonComponentSerializer.gson().deserializeFromTree(MComponent.SERIALIZER.serialize(component).toJson());
     }
+
+    public static MComponent toMComponent(Component component) {
+
+        if(component == null) return null;
+        return MComponent.INLINE_SERIALIZER.deserialize(GsonComponentSerializer.gson().serialize(component));
+    }
+
 
     public static Key toKey(Identifier id) {
         return Key.key(id.getNamespace(), id.getPath());

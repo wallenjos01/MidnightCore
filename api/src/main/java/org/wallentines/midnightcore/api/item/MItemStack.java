@@ -7,14 +7,13 @@ import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.TextColor;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
-import org.wallentines.midnightlib.math.Color;
+import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 public interface MItemStack {
 
@@ -251,6 +250,12 @@ public interface MItemStack {
         return builder.toString();
     }
 
+    ConfigSerializer<MItemStack> SERIALIZER = ConfigSerializer.create(
+            ConfigSerializer.entry(Identifier.class, "type", MItemStack::getType),
+            ConfigSerializer.entry(PrimitiveSerializers.INT, "count", MItemStack::getCount).orDefault(1),
+            ConfigSerializer.entry(ConfigSection.class, "tag", MItemStack::getTag).orDefault(new ConfigSection()),
+            (type, count, tag) -> MidnightCoreAPI.getInstance().createItem(type, count, tag)
+    );
 
 
 }

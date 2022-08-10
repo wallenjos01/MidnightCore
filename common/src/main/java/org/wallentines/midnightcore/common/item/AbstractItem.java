@@ -1,14 +1,11 @@
 package org.wallentines.midnightcore.common.item;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MHoverEvent;
 import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
-import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -98,9 +95,9 @@ public abstract class AbstractItem implements MItemStack {
     @Override
     public void setLore(List<MComponent> lore) {
 
-        List<MComponent> newLore = new ArrayList<>();
+        List<String> newLore = new ArrayList<>();
         for(MComponent cmp : lore) {
-            newLore.add(new MTextComponent("").withStyle(MStyle.ITEM_LORE_BASE).withChild(cmp.copy()));
+            newLore.add(new MTextComponent("").withStyle(MStyle.ITEM_LORE_BASE).withChild(cmp.copy()).toString());
         }
 
         if(tag == null) tag = new ConfigSection();
@@ -111,7 +108,7 @@ public abstract class AbstractItem implements MItemStack {
     @Override
     public MItemStack copy() {
 
-        return Builder.of(typeId).withAmount(count).withTag(tag).build();
+        return Builder.of(typeId).withAmount(count).withTag(tag.copy()).build();
     }
 
     @Override
@@ -120,11 +117,4 @@ public abstract class AbstractItem implements MItemStack {
     }
 
     protected abstract MComponent getTranslationComponent();
-
-    public static final ConfigSerializer<MItemStack> SERIALIZER = ConfigSerializer.create(
-            ConfigSerializer.entry(Identifier.class, "type", MItemStack::getType),
-            ConfigSerializer.entry(PrimitiveSerializers.INT, "count", MItemStack::getCount).orDefault(1),
-            ConfigSerializer.entry(ConfigSection.class, "tag", MItemStack::getTag).orDefault(new ConfigSection()),
-            (type, count, tag) -> MidnightCoreAPI.getInstance().createItem(type, count, tag)
-    );
 }
