@@ -173,7 +173,7 @@ public class ConversionUtil {
 
         } else {
 
-            return Component.Serializer.fromJson(MComponent.SERIALIZER.serialize(component).toJson());
+            return Component.Serializer.fromJson(JsonConfigProvider.INSTANCE.toJson(MComponent.SERIALIZER.serialize(component)));
         }
 
         out.setStyle(toStyle(component.getStyle())
@@ -207,7 +207,7 @@ public class ConversionUtil {
     public static HoverEvent toHoverEvent(MHoverEvent event) {
 
         if(event == null) return null;
-        return HoverEvent.deserialize(MHoverEvent.SERIALIZER.serialize(event).toJson());
+        return HoverEvent.deserialize(JsonConfigProvider.INSTANCE.toJson(MHoverEvent.SERIALIZER.serialize(event)));
     }
 
     public static ClickEvent toClickEvent(MClickEvent event) {

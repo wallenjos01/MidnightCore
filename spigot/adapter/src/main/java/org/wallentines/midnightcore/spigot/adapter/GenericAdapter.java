@@ -19,6 +19,7 @@ import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
 import org.wallentines.midnightlib.config.serialization.InlineSerializer;
 import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
+import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
 import java.util.*;
 
@@ -169,6 +170,8 @@ public class GenericAdapter implements SpigotAdapter {
     public SkinUpdater getSkinUpdater() {
         return null;
     }
+
+
 
     private static class PlayerTag {
 

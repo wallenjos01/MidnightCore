@@ -62,7 +62,7 @@ public class MidnightCore implements ModInitializer {
         Path dataFolder = Paths.get("config/MidnightCore");
 
         // Register all the things
-        Constants.registerDefaults();
+        Constants.registerDefaults(JsonConfigProvider.INSTANCE);
         Constants.CONFIG_DEFAULTS.set("vanilla_permissions", true);
         Constants.CONFIG_DEFAULTS.set("register_main_command", true);
         Constants.CONFIG_DEFAULTS.set("register_test_command", false);

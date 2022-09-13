@@ -4,13 +4,12 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import org.wallentines.midnightcore.api.module.skin.Skin;
+import org.wallentines.midnightlib.config.ConfigProvider;
+import org.wallentines.midnightlib.config.ConfigRegistry;
 import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collection;
@@ -26,10 +25,8 @@ public final class MojangUtil {
         try {
             URL url = new URL(String.format(UUID_URL, playerName));
 
-            String response = makeHttpRequest(url);
-            if(response == null) return null;
-
-            ConfigSection sec = JsonConfigProvider.INSTANCE.loadFromString(response);
+            ConfigSection sec = makeHttpRequest(url);
+            if(sec == null) return null;
 
             String id = sec.getString("id");
             id = id.substring(0,8) + "-" + id.substring(8,12) + "-" + id.substring(12,16) + "-" + id.substring(16,20) + "-" + id.substring(20,32);
@@ -51,10 +48,8 @@ public final class MojangUtil {
 
             URL url = new URL(String.format(SKIN_URL, playerId.toString().replace("-", "")));
 
-            String response = makeHttpRequest(url);
-            if(response == null) return null;
-
-            ConfigSection sec = JsonConfigProvider.INSTANCE.loadFromString(response);
+            ConfigSection sec = makeHttpRequest(url);
+            if(sec == null) return null;
 
             if(!sec.has("properties", Collection.class)) return null;
 
@@ -94,7 +89,7 @@ public final class MojangUtil {
     }
 
 
-    private static String makeHttpRequest(URL url) throws IOException {
+    private static ConfigSection makeHttpRequest(URL url) throws IOException {
 
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.connect();
@@ -102,15 +97,15 @@ public final class MojangUtil {
         if(conn.getResponseCode() != 200) return null;
         InputStream responseStream = conn.getInputStream();
 
-        StringBuilder response = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(responseStream));
+        ConfigProvider json = ConfigRegistry.INSTANCE.getProviderForFileType(".json");
+        if(json == null) return new ConfigSection();
 
-        String line;
-        while((line = reader.readLine()) != null) {
-            response.append(line);
-        }
+        ConfigSection out = json.loadFromStream(responseStream);
 
-        return response.toString();
+        responseStream.close();
+        conn.disconnect();
+
+        return out;
     }
 
 }

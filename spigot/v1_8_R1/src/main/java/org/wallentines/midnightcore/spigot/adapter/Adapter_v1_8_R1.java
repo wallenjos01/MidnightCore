@@ -7,8 +7,9 @@ import org.bukkit.craftbukkit.v1_8_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
+import org.wallentines.midnightlib.config.ConfigProvider;
+import org.wallentines.midnightlib.config.ConfigRegistry;
 import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
 import java.lang.reflect.Field;
 
@@ -28,11 +29,16 @@ public class Adapter_v1_8_R1 implements SpigotAdapter {
     }
 
     @Override
+    public ConfigProvider getJsonSerializer() {
+        return JsonConfigProvider_v1_8_R1.INSTANCE;
+    }
+
+    @Override
     public ItemStack getItemInMainHand(Player pl) {
         return pl.getItemInHand();
     }
 
-    @SuppressWarnings("deprecated")
+    @SuppressWarnings("deprecation")
     @Override
     public ItemStack getItemInOffHand(Player pl) {
         return new ItemStack(0);
@@ -40,6 +46,8 @@ public class Adapter_v1_8_R1 implements SpigotAdapter {
 
     @Override
     public boolean init() {
+
+        ConfigRegistry.INSTANCE.registerProvider(JsonConfigProvider_v1_8_R1.INSTANCE);
 
         try {
             handle = CraftItemStack.class.getDeclaredField("handle");
@@ -63,21 +71,21 @@ public class Adapter_v1_8_R1 implements SpigotAdapter {
     public void sendMessage(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutChat(ChatSerializer.a(comp.toString()), (byte) 1));
+        epl.playerConnection.sendPacket(new PacketPlayOutChat(ChatSerializer.a(toJsonString(comp)), (byte) 1));
     }
 
     @Override
     public void sendActionBar(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutChat(ChatSerializer.a(comp.toString()), (byte) 2));
+        epl.playerConnection.sendPacket(new PacketPlayOutChat(ChatSerializer.a(toJsonString(comp)), (byte) 2));
     }
 
     @Override
     public void sendTitle(Player pl, MComponent comp, int fadeIn, int stay, int fadeOut) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(EnumTitleAction.TITLE, ChatSerializer.a(comp.toString())));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(EnumTitleAction.TITLE, ChatSerializer.a(toJsonString(comp))));
         epl.playerConnection.sendPacket(new PacketPlayOutTitle(fadeIn, stay, fadeOut));
     }
 
@@ -85,7 +93,7 @@ public class Adapter_v1_8_R1 implements SpigotAdapter {
     public void sendSubtitle(Player pl, MComponent comp, int fadeIn, int stay, int fadeOut) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(EnumTitleAction.SUBTITLE, ChatSerializer.a(comp.toString())));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(EnumTitleAction.SUBTITLE, ChatSerializer.a(toJsonString(comp))));
         epl.playerConnection.sendPacket(new PacketPlayOutTitle(fadeIn, stay, fadeOut));
     }
 
@@ -129,7 +137,7 @@ public class Adapter_v1_8_R1 implements SpigotAdapter {
         NBTTagCompound tag = new NBTTagCompound();
         epl.b(tag);
 
-        return JsonConfigProvider.INSTANCE.loadFromString(tag.toString());
+        return getJsonSerializer().loadFromString(tag.toString());
     }
 
     @Override

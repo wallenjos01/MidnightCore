@@ -56,7 +56,13 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
 
     @Override
     public String getLocale() {
-        return run(Player::getLocale, () -> null);
+
+        return run(pl -> {
+            if(MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() >= 12) {
+                return pl.getLocale();
+            }
+            return null;
+        }, () -> null);
     }
 
     @Override
@@ -77,7 +83,6 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
     @Override
     public void sendActionBar(MComponent component) {
         run(pl -> AdapterManager.getAdapter().sendActionBar(pl, component), () -> {});
-
     }
 
     @Override

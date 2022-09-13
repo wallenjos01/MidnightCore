@@ -1,12 +1,12 @@
 package org.wallentines.midnightcore.spigot.util;
 
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.wallentines.midnightcore.api.text.MComponent;
+import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
+import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -30,6 +30,11 @@ public final class ConversionUtil {
 
         Identifier id = Identifier.parseOrDefault(w.getName(), "minecraft");
         return new org.wallentines.midnightcore.api.player.Location(id, new Vec3d(location.getX(), location.getY(), location.getZ()), location.getYaw(), location.getPitch());
+    }
+
+    public static String toJsonString(MComponent component) {
+
+        return AdapterManager.getAdapter().toJsonString(component);
     }
 
 

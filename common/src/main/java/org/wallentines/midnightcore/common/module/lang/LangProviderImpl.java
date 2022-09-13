@@ -1,6 +1,7 @@
 package org.wallentines.midnightcore.common.module.lang;
 
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.lang.LangModule;
 import org.wallentines.midnightcore.api.module.lang.LangProvider;
 import org.wallentines.midnightcore.api.player.MPlayer;
@@ -59,7 +60,14 @@ public class LangProviderImpl implements LangProvider {
         if(language == null) language = module.getServerLanguage();
 
         LangRegistry entries = getEntries(language);
-        return entries.getMessage(key, () -> defaults.getMessage(key));
+        String out = entries.getMessage(key, () -> defaults.getMessage(key));
+
+        if(out == null) {
+            MidnightCoreAPI.getLogger().warn("Requested Lang entry " + key + " not found!");
+            return key;
+        }
+
+        return out;
     }
 
     @Override

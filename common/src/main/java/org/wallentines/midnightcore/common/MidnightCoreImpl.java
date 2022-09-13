@@ -9,6 +9,7 @@ import org.wallentines.midnightcore.api.text.CustomScoreboard;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.item.ItemConverter;
 import org.wallentines.midnightlib.Version;
+import org.wallentines.midnightlib.config.ConfigProvider;
 import org.wallentines.midnightlib.config.ConfigRegistry;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.FileConfig;

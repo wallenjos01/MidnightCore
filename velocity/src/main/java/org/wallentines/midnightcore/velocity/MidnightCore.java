@@ -17,6 +17,7 @@ import org.wallentines.midnightcore.velocity.module.lastserver.LastServerModule;
 import org.wallentines.midnightcore.velocity.module.messaging.VelocityMessagingModule;
 import org.wallentines.midnightcore.velocity.player.VelocityPlayerManager;
 import org.wallentines.midnightlib.Version;
+import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.event.Event;
 
 import java.nio.file.Path;
@@ -42,7 +43,7 @@ public class MidnightCore {
     @Subscribe(order= PostOrder.FIRST)
     public void onInitialize(ProxyInitializeEvent event) {
 
-        Constants.registerDefaults();
+        Constants.registerDefaults(JsonConfigProvider.INSTANCE);
 
         VelocityPlayerManager playerManager = new VelocityPlayerManager();
         MidnightCoreImpl api = new MidnightCoreImpl(dataFolder, Version.SERIALIZER.deserialize("1.18.2"), DummyItem::new, playerManager, title -> null, (id,title) -> null, (str, b) -> server.getCommandManager().executeAsync(server.getConsoleCommandSource(), str));

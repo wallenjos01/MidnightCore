@@ -43,6 +43,7 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
 import org.wallentines.midnightcore.fabric.mixin.AccessorMinecraftServer;
+import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.event.Event;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -124,7 +125,7 @@ public class DynamicLevelContext {
 
                     RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, access);
 
-                    JsonObject generatorSettings = config.getGeneratorSettings().toJson();
+                    JsonObject generatorSettings = JsonConfigProvider.INSTANCE.toJson(config.getGeneratorSettings());
                     DataResult<FlatLevelGeneratorSettings> result = FlatLevelGeneratorSettings.CODEC.parse(new Dynamic<>(registryOps, generatorSettings));
 
                     Optional<FlatLevelGeneratorSettings> settings = result.resultOrPartial(str -> MidnightCoreAPI.getLogger().error(str));

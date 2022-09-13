@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.api.module.skin;
 
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightlib.config.ConfigProvider;
 import org.wallentines.midnightlib.module.Module;
 
 import java.util.UUID;

@@ -82,7 +82,7 @@ public class TestComponents {
         };
 
 
-        ConfigRegistry.INSTANCE.setupDefaults("minecraft");
+        ConfigRegistry.INSTANCE.setupDefaults("minecraft", JsonConfigProvider.INSTANCE);
         ConfigRegistry.INSTANCE.registerInlineSerializer(TextColor.class, TextColor.SERIALIZER);
         ConfigRegistry.INSTANCE.registerSerializer(MStyle.class, MStyle.SERIALIZER);
         ConfigRegistry.INSTANCE.registerSerializer(MClickEvent.class, MClickEvent.SERIALIZER);

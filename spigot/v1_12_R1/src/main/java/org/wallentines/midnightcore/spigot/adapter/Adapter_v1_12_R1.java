@@ -52,21 +52,21 @@ public class Adapter_v1_12_R1 implements SpigotAdapter {
     public void sendMessage(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(comp.toString()), ChatMessageType.SYSTEM));
+        epl.playerConnection.sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), ChatMessageType.SYSTEM));
     }
 
     @Override
     public void sendActionBar(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(comp.toString()), ChatMessageType.GAME_INFO));
+        epl.playerConnection.sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), ChatMessageType.GAME_INFO));
     }
 
     @Override
     public void sendTitle(Player pl, MComponent comp, int fadeIn, int stay, int fadeOut) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a(comp.toString())));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a(toJsonString(comp))));
         epl.playerConnection.sendPacket(new PacketPlayOutTitle(fadeIn, stay, fadeOut));
     }
 
@@ -74,7 +74,7 @@ public class Adapter_v1_12_R1 implements SpigotAdapter {
     public void sendSubtitle(Player pl, MComponent comp, int fadeIn, int stay, int fadeOut) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, IChatBaseComponent.ChatSerializer.a(comp.toString())));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, IChatBaseComponent.ChatSerializer.a(toJsonString(comp))));
         epl.playerConnection.sendPacket(new PacketPlayOutTitle(fadeIn, stay, fadeOut));
     }
 
@@ -118,7 +118,7 @@ public class Adapter_v1_12_R1 implements SpigotAdapter {
         NBTTagCompound tag = new NBTTagCompound();
         tag = epl.save(tag);
 
-        return JsonConfigProvider.INSTANCE.loadFromString(tag.toString());
+        return getJsonSerializer().loadFromString(tag.toString());
     }
 
     @Override

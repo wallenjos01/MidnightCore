@@ -5,8 +5,7 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 
 public class Adapters {
 
-
-    public static final String API_VERSION = Bukkit.getServer().getClass().getPackage().getName().replace(".",",").split(",")[3];
+    private static final String API_VERSION = Bukkit.getServer().getClass().getPackage().getName().replace(".",",").split(",")[3];
 
     public static void findAdapter() {
 

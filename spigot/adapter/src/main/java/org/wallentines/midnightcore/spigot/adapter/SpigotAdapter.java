@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
+import org.wallentines.midnightlib.config.ConfigProvider;
 import org.wallentines.midnightlib.config.ConfigSection;
 
 import java.util.UUID;
@@ -38,6 +39,16 @@ public interface SpigotAdapter {
     void loadTag(Player pl, ConfigSection tag);
 
     SkinUpdater getSkinUpdater();
+
+    default String toJsonString(MComponent component) {
+
+        return getJsonSerializer().saveToString(MComponent.SERIALIZER.serialize(component));
+    }
+
+    default ConfigProvider getJsonSerializer() {
+
+        return org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider.INSTANCE;
+    }
 
     default ItemStack getItemInMainHand(Player pl) {
 

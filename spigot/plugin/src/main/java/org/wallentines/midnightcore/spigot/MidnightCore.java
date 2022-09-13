@@ -9,6 +9,7 @@ import org.wallentines.midnightcore.common.Registries;
 import org.wallentines.midnightcore.common.module.savepoint.AbstractSavepointModule;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.spigot.adapter.Adapters;
+import org.wallentines.midnightcore.spigot.config.YamlConfigProvider;
 import org.wallentines.midnightcore.spigot.event.MidnightCoreInitializeEvent;
 import org.wallentines.midnightcore.spigot.event.MidnightCoreLoadModulesEvent;
 import org.wallentines.midnightcore.spigot.item.ItemConverters;
@@ -19,6 +20,7 @@ import org.wallentines.midnightcore.spigot.player.SpigotPlayerManager;
 import org.wallentines.midnightcore.spigot.text.SpigotScoreboard;
 import org.wallentines.midnightlib.Version;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.wallentines.midnightlib.config.ConfigRegistry;
 
 import java.nio.file.Path;
 
@@ -30,7 +32,18 @@ public class MidnightCore extends JavaPlugin {
     public void onLoad() {
 
         MidnightCorePlugin.PLUGIN = this;
-        Constants.registerDefaults();
+        Constants.registerDefaults(YamlConfigProvider.INSTANCE);
+
+        try {
+
+            // Register Standard GSON provider if present (>= 1_8_R2)
+            Class.forName("com.google.gson.Gson");
+            ConfigRegistry.INSTANCE.registerProvider(org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider.INSTANCE);
+
+        } catch (ClassNotFoundException ex) {
+            // Ignore
+        }
+
     }
 
     @Override

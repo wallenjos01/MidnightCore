@@ -61,6 +61,9 @@ dependencies {
 
     shade project(':spigot')
     shade project(':spigot:adapter')
+    shade project(':spigot:v1_8_R1')
+    shade project(':spigot:v1_8_R2')
+    shade project(':spigot:v1_8_R3')
     shade project(':spigot:v1_9_R1')
     shade project(':spigot:v1_9_R2')
     shade project(':spigot:v1_10_R1')
