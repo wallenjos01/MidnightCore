@@ -10,11 +10,11 @@ repositories {
 
 dependencies {
 
-    implementation 'org.spigotmc:spigot:1.11.2-R0.1-SNAPSHOT'
-    implementation 'org.wallentines:midnightlib:1.0-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot:1.11.2-R0.1-SNAPSHOT'
+    compileOnly 'org.wallentines:midnightlib:1.0-SNAPSHOT'
 
-    implementation(project(':api'))
-    implementation(project(':common'))
-    implementation(project(':spigot:adapter'))
+    compileOnly(project(':api'))
+    compileOnly(project(':common'))
+    compileOnly(project(':spigot:adapter'))
 
 }

@@ -15,9 +15,9 @@ dependencies {
     compileOnly 'com.google.code.gson:gson:2.9.0'
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
-    implementation 'org.wallentines:midnightlib:1.0-SNAPSHOT'
-    implementation project(':api')
-    implementation project(':common')
+    compileOnly 'org.wallentines:midnightlib:1.0-SNAPSHOT'
+    compileOnly project(':api')
+    compileOnly project(':common')
 
-    implementation project(':spigot:adapter')
+    compileOnly project(':spigot:adapter')
 }
