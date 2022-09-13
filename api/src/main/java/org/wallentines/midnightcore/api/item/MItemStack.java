@@ -10,10 +10,7 @@ import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
 import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public interface MItemStack {
 
@@ -96,14 +93,14 @@ public interface MItemStack {
 
                 if(name != null) {
 
-                    display.set("Name", name.toString());
+                    display.set("Name", name.toItemText());
                 }
 
                 if(lore != null) {
 
                     List<String> listLore = new ArrayList<>();
                     for(MComponent cmp : lore) {
-                        listLore.add(cmp.toString());
+                        listLore.add(cmp.toItemText());
                     }
 
                     display.set("Lore", listLore);
@@ -117,17 +114,8 @@ public interface MItemStack {
                 ConfigSection skullOwner = new ConfigSection();
 
                 skullOwner.set("Id", majorVersion > 15 ? UUIDtoInts(headSkin.getUUID()) : headSkin.getUUID().toString());
+                skullOwner.set("Properties", new ConfigSection().with("textures", Collections.singletonList(new ConfigSection().with("Value", headSkin.getValue()))));
 
-                ConfigSection properties = new ConfigSection();
-                List<ConfigSection> textures = new ArrayList<>();
-
-                ConfigSection property = new ConfigSection();
-                property.set("Value", headSkin.getValue());
-
-                textures.add(property);
-                properties.set("textures", textures);
-
-                skullOwner.set("Properties", properties);
                 tag.set("SkullOwner", skullOwner);
             }
 

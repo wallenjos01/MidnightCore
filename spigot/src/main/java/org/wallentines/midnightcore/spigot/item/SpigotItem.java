@@ -20,7 +20,7 @@ public class SpigotItem extends AbstractItem {
 
     public SpigotItem(ItemStack is) {
         super(ConversionUtil.toIdentifier(is.getType().getKey()), is.getAmount(), AdapterManager.getAdapter().getTag(is));
-        internal = is;
+        internal = AdapterManager.getAdapter().setupInternal(is);
     }
 
     public SpigotItem(Identifier typeId, int count, ConfigSection tag) {
@@ -51,7 +51,7 @@ public class SpigotItem extends AbstractItem {
             return null;
         }
 
-        ItemStack is = new ItemStack(mat, count);
+        ItemStack is = AdapterManager.getAdapter().setupInternal(new ItemStack(mat, count));
         AdapterManager.getAdapter().setTag(is, tag);
 
         return is;

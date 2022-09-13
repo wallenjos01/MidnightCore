@@ -11,6 +11,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Locale;
 
+@SuppressWarnings("deprecation")
 public class LegacyItem extends AbstractItem {
 
     private final ItemStack internal;
@@ -18,7 +19,7 @@ public class LegacyItem extends AbstractItem {
 
     public LegacyItem(ItemStack is) {
         super(new Identifier("minecraft", is.getType().name()), is.getAmount(), AdapterManager.getAdapter().getTag(is));
-        internal = is;
+        internal = AdapterManager.getAdapter().setupInternal(is);
 
     }
     public LegacyItem(Identifier typeId, int count, ConfigSection tag) {
@@ -30,8 +31,8 @@ public class LegacyItem extends AbstractItem {
     @Override
     public void update() {
 
-        AdapterManager.getAdapter().setTag(internal, tag);
         internal.setAmount(count);
+        AdapterManager.getAdapter().setTag(internal, tag);
     }
 
     @Override
@@ -57,7 +58,7 @@ public class LegacyItem extends AbstractItem {
 
     private ItemStack createItem() {
 
-        ItemStack out = LegacyUtil.fromLegacyMaterial(getType(), data);
+        ItemStack out = AdapterManager.getAdapter().setupInternal(LegacyUtil.fromLegacyMaterial(getType(), data));
         if(out == null) {
             MidnightCoreAPI.getLogger().warn("Unable to find material for " + getType().getPath().toUpperCase(Locale.ROOT) + "!");
             return null;
@@ -67,6 +68,8 @@ public class LegacyItem extends AbstractItem {
         out.setAmount(count);
 
         AdapterManager.getAdapter().setTag(out, getTag());
+        out.setItemMeta(out.getItemMeta());
+
         return out;
     }
 

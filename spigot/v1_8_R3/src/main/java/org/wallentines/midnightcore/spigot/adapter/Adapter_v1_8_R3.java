@@ -6,6 +6,8 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
@@ -22,7 +24,11 @@ public class Adapter_v1_8_R3 implements SpigotAdapter {
         try {
             return (net.minecraft.server.v1_8_R3.ItemStack) handle.get(is);
 
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException | IllegalAccessException ex) {
+
+            MidnightCoreAPI.getLogger().warn("Cannot get handle of " + is.getClass() + "!");
+            ex.printStackTrace();
+
             return CraftItemStack.asNMSCopy(is);
         }
     }
@@ -100,19 +106,25 @@ public class Adapter_v1_8_R3 implements SpigotAdapter {
     public void setTag(ItemStack is, ConfigSection sec) {
 
         net.minecraft.server.v1_8_R3.ItemStack mis = getHandle(is);
-
         try {
-            NBTTagCompound cmp = MojangsonParser.parse(sec.toString());
+
+            NBTTagCompound cmp = MojangsonParser.parse(MItemStack.toNBT(sec));
             mis.setTag(cmp);
 
         } catch (MojangsonParseException ex) {
-            // Ignore
+
+            MidnightCoreAPI.getLogger().warn("Unable to change item tag!");
         }
     }
 
     @Override
     public ConfigSection getTag(ItemStack is) {
-        return null;
+
+        net.minecraft.server.v1_8_R3.ItemStack mis = getHandle(is);
+        NBTTagCompound cmp = mis.getTag();
+
+        if(cmp == null) return null;
+        return getJsonSerializer().loadFromString(cmp.toString());
     }
 
     @Override
@@ -136,18 +148,24 @@ public class Adapter_v1_8_R3 implements SpigotAdapter {
     public void loadTag(Player pl, ConfigSection tag) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
+
         try {
-            NBTTagCompound nbt = MojangsonParser.parse(tag.toString());
+            NBTTagCompound nbt = MojangsonParser.parse(MItemStack.toNBT(tag));
             epl.a(nbt);
 
         } catch (MojangsonParseException ex) {
-            // Ignore
+            MidnightCoreAPI.getLogger().warn("Unable to load player data from tag!");
         }
     }
 
     @Override
     public SkinUpdater getSkinUpdater() {
         return updater;
+    }
+
+    @Override
+    public ItemStack setupInternal(ItemStack item) {
+        return CraftItemStack.asCraftCopy(item);
     }
 
 }

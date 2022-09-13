@@ -3,3 +3,6 @@ main: '${group}.${id}.spigot.${mainClass}'
 version: '${version}'
 author: M1dnight_Ninja
 api-version: '${minecraftVersion}'
+commands:
+  mcoretest:
+    description: Test Command

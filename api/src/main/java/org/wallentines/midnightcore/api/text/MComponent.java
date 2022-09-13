@@ -1,6 +1,8 @@
 package org.wallentines.midnightcore.api.text;
 
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightlib.config.ConfigProvider;
+import org.wallentines.midnightlib.config.ConfigRegistry;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
 import org.wallentines.midnightlib.config.serialization.InlineSerializer;
@@ -120,6 +122,16 @@ public abstract class MComponent {
         return toPlainText('&', MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() > 15 ? '#' : null);
     }
 
+    public String toItemText() {
+
+        if(MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() > 12) {
+            MidnightCoreAPI.getLogger().warn("Minor Version: " + MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion());
+            return toString();
+        }
+
+        return toLegacyText();
+    }
+
     private String toPlainText(Character colorChar, Character hexChar) {
 
         StringBuilder out = new StringBuilder(style.toLegacyStyle(colorChar, hexChar)).append(content);
@@ -164,7 +176,10 @@ public abstract class MComponent {
     @Override
     public String toString() {
 
-        return SERIALIZER.serialize(this).toString();
+        ConfigProvider prov = ConfigRegistry.INSTANCE.getProviderForFileType(".json");
+        if(prov == null) prov = ConfigRegistry.INSTANCE.getDefaultProvider();
+
+        return prov.saveToString(SERIALIZER.serialize(this));
     }
 
     protected abstract MComponent baseCopy();

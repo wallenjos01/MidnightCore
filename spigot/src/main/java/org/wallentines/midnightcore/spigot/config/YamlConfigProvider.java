@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.spigot.config;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightlib.config.ConfigProvider;
 import org.wallentines.midnightlib.config.ConfigSection;
 
@@ -76,10 +77,12 @@ public class YamlConfigProvider implements ConfigProvider {
     public ConfigSection fromYaml(ConfigurationSection config) {
 
         ConfigSection out = new ConfigSection();
+        if(config == null) return null;
+
         for(String key : config.getKeys(false)) {
 
             Object o = config.get(key);
-            if(o instanceof ConfigurationSection) {
+            if(config.isConfigurationSection(key)) {
                 out.set(key, fromYaml((ConfigurationSection) o));
             } else {
                 out.set(key, o);

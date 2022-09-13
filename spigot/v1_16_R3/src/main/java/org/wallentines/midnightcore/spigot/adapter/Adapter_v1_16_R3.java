@@ -146,5 +146,11 @@ public class Adapter_v1_16_R3 implements SpigotAdapter {
     public SkinUpdater getSkinUpdater() {
         return updater;
     }
+
+    @Override
+    public ItemStack setupInternal(ItemStack item) {
+        return CraftItemStack.asCraftCopy(item);
+    }
+
 }
 

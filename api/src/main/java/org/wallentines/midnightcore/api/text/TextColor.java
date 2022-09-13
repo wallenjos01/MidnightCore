@@ -50,4 +50,6 @@ public class TextColor extends Color {
     }
 
     public static final InlineSerializer<TextColor> SERIALIZER = InlineSerializer.of(Color::toHex, TextColor::parse);
+
+    public static final InlineSerializer<TextColor> LEGACY_SERIALIZER = InlineSerializer.of(TextColor::toLegacyColor, TextColor::parse);
 }

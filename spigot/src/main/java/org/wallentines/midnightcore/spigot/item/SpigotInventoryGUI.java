@@ -135,7 +135,7 @@ public class SpigotInventoryGUI extends AbstractInventoryGUI {
 
     static {
 
-        Bukkit.getServer().getPluginManager().registerEvents(new GUIListener(), MidnightCorePlugin.PLUGIN);
+        Bukkit.getServer().getPluginManager().registerEvents(new GUIListener(), MidnightCorePlugin.getInstance());
 
     }
 }

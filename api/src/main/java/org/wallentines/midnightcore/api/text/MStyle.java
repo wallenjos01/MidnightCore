@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.api.text;
 
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
 import org.wallentines.midnightlib.math.Color;
@@ -133,7 +134,11 @@ public class MStyle {
 
             ConfigSection out = new ConfigSection();
 
-            out.set("color", object.color);
+            if(MidnightCoreAPI.getInstance() == null || MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() >= 16) {
+                out.set("color", object.color);
+            } else if(object.color != null) {
+                out.set("color", TextColor.LEGACY_SERIALIZER.serialize(object.color));
+            }
             out.set("bold", object.bold);
             out.set("italic", object.italic);
             out.set("underlined", object.underlined);

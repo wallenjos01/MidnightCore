@@ -35,7 +35,7 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
             return false;
         }
 
-        Bukkit.getPluginManager().registerEvents(this, MidnightCorePlugin.PLUGIN);
+        Bukkit.getPluginManager().registerEvents(this, MidnightCorePlugin.getInstance());
 
         return true;
     }

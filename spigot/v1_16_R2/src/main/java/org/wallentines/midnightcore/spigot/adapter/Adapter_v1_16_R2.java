@@ -147,4 +147,9 @@ public class Adapter_v1_16_R2 implements SpigotAdapter {
         return updater;
     }
 
+    @Override
+    public ItemStack setupInternal(ItemStack item) {
+        return CraftItemStack.asCraftCopy(item);
+    }
+
 }

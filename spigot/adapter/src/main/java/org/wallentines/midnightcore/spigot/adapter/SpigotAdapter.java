@@ -40,6 +40,8 @@ public interface SpigotAdapter {
 
     SkinUpdater getSkinUpdater();
 
+    ItemStack setupInternal(ItemStack item);
+
     default String toJsonString(MComponent component) {
 
         return getJsonSerializer().saveToString(MComponent.SERIALIZER.serialize(component));

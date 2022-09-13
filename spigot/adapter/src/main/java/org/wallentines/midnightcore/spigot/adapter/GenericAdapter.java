@@ -171,7 +171,10 @@ public class GenericAdapter implements SpigotAdapter {
         return null;
     }
 
-
+    @Override
+    public ItemStack setupInternal(ItemStack item) {
+        return item;
+    }
 
     private static class PlayerTag {
 

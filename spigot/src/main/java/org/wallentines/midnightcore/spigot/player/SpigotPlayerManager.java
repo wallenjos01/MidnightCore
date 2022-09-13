@@ -17,7 +17,7 @@ public class SpigotPlayerManager extends AbstractPlayerManger<Player> implements
 
     public SpigotPlayerManager() {
 
-        Bukkit.getServer().getPluginManager().registerEvents(this, MidnightCorePlugin.PLUGIN);
+        Bukkit.getServer().getPluginManager().registerEvents(this, MidnightCorePlugin.getInstance());
     }
 
     @Override
