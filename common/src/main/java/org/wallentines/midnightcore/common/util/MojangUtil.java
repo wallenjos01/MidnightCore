@@ -1,10 +1,11 @@
 package org.wallentines.midnightcore.common.util;
 
-import com.google.gson.*;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import org.wallentines.midnightcore.api.module.skin.Skin;
+import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,14 +13,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Collection;
 import java.util.UUID;
 
 public final class MojangUtil {
 
     private static final String UUID_URL = "https://api.mojang.com/users/profiles/minecraft/%s";
     private static final String SKIN_URL = "https://sessionserver.mojang.com/session/minecraft/profile/%s?unsigned=false";
-
-    private static final Gson GSON = new GsonBuilder().create();
 
     public static UUID getUUID(String playerName) {
 
@@ -29,13 +29,9 @@ public final class MojangUtil {
             String response = makeHttpRequest(url);
             if(response == null) return null;
 
-            JsonElement ele = GSON.fromJson(response, JsonElement.class);
-            if(!ele.isJsonObject()) return null;
+            ConfigSection sec = JsonConfigProvider.INSTANCE.loadFromString(response);
 
-            JsonObject obj = ele.getAsJsonObject();
-            if(!obj.has("id")) return null;
-
-            String id = obj.get("id").getAsString();
+            String id = sec.getString("id");
             id = id.substring(0,8) + "-" + id.substring(8,12) + "-" + id.substring(12,16) + "-" + id.substring(16,20) + "-" + id.substring(20,32);
 
             return UUID.fromString(id);
@@ -58,21 +54,16 @@ public final class MojangUtil {
             String response = makeHttpRequest(url);
             if(response == null) return null;
 
-            JsonElement ele = GSON.fromJson(response, JsonElement.class);
-            if(!ele.isJsonObject()) return null;
+            ConfigSection sec = JsonConfigProvider.INSTANCE.loadFromString(response);
 
-            JsonObject obj = ele.getAsJsonObject();
-            if(!obj.has("properties") || !obj.get("properties").isJsonArray()) return null;
+            if(!sec.has("properties", Collection.class)) return null;
 
-            JsonArray properties = obj.getAsJsonArray("properties");
-            for(JsonElement property : properties) {
-                if(!property.isJsonObject()) continue;
+            for(ConfigSection property : sec.getListFiltered("properties", ConfigSection.class)) {
 
-                JsonObject prop = property.getAsJsonObject();
-                if(!prop.has("name") || !prop.get("name").getAsString().equals("textures")) continue;
+                if(!property.has("name") || !property.getString("name").equals("textures")) continue;
 
-                String value = prop.get("value").getAsString();
-                String signature = prop.get("signature").getAsString();
+                String value = property.getString("value");
+                String signature = property.getString("signature");
 
                 return new Skin(playerId, value, signature);
             }
@@ -86,7 +77,9 @@ public final class MojangUtil {
 
 
     public static Skin getSkinFromProfile(GameProfile profile) {
+
         PropertyMap map = profile.getProperties();
+
         if(map == null || !map.containsKey("textures") || map.get("textures").size() == 0) return null;
 
         Property skin = map.get("textures").iterator().next();

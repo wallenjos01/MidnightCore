@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.common.module.lang;
 
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.midnightcore.api.module.lang.LangModule;
 import org.wallentines.midnightcore.api.module.lang.LangProvider;
 import org.wallentines.midnightcore.api.player.MPlayer;
@@ -8,7 +9,6 @@ import org.wallentines.midnightcore.common.util.FileUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.FileConfig;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;

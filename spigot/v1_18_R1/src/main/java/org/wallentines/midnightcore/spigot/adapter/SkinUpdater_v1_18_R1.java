@@ -24,11 +24,9 @@ import java.util.List;
 
 public class SkinUpdater_v1_18_R1 implements SkinUpdater {
 
-    public static final SkinUpdater_v1_18_R1 INSTANCE = new SkinUpdater_v1_18_R1();
-
     @Override
-    public void init() {
-
+    public boolean init() {
+        return true;
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.common.player.AbstractPlayerManger;
-import org.wallentines.midnightcore.spigot.MidnightCore;
+import org.wallentines.midnightcore.spigot.MidnightCorePlugin;
 
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ public class SpigotPlayerManager extends AbstractPlayerManger<Player> implements
 
     public SpigotPlayerManager() {
 
-        Bukkit.getServer().getPluginManager().registerEvents(this, MidnightCore.getPlugin(MidnightCore.class));
+        Bukkit.getServer().getPluginManager().registerEvents(this, MidnightCorePlugin.PLUGIN);
     }
 
     @Override

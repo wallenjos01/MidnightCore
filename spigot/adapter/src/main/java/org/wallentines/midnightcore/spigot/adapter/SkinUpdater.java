@@ -5,7 +5,7 @@ import org.wallentines.midnightcore.api.module.skin.Skin;
 
 public interface SkinUpdater {
 
-    void init();
+    boolean init();
 
     void updateSkin(Player user, Skin skin);
 

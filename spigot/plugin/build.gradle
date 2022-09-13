@@ -1,0 +1,97 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+configurations {
+    shade
+}
+
+repositories {
+
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
+}
+
+shadowJar {
+
+    archiveClassifier.set('')
+    configurations = [project.configurations.shade]
+}
+tasks.assemble.dependsOn tasks.shadowJar
+
+
+dependencies {
+
+    compileOnly "org.spigotmc:spigot-api:${project.spigot_version}"
+
+    compileOnly 'org.wallentines:midnightlib:1.0-SNAPSHOT'
+
+    compileOnly project(':api')
+    compileOnly project(':common')
+
+    compileOnly project(':spigot')
+    compileOnly project(':spigot:adapter')
+    compileOnly project(':spigot:v1_8_R1')
+    compileOnly project(':spigot:v1_8_R2')
+    compileOnly project(':spigot:v1_8_R3')
+    compileOnly project(':spigot:v1_9_R1')
+    compileOnly project(':spigot:v1_9_R2')
+    compileOnly project(':spigot:v1_10_R1')
+    compileOnly project(':spigot:v1_11_R1')
+    compileOnly project(':spigot:v1_12_R1')
+    compileOnly project(':spigot:v1_13_R2')
+    compileOnly project(':spigot:v1_14_R1')
+    compileOnly project(':spigot:v1_15_R1')
+    compileOnly project(':spigot:v1_16_R1')
+    compileOnly project(':spigot:v1_16_R2')
+    compileOnly project(':spigot:v1_16_R3')
+    compileOnly project(':spigot:v1_17_R1')
+    compileOnly project(':spigot:v1_18_R1')
+    compileOnly project(':spigot:v1_18_R2')
+    compileOnly project(':spigot:v1_19_R1')
+
+    shade 'org.wallentines:midnightlib:1.0-SNAPSHOT'
+
+    shade project(':api')
+    shade project(':common')
+
+    shade project(':spigot')
+    shade project(':spigot:adapter')
+    shade project(':spigot:v1_9_R1')
+    shade project(':spigot:v1_9_R2')
+    shade project(':spigot:v1_10_R1')
+    shade project(':spigot:v1_11_R1')
+    shade project(':spigot:v1_12_R1')
+    shade project(':spigot:v1_13_R2')
+    shade project(':spigot:v1_14_R1')
+    shade project(':spigot:v1_15_R1')
+    shade project(':spigot:v1_16_R1')
+    shade project(':spigot:v1_16_R2')
+    shade project(':spigot:v1_16_R3')
+    shade project(':spigot:v1_17_R1')
+    shade project(':spigot:v1_18_R1')
+    shade project(':spigot:v1_18_R2')
+    shade project(':spigot:v1_19_R1')
+}
+
+
+processResources {
+
+    Map<String, ?> ex = new HashMap<>()
+    ex.put("version", project.version)
+    ex.put("id", project.mod_id)
+    ex.put("name", project.mod_name)
+    ex.put("target", project.name)
+    ex.put("description", project.description)
+    ex.put("group", project.group)
+    ex.put("minecraftVersion", project.spigot_api_version)
+    ex.put("mainClass", project.main_class_name)
+
+    filesMatching("plugin.yml") {
+        expand(ex)
+    }
+}

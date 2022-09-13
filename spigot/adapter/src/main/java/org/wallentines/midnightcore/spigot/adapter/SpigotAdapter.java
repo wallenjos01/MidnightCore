@@ -10,6 +10,8 @@ import java.util.UUID;
 
 public interface SpigotAdapter {
 
+    boolean init();
+
     GameProfile getGameProfile(Player pl);
 
 
@@ -36,8 +38,6 @@ public interface SpigotAdapter {
     void loadTag(Player pl, ConfigSection tag);
 
     SkinUpdater getSkinUpdater();
-
-    boolean isVersionSupported(String str);
 
     default ItemStack getItemInMainHand(Player pl) {
 

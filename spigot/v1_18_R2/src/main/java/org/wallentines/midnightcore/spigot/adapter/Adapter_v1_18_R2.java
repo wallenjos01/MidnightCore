@@ -25,8 +25,9 @@ import java.lang.reflect.Field;
 
 public class Adapter_v1_18_R2 implements SpigotAdapter {
 
-    private static Field handle;
-    public static net.minecraft.world.item.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
+    private SkinUpdater_v1_18_R2 updater;
+    private Field handle;
+    public net.minecraft.world.item.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
 
         try {
             return (net.minecraft.world.item.ItemStack) handle.get(is);
@@ -36,15 +37,19 @@ public class Adapter_v1_18_R2 implements SpigotAdapter {
         }
     }
 
-    static {
+    @Override
+    public boolean init() {
 
         try {
             handle = CraftItemStack.class.getDeclaredField("handle");
             handle.setAccessible(true);
 
         } catch (Exception ex) {
-            // Ignore
+            return false;
         }
+
+        updater = new SkinUpdater_v1_18_R2();
+        return updater.init();
     }
 
     @Override
@@ -153,12 +158,7 @@ public class Adapter_v1_18_R2 implements SpigotAdapter {
 
     @Override
     public SkinUpdater getSkinUpdater() {
-        return SkinUpdater_v1_18_R2.INSTANCE;
+        return updater;
     }
 
-    @Override
-    public boolean isVersionSupported(String str) {
-
-        return str.equals("v1_18_R2");
-    }
 }

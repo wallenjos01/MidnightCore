@@ -7,7 +7,10 @@ repositories {
 
 dependencies {
 
-    compileOnly 'com.mojang:authlib:2.1.28'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
+    compileOnly 'com.mojang:authlib:3.11.49'
+    compileOnly 'com.google.guava:guava:31.1-jre'
+
     compileOnly project(":api")
 
     testImplementation 'junit:junit:4.13.2'

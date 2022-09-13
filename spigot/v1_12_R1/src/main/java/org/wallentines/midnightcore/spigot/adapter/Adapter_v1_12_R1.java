@@ -14,10 +14,10 @@ import java.lang.reflect.Field;
 
 public class Adapter_v1_12_R1 implements SpigotAdapter {
 
-    public static final Adapter_v1_12_R1 INSTANCE = new Adapter_v1_12_R1();
+    private SkinUpdater_v1_12_R1 updater;
 
-    private static Field handle;
-    public static net.minecraft.server.v1_12_R1.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
+    private Field handle;
+    public net.minecraft.server.v1_12_R1.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
 
         try {
             return (net.minecraft.server.v1_12_R1.ItemStack) handle.get(is);
@@ -27,15 +27,18 @@ public class Adapter_v1_12_R1 implements SpigotAdapter {
         }
     }
 
-    static {
+    @Override
+    public boolean init() {
 
         try {
             handle = CraftItemStack.class.getDeclaredField("handle");
             handle.setAccessible(true);
-
         } catch (Exception ex) {
-            // Ignore
+            return false;
         }
+
+        updater = new SkinUpdater_v1_12_R1();
+        return updater.init();
     }
 
     @Override
@@ -133,11 +136,7 @@ public class Adapter_v1_12_R1 implements SpigotAdapter {
 
     @Override
     public SkinUpdater getSkinUpdater() {
-        return SkinUpdater_v1_12_R1.INSTANCE;
+        return updater;
     }
 
-    @Override
-    public boolean isVersionSupported(String str) {
-        return str.equals("v1_12_R1");
-    }
 }

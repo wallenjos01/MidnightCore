@@ -32,6 +32,11 @@ public class GenericAdapter implements SpigotAdapter {
     }
 
     @Override
+    public boolean init() {
+        return true;
+    }
+
+    @Override
     public GameProfile getGameProfile(Player pl) {
 
         return new GameProfile(pl.getUniqueId(), pl.getName());
@@ -163,11 +168,6 @@ public class GenericAdapter implements SpigotAdapter {
     @Override
     public SkinUpdater getSkinUpdater() {
         return null;
-    }
-
-    @Override
-    public boolean isVersionSupported(String str) {
-        return true;
     }
 
     private static class PlayerTag {

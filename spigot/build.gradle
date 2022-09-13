@@ -1,61 +1,23 @@
-plugins {
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+repositories {
 
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
 }
-
-sourceCompatibility = JavaVersion.VERSION_17;
-targetCompatibility = JavaVersion.VERSION_17;
-
-configurations {
-    shade
-}
-
-shadowJar {
-
-    archiveClassifier.set('')
-    configurations = [project.configurations.shade]
-}
-tasks.assemble.dependsOn tasks.shadowJar
 
 dependencies {
 
-    compileOnly "org.spigotmc:spigot:${project.spigot_version}"
+    compileOnly "org.spigotmc:spigot-api:${project.spigot_version}"
+    compileOnly 'com.mojang:authlib:3.11.49'
+    compileOnly 'com.google.code.gson:gson:2.9.0'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 
     implementation 'org.wallentines:midnightlib:1.0-SNAPSHOT'
     implementation project(':api')
     implementation project(':common')
 
     implementation project(':spigot:adapter')
-    implementation project(':spigot:v1_12_R1')
-    implementation project(':spigot:v1_18_R1')
-    implementation project(':spigot:v1_18_R2')
-
-    shade 'org.wallentines:midnightlib:1.0-SNAPSHOT'
-
-    shade project(':api')
-    shade project(':common')
-
-    shade project(':spigot:adapter')
-    shade project(':spigot:v1_12_R1')
-    shade project(':spigot:v1_18_R1')
-    shade project(':spigot:v1_18_R2')
-
-}
-
-processResources {
-
-    Map<String, ?> ex = new HashMap<>()
-    ex.put("version", project.version)
-    ex.put("id", project.mod_id)
-    ex.put("name", project.mod_name)
-    ex.put("target", project.name)
-    ex.put("description", project.description)
-    ex.put("group", project.group)
-    ex.put("minecraftVersion", project.spigot_api_version)
-    ex.put("mainClass", project.main_class_name)
-
-    filesMatching("plugin.yml") {
-        expand(ex)
-    }
 }

@@ -1,40 +1,21 @@
 package org.wallentines.midnightcore.spigot.adapter;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.EmptyByteBuf;
 import net.minecraft.server.v1_12_R1.*;
-import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
-import org.wallentines.midnightcore.api.player.MPlayer;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 public class SkinUpdater_v1_12_R1 implements SkinUpdater {
 
-    public static final SkinUpdater INSTANCE = new SkinUpdater_v1_12_R1();
-    private Field action;
-    private Field entries;
-
     @Override
-    public void init() {
-
-        try {
-            action = PacketPlayOutPlayerInfo.class.getDeclaredField("a");
-            entries = PacketPlayOutPlayerInfo.class.getDeclaredField("b");
-        } catch (NoSuchFieldException ex) {
-            throw new IllegalStateException("Unable to find required field in PacketPlayOutPlayerInfo!");
-        }
-        action.setAccessible(true);
-        entries.setAccessible(true);
+    public boolean init() {
+        return true;
     }
 
     @Override
@@ -132,57 +113,5 @@ public class SkinUpdater_v1_12_R1 implements SkinUpdater {
 
         return out;
     }
-
- /*   @SuppressWarnings("unchecked")
-    private void applyActiveProfile(PacketPlayOutPlayerInfo packet, Skin skin) {
-
-        PacketPlayOutPlayerInfo.EnumPlayerInfoAction act;
-        List<PacketPlayOutPlayerInfo.PlayerInfoData> ents;
-        try {
-            act = (PacketPlayOutPlayerInfo.EnumPlayerInfoAction) action.get(packet);
-            ents = (List<PacketPlayOutPlayerInfo.PlayerInfoData>) entries.get(packet);
-        } catch (IllegalAccessException ex) {
-            return;
-        }
-
-
-        if(act != PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER) return;
-
-        GameProfile profile = null;
-        for(PacketPlayOutPlayerInfo.PlayerInfoData ent : ents) {
-            for(MPlayer u : MidnightCoreAPI.getInstance().getPlayerManager()) {
-                if(u.getUUID().equals(ent.a().getId())) {
-                    profile = ent.a();
-                    break;
-                }
-            }
-            if(profile != null) break;
-        }
-
-        if(profile == null) return;
-        if(skin == null) return;
-
-        GameProfile oldProfile = profile;
-
-        profile = new GameProfile(oldProfile.getId(), oldProfile.getName());
-
-        Player pl = Bukkit.getPlayer(profile.getId());
-        if(pl == null) return;
-
-        EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-
-        profile.getProperties().clear();
-        profile.getProperties().putAll(epl.getProfile().getProperties());
-
-        profile.getProperties().get("textures").clear();
-        profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
-
-        ents.set(0, packet.new PlayerInfoData(
-                profile,
-                epl.ping,
-                epl.playerInteractManager.getGameMode(),
-                epl.listName
-        ));
-    }*/
 
 }

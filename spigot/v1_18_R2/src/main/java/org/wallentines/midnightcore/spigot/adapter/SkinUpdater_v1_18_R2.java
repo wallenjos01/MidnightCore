@@ -24,11 +24,10 @@ import java.util.HashSet;
 import java.util.List;
 
 public class SkinUpdater_v1_18_R2 implements SkinUpdater {
-    static final SkinUpdater_v1_18_R2 INSTANCE = new SkinUpdater_v1_18_R2();
 
     @Override
-    public void init() {
-
+    public boolean init() {
+        return true;
     }
 
     @Override
