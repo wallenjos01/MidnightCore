@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.spigot.adapter;
 import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.EmptyByteBuf;
+import io.netty.buffer.Unpooled;
 import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -97,7 +98,7 @@ public class SkinUpdater_v1_16_R3 implements SkinUpdater {
 
     private PacketPlayOutPlayerInfo createPacket(EntityPlayer player, Skin skin) {
 
-        PacketDataSerializer serializer = new PacketDataSerializer(new EmptyByteBuf(ByteBufAllocator.DEFAULT));
+        PacketDataSerializer serializer = new PacketDataSerializer(Unpooled.buffer());
 
         serializer.a(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
         serializer.d(1);

@@ -53,7 +53,7 @@ public class Adapter_v1_15_R1 implements SpigotAdapter {
     public void sendMessage(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.a(IChatBaseComponent.ChatSerializer.a(comp.toString()), false);
+        epl.a(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), false);
 
     }
 
@@ -61,7 +61,7 @@ public class Adapter_v1_15_R1 implements SpigotAdapter {
     public void sendActionBar(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.a(IChatBaseComponent.ChatSerializer.a(comp.toString()), true);
+        epl.a(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), true);
 
     }
 
@@ -70,7 +70,7 @@ public class Adapter_v1_15_R1 implements SpigotAdapter {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
 
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a(comp.toString()), fadeIn, stay, fadeOut));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), fadeIn, stay, fadeOut));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class Adapter_v1_15_R1 implements SpigotAdapter {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
 
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, IChatBaseComponent.ChatSerializer.a(comp.toString()), fadeIn, stay, fadeOut));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), fadeIn, stay, fadeOut));
     }
 
     @Override

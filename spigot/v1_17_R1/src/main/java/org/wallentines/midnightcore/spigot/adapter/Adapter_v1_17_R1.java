@@ -60,7 +60,7 @@ public class Adapter_v1_17_R1 implements SpigotAdapter {
     public void sendMessage(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.a(IChatBaseComponent.ChatSerializer.a(comp.toString()), ChatMessageType.a, NIL_UUID);
+        epl.a(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), ChatMessageType.a, NIL_UUID);
 
     }
 
@@ -68,7 +68,7 @@ public class Adapter_v1_17_R1 implements SpigotAdapter {
     public void sendActionBar(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.a(IChatBaseComponent.ChatSerializer.a(comp.toString()), ChatMessageType.c, NIL_UUID);
+        epl.a(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), ChatMessageType.c, NIL_UUID);
 
     }
 
@@ -77,7 +77,7 @@ public class Adapter_v1_17_R1 implements SpigotAdapter {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
 
-        epl.b.sendPacket(new ClientboundSetTitleTextPacket(IChatBaseComponent.ChatSerializer.a(comp.toString())));
+        epl.b.sendPacket(new ClientboundSetTitleTextPacket(IChatBaseComponent.ChatSerializer.a(toJsonString(comp))));
         epl.b.sendPacket(new ClientboundSetTitlesAnimationPacket(fadeIn, stay, fadeOut));
     }
 
@@ -85,7 +85,7 @@ public class Adapter_v1_17_R1 implements SpigotAdapter {
     public void sendSubtitle(Player pl, MComponent comp, int fadeIn, int stay, int fadeOut) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.b.sendPacket(new ClientboundSetSubtitleTextPacket(IChatBaseComponent.ChatSerializer.a(comp.toString())));
+        epl.b.sendPacket(new ClientboundSetSubtitleTextPacket(IChatBaseComponent.ChatSerializer.a(toJsonString(comp))));
         epl.b.sendPacket(new ClientboundSetTitlesAnimationPacket(fadeIn, stay, fadeOut));
     }
 

@@ -29,7 +29,7 @@ public class GenericAdapter implements SpigotAdapter {
 
     public static BaseComponent toBaseComponent(MComponent comp) {
 
-        return ComponentSerializer.parse(comp.toString())[0];
+        return ComponentSerializer.parse(JsonConfigProvider.INSTANCE.saveToString(MComponent.SERIALIZER.serialize(comp)))[0];
     }
 
     @Override
