@@ -85,10 +85,10 @@ public abstract class AbstractInventoryGUI implements InventoryGUI {
             openGuis.get(u).close(u);
         }
 
-        openGuis.put(u, this);
-
         this.players.put(u, page);
         this.onOpened(u, page);
+
+        openGuis.put(u, this);
     }
 
     @Override

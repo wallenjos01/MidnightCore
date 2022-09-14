@@ -7,6 +7,10 @@ import org.wallentines.midnightlib.config.ConfigProvider;
 import org.wallentines.midnightlib.config.ConfigSection;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class YamlConfigProvider implements ConfigProvider {
 
@@ -58,20 +62,56 @@ public class YamlConfigProvider implements ConfigProvider {
         return ".yml";
     }
 
+    private Object serializeForYaml(Object value) {
+
+        if(value instanceof ConfigSection) {
+
+            return toYaml((ConfigSection) value);
+
+        } else if(value instanceof Collection<?>) {
+
+            List<Object> list = new ArrayList<>();
+            for(Object o : (Collection<?>) value) {
+                list.add(serializeForYaml(o));
+            }
+            return list;
+
+        } else {
+
+            return value;
+        }
+    }
+
     public YamlConfiguration toYaml(ConfigSection sec) {
 
         YamlConfiguration out = new YamlConfiguration();
         for(String key : sec.getKeys()) {
 
-            Object o = sec.get(key);
-            if(o instanceof ConfigSection) {
-                out.set(key, toYaml((ConfigSection) o));
-            } else {
-                out.set(key, o);
-            }
+            Object value = sec.get(key);
+            out.set(key, serializeForYaml(value));
         }
 
         return out;
+    }
+
+    private Object deserializeFromYaml(Object value) {
+
+        if(value instanceof ConfigurationSection) {
+
+            return fromYaml((ConfigurationSection) value);
+
+        } else if(value instanceof Collection<?>) {
+
+            List<Object> list = new ArrayList<>();
+            for(Object o : (Collection<?>) value) {
+                list.add(deserializeFromYaml(o));
+            }
+            return list;
+
+        } else {
+
+            return value;
+        }
     }
 
     public ConfigSection fromYaml(ConfigurationSection config) {
@@ -82,11 +122,7 @@ public class YamlConfigProvider implements ConfigProvider {
         for(String key : config.getKeys(false)) {
 
             Object o = config.get(key);
-            if(config.isConfigurationSection(key)) {
-                out.set(key, fromYaml((ConfigurationSection) o));
-            } else {
-                out.set(key, o);
-            }
+            out.set(key, deserializeFromYaml(o));
         }
 
         return out;
