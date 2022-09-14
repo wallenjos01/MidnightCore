@@ -14,7 +14,6 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
@@ -104,11 +103,8 @@ public class Adapter_v1_19_R1 implements SpigotAdapter {
         net.minecraft.world.item.ItemStack mis = getHandle(is);
 
         try {
-            String str = MItemStack.toNBT(sec);
 
-            MidnightCoreAPI.getLogger().info(str);
-
-            NBTTagCompound cmp = MojangsonParser.a(str);
+            NBTTagCompound cmp = MojangsonParser.a(MItemStack.toNBT(sec));
             mis.c(cmp);
 
         } catch (CommandSyntaxException ex) {

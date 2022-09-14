@@ -9,10 +9,8 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.entity.EnumItemSlot;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
-import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
@@ -40,11 +38,10 @@ public class SkinUpdater_v1_19_R1 implements SkinUpdater {
         if(server == null) return;
 
         // Create Packets
-
-        PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.c, epl);
+        PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.e, epl);
         PacketPlayOutPlayerInfo add = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.a, epl);
 
-        applyActiveProfile(add, skin);
+        applyActiveProfile(add, spl, skin);
 
         List<Pair<EnumItemSlot, ItemStack>> items = new ArrayList<>();
 
@@ -86,6 +83,8 @@ public class SkinUpdater_v1_19_R1 implements SkinUpdater {
         // Send Packets
         for(EntityPlayer obs : epl.c.ac().t()) {
 
+            MidnightCoreAPI.getLogger().warn("Sending Packets to " + obs.displayName);
+
             obs.b.a(remove);
             obs.b.a(add);
 
@@ -104,7 +103,7 @@ public class SkinUpdater_v1_19_R1 implements SkinUpdater {
         epl.b.a(abilities);
         epl.b.a(equip);
 
-        server.execute(() -> {
+        server.g(() -> {
             server.ac().d(epl);
             server.ac().e(epl);
 
@@ -112,49 +111,45 @@ public class SkinUpdater_v1_19_R1 implements SkinUpdater {
         });
     }
 
-    private void applyActiveProfile(PacketPlayOutPlayerInfo packet, Skin skin) {
+    private void applyActiveProfile(PacketPlayOutPlayerInfo packet, Player player, Skin skin) {
 
         if(packet.c() != PacketPlayOutPlayerInfo.EnumPlayerInfoAction.a) return;
         List<PacketPlayOutPlayerInfo.PlayerInfoData> entries = packet.b();
 
-        GameProfile profile = null;
-        for(PacketPlayOutPlayerInfo.PlayerInfoData ent : entries) {
+        PacketPlayOutPlayerInfo.PlayerInfoData entry = null;
+
+        int index = 0;
+        for(; index < entries.size() ; index++) {
+            PacketPlayOutPlayerInfo.PlayerInfoData ent = entries.get(index);
             for(MPlayer u : MidnightCoreAPI.getInstance().getPlayerManager()) {
                 if(u.getUUID().equals(ent.a().getId())) {
-                    profile = ent.a();
+                    entry = ent;
                     break;
                 }
             }
-            if(profile != null) break;
+        }
+        if(entry == null) {
+            return;
         }
 
-        if(profile == null) return;
-        if(skin == null) return;
+        GameProfile profile = new GameProfile(entry.a().getId(), entry.a().getName());
 
-        GameProfile oldProfile = profile;
-
-        profile = new GameProfile(oldProfile.getId(), oldProfile.getName());
-
-        Player pl = Bukkit.getPlayer(profile.getId());
-        if(pl == null) return;
-
-        EntityPlayer epl = ((CraftPlayer) pl).getHandle();
+        EntityPlayer epl = ((CraftPlayer) player).getHandle();
 
         profile.getProperties().clear();
         profile.getProperties().putAll(epl.fy().getProperties());
 
-        profile.getProperties().get("textures").clear();
-        profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
+        if(skin != null) {
+            profile.getProperties().get("textures").clear();
+            profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
+        }
 
-        ProfilePublicKey key = epl.fz();
-        ProfilePublicKey.a publicKey = key == null ? null : key.b();
-
-        entries.set(0, new PacketPlayOutPlayerInfo.PlayerInfoData(
+        entries.set(index - 1, new PacketPlayOutPlayerInfo.PlayerInfoData(
                 profile,
-                pl.getPing(),
-                epl.d.b(),
-                epl.listName,
-                publicKey
+                entry.b(),
+                entry.c(),
+                entry.d(),
+                entry.e()
         ));
     }
 }

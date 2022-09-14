@@ -103,11 +103,7 @@ public class Adapter_v1_18_R2 implements SpigotAdapter {
         net.minecraft.world.item.ItemStack mis = getHandle(is);
 
         try {
-            String str = MItemStack.toNBT(sec);
-
-            MidnightCoreAPI.getLogger().info(str);
-
-            NBTTagCompound cmp = MojangsonParser.a(str);
+            NBTTagCompound cmp = MojangsonParser.a(MItemStack.toNBT(sec));
             mis.c(cmp);
 
         } catch (CommandSyntaxException ex) {

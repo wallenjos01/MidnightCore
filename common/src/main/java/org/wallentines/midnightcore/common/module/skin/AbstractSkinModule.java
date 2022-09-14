@@ -11,7 +11,6 @@ import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.module.skin.SkinUpdateEvent;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.common.util.MojangUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
@@ -134,7 +133,7 @@ public abstract class AbstractSkinModule implements SkinModule {
         Skin oldSkin = activeSkins.get(user);
         Skin newSkin = loadedSkins.get(user);
 
-        SkinUpdateEvent ev = new SkinUpdateEvent((AbstractPlayer<?>) user, oldSkin, newSkin);
+        SkinUpdateEvent ev = new SkinUpdateEvent(user, oldSkin, newSkin);
         Event.invoke(ev);
 
         if(!ev.isCancelled()) {

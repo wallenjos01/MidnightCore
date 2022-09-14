@@ -8,7 +8,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3;
@@ -161,27 +160,22 @@ public class FabricSkinModule extends AbstractSkinModule {
 
     private void applyActiveProfile(ClientboundPlayerInfoPacket packet, Skin skin) {
 
-        if(skin == null) return;
-
         if(packet.getAction() != ClientboundPlayerInfoPacket.Action.ADD_PLAYER) return;
         List<ClientboundPlayerInfoPacket.PlayerUpdate> entries = packet.getEntries();
 
-        GameProfile profile = null;
-        for(ClientboundPlayerInfoPacket.PlayerUpdate ent : entries) {
+        ClientboundPlayerInfoPacket.PlayerUpdate entry = null;
+        int index = 0;
+        for(; index < entries.size() ; index++) {
+            ClientboundPlayerInfoPacket.PlayerUpdate ent = entries.get(index);
             for(MPlayer u : MidnightCoreAPI.getInstance().getPlayerManager()) {
                 if(u.getUUID().equals(ent.getProfile().getId())) {
-                    profile = ent.getProfile();
+                    entry = ent;
                     break;
                 }
             }
-            if(profile != null) break;
         }
-
-        if(profile == null) return;
-
-        GameProfile oldProfile = profile;
-
-        profile = new GameProfile(oldProfile.getId(), oldProfile.getName());
+        if(entry == null || entry.getProfile() == null) return;
+        GameProfile profile = new GameProfile(entry.getProfile().getId(), entry.getProfile().getName());
 
         ServerPlayer player = MidnightCore.getInstance().getServer().getPlayerList().getPlayer(profile.getId());
         if(player == null) return;
@@ -189,17 +183,17 @@ public class FabricSkinModule extends AbstractSkinModule {
         profile.getProperties().clear();
         profile.getProperties().putAll(player.getGameProfile().getProperties());
 
-        profile.getProperties().get("textures").clear();
-        profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
+        if(skin != null) {
+            profile.getProperties().get("textures").clear();
+            profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
+        }
 
-        ProfilePublicKey.Data keyData = player.getProfilePublicKey() == null ? null : player.getProfilePublicKey().data();
-
-        entries.set(0, new ClientboundPlayerInfoPacket.PlayerUpdate(
+        entries.set(index - 1, new ClientboundPlayerInfoPacket.PlayerUpdate(
                 profile,
-                player.latency,
-                player.gameMode.getGameModeForPlayer(),
-                player.getTabListDisplayName(),
-                keyData
+                entry.getLatency(),
+                entry.getGameMode(),
+                entry.getDisplayName(),
+                entry.getProfilePublicKey()
         ));
     }
 

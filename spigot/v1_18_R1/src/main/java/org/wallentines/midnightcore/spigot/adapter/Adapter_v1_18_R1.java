@@ -15,6 +15,7 @@ import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
@@ -100,7 +101,7 @@ public class Adapter_v1_18_R1 implements SpigotAdapter {
         net.minecraft.world.item.ItemStack mis = getHandle(is);
 
         try {
-            NBTTagCompound cmp = MojangsonParser.a(sec.toString());
+            NBTTagCompound cmp = MojangsonParser.a(MItemStack.toNBT(sec));
             mis.c(cmp);
 
         } catch (CommandSyntaxException ex) {
@@ -139,7 +140,7 @@ public class Adapter_v1_18_R1 implements SpigotAdapter {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
         try {
-            NBTTagCompound nbt = MojangsonParser.a(tag.toString());
+            NBTTagCompound nbt = MojangsonParser.a(MItemStack.toNBT(tag));
             epl.a(nbt);
 
         } catch (CommandSyntaxException ex) {
