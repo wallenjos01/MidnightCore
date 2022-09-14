@@ -55,8 +55,7 @@ public class Adapter_v1_18_R2 implements SpigotAdapter {
     @Override
     public GameProfile getGameProfile(Player pl) {
 
-        EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        return epl.fq();
+        return ((CraftPlayer) pl).getProfile();
     }
 
     @Override

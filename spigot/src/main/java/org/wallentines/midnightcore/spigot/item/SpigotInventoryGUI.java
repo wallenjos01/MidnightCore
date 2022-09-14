@@ -87,18 +87,18 @@ public class SpigotInventoryGUI extends AbstractInventoryGUI {
     private static class GUIListener implements Listener {
 
         private static ClickType getActionType(org.bukkit.event.inventory.ClickType type) {
-            return switch (type) {
-                case LEFT -> ClickType.LEFT;
-                case SHIFT_LEFT -> ClickType.SHIFT_LEFT;
-                case RIGHT -> ClickType.RIGHT;
-                case SHIFT_RIGHT -> ClickType.SHIFT_RIGHT;
-                case MIDDLE -> ClickType.MIDDLE;
-                case NUMBER_KEY -> ClickType.NUMBER_KEY;
-                case DOUBLE_CLICK -> ClickType.DOUBLE;
-                case DROP -> ClickType.THROW;
-                case CONTROL_DROP -> ClickType.THROW_ALL;
-                default -> null;
-            };
+            switch (type) {
+                case LEFT: return ClickType.LEFT;
+                case SHIFT_LEFT: return ClickType.SHIFT_LEFT;
+                case RIGHT: return ClickType.RIGHT;
+                case SHIFT_RIGHT: return ClickType.SHIFT_RIGHT;
+                case MIDDLE: return ClickType.MIDDLE;
+                case NUMBER_KEY: return ClickType.NUMBER_KEY;
+                case DOUBLE_CLICK: return ClickType.DOUBLE;
+                case DROP: return ClickType.THROW;
+                case CONTROL_DROP: return ClickType.THROW_ALL;
+                default: return null;
+            }
         }
 
 

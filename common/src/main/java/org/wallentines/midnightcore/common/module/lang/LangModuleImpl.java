@@ -78,7 +78,8 @@ public class LangModuleImpl implements LangModule {
 
         PlaceholderSupplier<String> pl = inlinePlaceholders.get(ctx.getName());
         if(pl == null) for(Object o : args) {
-            if(o instanceof CustomPlaceholderInline ci) {
+            if(o instanceof CustomPlaceholderInline) {
+                CustomPlaceholderInline ci = (CustomPlaceholderInline) o;
                 if(ci.getId().equals(placeholder)) pl = ci;
             }
         }
@@ -93,7 +94,8 @@ public class LangModuleImpl implements LangModule {
 
         PlaceholderSupplier<MComponent> pl = placeholders.get(ctx.getName());
         if(pl == null) for(Object o : args) {
-            if(o instanceof CustomPlaceholder ci) {
+            if(o instanceof CustomPlaceholder) {
+                CustomPlaceholder ci = (CustomPlaceholder) o;
                 if(ci.getId().equals(placeholder)) pl = ci;
             }
         }
@@ -171,7 +173,8 @@ public class LangModuleImpl implements LangModule {
     public String getInlinePlaceholderValue(String key, String parameter, Object... args) {
 
         for(Object o : args) {
-            if(o instanceof CustomPlaceholderInline cpi) {
+            if(o instanceof CustomPlaceholderInline) {
+                CustomPlaceholderInline cpi = (CustomPlaceholderInline) o;
                 if(cpi.getId().equals(key)) return cpi.get();
             }
         }
@@ -184,7 +187,8 @@ public class LangModuleImpl implements LangModule {
     public MComponent getPlaceholderValue(String key, String parameter, Object... args) {
 
         for(Object o : args) {
-            if(o instanceof CustomPlaceholder cp) {
+            if(o instanceof CustomPlaceholder) {
+                CustomPlaceholder cp = (CustomPlaceholder) o;
                 if(cp.getId().equals(key)) return cp.get();
             }
         }

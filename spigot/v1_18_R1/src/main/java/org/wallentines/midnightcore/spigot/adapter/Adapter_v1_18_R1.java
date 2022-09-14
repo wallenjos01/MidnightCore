@@ -52,7 +52,7 @@ public class Adapter_v1_18_R1 implements SpigotAdapter {
 
     @Override
     public GameProfile getGameProfile(Player pl) {
-        return null;
+        return ((CraftPlayer) pl).getProfile();
     }
 
     @Override

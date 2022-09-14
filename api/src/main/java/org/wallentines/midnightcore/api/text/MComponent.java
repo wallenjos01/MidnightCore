@@ -125,7 +125,6 @@ public abstract class MComponent {
     public String toItemText() {
 
         if(MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() > 12) {
-            MidnightCoreAPI.getLogger().warn("Minor Version: " + MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion());
             return toString();
         }
 
