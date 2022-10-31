@@ -28,6 +28,7 @@ import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
 import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;
+import org.wallentines.midnightcore.fabric.module.session.FabricSessionModule;
 import org.wallentines.midnightcore.fabric.module.skin.FabricSkinModule;
 import org.wallentines.midnightcore.fabric.module.vanish.FabricVanishModule;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
@@ -101,9 +102,9 @@ public class MidnightCore implements ModInitializer {
         Registries.MODULE_REGISTRY.register(FabricSkinModule.ID, FabricSkinModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricSavepointModule.ID, FabricSavepointModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(DynamicLevelModule.ID, DynamicLevelModule.MODULE_INFO);
-        //Registries.MODULE_REGISTRY.register(DimensionModule.ID, DimensionModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricVanishModule.ID, FabricVanishModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricMessagingModule.ID, FabricMessagingModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(FabricSessionModule.ID, FabricSessionModule.MODULE_INFO);
 
         // Register some Requirements too
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), (pl,req,item) -> {
