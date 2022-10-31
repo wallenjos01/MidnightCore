@@ -4,6 +4,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -43,7 +44,7 @@ public class MixinLivingEntity {
         midnight_core_lastEvent = ev;
     }
 
-    @Inject(method = "eat", at=@At(value="HEAD"), cancellable = true)
+    @Inject(method = "eat", at=@At(value="INVOKE", target="Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"), cancellable = true)
     private void onEat(Level level, ItemStack itemStack, CallbackInfoReturnable<ItemStack> cir) {
 
         LivingEntity le = (LivingEntity) (Object) this;
@@ -52,8 +53,8 @@ public class MixinLivingEntity {
         Event.invoke(event);
 
         if(event.isCancelled()) {
+            le.gameEvent(GameEvent.EAT);
             cir.setReturnValue(itemStack);
-            cir.cancel();
         }
 
     }

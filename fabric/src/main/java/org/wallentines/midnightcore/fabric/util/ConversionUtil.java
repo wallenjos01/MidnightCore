@@ -8,6 +8,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightcore.api.text.*;
 import org.wallentines.midnightcore.api.text.TextColor;
+import org.wallentines.midnightcore.fabric.mixin.AccessorStyle;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -96,45 +97,16 @@ public class ConversionUtil {
         MStyle out = new MStyle();
         if(style.isEmpty()) return out;
 
+        AccessorStyle acc = (AccessorStyle) style;
+
         if(style.getColor() != null) out.withColor(TextColor.parse(style.getColor().serialize()));
+        out.withBold(acc.getBold());
+        out.withItalic(acc.getItalic());
+        out.withUnderlined(acc.getUnderlined());
+        out.withStrikethrough(acc.getStrikethrough());
+        out.withObfuscated(acc.getObfuscated());
 
-        String styleStr = style.toString().substring(7);
-        StringBuilder[] builders = new StringBuilder[2];
-        builders[0] = new StringBuilder();
-        builders[1] = new StringBuilder();
-
-        int index = 0;
-
-        for(char c : styleStr.toCharArray()) {
-            if(c == ',') {
-
-                String key = builders[0].toString();
-                String value = builders[1].toString();
-
-                Boolean val = value.equals("null") ? null : Boolean.valueOf(value);
-
-                switch (key) {
-                    case "bold" -> out.withBold(val);
-                    case "italic" -> out.withItalic(val);
-                    case "underlined" -> out.withUnderlined(val);
-                    case "strikethrough" -> out.withStrikethrough(val);
-                    case "obfuscated" -> out.withObfuscated(val);
-                    case "font" -> out.withFont(val == null || value.equals("minecraft:default") ? null : Identifier.parse(value));
-                }
-
-                builders[0] = new StringBuilder();
-                builders[1] = new StringBuilder();
-
-            } else if(c == '=') {
-
-                index = (index + 1) % 2;
-
-            } else if(c != ' ') {
-
-                builders[index].append(c);
-
-            }
-        }
+        out.withFont(toIdentifier(style.getFont()));
 
         return out;
     }

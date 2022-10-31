@@ -29,7 +29,7 @@ public class MixinServerPlayerGameMode {
     @Inject(method = "destroyBlock", at=@At(value="INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)V"), cancellable = true)
     private void onDestroyBlock(BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
 
-        BlockBreakEvent event = new BlockBreakEvent(player, blockPos, level.getBlockState(blockPos));
+        BlockBreakEvent event = new BlockBreakEvent(player.getLevel(), player, blockPos, level.getBlockState(blockPos));
         Event.invoke(event);
 
         if(event.isCancelled()) {
