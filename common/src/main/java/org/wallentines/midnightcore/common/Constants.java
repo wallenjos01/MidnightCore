@@ -60,7 +60,7 @@ public final class Constants {
             return reg.isWithin(pl.getLocation().getCoordinates());
         });
 
-        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "locale"), (pl,req,data) -> data.equals(pl.getLocale()));
+        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "locale"), (pl,req,data) -> data.contains("_") ? data.equals(pl.getLocale()) : pl.getLocale().startsWith(data));
 
     }
 

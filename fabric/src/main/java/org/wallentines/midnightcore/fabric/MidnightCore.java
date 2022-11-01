@@ -8,6 +8,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.*;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.lang.LangModule;
@@ -42,7 +43,6 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -129,20 +129,10 @@ public class MidnightCore implements ModInitializer {
             if(oit.isEmpty()) return false;
 
             Item it = oit.get();
+            int items = ContainerHelper.clearOrCountMatchingItems(sp.getInventory(), is -> is.getItem() == it, 0, true);
+            items += ContainerHelper.clearOrCountMatchingItems(sp.containerMenu.getCarried(), is -> is.getItem() == it, 0, true);
 
-            List<ItemStack> items = new ArrayList<>();
-            items.addAll(sp.getInventory().items);
-            items.addAll(sp.getInventory().armor);
-            items.addAll(sp.getInventory().offhand);
-
-            int currentCount = 0;
-            for(ItemStack is : items) {
-                if (is.getItem() == it) {
-                    currentCount += is.getCount();
-                }
-            }
-
-            return currentCount >= count;
+            return items >= count;
         });
 
         // Tell other mods that we are registering modules
