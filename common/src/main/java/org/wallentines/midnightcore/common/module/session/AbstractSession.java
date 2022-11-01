@@ -56,12 +56,17 @@ public abstract class AbstractSession implements Session {
         if(players.contains(player)) return false;
         if(!shouldAddPlayer(player)) return false;
 
-        spm.resetPlayer(player);
         spm.savePlayer(player, spId);
 
         players.add(player);
 
-        onAddPlayer(player);
+        try {
+            onAddPlayer(player);
+        } catch (Exception ex) {
+            LOGGER.warn("An error occurred while adding a player to a session!");
+            ex.printStackTrace();
+        }
+
         return true;
     }
 
@@ -73,7 +78,12 @@ public abstract class AbstractSession implements Session {
 
         players.remove(player);
 
-        onRemovePlayer(player);
+        try {
+            onRemovePlayer(player);
+        } catch (Exception ex) {
+            LOGGER.warn("An error occurred while removing a player from a session!");
+            ex.printStackTrace();
+        }
 
         if (players.isEmpty()) {
             shutdown();
@@ -144,12 +154,17 @@ public abstract class AbstractSession implements Session {
             try {
                 run.run();
             } catch (Exception ex) {
-                LOGGER.warn("An error occurred while shutting down a session!");
+                LOGGER.warn("An error occurred while running shutdown callbacks for a session!");
                 ex.printStackTrace();
             }
         }
 
-        onShutdown();
+        try {
+            onShutdown();
+        } catch (Exception ex) {
+            LOGGER.warn("An error occurred while shutting down a session!");
+            ex.printStackTrace();
+        }
         Event.unregisterAll(this);
     }
 
@@ -177,7 +192,7 @@ public abstract class AbstractSession implements Session {
     public static void registerPlaceholders(LangModule module) {
 
         if(module == null) return;
-        module.registerInlinePlaceholder(Constants.DEFAULT_NAMESPACE + "_session_player_count", PlaceholderSupplier.create(AbstractSession.class, s -> s.getPlayerCount() + "", () -> "0"));
+        module.registerInlinePlaceholder("session_player_count", PlaceholderSupplier.create(AbstractSession.class, s -> s.getPlayerCount() + "", () -> "0"));
     }
 
 }

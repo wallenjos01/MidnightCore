@@ -147,6 +147,11 @@ public class VelocityPlayer extends AbstractPlayer<Player> {
     }
 
     @Override
+    public float getHealth() {
+        return 0;
+    }
+
+    @Override
     public void applyResourcePack(String url, String hash, boolean force, MComponent promptMessage, Consumer<ResourcePackStatus> onResponse) {
 
     }

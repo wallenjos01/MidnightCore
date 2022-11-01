@@ -76,6 +76,11 @@ public class TestComponents {
             }
 
             @Override
+            public void executeOnServer(Runnable runnable) {
+
+            }
+
+            @Override
             public Random getRandom() {
                 return null;
             }

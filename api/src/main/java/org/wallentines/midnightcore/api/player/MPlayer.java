@@ -50,6 +50,8 @@ public interface MPlayer extends Skinnable {
 
     GameMode getGameMode();
 
+    float getHealth();
+
     void applyResourcePack(String url, String hash, boolean force, MComponent promptMessage, Consumer<ResourcePackStatus> onResponse);
 
     enum ResourcePackStatus {

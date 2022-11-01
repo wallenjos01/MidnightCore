@@ -46,7 +46,15 @@ public class MidnightCore {
         Constants.registerDefaults(JsonConfigProvider.INSTANCE);
 
         VelocityPlayerManager playerManager = new VelocityPlayerManager();
-        MidnightCoreImpl api = new MidnightCoreImpl(dataFolder, Version.SERIALIZER.deserialize("1.18.2"), DummyItem::new, playerManager, title -> null, (id,title) -> null, (str, b) -> server.getCommandManager().executeAsync(server.getConsoleCommandSource(), str));
+        MidnightCoreImpl api = new MidnightCoreImpl(
+                dataFolder,
+                Version.SERIALIZER.deserialize("1.19.2"),
+                DummyItem::new,
+                playerManager,
+                title -> null,
+                (id,title) -> null,
+                (str, b) -> server.getCommandManager().executeAsync(server.getConsoleCommandSource(), str),
+                run -> server.getScheduler().buildTask(this, run).schedule());
 
         Registries.MODULE_REGISTRY.register(VelocityMessagingModule.ID, VelocityMessagingModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(LastServerModule.ID, LastServerModule.MODULE_INFO);

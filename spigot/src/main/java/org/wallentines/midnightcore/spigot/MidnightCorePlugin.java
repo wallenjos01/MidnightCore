@@ -63,7 +63,8 @@ public class MidnightCorePlugin {
                 new SpigotPlayerManager(),
                 SpigotInventoryGUI::new,
                 SpigotScoreboard::new,
-                (str, b) -> server.dispatchCommand(server.getConsoleSender(), str)
+                (str, b) -> server.dispatchCommand(server.getConsoleSender(), str),
+                (run) -> server.getScheduler().runTask(MidnightCorePlugin.getInstance(), run)
         );
 
         Registries.MODULE_REGISTRY.register(AbstractSavepointModule.ID, SpigotSavepointModule.MODULE_INFO);

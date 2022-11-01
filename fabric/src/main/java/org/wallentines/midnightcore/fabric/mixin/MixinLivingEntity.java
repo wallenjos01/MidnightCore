@@ -27,7 +27,7 @@ public class MixinLivingEntity {
 
     }
 
-    @Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", at=@At(value = "HEAD"), cancellable = true)
+    @Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", at=@At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"), cancellable = true)
     public void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
 
         LivingEntity le = (LivingEntity) (Object) this;

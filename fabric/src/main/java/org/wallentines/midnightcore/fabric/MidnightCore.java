@@ -16,6 +16,7 @@ import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.common.Registries;
 import org.wallentines.midnightcore.common.module.lang.LangModuleImpl;
+import org.wallentines.midnightcore.fabric.command.ExecuteAugment;
 import org.wallentines.midnightcore.fabric.command.MainCommand;
 import org.wallentines.midnightcore.fabric.command.TestCommand;
 import org.wallentines.midnightcore.fabric.event.MidnightCoreAPICreatedEvent;
@@ -67,6 +68,7 @@ public class MidnightCore implements ModInitializer {
         Constants.CONFIG_DEFAULTS.set("vanilla_permissions", true);
         Constants.CONFIG_DEFAULTS.set("register_main_command", true);
         Constants.CONFIG_DEFAULTS.set("register_test_command", false);
+        Constants.CONFIG_DEFAULTS.set("augment_execute_command", true);
 
         // Determine Minecraft version
         Optional<ModContainer> cont = FabricLoader.getInstance().getModContainer("minecraft");
@@ -86,7 +88,8 @@ public class MidnightCore implements ModInitializer {
                 (str, b) -> {
                     CommandSourceStack sta = b ? server.createCommandSourceStack().withSuppressedOutput() : server.createCommandSourceStack();
                     server.getCommands().performPrefixedCommand(sta, str);
-                }
+                },
+                run -> server.submit(run)
         );
         MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version.toString());
 
@@ -148,6 +151,7 @@ public class MidnightCore implements ModInitializer {
         Event.register(CommandLoadEvent.class, this, event -> {
             if(api.getConfig().getBoolean("register_main_command")) MainCommand.register(event.getDispatcher());
             if(api.getConfig().getBoolean("register_test_command")) TestCommand.register(event.getDispatcher());
+            if(api.getConfig().getBoolean("augment_execute_command")) ExecuteAugment.register(event.getDispatcher());
         });
     }
 

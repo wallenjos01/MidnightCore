@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 public class CooldownRequirementType implements RequirementType<MPlayer> {
 
-    HashMap<Requirement<MPlayer>, HashMap<MPlayer, Long>> cooldowns = new HashMap<>();
+    private final HashMap<Requirement<MPlayer>, HashMap<MPlayer, Long>> cooldowns = new HashMap<>();
 
     @Override
     public boolean check(MPlayer player, Requirement<MPlayer> req, String value) {

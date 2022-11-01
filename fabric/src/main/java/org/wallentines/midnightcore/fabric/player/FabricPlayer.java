@@ -2,13 +2,13 @@ package org.wallentines.midnightcore.fabric.player;
 
 import com.mojang.authlib.GameProfile;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.GameType;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
@@ -217,6 +217,11 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
             case ADVENTURE -> GameMode.ADVENTURE;
             case SPECTATOR -> GameMode.SPECTATOR;
         }, () -> GameMode.SURVIVAL);
+    }
+
+    @Override
+    public float getHealth() {
+        return run(LivingEntity::getHealth, () -> 0.0f);
     }
 
     @Override

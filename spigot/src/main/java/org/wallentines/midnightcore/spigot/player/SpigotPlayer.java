@@ -146,6 +146,11 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
     }
 
     @Override
+    public float getHealth() {
+        return run(pl -> (float) pl.getHealth(), () -> 0.0f);
+    }
+
+    @Override
     public void applyResourcePack(String url, String hash, boolean force, MComponent promptMessage, Consumer<ResourcePackStatus> onResponse) {
 
     }

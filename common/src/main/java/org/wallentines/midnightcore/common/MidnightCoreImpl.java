@@ -4,16 +4,12 @@ import org.wallentines.midnightcore.api.item.InventoryGUI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
-import org.wallentines.midnightcore.api.requirement.CooldownRequirementType;
 import org.wallentines.midnightcore.api.text.CustomScoreboard;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.item.ItemConverter;
 import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigProvider;
-import org.wallentines.midnightlib.config.ConfigRegistry;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.FileConfig;
-import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
@@ -39,11 +35,13 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     private final Function<MComponent, InventoryGUI> guiFunction;
     private final BiFunction<String, MComponent, CustomScoreboard> scoreboardFunction;
     private final BiConsumer<String, Boolean> console;
+
+    private final Consumer<Runnable> serverSubmitter;
     private final Random random = new Random();
 
     private final ModuleManager<MidnightCoreAPI> moduleManager;
 
-    public MidnightCoreImpl(Path dataFolder, Version gameVersion, ItemConverter itemConverter, PlayerManager playerManager, Function<MComponent, InventoryGUI> guiFunction, BiFunction<String, MComponent, CustomScoreboard> scoreboardFunction, BiConsumer<String, Boolean> console) {
+    public MidnightCoreImpl(Path dataFolder, Version gameVersion, ItemConverter itemConverter, PlayerManager playerManager, Function<MComponent, InventoryGUI> guiFunction, BiFunction<String, MComponent, CustomScoreboard> scoreboardFunction, BiConsumer<String, Boolean> console, Consumer<Runnable> serverSubmitter) {
 
         super();
 
@@ -66,6 +64,7 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
         this.guiFunction = guiFunction;
         this.scoreboardFunction = scoreboardFunction;
         this.console = console;
+        this.serverSubmitter = serverSubmitter;
     }
 
     public void loadModules() {
@@ -130,6 +129,12 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     @Override
     public void executeConsoleCommand(String command, boolean log) {
         console.accept(command, log);
+    }
+
+
+    @Override
+    public void executeOnServer(Runnable runnable) {
+        serverSubmitter.accept(runnable);
     }
 
     @Override

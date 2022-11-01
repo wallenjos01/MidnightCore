@@ -115,7 +115,11 @@ public abstract class MidnightCoreAPI {
      */
     public abstract void executeConsoleCommand(String command, boolean log);
 
-
+    /**
+     * Submits a function to be run synchronously on the server thread on the next tick
+     * @param runnable The function to run
+     */
+    public abstract void executeOnServer(Runnable runnable);
 
     /**
      * Retrieves the global Random object
