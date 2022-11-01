@@ -112,11 +112,23 @@ public class MidnightCore implements ModInitializer {
         // Register some Requirements too
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), (pl,req,item) -> {
             ServerPlayer sp = FabricPlayer.getInternal(pl);
+
             int index = item.indexOf(",");
-            String id = item.substring(0, index);
-            int count = Integer.parseInt(item.substring(index + 1));
+
+            String id = item;
+            int count = 1;
+
+            if(index > -1) {
+                id = item.substring(0, index);
+                count = Integer.parseInt(item.substring(index + 1));
+            }
+            if(id.length() == 0) return false;
 
             ResourceLocation loc = new ResourceLocation(id);
+            Optional<Item> oit = Registry.ITEM.getOptional(loc);
+            if(oit.isEmpty()) return false;
+
+            Item it = oit.get();
 
             List<ItemStack> items = new ArrayList<>();
             items.addAll(sp.getInventory().items);
@@ -125,7 +137,7 @@ public class MidnightCore implements ModInitializer {
 
             int currentCount = 0;
             for(ItemStack is : items) {
-                if (Registry.ITEM.getKey(is.getItem()).equals(loc)) {
+                if (is.getItem() == it) {
                     currentCount += is.getCount();
                 }
             }
