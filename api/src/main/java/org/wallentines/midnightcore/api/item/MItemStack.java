@@ -240,8 +240,8 @@ public interface MItemStack {
 
     ConfigSerializer<MItemStack> SERIALIZER = ConfigSerializer.create(
             ConfigSerializer.entry(Identifier.class, "type", MItemStack::getType),
-            ConfigSerializer.entry(PrimitiveSerializers.INT, "count", MItemStack::getCount).orDefault(1),
-            ConfigSerializer.entry(ConfigSection.class, "tag", MItemStack::getTag).orDefault(new ConfigSection()),
+            PrimitiveSerializers.INT.entry("count", MItemStack::getCount).orDefault(1),
+            ConfigSerializer.RAW.entry("tag", MItemStack::getTag).orDefault(new ConfigSection()),
             (type, count, tag) -> MidnightCoreAPI.getInstance().createItem(type, count, tag)
     );
 

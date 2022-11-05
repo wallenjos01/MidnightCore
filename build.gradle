@@ -43,25 +43,4 @@ subprojects {
         useJUnit()
         maxHeapSize = '1G'
     }
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-                groupId = "${project.group}.${project.mod_id}"
-            }
-        }
-        repositories {
-            maven {
-                if (project.hasProperty("pubUrl")) {
-                    url = project.pubUrl as String
-                    credentials {
-                        username project.pubUser as String
-                        password project.pubPass as String
-                    }
-                }
-            }
-        }
-    }
-
 }

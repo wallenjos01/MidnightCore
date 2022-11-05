@@ -18,7 +18,6 @@ include 'fabric'
 include 'velocity'
 include 'bungee'
 
-include 'spigot:adapter'
 include 'spigot:v1_8_R1'
 include 'spigot:v1_8_R2'
 include 'spigot:v1_8_R3'

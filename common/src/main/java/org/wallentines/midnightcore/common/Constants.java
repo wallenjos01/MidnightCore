@@ -41,7 +41,7 @@ public final class Constants {
         ConfigRegistry.INSTANCE.registerSerializer(MItemStack.class, AbstractItem.SERIALIZER);
         ConfigRegistry.INSTANCE.registerSerializer(Skin.class, Skin.SERIALIZER);
 
-        ConfigRegistry.INSTANCE.registerSerializer((Class<Requirement<MPlayer>>) ((Class<?>)Requirement.class), new Requirement.RequirementSerializer<>(Registries.REQUIREMENT_REGISTRY));
+        ConfigRegistry.INSTANCE.registerSerializer((Class<Requirement<MPlayer>>) ((Class<?>) Requirement.class), new Requirement.RequirementSerializer<>(Registries.REQUIREMENT_REGISTRY));
 
         ConfigRegistry.INSTANCE.registerInlineSerializer(MComponent.class, MComponent.INLINE_SERIALIZER);
         ConfigRegistry.INSTANCE.registerInlineSerializer(Location.class, Location.SERIALIZER);
@@ -50,17 +50,11 @@ public final class Constants {
         Registries.MODULE_REGISTRY.register(DataModuleImpl.ID, DataModuleImpl.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(LangModuleImpl.ID, LangModuleImpl.MODULE_INFO);
 
-
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "cooldown"), new CooldownRequirementType());
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "permission"), (pl,req,data) -> pl.hasPermission(data));
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "world"), (pl,req,data) -> pl.getLocation().getWorldId().equals(Identifier.parse(data)));
-        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "in_region"), (pl,req,data) -> {
-
-            Region reg = Region.SERIALIZER.deserialize(data);
-            return reg.isWithin(pl.getLocation().getCoordinates());
-        });
-
-        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "locale"), (pl,req,data) -> data.contains("_") ? data.equals(pl.getLocale()) : pl.getLocale().startsWith(data));
+        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "in_region"), (pl,req,data) -> Region.SERIALIZER.deserialize(data).isWithin(pl.getLocation().getCoordinates()));
+        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "locale"), (pl,req,data) -> data.contains("_") ? pl.getLocale().equals(data) : pl.getLocale().startsWith(data));
 
     }
 

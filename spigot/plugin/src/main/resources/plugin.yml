@@ -1,5 +1,5 @@
 name: '${id}'
-main: '${group}.${id}.spigot.${mainClass}'
+main: '${group}.${id}.spigot.Main'
 version: '${version}'
 author: M1dnight_Ninja
 api-version: 1.13

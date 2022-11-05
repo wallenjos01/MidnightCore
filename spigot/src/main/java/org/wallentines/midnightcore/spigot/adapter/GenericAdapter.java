@@ -252,35 +252,35 @@ public class GenericAdapter implements SpigotAdapter {
 
         private static final ConfigSerializer<ItemStack> ITEM_SERIALIZER = ConfigSerializer.create(
 
-            ConfigSerializer.entry(PrimitiveSerializers.STRING, "type", it -> it.getType().name()),
+            PrimitiveSerializers.STRING.entry("type", it -> it.getType().name()),
             type -> new ItemStack(Material.valueOf(type))
         );
 
         private static final InlineSerializer<PotionEffectType> EFFECT_TYPE_SERIALIZER = InlineSerializer.of(PotionEffectType::getName, PotionEffectType::getByName);
 
         private static final ConfigSerializer<PotionEffect> EFFECT_SERIALIZER = ConfigSerializer.create(
-                ConfigSerializer.entry(EFFECT_TYPE_SERIALIZER, "type", PotionEffect::getType),
-                ConfigSerializer.entry(PrimitiveSerializers.INT, "duration", PotionEffect::getDuration),
-                ConfigSerializer.entry(PrimitiveSerializers.INT, "amplifier", PotionEffect::getAmplifier),
-                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "ambient", PotionEffect::isAmbient),
-                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "particles", PotionEffect::hasParticles),
-                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "icon", PotionEffect::hasIcon),
+                EFFECT_TYPE_SERIALIZER.entry("type", PotionEffect::getType),
+                PrimitiveSerializers.INT.entry("duration", PotionEffect::getDuration),
+                PrimitiveSerializers.INT.entry("amplifier", PotionEffect::getAmplifier),
+                PrimitiveSerializers.BOOLEAN.entry("ambient", PotionEffect::isAmbient),
+                PrimitiveSerializers.BOOLEAN.entry("particles", PotionEffect::hasParticles),
+                PrimitiveSerializers.BOOLEAN.entry("icon", PotionEffect::hasIcon),
                 PotionEffect::new
         );
 
         public static final ConfigSerializer<PlayerTag> SERIALIZER = ConfigSerializer.create(
-                ConfigSerializer.entry(PrimitiveSerializers.INT, "fire_ticks", pt -> pt.fireTicks),
-                ConfigSerializer.listEntry(EFFECT_SERIALIZER, "effects", pt -> pt.effects),
-                ConfigSerializer.listEntry(ITEM_SERIALIZER, "items", pt -> pt.inventory),
-                ConfigSerializer.listEntry(ITEM_SERIALIZER, "armor", pt -> pt.armor),
-                ConfigSerializer.entry(PrimitiveSerializers.DOUBLE, "health", pt -> pt.health),
-                ConfigSerializer.entry(PrimitiveSerializers.DOUBLE, "max_health", pt -> pt.maxHealth),
-                ConfigSerializer.entry(PrimitiveSerializers.INT, "hunger", pt -> pt.hunger),
-                ConfigSerializer.entry(PrimitiveSerializers.FLOAT, "saturation", pt -> pt.saturation),
-                ConfigSerializer.entry(PrimitiveSerializers.INT, "exp", pt -> pt.exp),
-                ConfigSerializer.entry(PrimitiveSerializers.INT, "levels", pt -> pt.expLevels),
-                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "allow_flight", pt -> pt.allowFlight),
-                ConfigSerializer.entry(PrimitiveSerializers.BOOLEAN, "flying", pt -> pt.flying),
+                PrimitiveSerializers.INT.entry("fire_ticks", pt -> pt.fireTicks),
+                EFFECT_SERIALIZER.listOf().entry("effects", pt -> pt.effects),
+                ITEM_SERIALIZER.listOf().entry("items", pt -> pt.inventory),
+                ITEM_SERIALIZER.listOf().entry("armor", pt -> pt.armor),
+                PrimitiveSerializers.DOUBLE.entry("health", pt -> pt.health),
+                PrimitiveSerializers.DOUBLE.entry("max_health", pt -> pt.maxHealth),
+                PrimitiveSerializers.INT.entry("hunger", pt -> pt.hunger),
+                PrimitiveSerializers.FLOAT.entry("saturation", pt -> pt.saturation),
+                PrimitiveSerializers.INT.entry("exp", pt -> pt.exp),
+                PrimitiveSerializers.INT.entry("levels", pt -> pt.expLevels),
+                PrimitiveSerializers.BOOLEAN.entry("allow_flight", pt -> pt.allowFlight),
+                PrimitiveSerializers.BOOLEAN.entry("flying", pt -> pt.flying),
                 PlayerTag::new
         );
 

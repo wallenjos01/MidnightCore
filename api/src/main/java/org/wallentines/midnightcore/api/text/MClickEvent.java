@@ -28,8 +28,8 @@ public class MClickEvent {
     }
 
     public static final ConfigSerializer<MClickEvent> SERIALIZER = ConfigSerializer.create(
-            ConfigSerializer.entry(PrimitiveSerializers.STRING, "action", ev -> ev.action.getId()),
-            ConfigSerializer.entry(PrimitiveSerializers.STRING, "value", ev -> ev.value),
+            PrimitiveSerializers.STRING.entry("action", ev -> ev.action.getId()),
+            PrimitiveSerializers.STRING.entry("value", ev -> ev.value),
             (action, value) -> new MClickEvent(ClickAction.getById(action), value));
 
     public enum ClickAction {

@@ -34,7 +34,6 @@ dependencies {
     compileOnly project(':common')
 
     compileOnly project(':spigot')
-    compileOnly project(':spigot:adapter')
     compileOnly project(':spigot:v1_8_R1')
     compileOnly project(':spigot:v1_8_R2')
     compileOnly project(':spigot:v1_8_R3')
@@ -60,7 +59,6 @@ dependencies {
     shade project(':common')
 
     shade project(':spigot')
-    shade project(':spigot:adapter')
     shade project(':spigot:v1_8_R1')
     shade project(':spigot:v1_8_R2')
     shade project(':spigot:v1_8_R3')

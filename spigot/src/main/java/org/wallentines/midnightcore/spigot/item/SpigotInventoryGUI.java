@@ -13,7 +13,7 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.item.AbstractInventoryGUI;
-import org.wallentines.midnightcore.spigot.MidnightCorePlugin;
+import org.wallentines.midnightcore.spigot.MidnightCore;
 import org.wallentines.midnightcore.spigot.player.SpigotPlayer;
 
 public class SpigotInventoryGUI extends AbstractInventoryGUI {
@@ -135,7 +135,7 @@ public class SpigotInventoryGUI extends AbstractInventoryGUI {
 
     static {
 
-        Bukkit.getServer().getPluginManager().registerEvents(new GUIListener(), MidnightCorePlugin.getInstance());
+        Bukkit.getServer().getPluginManager().registerEvents(new GUIListener(), MidnightCore.getInstance());
 
     }
 }

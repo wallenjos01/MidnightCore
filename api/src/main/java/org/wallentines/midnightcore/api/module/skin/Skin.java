@@ -31,9 +31,9 @@ public class Skin {
 
 
     public static final ConfigSerializer<Skin> SERIALIZER = ConfigSerializer.create(
-            ConfigSerializer.entry(UUID.class, "uid", Skin::getUUID),
-            ConfigSerializer.entry(PrimitiveSerializers.STRING, "b64", Skin::getValue),
-            ConfigSerializer.entry(PrimitiveSerializers.STRING, "sig", Skin::getSignature),
+            PrimitiveSerializers.UUID.entry("uid", Skin::getUUID),
+            PrimitiveSerializers.STRING.entry("b64", Skin::getValue),
+            PrimitiveSerializers.STRING.entry("sig", Skin::getSignature),
             Skin::new
     );
 

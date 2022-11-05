@@ -64,8 +64,8 @@ public class MHoverEvent {
     }
 
     public static final ConfigSerializer<MHoverEvent> SERIALIZER = ConfigSerializer.create(
-            ConfigSerializer.entry(PrimitiveSerializers.STRING, "action", ev -> ev.action.getId()),
-            ConfigSerializer.entry(ConfigSection.class, "contents", ev -> ev.data),
+            PrimitiveSerializers.STRING.entry("action", ev -> ev.action.getId()),
+            ConfigSerializer.RAW.entry("contents", ev -> ev.data),
             (action, contents) -> new MHoverEvent(HoverAction.getById(action), contents));
 
     public enum HoverAction {

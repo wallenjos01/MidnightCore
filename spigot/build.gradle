@@ -12,12 +12,31 @@ dependencies {
 
     compileOnly "org.spigotmc:spigot-api:${project.spigot_version}"
     compileOnly 'com.mojang:authlib:3.11.49'
-    compileOnly 'com.google.code.gson:gson:2.9.0'
+    compileOnly 'com.google.code.gson:gson:2.10'
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
     compileOnly 'org.wallentines:midnightlib:1.0-SNAPSHOT'
+
     compileOnly project(':api')
     compileOnly project(':common')
+}
 
-    compileOnly project(':spigot:adapter')
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = "${project.group}.${project.mod_id}"
+        }
+    }
+    repositories {
+        maven {
+            if (project.hasProperty("pubUrl")) {
+                url = project.pubUrl as String
+                credentials {
+                    username project.pubUser as String
+                    password project.pubPass as String
+                }
+            }
+        }
+    }
 }

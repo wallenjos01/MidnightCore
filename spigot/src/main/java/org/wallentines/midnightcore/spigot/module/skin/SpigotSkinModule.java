@@ -11,7 +11,7 @@ import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.common.util.MojangUtil;
-import org.wallentines.midnightcore.spigot.MidnightCorePlugin;
+import org.wallentines.midnightcore.spigot.MidnightCore;
 import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
 import org.wallentines.midnightcore.spigot.adapter.SkinUpdater;
 import org.wallentines.midnightcore.spigot.player.SpigotPlayer;
@@ -35,7 +35,7 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
             return false;
         }
 
-        Bukkit.getPluginManager().registerEvents(this, MidnightCorePlugin.getInstance());
+        Bukkit.getPluginManager().registerEvents(this, MidnightCore.getInstance());
 
         return true;
     }

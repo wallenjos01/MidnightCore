@@ -18,6 +18,6 @@ dependencies {
 
     compileOnly(project(':api'))
     compileOnly(project(':common'))
-    compileOnly(project(':spigot:adapter'))
+    compileOnly project(':spigot')
 
 }

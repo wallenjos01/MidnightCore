@@ -3,11 +3,11 @@ package org.wallentines.midnightcore.spigot;
 import org.wallentines.midnightcore.spigot.adapter.Adapters;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class MidnightCore extends JavaPlugin {
+public class Main extends JavaPlugin {
     @Override
     public void onLoad() {
 
-        MidnightCorePlugin.onLoad(this);
+        MidnightCore.onLoad(this);
 
     }
 
@@ -17,7 +17,7 @@ public class MidnightCore extends JavaPlugin {
         // Adapter
         Adapters.findAdapter();
 
-        MidnightCorePlugin.onEnable(getDataFolder(), getServer());
+        MidnightCore.onEnable(getDataFolder(), getServer());
 
     }
 

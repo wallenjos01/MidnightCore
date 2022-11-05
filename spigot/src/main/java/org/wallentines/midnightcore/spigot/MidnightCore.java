@@ -25,7 +25,7 @@ import org.wallentines.midnightlib.config.ConfigRegistry;
 import java.io.File;
 import java.nio.file.Path;
 
-public class MidnightCorePlugin {
+public class MidnightCore {
 
     private static final Logger LOGGER = LogManager.getLogger("MidnightCore");
 
@@ -64,7 +64,7 @@ public class MidnightCorePlugin {
                 SpigotInventoryGUI::new,
                 SpigotScoreboard::new,
                 (str, b) -> server.dispatchCommand(server.getConsoleSender(), str),
-                (run) -> server.getScheduler().runTask(MidnightCorePlugin.getInstance(), run)
+                (run) -> server.getScheduler().runTask(MidnightCore.getInstance(), run)
         );
 
         Registries.MODULE_REGISTRY.register(AbstractSavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
