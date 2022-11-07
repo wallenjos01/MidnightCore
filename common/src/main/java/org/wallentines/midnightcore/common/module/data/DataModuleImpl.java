@@ -16,35 +16,36 @@ public class DataModuleImpl implements DataModule {
     private final HashMap<Path, DataProviderImpl> providers = new HashMap<>();
     private DataProviderImpl global;
 
-    private MidnightCoreAPI api;
+    private boolean enabled = false;
 
     @Override
     public DataProvider getGlobalProvider() {
+        if(!enabled) throw Constants.MODULE_DISABLED;
         return global;
     }
 
     @Override
     public DataProvider getOrCreateProvider(Path folderPath) {
+        if(!enabled) throw Constants.MODULE_DISABLED;
         return providers.computeIfAbsent(folderPath, k -> new DataProviderImpl(folderPath));
     }
 
     @Override
     public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
 
-        this.api = data;
-        reload(section);
+        String globalFolder = section.getString(CONFIG_GLOBAL_FOLDER);
+        Path folderPath = data.getDataFolder().toPath().resolve(globalFolder);
+        global = new DataProviderImpl(folderPath);
 
+        enabled = true;
         return true;
     }
 
     @Override
-    public void reload(ConfigSection config) {
-
-        String globalFolder = config.getString(CONFIG_GLOBAL_FOLDER);
-
-        Path folderPath = api.getDataFolder().toPath().resolve(globalFolder);
-        global = new DataProviderImpl(folderPath);
-
+    public void disable() {
+        if(!enabled) throw Constants.MODULE_DISABLED;
+        global.saveAll();
+        enabled = false;
     }
 
     private static final String CONFIG_GLOBAL_FOLDER = "global_folder_name";

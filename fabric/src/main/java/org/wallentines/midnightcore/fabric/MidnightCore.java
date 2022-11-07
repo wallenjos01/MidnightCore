@@ -24,6 +24,7 @@ import org.wallentines.midnightcore.fabric.event.MidnightCoreAPICreatedEvent;
 import org.wallentines.midnightcore.fabric.event.MidnightCoreLoadModulesEvent;
 import org.wallentines.midnightcore.fabric.event.server.CommandLoadEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
+import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
 import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
@@ -154,6 +155,10 @@ public class MidnightCore implements ModInitializer {
             if(api.getConfig().getBoolean("register_main_command")) MainCommand.register(event.getDispatcher());
             if(api.getConfig().getBoolean("register_test_command")) TestCommand.register(event.getDispatcher());
             if(api.getConfig().getBoolean("augment_execute_command")) ExecuteAugment.register(event.getDispatcher());
+        });
+
+        Event.register(ServerStopEvent.class, this, event -> {
+            api.shutdown();
         });
     }
 

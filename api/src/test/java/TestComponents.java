@@ -84,6 +84,16 @@ public class TestComponents {
             public Random getRandom() {
                 return null;
             }
+
+            @Override
+            public void reload() {
+
+            }
+
+            @Override
+            public void shutdown() {
+
+            }
         };
 
 

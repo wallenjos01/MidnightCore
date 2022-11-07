@@ -68,12 +68,9 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     }
 
     public void loadModules() {
-
         ConfigSection sec = getConfig().getOrCreateSection("modules");
-        sec.fill(ModuleManager.generateConfig(Registries.MODULE_REGISTRY));
-        config.save();
-
         moduleManager.loadAll(sec, this, Registries.MODULE_REGISTRY);
+        config.save();
     }
 
     @Override
@@ -140,5 +137,16 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     @Override
     public Random getRandom() {
         return random;
+    }
+
+    @Override
+    public void reload() {
+        ConfigSection sec = getConfig().getOrCreateSection("modules");
+        moduleManager.reloadAll(sec, this, Registries.MODULE_REGISTRY);
+    }
+
+    @Override
+    public void shutdown() {
+        moduleManager.unloadAll();
     }
 }

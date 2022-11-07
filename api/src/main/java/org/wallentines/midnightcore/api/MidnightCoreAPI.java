@@ -128,6 +128,11 @@ public abstract class MidnightCoreAPI {
      */
     public abstract Random getRandom();
 
+
+    public abstract void reload();
+
+    public abstract void shutdown();
+
     /**
      * Returns the global MidnightCoreAPI instance
      *

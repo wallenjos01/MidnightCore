@@ -22,6 +22,7 @@ public final class Constants {
     public static final Version VERSION = Version.SERIALIZER.deserialize("1.0.0");
     public static final String DEFAULT_NAMESPACE = "midnightcore";
 
+    public static final IllegalStateException MODULE_DISABLED = new IllegalStateException("Attempt to access disabled Module!");
     public static final ConfigSection CONFIG_DEFAULTS = new ConfigSection()
             .with("modules", new ConfigSection());
 
