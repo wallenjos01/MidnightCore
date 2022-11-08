@@ -21,8 +21,6 @@ import org.wallentines.midnightcore.fabric.event.server.CommandLoadEvent;
 import org.wallentines.midnightcore.fabric.event.server.CommandSendEvent;
 import org.wallentines.midnightlib.event.Event;
 
-import java.lang.reflect.Field;
-
 @Mixin(Commands.class)
 public abstract class MixinCommands {
 
@@ -31,25 +29,11 @@ public abstract class MixinCommands {
     @Inject(method = "<init>", at=@At(value = "FIELD", target="Lnet/minecraft/commands/Commands$CommandSelection;includeIntegrated:Z", opcode = Opcodes.GETFIELD))
     private void beforeIntegrated(Commands.CommandSelection commandSelection, CommandBuildContext ctx, CallbackInfo ci) {
 
-        if(MidnightCoreAPI.getInstance().getConfig().getBoolean("vanilla_permissions")) {
-
-            try {
-                Field field = CommandNode.class.getDeclaredField("requirement");
-                field.setAccessible(true);
-
-                for(CommandNode<CommandSourceStack> node : dispatcher.getRoot().getChildren()) {
-                    if(!(node instanceof LiteralCommandNode<CommandSourceStack> lit)) continue;
-
-                    try {
-                        field.set(node, lit.getRequirement().or(Permissions.require("minecraft.command." + lit.getLiteral())));
-                    } catch (IllegalAccessException ex) {
-                        MidnightCoreAPI.getLogger().warn("Unable to apply vanilla command permission for " + lit.getLiteral() + "!");
-                        ex.printStackTrace();
-                    }
-                }
-
-            } catch (NoSuchFieldException ex) {
-                MidnightCoreAPI.getLogger().warn("Unable to register vanilla command permissions!");
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api != null && api.getConfig().getBoolean("vanilla_permissions")) {
+            for(CommandNode<CommandSourceStack> node : dispatcher.getRoot().getChildren()) {
+                if(!(node instanceof LiteralCommandNode<CommandSourceStack> lit)) continue;
+                ((AccessorCommandNode) lit).setRequirement(lit.getRequirement().or(Permissions.require("minecraft.command." + lit.getLiteral())));
             }
         }
 
