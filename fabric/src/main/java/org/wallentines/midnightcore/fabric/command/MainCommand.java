@@ -9,8 +9,8 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.lang.CustomPlaceholderInline;
-import org.wallentines.midnightcore.api.module.lang.LangProvider;
+import org.wallentines.midnightcore.api.text.CustomPlaceholderInline;
+import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.Registries;
 import org.wallentines.midnightcore.fabric.MidnightCore;
@@ -71,21 +71,23 @@ public class MainCommand {
 
     private static int moduleLoadCommand(CommandContext<CommandSourceStack> context) {
 
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
         LangProvider prov = MidnightCore.getInstance().getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
         ModuleInfo<MidnightCoreAPI> info = Registries.MODULE_REGISTRY.get(id);
-        if(info == null) {
+        if(api == null || info == null) {
             CommandUtil.sendCommandFailure(context, prov, "command.error.module_not_found");
             return 0;
         }
 
-        if(MidnightCoreAPI.getInstance().getModuleManager().isModuleLoaded(id)) {
+
+        if(api.getModuleManager().isModuleLoaded(id)) {
             CommandUtil.sendCommandFailure(context, prov, "command.error.module_loaded");
             return 0;
         }
 
-        MidnightCoreAPI.getInstance().getModuleManager().loadModule(info, MidnightCoreAPI.getInstance(), MidnightCoreAPI.getInstance().getConfig().getSection("modules").getOrCreateSection(id.toString()));
+        api.getModuleManager().loadModule(info, MidnightCoreAPI.getInstance(), api.getConfig().getSection("modules").getOrCreateSection(id.toString()));
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.loaded", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -93,15 +95,16 @@ public class MainCommand {
 
     private static int moduleUnloadCommand(CommandContext<CommandSourceStack> context) {
 
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
         LangProvider prov = MidnightCore.getInstance().getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        if(!MidnightCoreAPI.getInstance().getModuleManager().isModuleLoaded(id)) {
+        if(api == null || !api.getModuleManager().isModuleLoaded(id)) {
             CommandUtil.sendCommandFailure(context, prov, "command.error.module_not_loaded");
             return 0;
         }
 
-        MidnightCoreAPI.getInstance().getModuleManager().unloadModule(id);
+        api.getModuleManager().unloadModule(id);
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.unloaded", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -109,10 +112,14 @@ public class MainCommand {
 
     private static int moduleEnableCommand(CommandContext<CommandSourceStack> context) {
 
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) return 0;
+
         LangProvider prov = MidnightCore.getInstance().getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        MidnightCoreAPI.getInstance().getConfig().getSection("modules").getOrCreateSection(id.toString()).set("enabled", true);
+        api.getConfig().getSection("modules").getOrCreateSection(id.toString()).set("enabled", true);
+        api.saveConfig();
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.enabled", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -120,10 +127,14 @@ public class MainCommand {
 
     private static int moduleDisableCommand(CommandContext<CommandSourceStack> context) {
 
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) return 0;
+
         LangProvider prov = MidnightCore.getInstance().getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        MidnightCoreAPI.getInstance().getConfig().getSection("modules").getOrCreateSection(id.toString()).set("enabled", false);
+        api.getConfig().getSection("modules").getOrCreateSection(id.toString()).set("enabled", false);
+        api.saveConfig();
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.disabled", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -131,11 +142,14 @@ public class MainCommand {
 
     private static int moduleListCommand(CommandContext<CommandSourceStack> context) {
 
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) return 0;
+
         LangProvider prov = MidnightCore.getInstance().getLangProvider();
 
         context.getSource().sendSuccess(ConversionUtil.toComponent(prov.getMessage("command.module.list.header", "en_us")), false);
 
-        ModuleManager<MidnightCoreAPI> manager = MidnightCoreAPI.getInstance().getModuleManager();
+        ModuleManager<MidnightCoreAPI> manager = api.getModuleManager();
         for (ModuleInfo<MidnightCoreAPI> info : Registries.MODULE_REGISTRY) {
 
             CustomPlaceholderInline cp = CustomPlaceholderInline.create("module_id", info.getId().toString());
@@ -154,7 +168,9 @@ public class MainCommand {
         LangProvider prov = MidnightCore.getInstance().getLangProvider();
 
         long elapsed = System.currentTimeMillis();
-        MidnightCoreAPI.getInstance().reload();
+
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api != null) api.reload();
 
         elapsed = System.currentTimeMillis() - elapsed;
 

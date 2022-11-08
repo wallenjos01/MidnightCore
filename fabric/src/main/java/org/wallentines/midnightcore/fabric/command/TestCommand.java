@@ -15,7 +15,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.lang.LangModule;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointModule;
 import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.module.skin.Skinnable;
@@ -23,8 +22,10 @@ import org.wallentines.midnightcore.api.module.vanish.VanishModule;
 import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
+import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.Registries;
+import org.wallentines.midnightcore.common.util.Util;
 import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelContext;
@@ -87,7 +88,7 @@ public class TestCommand {
         ServerPlayer spl = extractPlayer(context);
         if(spl == null) return 0;
 
-        SkinModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(SkinModule.class);
+        SkinModule mod = Util.getModule(SkinModule.class);
 
         mod.getOnlineSkinAsync(SKIN_UUID, skin -> {
             try {
@@ -110,7 +111,7 @@ public class TestCommand {
         if(spl == null) return 0;
 
         try {
-            SavepointModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(SavepointModule.class);
+            SavepointModule mod = Util.getModule(SavepointModule.class);
             mod.savePlayer(FabricPlayer.wrap(spl), SAVEPOINT_ID);
 
             context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Saved!")), false);
@@ -128,7 +129,7 @@ public class TestCommand {
         if(spl == null) return 0;
 
         try {
-            SavepointModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(SavepointModule.class);
+            SavepointModule mod = Util.getModule(SavepointModule.class);
             mod.loadPlayer(FabricPlayer.wrap(spl), SAVEPOINT_ID);
 
             context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Loaded!")), false);
@@ -148,7 +149,7 @@ public class TestCommand {
 
             MPlayer mpl = FabricPlayer.wrap(spl);
 
-            VanishModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(VanishModule.class);
+            VanishModule mod = Util.getModule(VanishModule.class);
             if(mod.isVanished(mpl)) {
 
                 mod.revealPlayer(mpl);
@@ -174,14 +175,14 @@ public class TestCommand {
 
             MPlayer mpl = FabricPlayer.wrap(spl);
 
-            DynamicLevelModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(DynamicLevelModule.class);
+            DynamicLevelModule mod = Util.getModule(DynamicLevelModule.class);
             if(mod == null) return 0;
 
             WorldConfig conf = new WorldConfig(new Identifier(Constants.DEFAULT_NAMESPACE, "test"))
                 .generator(EmptyGenerator.create(Biomes.FOREST))
                 .rootDimensionType(LevelStem.NETHER);
 
-            Path dataFolder = MidnightCoreAPI.getInstance().getDataFolder().toPath();
+            Path dataFolder = Util.getOr(MidnightCoreAPI.getInstance(), inst -> inst.getDataFolder().toPath(), () -> Path.of(""));
 
             DynamicLevelStorage storage = mod.createLevelStorage(dataFolder, dataFolder.resolve("backups"));
             DynamicLevelContext ctx = storage.createWorldContext("test", conf);
@@ -224,10 +225,9 @@ public class TestCommand {
 
             if(spl == null) return 0;
 
-            LangModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(LangModule.class);
             FabricPlayer mpl = FabricPlayer.wrap(spl);
 
-            MComponent txt = mod.parseText(arg, mpl, MidnightCore.getInstance().getLangProvider());
+            MComponent txt = PlaceholderManager.INSTANCE.parseText(arg, mpl, MidnightCore.getInstance().getLangProvider());
             mpl.sendMessage(txt);
 
         } catch (Throwable th) {

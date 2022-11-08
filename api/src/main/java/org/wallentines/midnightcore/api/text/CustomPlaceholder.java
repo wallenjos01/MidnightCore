@@ -1,10 +1,9 @@
-package org.wallentines.midnightcore.api.module.lang;
-
-import org.wallentines.midnightcore.api.text.MComponent;
+package org.wallentines.midnightcore.api.text;
 
 public interface CustomPlaceholder extends PlaceholderSupplier<MComponent> {
 
     MComponent get();
+
     String getId();
 
     @Override
@@ -20,6 +19,13 @@ public interface CustomPlaceholder extends PlaceholderSupplier<MComponent> {
     static CustomPlaceholder create(String id, MComponent out) {
         return new CustomPlaceholder() {
             @Override public MComponent get() { return out; }
+            @Override public String getId() { return id; }
+        };
+    }
+
+    static CustomPlaceholderInline create(String id, String out) {
+        return new CustomPlaceholderInline() {
+            @Override public String get() { return out; }
             @Override public String getId() { return id; }
         };
     }

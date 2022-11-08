@@ -1,6 +1,6 @@
 package org.wallentines.midnightcore.api.module.session;
 
-import org.wallentines.midnightcore.api.module.lang.LangProvider;
+import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
 

@@ -11,12 +11,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.*;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.lang.LangModule;
-import org.wallentines.midnightcore.api.module.lang.LangProvider;
+import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.common.Registries;
-import org.wallentines.midnightcore.common.module.lang.LangModuleImpl;
 import org.wallentines.midnightcore.fabric.command.ExecuteAugment;
 import org.wallentines.midnightcore.fabric.command.MainCommand;
 import org.wallentines.midnightcore.fabric.command.TestCommand;
@@ -146,8 +144,11 @@ public class MidnightCore implements ModInitializer {
         Event.invoke(new MidnightCoreAPICreatedEvent(api));
 
         // Create a lang provider for our use
-        LangModule module = api.getModuleManager().getModule(LangModuleImpl.class);
-        provider = module.createProvider(dataFolder.resolve("lang"), JsonConfigProvider.INSTANCE.loadFromStream(getClass().getResourceAsStream("/midnightcore/lang/en_us.json")));
+        provider = new LangProvider(
+                dataFolder.resolve("lang"),
+                JsonConfigProvider.INSTANCE.loadFromStream(getClass().getResourceAsStream("/midnightcore/lang/en_us.json")),
+                api.getServerLocale()
+        );
 
         // Events
         Event.register(ServerStartEvent.class, this, event -> server = event.getServer());
@@ -157,9 +158,7 @@ public class MidnightCore implements ModInitializer {
             if(api.getConfig().getBoolean("augment_execute_command")) ExecuteAugment.register(event.getDispatcher());
         });
 
-        Event.register(ServerStopEvent.class, this, event -> {
-            api.shutdown();
-        });
+        Event.register(ServerStopEvent.class, this, event -> api.shutdown());
     }
 
     public MinecraftServer getServer() {

@@ -80,6 +80,13 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     }
 
     @Override
+    public void saveConfig() {
+
+        config.getRoot().fill(Constants.CONFIG_DEFAULTS);
+        config.save();
+    }
+
+    @Override
     public File getDataFolder() {
         return dataFolder;
     }
@@ -140,8 +147,14 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     }
 
     @Override
+    public String getServerLocale() {
+        return config.getRoot().getString("locale");
+    }
+
+    @Override
     public void reload() {
-        ConfigSection sec = getConfig().getOrCreateSection("modules");
+        config.reload();
+        ConfigSection sec = config.getRoot().getOrCreateSection("modules");
         moduleManager.reloadAll(sec, this, Registries.MODULE_REGISTRY);
     }
 

@@ -2,15 +2,15 @@ package org.wallentines.midnightcore.common.module.session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.lang.LangModule;
-import org.wallentines.midnightcore.api.module.lang.LangProvider;
-import org.wallentines.midnightcore.api.module.lang.PlaceholderSupplier;
+import org.wallentines.midnightcore.api.text.LangProvider;
+import org.wallentines.midnightcore.api.text.PlaceholderManager;
+import org.wallentines.midnightcore.api.text.PlaceholderSupplier;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointModule;
 import org.wallentines.midnightcore.api.module.session.Session;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.Constants;
+import org.wallentines.midnightcore.common.util.Util;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -40,8 +40,10 @@ public abstract class AbstractSession implements Session {
     public AbstractSession(String namespace) {
 
         this.uid = UUID.randomUUID();
+        this.spm = Util.getModule(SavepointModule.class);
 
-        this.spm = MidnightCoreAPI.getInstance().getModuleManager().getModule(SavepointModule.class);
+        if(spm == null) throw new IllegalStateException("Instantiating a Session requires the Savepoint module to be loaded!");
+
         this.spId = new Identifier(namespace, uid.toString());
     }
 
@@ -189,10 +191,9 @@ public abstract class AbstractSession implements Session {
     protected abstract void onRemovePlayer(MPlayer player);
     protected abstract void onShutdown();
 
-    public static void registerPlaceholders(LangModule module) {
+    public static void registerPlaceholders(PlaceholderManager registry) {
 
-        if(module == null) return;
-        module.registerInlinePlaceholder("session_player_count", PlaceholderSupplier.create(AbstractSession.class, s -> s.getPlayerCount() + "", () -> "0"));
+        registry.getInlinePlaceholders().register("session_player_count", PlaceholderSupplier.create(AbstractSession.class, s -> s.getPlayerCount() + "", () -> "0"));
     }
 
 }

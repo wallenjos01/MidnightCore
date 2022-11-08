@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.midnightcore.api.item.InventoryGUI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.MPlayer;
@@ -34,6 +35,12 @@ public abstract class MidnightCoreAPI {
      * @return The main configuration
      */
     public abstract ConfigSection getConfig();
+
+    /**
+     * Saves the main config to disk
+     */
+    public abstract void saveConfig();
+
 
     /**
      * Gets the plugin/mod's data folder, where all configuration is stored.
@@ -128,16 +135,29 @@ public abstract class MidnightCoreAPI {
      */
     public abstract Random getRandom();
 
+    /**
+     * Retrieves the default locale used by the server
+     *
+     * @return The default locale used by the server
+     */
+    public abstract String getServerLocale();
 
+    /**
+     * Reloads the main config and all registered modules
+     */
     public abstract void reload();
 
+    /**
+     * Disables all loaded modules
+     */
     public abstract void shutdown();
 
     /**
-     * Returns the global MidnightCoreAPI instance
+     * Returns the global MidnightCoreAPI instance. Will be null if the instance has not been created yet
      *
      * @return The global api
      */
+    @Nullable
     public static MidnightCoreAPI getInstance() {
         return INSTANCE;
     }

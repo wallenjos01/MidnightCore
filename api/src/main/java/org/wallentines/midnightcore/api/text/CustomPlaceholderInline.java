@@ -1,4 +1,4 @@
-package org.wallentines.midnightcore.api.module.lang;
+package org.wallentines.midnightcore.api.text;
 
 public interface CustomPlaceholderInline extends PlaceholderSupplier<String> {
 

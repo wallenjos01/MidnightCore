@@ -14,9 +14,11 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
+import org.wallentines.midnightcore.common.util.Util;
 import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.event.player.ResourcePackStatusEvent;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
@@ -34,9 +36,10 @@ import java.util.function.Consumer;
 
 public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
 
-    String locale = "en_us";
 
-    private static final HashMap<ServerPlayer, Consumer<ResourcePackStatus>> awaitingResourcePack = new HashMap<>();
+    private static final HashMap<ServerPlayer, Consumer<ResourcePackStatus>> AWAITING_RESOURCE_PACK = new HashMap<>();
+
+    private String locale = LangProvider.getServerLocale();
 
     protected FabricPlayer(UUID uuid) {
         super(uuid);
@@ -44,7 +47,10 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
 
     @Override
     public String getUsername() {
-        return run(player -> { return player.getGameProfile().getName(); }, () -> getUUID().toString());
+        return run(player -> player.getGameProfile().getName(), () -> {
+            Optional<GameProfile> prof = MidnightCore.getInstance().getServer().getProfileCache().get(getUUID());
+            return prof.map(GameProfile::getName).orElseGet(() -> getUUID().toString());
+        });
     }
 
     @Override
@@ -233,13 +239,17 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
 
             String outHash = hash == null ? "" : hash;
             player.connection.send(new ClientboundResourcePackPacket(url, outHash, force, ConversionUtil.toComponent(promptMessage)));
-            awaitingResourcePack.put(player, onResponse);
+            AWAITING_RESOURCE_PACK.put(player, onResponse);
         }, () -> { });
 
     }
 
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
     public static FabricPlayer wrap(ServerPlayer player) {
-        return (FabricPlayer) MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(player.getUUID());
+        return (FabricPlayer) Util.getOr(MidnightCoreAPI.getInstance(), inst -> inst.getPlayerManager().getPlayer(player.getUUID()), () -> new FabricPlayer(player.getUUID()));
     }
 
     public static ServerPlayer getInternal(MPlayer player) {
@@ -249,7 +259,7 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     static {
 
         Event.register(ResourcePackStatusEvent.class, FabricPlayer.class, ev ->
-            awaitingResourcePack.computeIfPresent(ev.getPlayer(), (k, v) -> {
+            AWAITING_RESOURCE_PACK.computeIfPresent(ev.getPlayer(), (k, v) -> {
                 v.accept(ev.getStatus());
                 return null;
             }

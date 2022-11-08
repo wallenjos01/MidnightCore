@@ -18,10 +18,13 @@ public abstract class AbstractVanishModule implements VanishModule {
     protected Set<MPlayer> globalVanished = new HashSet<>();
     protected HashMap<MPlayer, Set<MPlayer>> vanished = new HashMap<>();
 
+    protected MidnightCoreAPI api;
+
     @Override
     public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
 
-        reload(section);
+        this.api = data;
+        this.hideMessages = section.getBoolean("hide_join_messages");
 
         Event.register(SavepointCreatedEvent.class, this, ev -> {
 
@@ -46,7 +49,7 @@ public abstract class AbstractVanishModule implements VanishModule {
                 vanishPlayer(ev.getPlayer());
             }
             for(UUID u : sec.getListFiltered("vanished", UUID.class)) {
-                MPlayer mpl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(u);
+                MPlayer mpl = api.getPlayerManager().getPlayer(u);
                 vanishPlayerFor(mpl, ev.getPlayer());
             }
         });
@@ -57,17 +60,10 @@ public abstract class AbstractVanishModule implements VanishModule {
     }
 
     @Override
-    public void reload(ConfigSection config) {
-
-        hideMessages = config.getBoolean("hide_join_messages");
-
-    }
-
-    @Override
     public void vanishPlayer(MPlayer player) {
 
         if(!globalVanished.contains(player)) {
-            for(MPlayer observer : MidnightCoreAPI.getInstance().getPlayerManager()) {
+            for(MPlayer observer : api.getPlayerManager()) {
                 doVanish(player, observer);
             }
             globalVanished.add(player);
@@ -90,7 +86,7 @@ public abstract class AbstractVanishModule implements VanishModule {
 
         if(globalVanished.contains(player)) {
             globalVanished.remove(player);
-            for(MPlayer observer : MidnightCoreAPI.getInstance().getPlayerManager()) {
+            for(MPlayer observer : api.getPlayerManager()) {
                 doReveal(player, observer);
             }
         }

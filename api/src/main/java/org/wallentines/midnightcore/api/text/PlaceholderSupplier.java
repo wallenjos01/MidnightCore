@@ -1,4 +1,4 @@
-package org.wallentines.midnightcore.api.module.lang;
+package org.wallentines.midnightcore.api.text;
 
 import org.wallentines.midnightlib.config.serialization.Functions;
 
@@ -116,7 +116,7 @@ public interface PlaceholderSupplier<T> {
 
         private final HashMap<Class<?>, Integer> indicesByClass = new HashMap<>();
 
-        public PlaceholderContext(String name, Object[] args, String parameter) {
+        public PlaceholderContext(String name, String parameter, Object... args) {
             this.name = name;
             this.args = args;
             this.parameter = parameter;

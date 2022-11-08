@@ -1,101 +1,14 @@
 import org.junit.Assert;
 import org.junit.Test;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.item.InventoryGUI;
-import org.wallentines.midnightcore.api.item.MItemStack;
-import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightcore.api.player.PlayerManager;
-import org.wallentines.midnightcore.api.text.*;
-import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigRegistry;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
-import org.wallentines.midnightlib.module.ModuleManager;
-import org.wallentines.midnightlib.registry.Identifier;
-import org.wallentines.midnightlib.registry.Registry;
-import org.wallentines.midnightlib.requirement.RequirementType;
 
-import java.io.File;
-import java.util.Random;
+import org.wallentines.midnightcore.api.text.*;
+import org.wallentines.midnightlib.config.ConfigRegistry;
+import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
 public class TestComponents {
 
     @Test
     public void testSerialization() {
-
-        new MidnightCoreAPI() {
-
-            @Override
-            public ConfigSection getConfig() {
-                return null;
-            }
-
-            @Override
-            public File getDataFolder() {
-                return null;
-            }
-
-            @Override
-            public Version getGameVersion() {
-                return Version.SERIALIZER.deserialize("1.18.1");
-            }
-
-            @Override
-            public ModuleManager<MidnightCoreAPI> getModuleManager() {
-                return null;
-            }
-
-            @Override
-            public Registry<RequirementType<MPlayer>> getRequirementRegistry() {
-                return null;
-            }
-
-            @Override
-            public PlayerManager getPlayerManager() {
-                return null;
-            }
-
-            @Override
-            public MItemStack createItem(Identifier id, int count, ConfigSection nbt) {
-                return null;
-            }
-
-            @Override
-            public InventoryGUI createGUI(MComponent title) {
-                return null;
-            }
-
-            @Override
-            public CustomScoreboard createScoreboard(String id, MComponent title) {
-                return null;
-            }
-
-            @Override
-            public void executeConsoleCommand(String command, boolean log) {
-
-            }
-
-            @Override
-            public void executeOnServer(Runnable runnable) {
-
-            }
-
-            @Override
-            public Random getRandom() {
-                return null;
-            }
-
-            @Override
-            public void reload() {
-
-            }
-
-            @Override
-            public void shutdown() {
-
-            }
-        };
-
 
         ConfigRegistry.INSTANCE.setupDefaults("minecraft", JsonConfigProvider.INSTANCE);
         ConfigRegistry.INSTANCE.registerInlineSerializer(TextColor.class, TextColor.SERIALIZER);

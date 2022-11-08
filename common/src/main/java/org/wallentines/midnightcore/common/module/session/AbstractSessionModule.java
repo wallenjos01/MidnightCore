@@ -1,10 +1,10 @@
 package org.wallentines.midnightcore.common.module.session;
 
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.lang.LangModule;
 import org.wallentines.midnightcore.api.module.session.Session;
 import org.wallentines.midnightcore.api.module.session.SessionModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -74,7 +74,7 @@ public abstract class AbstractSessionModule implements SessionModule {
     @Override
     public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
 
-        AbstractSession.registerPlaceholders(MidnightCoreAPI.getInstance().getModuleManager().getModule(LangModule.class));
+        AbstractSession.registerPlaceholders(PlaceholderManager.INSTANCE);
         return true;
     }
 

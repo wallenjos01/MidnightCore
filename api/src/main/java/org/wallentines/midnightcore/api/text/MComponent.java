@@ -119,12 +119,12 @@ public abstract class MComponent {
             return toString();
         }
 
-        return toPlainText('&', MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() > 15 ? '#' : null);
+        return toPlainText('&', getGameVersion() > 15 ? '#' : null);
     }
 
     public String toItemText() {
 
-        if(MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() > 12) {
+        if(getGameVersion() > 12) {
             return toString();
         }
 
@@ -205,6 +205,13 @@ public abstract class MComponent {
         }
 
         return parsePlainText(s);
+    }
+
+    private static int getGameVersion() {
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) return 19;
+
+        return api.getGameVersion().getMinorVersion();
     }
 
     private static MComponent parsePlainText(String content) {
@@ -288,29 +295,29 @@ public abstract class MComponent {
     protected abstract void onSerialize(ConfigSection sec);
 
     // Static Fields
-    public static final ConfigSerializer<MComponent> SERIALIZER = new ConfigSerializer<MComponent>() {
+    public static final ConfigSerializer<MComponent> SERIALIZER = new ConfigSerializer<>() {
 
         @Override
         public MComponent deserialize(ConfigSection section) {
 
             ComponentType type = null;
-            for(String s : section.getKeys()) {
+            for (String s : section.getKeys()) {
                 ComponentType ct = ComponentType.getById(s);
-                if(ct != null) {
+                if (ct != null) {
                     type = ct;
                     break;
                 }
             }
 
-            if(type == null) return null;
+            if (type == null) return null;
 
             MComponent out = type.deserialize(section).withStyle(MStyle.SERIALIZER.deserialize(section));
 
-            if(section.has("clickEvent")) out.clickEvent = section.get("clickEvent", MClickEvent.class);
-            if(section.has("hoverEvent")) out.hoverEvent = section.get("hoverEvent", MHoverEvent.class);
+            if (section.has("clickEvent")) out.clickEvent = section.get("clickEvent", MClickEvent.class);
+            if (section.has("hoverEvent")) out.hoverEvent = section.get("hoverEvent", MHoverEvent.class);
 
-            if(section.has("insertion", String.class)) out.insertion = section.getString("insertion");
-            if(section.has("extra", List.class)) {
+            if (section.has("insertion", String.class)) out.insertion = section.getString("insertion");
+            if (section.has("extra", List.class)) {
                 out.children.addAll(section.getList("extra", MComponent.class));
             }
 
@@ -323,18 +330,18 @@ public abstract class MComponent {
             ConfigSection sec = new ConfigSection()
                     .with(object.type.getId(), object.content);
 
-            if(object.style != null) sec.fill(MStyle.SERIALIZER.serialize(object.style));
-            if(object.clickEvent != null) sec.set("clickEvent", object.clickEvent);
-            if(object.hoverEvent != null) sec.set("hoverEvent", object.hoverEvent);
+            if (object.style != null) sec.fill(MStyle.SERIALIZER.serialize(object.style));
+            if (object.clickEvent != null) sec.set("clickEvent", object.clickEvent);
+            if (object.hoverEvent != null) sec.set("hoverEvent", object.hoverEvent);
 
             object.onSerialize(sec);
 
             List<ConfigSection> extra = new ArrayList<>();
-            for(MComponent comp : object.children) {
+            for (MComponent comp : object.children) {
                 extra.add(serialize(comp));
             }
-            if(!extra.isEmpty()) sec.set("extra", extra);
-            if(object.insertion != null) sec.set("insertion", object.insertion);
+            if (!extra.isEmpty()) sec.set("extra", extra);
+            if (object.insertion != null) sec.set("insertion", object.insertion);
 
             return sec;
         }
