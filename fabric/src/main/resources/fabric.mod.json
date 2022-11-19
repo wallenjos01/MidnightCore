@@ -11,6 +11,7 @@
     "mixins": [
         "${id}.mixins.json"
     ],
+    "accessWidener": "${id}.accesswidener",
     "depends": {
         "fabricloader": ">=${fabricLoader}",
         "minecraft": ">=${minecraftVersion}",

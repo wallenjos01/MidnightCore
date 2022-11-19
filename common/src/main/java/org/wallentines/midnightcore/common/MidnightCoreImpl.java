@@ -70,6 +70,9 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     public void loadModules() {
         ConfigSection sec = getConfig().getOrCreateSection("modules");
         moduleManager.loadAll(sec, this, Registries.MODULE_REGISTRY);
+
+        getLogger().info("Loaded " + moduleManager.getCount() + " modules");
+
         config.save();
     }
 

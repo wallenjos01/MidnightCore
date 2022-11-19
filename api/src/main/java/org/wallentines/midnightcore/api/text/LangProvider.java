@@ -61,14 +61,7 @@ public class LangProvider {
     public String getRawMessage(String key, String locale) {
 
         if(locale == null) locale = serverLocale;
-
-        LangRegistry reg = getEntries(locale);
-        return reg.getMessage(key, () -> {
-            if(reg == registries.get(serverLocale)) {
-                return key;
-            }
-            return getRawMessage(key, serverLocale);
-        });
+        return getEntries(locale).getMessage(key, () -> getEntries(serverLocale).getMessage(key, () -> key));
     }
 
     public boolean hasKey(String key) {
@@ -91,7 +84,23 @@ public class LangProvider {
         return getRawMessage(key, locale);
     }
 
-    void reload() {
+    public void loadEntries(String locale, LangRegistry reg) {
+        registries.put(locale, reg);
+
+        FileConfig conf = FileConfig.findOrCreate(locale, folder);
+        conf.getRoot().fill(reg.save());
+        conf.save();
+    }
+
+    public String getDefaultLocale() {
+        return serverLocale;
+    }
+
+    public File getFolder() {
+        return folder;
+    }
+
+    public void reload() {
 
         registries.clear();
 

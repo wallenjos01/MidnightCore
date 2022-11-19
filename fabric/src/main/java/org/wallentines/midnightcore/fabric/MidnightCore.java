@@ -27,6 +27,7 @@ import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
+import org.wallentines.midnightcore.fabric.module.extension.ExtensionModule;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
 import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;
 import org.wallentines.midnightcore.fabric.module.session.FabricSessionModule;
@@ -107,6 +108,7 @@ public class MidnightCore implements ModInitializer {
         Registries.MODULE_REGISTRY.register(FabricVanishModule.ID, FabricVanishModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricMessagingModule.ID, FabricMessagingModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricSessionModule.ID, FabricSessionModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(ExtensionModule.ID, ExtensionModule.MODULE_INFO);
 
         // Register some Requirements too
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), (pl,req,item) -> {

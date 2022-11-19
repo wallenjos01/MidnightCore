@@ -40,12 +40,15 @@
     "MixinServerChunkCache",
     "MixinServerGamePacketListener",
     "MixinServerLevel",
+    "MixinServerLoginPacketListener",
     "MixinServerPlayer",
     "MixinServerPlayerGameMode",
     "MixinTimeCommand"
   ],
   "client": [
+    "MixinClientLoginPacketListener"
   ],
+  "priority": 1010,
   "injectors": {
     "defaultRequire": 1
   }

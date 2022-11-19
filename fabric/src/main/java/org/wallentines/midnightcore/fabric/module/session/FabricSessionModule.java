@@ -18,7 +18,7 @@ public class FabricSessionModule extends AbstractSessionModule {
     public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
         Event.register(ServerStartEvent.class, this, event -> event.getServer().addTickable(this::tickAll));
         Event.register(ServerStopEvent.class, this, event -> shutdownAll());
-        Event.register(PlayerLeaveEvent.class, this, event -> {
+        Event.register(PlayerLeaveEvent.class, this, 5, event -> {
             MPlayer mpl = FabricPlayer.wrap(event.getPlayer());
             Session sess = getSession(mpl);
             if(sess != null) sess.removePlayer(mpl);
