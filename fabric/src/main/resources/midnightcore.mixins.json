@@ -46,7 +46,8 @@
     "MixinTimeCommand"
   ],
   "client": [
-    "MixinClientLoginPacketListener"
+    "MixinClientLoginPacketListener",
+    "MixinClientPacketListener"
   ],
   "priority": 1010,
   "injectors": {

@@ -14,8 +14,10 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
 import org.wallentines.midnightcore.fabric.event.server.CustomMessageEvent;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
+import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -43,20 +45,27 @@ public class FabricMessagingModule extends AbstractMessagingModule {
 
     private void onMessage(CustomMessageEvent event) {
 
+        if(event.isHandled()) return;
+
         MPlayer player = FabricPlayer.wrap(event.getSource());
         FriendlyByteBuf buf = event.getData();
 
         try {
             if (!buf.isReadable() || buf.refCnt() == 0) return;
 
+            Identifier id = ConversionUtil.toIdentifier(event.getPacketId());
+            if(!handlers.contains(id)) return;
+
             DataInput input = new DataInputStream(new ByteArrayInputStream(buf.accessByteBufWithCorrectSize()));
 
             try {
-                handleRaw(player, input);
+                handle(player, id, input);
             } catch (Exception ex) {
                 MidnightCoreAPI.getLogger().warn("An exception occurred while processing a plugin message!");
                 ex.printStackTrace();
             }
+
+            event.setHandled(true);
 
         } catch (IllegalReferenceCountException ex) {
             // Ignore

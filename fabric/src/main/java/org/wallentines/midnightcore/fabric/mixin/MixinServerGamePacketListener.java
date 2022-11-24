@@ -90,14 +90,17 @@ public abstract class MixinServerGamePacketListener {
                 packet.allowsListing())));
     }
 
-    @Inject(method = "handleCustomPayload", at=@At(value="HEAD"))
+    @Inject(method = "handleCustomPayload", at=@At(value="HEAD"), cancellable = true)
     private void onCustomPayload(ServerboundCustomPayloadPacket packet, CallbackInfo ci) {
 
-        server.submit(() -> Event.invoke(new CustomMessageEvent(packet.getData(), player)));
+        CustomMessageEvent ev = new CustomMessageEvent(packet.getIdentifier(), packet.getData(), player);
+        Event.invoke(ev);
+
+        if(ev.isHandled()) ci.cancel();
     }
 
     @Inject(method = "handleResourcePackResponse", at=@At(value="HEAD"))
-    private void onCustomPayload(ServerboundResourcePackPacket packet, CallbackInfo ci) {
+    private void onResourcePack(ServerboundResourcePackPacket packet, CallbackInfo ci) {
 
         MPlayer.ResourcePackStatus status = switch (packet.getAction()) {
             case ACCEPTED -> MPlayer.ResourcePackStatus.ACCEPTED;

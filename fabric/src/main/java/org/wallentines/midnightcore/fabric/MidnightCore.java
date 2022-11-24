@@ -15,6 +15,7 @@ import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.common.Registries;
+import org.wallentines.midnightcore.common.util.FileUtil;
 import org.wallentines.midnightcore.fabric.command.ExecuteAugment;
 import org.wallentines.midnightcore.fabric.command.MainCommand;
 import org.wallentines.midnightcore.fabric.command.TestCommand;
@@ -146,8 +147,11 @@ public class MidnightCore implements ModInitializer {
         Event.invoke(new MidnightCoreAPICreatedEvent(api));
 
         // Create a lang provider for our use
+        Path lang = dataFolder.resolve("lang");
+        FileUtil.tryCreateDirectory(lang);
+
         provider = new LangProvider(
-                dataFolder.resolve("lang"),
+                lang,
                 JsonConfigProvider.INSTANCE.loadFromStream(getClass().getResourceAsStream("/midnightcore/lang/en_us.json")),
                 api.getServerLocale()
         );

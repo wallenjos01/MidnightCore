@@ -44,24 +44,6 @@ public abstract class AbstractMessagingModule implements MessagingModule {
 
     protected abstract void send(MPlayer player, Identifier id, byte[] data);
 
-    protected void handleRaw(MPlayer sender, DataInput data) {
-
-        Identifier id;
-
-        try {
-            String channel = data.readUTF();
-
-            if(channel.isEmpty()) return;
-            id = Identifier.parseOrDefault(channel, Constants.DEFAULT_NAMESPACE);
-
-        } catch (Exception ex) {
-            // Not for us
-            return;
-        }
-
-        handle(sender, id, data);
-    }
-
     protected void handle(MPlayer sender, Identifier id, DataInput data) {
 
         MessageHandler handler = handlers.get(id);

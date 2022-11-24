@@ -7,11 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.fabric.event.server.ServerBeginQueryEvent;
-import org.wallentines.midnightcore.fabric.event.world.BlockBreakEvent;
-import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.Module;
@@ -109,27 +106,5 @@ public class ExtensionModule implements Module<MidnightCoreAPI> {
 
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "extension");
     public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(ExtensionModule::new, ID, new ConfigSection().with("extensions", new ConfigSection()));
-
-    private static class DummyExtension implements Module<ExtensionModule> {
-        @Override
-        public boolean initialize(ConfigSection section, ExtensionModule data) {
-
-            Event.register(BlockBreakEvent.class, this, ev -> {
-
-                MPlayer mpl = FabricPlayer.wrap(ev.getPlayer());
-                if(data.isExtensionSupported(mpl, getClass())) {
-                    mpl.sendMessage(new MTextComponent("dummy component enabled"));
-                }
-
-            });
-
-            return true;
-        }
-    }
-
-    static {
-        final Identifier DUMMY_ID = new Identifier(Constants.DEFAULT_NAMESPACE, "dummy");
-        SUPPORTED_EXTENSIONS.register(DUMMY_ID, new ModuleInfo<>(DummyExtension::new, DUMMY_ID, new ConfigSection()));
-    }
 
 }
