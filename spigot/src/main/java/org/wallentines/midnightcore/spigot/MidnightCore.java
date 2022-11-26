@@ -7,7 +7,7 @@ import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
-import org.wallentines.midnightcore.common.Registries;
+import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.common.module.savepoint.AbstractSavepointModule;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.spigot.config.YamlConfigProvider;

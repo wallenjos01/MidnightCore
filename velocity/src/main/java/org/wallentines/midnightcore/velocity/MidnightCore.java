@@ -9,7 +9,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
-import org.wallentines.midnightcore.common.Registries;
+import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.velocity.event.MidnightCoreInitializeEvent;
 import org.wallentines.midnightcore.velocity.item.DummyItem;
 import org.wallentines.midnightcore.velocity.module.globaljoin.GlobalJoinModule;

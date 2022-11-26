@@ -116,4 +116,22 @@ public class LangProvider {
         return MidnightCoreAPI.getInstance() != null ? MidnightCoreAPI.getInstance().getServerLocale() : "en_us";
     }
 
+    public static void registerPlaceholders(PlaceholderManager manager) {
+
+        manager.getPlaceholders().register("lang", ctx -> {
+
+            String param = ctx.getParameter();
+            LangProvider prov = ctx.getArgument(LangProvider.class);
+            MPlayer player = ctx.getArgument(MPlayer.class);
+
+            if(prov != null) {
+                String locale = player == null ? prov.serverLocale : player.getLocale();
+                return prov.getMessage(param, locale, ctx.getArgs());
+            }
+
+            return new MTextComponent(param);
+        });
+
+    }
+
 }

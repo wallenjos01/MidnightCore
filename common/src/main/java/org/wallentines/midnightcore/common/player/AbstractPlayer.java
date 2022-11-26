@@ -4,6 +4,7 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.common.util.Util;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
@@ -66,20 +67,29 @@ public abstract class AbstractPlayer<T> implements MPlayer {
 
     @Override
     public void setSkin(Skin skin) {
-        SkinModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(SkinModule.class);
-        mod.setSkin(this, skin);
-        mod.updateSkin(this);
+        SkinModule mod = MidnightCoreAPI.getModule(SkinModule.class);
+        if(mod != null) {
+            mod.setSkin(this, skin);
+            mod.updateSkin(this);
+        }
     }
 
     @Override
     public void resetSkin() {
-        SkinModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(SkinModule.class);
-        mod.resetSkin(this);
-        mod.updateSkin(this);
+        SkinModule mod = MidnightCoreAPI.getModule(SkinModule.class);
+        if(mod != null) {
+            mod.resetSkin(this);
+            mod.updateSkin(this);
+        }
     }
 
     @Override
     public Skin getSkin() {
-        return MidnightCoreAPI.getInstance().getModuleManager().getModule(SkinModule.class).getSkin(this);
+
+        SkinModule mod = MidnightCoreAPI.getModule(SkinModule.class);
+        if(mod != null) {
+            return mod.getSkin(this);
+        }
+        return null;
     }
 }

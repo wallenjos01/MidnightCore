@@ -1,6 +1,7 @@
 package org.wallentines.midnightcore.common;
 
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.PlaceholderSupplier;
 import org.wallentines.midnightcore.api.player.Location;
@@ -10,6 +11,7 @@ import org.wallentines.midnightcore.api.requirement.CooldownRequirementType;
 import org.wallentines.midnightcore.api.text.*;
 import org.wallentines.midnightcore.common.item.AbstractItem;
 import org.wallentines.midnightcore.common.module.data.DataModuleImpl;
+import org.wallentines.midnightcore.common.module.session.AbstractSession;
 import org.wallentines.midnightcore.common.util.Util;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigProvider;
@@ -76,6 +78,9 @@ public final class Constants {
 
         inline.register("server_version", PlaceholderSupplier.create(Util.getOr(MidnightCoreAPI.getInstance(), inst -> inst.getGameVersion().toString(), () -> "Unknown")));
         inline.register(DEFAULT_NAMESPACE + "_version", PlaceholderSupplier.create(VERSION.toString()));
+
+        LangProvider.registerPlaceholders(PlaceholderManager.INSTANCE);
+        AbstractSession.registerPlaceholders(PlaceholderManager.INSTANCE);
 
     }
 

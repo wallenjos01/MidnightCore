@@ -13,6 +13,7 @@ import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
 import org.wallentines.midnightcore.fabric.module.skin.FabricSkinModule;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 public class FabricVanishModule extends AbstractVanishModule {
@@ -81,5 +82,5 @@ public class FabricVanishModule extends AbstractVanishModule {
 
     }
 
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(FabricVanishModule::new, ID, DEFAULTS);
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(FabricVanishModule::new, ID, DEFAULTS);
 }

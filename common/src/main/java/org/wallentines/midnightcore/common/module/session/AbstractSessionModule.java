@@ -4,12 +4,12 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.session.Session;
 import org.wallentines.midnightcore.api.module.session.SessionModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public abstract class AbstractSessionModule implements SessionModule {
 
@@ -23,7 +23,7 @@ public abstract class AbstractSessionModule implements SessionModule {
         }
 
         sessions.put(session.getId(), session);
-        session.addShutdownCallback(() -> sessions.remove(session.getId()));
+        session.shutdownEvent().register(this, ev -> sessions.remove(ev.getSession().getId()));
     }
 
     @Override
@@ -72,9 +72,19 @@ public abstract class AbstractSessionModule implements SessionModule {
     }
 
     @Override
+    public void shutdownAll(Predicate<Session> test) {
+
+        List<Session> sess = new ArrayList<>(sessions.values());
+        for(Session s : sess) {
+            if(test.test(s)) {
+                s.shutdown();
+            }
+        }
+    }
+
+    @Override
     public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
 
-        AbstractSession.registerPlaceholders(PlaceholderManager.INSTANCE);
         return true;
     }
 

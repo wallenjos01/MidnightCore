@@ -7,9 +7,11 @@ import org.wallentines.midnightcore.common.module.session.AbstractSessionModule;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
+import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 public class FabricSessionModule extends AbstractSessionModule {
@@ -26,11 +28,6 @@ public class FabricSessionModule extends AbstractSessionModule {
         return super.initialize(section, data);
     }
 
-    @Override
-    public void disable() {
-        Event.unregisterAll(this);
-    }
-
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(FabricSessionModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>>(FabricSessionModule::new, ID, new ConfigSection()).dependsOn(FabricSavepointModule.ID);
 
 }

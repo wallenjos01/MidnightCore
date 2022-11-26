@@ -24,7 +24,7 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightcore.common.Registries;
+import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.common.util.Util;
 import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
@@ -88,7 +88,7 @@ public class TestCommand {
         ServerPlayer spl = extractPlayer(context);
         if(spl == null) return 0;
 
-        SkinModule mod = Util.getModule(SkinModule.class);
+        SkinModule mod = MidnightCoreAPI.getModule(SkinModule.class);
 
         mod.getOnlineSkinAsync(SKIN_UUID, skin -> {
             try {
@@ -111,7 +111,7 @@ public class TestCommand {
         if(spl == null) return 0;
 
         try {
-            SavepointModule mod = Util.getModule(SavepointModule.class);
+            SavepointModule mod = MidnightCoreAPI.getModule(SavepointModule.class);
             mod.savePlayer(FabricPlayer.wrap(spl), SAVEPOINT_ID);
 
             context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Saved!")), false);
@@ -129,7 +129,7 @@ public class TestCommand {
         if(spl == null) return 0;
 
         try {
-            SavepointModule mod = Util.getModule(SavepointModule.class);
+            SavepointModule mod = MidnightCoreAPI.getModule(SavepointModule.class);
             mod.loadPlayer(FabricPlayer.wrap(spl), SAVEPOINT_ID);
 
             context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Loaded!")), false);
@@ -149,7 +149,7 @@ public class TestCommand {
 
             MPlayer mpl = FabricPlayer.wrap(spl);
 
-            VanishModule mod = Util.getModule(VanishModule.class);
+            VanishModule mod = MidnightCoreAPI.getModule(VanishModule.class);
             if(mod.isVanished(mpl)) {
 
                 mod.revealPlayer(mpl);
@@ -175,7 +175,7 @@ public class TestCommand {
 
             MPlayer mpl = FabricPlayer.wrap(spl);
 
-            DynamicLevelModule mod = Util.getModule(DynamicLevelModule.class);
+            DynamicLevelModule mod = MidnightCoreAPI.getModule(DynamicLevelModule.class);
             if(mod == null) return 0;
 
             WorldConfig conf = new WorldConfig(new Identifier(Constants.DEFAULT_NAMESPACE, "test"))

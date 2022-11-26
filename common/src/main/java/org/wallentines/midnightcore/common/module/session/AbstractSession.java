@@ -2,6 +2,8 @@ package org.wallentines.midnightcore.common.module.session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.session.SessionModule;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.api.text.PlaceholderSupplier;
@@ -10,8 +12,8 @@ import org.wallentines.midnightcore.api.module.session.Session;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightcore.common.util.Util;
 import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
@@ -23,15 +25,17 @@ public abstract class AbstractSession implements Session {
     public static final Random RANDOM = new Random();
 
     private final UUID uid;
-
     private final SavepointModule spm;
+    private final String namespace;
     private final Identifier spId;
 
     private boolean shutdown = false;
 
     private final Set<MPlayer> players = new HashSet<>();
 
-    private final List<Runnable> shutdownCallbacks = new ArrayList<>();
+    private final HandlerList<SessionShutdownEvent> shutdownCallbacks = new HandlerList<>();
+    private final HandlerList<SessionPlayerEvent> joinCallbacks = new HandlerList<>();
+    private final HandlerList<SessionPlayerEvent> leaveCallbacks = new HandlerList<>();
 
     public AbstractSession() {
         this(Constants.DEFAULT_NAMESPACE);
@@ -39,10 +43,10 @@ public abstract class AbstractSession implements Session {
 
     public AbstractSession(String namespace) {
 
-        this.uid = UUID.randomUUID();
-        this.spm = Util.getModule(SavepointModule.class);
+        this.namespace = namespace;
 
-        if(spm == null) throw new IllegalStateException("Instantiating a Session requires the Savepoint module to be loaded!");
+        this.uid = UUID.randomUUID();
+        this.spm = MidnightCoreAPI.getModule(SavepointModule.class);
 
         this.spId = new Identifier(namespace, uid.toString());
     }
@@ -50,6 +54,11 @@ public abstract class AbstractSession implements Session {
     @Override
     public final UUID getId() {
         return uid;
+    }
+
+    @Override
+    public String getNamespace() {
+        return namespace;
     }
 
     @Override
@@ -69,11 +78,15 @@ public abstract class AbstractSession implements Session {
             ex.printStackTrace();
         }
 
+        joinEvent().invoke(new SessionPlayerEvent(this, player));
+
         return true;
     }
 
     @Override
     public void removePlayer(MPlayer player) {
+
+        leaveEvent().invoke(new SessionPlayerEvent(this, player));
 
         spm.loadPlayer(player, spId);
         spm.removeSavePoint(player, spId);
@@ -91,11 +104,6 @@ public abstract class AbstractSession implements Session {
             shutdown();
         }
 
-    }
-
-    @Override
-    public void addShutdownCallback(Runnable runnable) {
-        shutdownCallbacks.add(runnable);
     }
 
     @Override
@@ -152,14 +160,7 @@ public abstract class AbstractSession implements Session {
             removePlayer(pl);
         }
 
-        for (Runnable run : shutdownCallbacks) {
-            try {
-                run.run();
-            } catch (Exception ex) {
-                LOGGER.warn("An error occurred while running shutdown callbacks for a session!");
-                ex.printStackTrace();
-            }
-        }
+        shutdownCallbacks.invoke(new SessionShutdownEvent(this));
 
         try {
             onShutdown();
@@ -184,6 +185,24 @@ public abstract class AbstractSession implements Session {
         for(MPlayer pl : getPlayers()) {
             pl.sendMessage(cache.computeIfAbsent(pl.getLocale(), k -> provider.getMessage(key, pl, data)));
         }
+    }
+
+    @Override
+    public HandlerList<SessionShutdownEvent> shutdownEvent() {
+        return shutdownCallbacks;
+    }
+
+    @Override
+    public HandlerList<SessionPlayerEvent> joinEvent() {
+        return joinCallbacks;
+    }
+
+    @Override
+    public HandlerList<SessionPlayerEvent> leaveEvent() {
+        return leaveCallbacks;
+    }
+    protected SavepointModule getSavepointModule() {
+        return spm;
     }
 
     protected abstract boolean shouldAddPlayer(MPlayer player);

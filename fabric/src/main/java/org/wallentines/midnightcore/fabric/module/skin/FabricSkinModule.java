@@ -23,6 +23,7 @@ import org.wallentines.midnightcore.fabric.event.player.PlayerLoginEvent;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.util.ArrayList;
@@ -197,6 +198,6 @@ public class FabricSkinModule extends AbstractSkinModule {
         ));
     }
 
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(FabricSkinModule::new, ID, DEFAULT_CONFIG);
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(FabricSkinModule::new, ID, DEFAULT_CONFIG);
 
 }

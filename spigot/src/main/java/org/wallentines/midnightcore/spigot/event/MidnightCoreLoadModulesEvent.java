@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.spigot.event;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Registry;
 
@@ -20,9 +21,9 @@ public class MidnightCoreLoadModulesEvent extends Event {
     }
 
     private final MidnightCoreAPI api;
-    private final Registry<ModuleInfo<MidnightCoreAPI>> registry;
+    private final Registry<ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>>> registry;
 
-    public MidnightCoreLoadModulesEvent(MidnightCoreAPI api, Registry<ModuleInfo<MidnightCoreAPI>> registry) {
+    public MidnightCoreLoadModulesEvent(MidnightCoreAPI api, Registry<ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>>> registry) {
         this.api = api;
         this.registry = registry;
     }
@@ -31,7 +32,7 @@ public class MidnightCoreLoadModulesEvent extends Event {
         return api;
     }
 
-    public Registry<ModuleInfo<MidnightCoreAPI>> getRegistry() {
+    public Registry<ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>>> getRegistry() {
         return registry;
     }
 }

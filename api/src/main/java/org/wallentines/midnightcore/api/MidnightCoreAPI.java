@@ -11,6 +11,7 @@ import org.wallentines.midnightcore.api.text.CustomScoreboard;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
@@ -62,7 +63,7 @@ public abstract class MidnightCoreAPI {
      *
      * @return The module manager
      */
-    public abstract ModuleManager<MidnightCoreAPI> getModuleManager();
+    public abstract ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> getModuleManager();
 
     /**
      * Returns the requirement type registry, so additional requirement types can be added
@@ -150,7 +151,7 @@ public abstract class MidnightCoreAPI {
     /**
      * Disables all loaded modules
      */
-    public abstract void shutdown();
+    public abstract void unloadModules();
 
     /**
      * Returns the global MidnightCoreAPI instance. Will be null if the instance has not been created yet
@@ -169,6 +170,23 @@ public abstract class MidnightCoreAPI {
      */
     public static Logger getLogger() {
         return LOGGER;
+    }
+
+
+    /**
+     * Gets a module from the global MidnightCoreAPI instance. Will be null if the API has not been created yet or the module is not enabled or the module has been unloaded
+     *
+     * @param clazz The class of the module to look up
+     * @return A module with the given class, or null
+     * @param <T> The type of module to look up
+     */
+    @Nullable
+    public static <T extends Module<MidnightCoreAPI>> T getModule(Class<T> clazz) {
+
+        MidnightCoreAPI inst = getInstance();
+        if(inst == null) return null;
+
+        return inst.getModuleManager().getModule(clazz);
     }
 
 }

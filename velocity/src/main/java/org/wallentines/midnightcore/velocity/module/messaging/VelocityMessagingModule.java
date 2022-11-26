@@ -16,6 +16,7 @@ import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingMod
 import org.wallentines.midnightcore.velocity.MidnightCore;
 import org.wallentines.midnightcore.velocity.player.VelocityPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -89,6 +90,6 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
 
     }
 
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(VelocityMessagingModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(VelocityMessagingModule::new, ID, new ConfigSection());
 
 }

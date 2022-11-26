@@ -9,7 +9,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.server.level.ServerPlayer;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightcore.common.Registries;
+import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.requirement.Requirement;

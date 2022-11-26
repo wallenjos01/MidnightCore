@@ -24,9 +24,4 @@ public class Util {
         if(obj != null) run.accept(obj);
     }
 
-    public static <T extends Module<MidnightCoreAPI>> T getModule(Class<T> clazz) {
-
-        return getOr(MidnightCoreAPI.getInstance(), inst -> inst.getModuleManager().getModule(clazz), () -> null);
-    }
-
 }

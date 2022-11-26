@@ -80,7 +80,7 @@ public class GlobalJoinModule implements Module<MidnightCoreAPI> {
 
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "global_join_messages");
 
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(
             GlobalJoinModule::new,
             ID,
             new ConfigSection().with("servers", new ConfigSection()

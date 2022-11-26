@@ -34,10 +34,7 @@ public class MixinServerLoginPacketListener {
     @Inject(method="tick", at=@At("TAIL"))
     private void onTick(CallbackInfo ci) {
 
-        MidnightCoreAPI.getLogger().warn("Tick - " + state);
         if(state == ServerLoginPacketListenerImpl.State.NEGOTIATING && negotiator.itemsInQueue() == 0) {
-
-            MidnightCoreAPI.getLogger().warn("Queue Cleared");
             state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
         }
     }
@@ -45,12 +42,9 @@ public class MixinServerLoginPacketListener {
     @Inject(method="handleAcceptedLogin", at=@At(value="INVOKE", target="Lnet/minecraft/network/protocol/login/ClientboundGameProfilePacket;<init>(Lcom/mojang/authlib/GameProfile;)V"), cancellable = true)
     private void onAccepted(CallbackInfo ci) {
 
-        MidnightCoreAPI.getLogger().warn("Login Accepted");
-
         // Check to see if negotiating has begun already
         if(negotiator == null) {
 
-            MidnightCoreAPI.getLogger().warn("Starting Negotiations");
             negotiator = new ServerNegotiator((ServerLoginPacketListenerImpl) (Object) this);
             state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
 
@@ -58,9 +52,6 @@ public class MixinServerLoginPacketListener {
             Event.invoke(new ServerBeginQueryEvent(server, gameProfile, negotiator));
             ci.cancel();
 
-        } else {
-
-            MidnightCoreAPI.getLogger().warn("Proceeding with Login");
         }
     }
 
@@ -71,8 +62,6 @@ public class MixinServerLoginPacketListener {
 
     @Inject(method="handleCustomQueryPacket", at=@At("HEAD"))
     private void onCustomQuery(ServerboundCustomQueryPacket packet, CallbackInfo ci) {
-
-        MidnightCoreAPI.getLogger().warn("Query Response Received");
 
         // Handle Negotiation responses
         if(negotiator != null) {

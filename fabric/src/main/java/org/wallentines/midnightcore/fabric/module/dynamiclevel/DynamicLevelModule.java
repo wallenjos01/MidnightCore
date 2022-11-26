@@ -24,6 +24,6 @@ public class DynamicLevelModule implements Module<MidnightCoreAPI> {
         return DynamicLevelStorage.create(this, path, backupPath);
     }
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "dynamic_level");
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(DynamicLevelModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(DynamicLevelModule::new, ID, new ConfigSection());
 
 }

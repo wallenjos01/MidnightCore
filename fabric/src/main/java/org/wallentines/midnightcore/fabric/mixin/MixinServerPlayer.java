@@ -22,8 +22,6 @@ import org.wallentines.midnightlib.event.Event;
 @Mixin(ServerPlayer.class)
 public class MixinServerPlayer implements Skinnable {
 
-    private final SkinModule midnight_core_skinModule = MidnightCoreAPI.getInstance().getModuleManager().getModule(SkinModule.class);
-
     @Inject(method = "doCloseContainer()V", at = @At("HEAD"))
     private void onClose(CallbackInfo ci) {
 
@@ -64,21 +62,16 @@ public class MixinServerPlayer implements Skinnable {
 
     @Override
     public void setSkin(Skin skin) {
-        FabricPlayer pl = FabricPlayer.wrap((ServerPlayer) (Object) this);
-        midnight_core_skinModule.setSkin(pl, skin);
-        midnight_core_skinModule.updateSkin(pl);
+        FabricPlayer.wrap((ServerPlayer) (Object) this).setSkin(skin);
     }
 
     @Override
     public void resetSkin() {
-        FabricPlayer pl = FabricPlayer.wrap((ServerPlayer) (Object) this);
-        midnight_core_skinModule.resetSkin(pl);
-        midnight_core_skinModule.updateSkin(pl);
+        FabricPlayer.wrap((ServerPlayer) (Object) this).resetSkin();
     }
 
     @Override
     public Skin getSkin() {
-        FabricPlayer pl = FabricPlayer.wrap((ServerPlayer) (Object) this);
-        return midnight_core_skinModule.getSkin(pl);
+        return FabricPlayer.wrap((ServerPlayer) (Object) this).getSkin();
     }
 }

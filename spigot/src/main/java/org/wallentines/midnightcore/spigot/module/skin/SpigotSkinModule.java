@@ -16,6 +16,7 @@ import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
 import org.wallentines.midnightcore.spigot.adapter.SkinUpdater;
 import org.wallentines.midnightcore.spigot.player.SpigotPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 public class SpigotSkinModule extends AbstractSkinModule implements Listener {
@@ -66,5 +67,5 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
         onLeave(SpigotPlayer.wrap(event.getPlayer()));
     }
 
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(SpigotSkinModule::new, ID, DEFAULT_CONFIG);
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(SpigotSkinModule::new, ID, DEFAULT_CONFIG);
 }

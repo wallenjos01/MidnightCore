@@ -2,12 +2,21 @@ package org.wallentines.midnightcore.fabric.item;
 
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.*;
 import org.wallentines.midnightcore.common.item.AbstractItem;
+import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
+import org.wallentines.midnightlib.requirement.RequirementType;
+
+import java.util.Optional;
 
 public class FabricItem extends AbstractItem {
 
@@ -49,4 +58,31 @@ public class FabricItem extends AbstractItem {
     public ItemStack getInternal() {
         return internal;
     }
+
+
+    public static final RequirementType<MPlayer> ITEM_REQUIREMENT = (pl,req,item) -> {
+        ServerPlayer sp = FabricPlayer.getInternal(pl);
+
+        int index = item.indexOf(",");
+
+        String id = item;
+        int count = 1;
+
+        if(index > -1) {
+            id = item.substring(0, index);
+            count = Integer.parseInt(item.substring(index + 1));
+        }
+        if(id.length() == 0) return false;
+
+        ResourceLocation loc = new ResourceLocation(id);
+        Optional<Item> oit = Registry.ITEM.getOptional(loc);
+        if(oit.isEmpty()) return false;
+
+        Item it = oit.get();
+        int items = ContainerHelper.clearOrCountMatchingItems(sp.getInventory(), is -> is.getItem() == it, 0, true);
+        items += ContainerHelper.clearOrCountMatchingItems(sp.containerMenu.getCarried(), is -> is.getItem() == it, 0, true);
+
+        return items >= count;
+    };
+
 }

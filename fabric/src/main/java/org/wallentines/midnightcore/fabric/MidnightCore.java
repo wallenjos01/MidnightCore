@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.fabric;
 
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -7,20 +8,16 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.item.*;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
-import org.wallentines.midnightcore.common.Registries;
+import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.common.util.FileUtil;
 import org.wallentines.midnightcore.fabric.command.ExecuteAugment;
 import org.wallentines.midnightcore.fabric.command.MainCommand;
 import org.wallentines.midnightcore.fabric.command.TestCommand;
-import org.wallentines.midnightcore.fabric.event.MidnightCoreAPICreatedEvent;
-import org.wallentines.midnightcore.fabric.event.MidnightCoreLoadModulesEvent;
+import org.wallentines.midnightcore.fabric.event.MidnightCoreModulesLoadedEvent;
 import org.wallentines.midnightcore.fabric.event.server.CommandLoadEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
@@ -28,13 +25,12 @@ import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
-import org.wallentines.midnightcore.fabric.module.extension.ExtensionModule;
+import org.wallentines.midnightcore.fabric.module.extension.ServerExtensionModule;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
 import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;
 import org.wallentines.midnightcore.fabric.module.session.FabricSessionModule;
 import org.wallentines.midnightcore.fabric.module.skin.FabricSkinModule;
 import org.wallentines.midnightcore.fabric.module.vanish.FabricVanishModule;
-import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.player.FabricPlayerManager;
 import org.wallentines.midnightcore.fabric.text.FabricScoreboard;
 import org.wallentines.midnightlib.Version;
@@ -94,6 +90,18 @@ public class MidnightCore implements ModInitializer {
         );
         MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version.toString());
 
+        // Register default fabric modules
+        Registries.MODULE_REGISTRY.register(FabricSkinModule.ID, FabricSkinModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(FabricSavepointModule.ID, FabricSavepointModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(DynamicLevelModule.ID, DynamicLevelModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(FabricVanishModule.ID, FabricVanishModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(FabricMessagingModule.ID, FabricMessagingModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(FabricSessionModule.ID, FabricSessionModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(ServerExtensionModule.ID, ServerExtensionModule.MODULE_INFO);
+
+        // Register some Requirements too
+        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), FabricItem.ITEM_REQUIREMENT);
+
         // Find all mods that request to be loaded now
         List<ModInitializer> inits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE, ModInitializer.class);
         inits.forEach(ModInitializer::onInitialize);
@@ -102,49 +110,9 @@ public class MidnightCore implements ModInitializer {
         List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
         verInits.forEach(ModInitializer::onInitialize);
 
-        // Register default fabric modules
-        Registries.MODULE_REGISTRY.register(FabricSkinModule.ID, FabricSkinModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(FabricSavepointModule.ID, FabricSavepointModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(DynamicLevelModule.ID, DynamicLevelModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(FabricVanishModule.ID, FabricVanishModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(FabricMessagingModule.ID, FabricMessagingModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(FabricSessionModule.ID, FabricSessionModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(ExtensionModule.ID, ExtensionModule.MODULE_INFO);
-
-        // Register some Requirements too
-        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), (pl,req,item) -> {
-            ServerPlayer sp = FabricPlayer.getInternal(pl);
-
-            int index = item.indexOf(",");
-
-            String id = item;
-            int count = 1;
-
-            if(index > -1) {
-                id = item.substring(0, index);
-                count = Integer.parseInt(item.substring(index + 1));
-            }
-            if(id.length() == 0) return false;
-
-            ResourceLocation loc = new ResourceLocation(id);
-            Optional<Item> oit = Registry.ITEM.getOptional(loc);
-            if(oit.isEmpty()) return false;
-
-            Item it = oit.get();
-            int items = ContainerHelper.clearOrCountMatchingItems(sp.getInventory(), is -> is.getItem() == it, 0, true);
-            items += ContainerHelper.clearOrCountMatchingItems(sp.containerMenu.getCarried(), is -> is.getItem() == it, 0, true);
-
-            return items >= count;
-        });
-
-        // Tell other mods that we are registering modules
-        Event.invoke(new MidnightCoreLoadModulesEvent(api, Registries.MODULE_REGISTRY));
-
-        // Load all the modules
-        api.loadModules();
-
-        // Tell other mods that the API has been created
-        Event.invoke(new MidnightCoreAPICreatedEvent(api));
+        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            org.wallentines.midnightcore.fabric.client.ClientInit.init(api);
+        }
 
         // Create a lang provider for our use
         Path lang = dataFolder.resolve("lang");
@@ -157,14 +125,25 @@ public class MidnightCore implements ModInitializer {
         );
 
         // Events
-        Event.register(ServerStartEvent.class, this, event -> server = event.getServer());
+        Event.register(ServerStartEvent.class, this, 10, event -> {
+
+            server = event.getServer();
+
+            api.loadModules();
+            MidnightCoreModulesLoadedEvent.invoke(new MidnightCoreModulesLoadedEvent(api, api.getModuleManager()));
+        });
+
         Event.register(CommandLoadEvent.class, this, event -> {
             if(api.getConfig().getBoolean("register_main_command")) MainCommand.register(event.getDispatcher());
             if(api.getConfig().getBoolean("register_test_command")) TestCommand.register(event.getDispatcher());
             if(api.getConfig().getBoolean("augment_execute_command")) ExecuteAugment.register(event.getDispatcher());
         });
 
-        Event.register(ServerStopEvent.class, this, event -> api.shutdown());
+        Event.register(ServerStopEvent.class, this, 90, event -> {
+
+            api.unloadModules();
+            server = null;
+        });
     }
 
     public MinecraftServer getServer() {

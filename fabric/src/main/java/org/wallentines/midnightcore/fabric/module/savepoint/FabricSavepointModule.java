@@ -8,6 +8,7 @@ import org.wallentines.midnightcore.common.module.savepoint.AbstractSavepointMod
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -35,6 +36,6 @@ public class FabricSavepointModule extends AbstractSavepointModule {
         return new FabricSavepoint(id);
     }
 
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(FabricSavepointModule::new, ID, DEFAULT_CONFIG);
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(FabricSavepointModule::new, ID, DEFAULT_CONFIG);
 
 }

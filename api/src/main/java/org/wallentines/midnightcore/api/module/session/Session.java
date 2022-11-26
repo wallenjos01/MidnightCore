@@ -3,6 +3,8 @@ package org.wallentines.midnightcore.api.module.session;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
+import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.event.HandlerList;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -19,6 +21,13 @@ public interface Session {
     UUID getId();
 
     /**
+     * Gets the namespace used to create Save Points within this session. May be used to identify the source of this session
+     *
+     * @return The Session's namespace
+     */
+    String getNamespace();
+
+    /**
      * Attempts to add a player to the session
      *
      * @param player The player to add
@@ -32,13 +41,6 @@ public interface Session {
      * @param player The player to remove
      */
     void removePlayer(MPlayer player);
-
-    /**
-     * Registers a callback to be run when the session shuts down
-     *
-     * @param runnable The code to be run
-     */
-    void addShutdownCallback(Runnable runnable);
 
     /**
      * Generates a collection of all the players in the session
@@ -99,5 +101,41 @@ public interface Session {
     void broadcastMessage(String key, LangProvider provider, Object... data);
 
     void tick();
+
+    HandlerList<SessionShutdownEvent> shutdownEvent();
+    HandlerList<SessionPlayerEvent> joinEvent();
+    HandlerList<SessionPlayerEvent> leaveEvent();
+
+    class SessionShutdownEvent extends Event {
+
+        private final Session session;
+
+        public SessionShutdownEvent(Session session) {
+            this.session = session;
+        }
+
+        public Session getSession() {
+            return session;
+        }
+    }
+
+    class SessionPlayerEvent extends Event {
+
+        private final Session session;
+        private final MPlayer player;
+
+        public SessionPlayerEvent(Session session, MPlayer player) {
+            this.session = session;
+            this.player = player;
+        }
+
+        public Session getSession() {
+            return session;
+        }
+
+        public MPlayer getPlayer() {
+            return player;
+        }
+    }
 
 }

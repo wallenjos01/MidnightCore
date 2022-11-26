@@ -9,6 +9,7 @@ import org.wallentines.midnightcore.api.module.savepoint.Savepoint;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.savepoint.AbstractSavepointModule;
 import org.wallentines.midnightcore.spigot.player.SpigotPlayer;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -42,6 +43,6 @@ public class SpigotSavepointModule extends AbstractSavepointModule {
         return new SpigotSavepoint(id);
     }
 
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(SpigotSavepointModule::new, ID, DEFAULT_CONFIG);
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(SpigotSavepointModule::new, ID, DEFAULT_CONFIG);
 
 }

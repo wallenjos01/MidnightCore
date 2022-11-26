@@ -6,6 +6,7 @@ import org.wallentines.midnightlib.module.Module;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public interface SessionModule extends Module<MidnightCoreAPI> {
 
@@ -20,6 +21,8 @@ public interface SessionModule extends Module<MidnightCoreAPI> {
     void shutdownSession(Session session);
 
     void shutdownAll();
+
+    void shutdownAll(Predicate<Session> test);
 
     Collection<Session> getSessions();
 

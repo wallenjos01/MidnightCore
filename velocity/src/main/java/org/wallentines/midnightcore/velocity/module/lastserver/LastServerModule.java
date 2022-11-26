@@ -65,6 +65,6 @@ public class LastServerModule implements Module<MidnightCoreAPI> {
     }
 
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "last_server");
-    public static final ModuleInfo<MidnightCoreAPI> MODULE_INFO = new ModuleInfo<>(LastServerModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(LastServerModule::new, ID, new ConfigSection());
 
 }

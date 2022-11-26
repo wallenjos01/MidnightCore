@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.common;
 
+import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.api.item.InventoryGUI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.MPlayer;
@@ -10,6 +11,7 @@ import org.wallentines.midnightcore.common.item.ItemConverter;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.FileConfig;
+import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
@@ -39,7 +41,7 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     private final Consumer<Runnable> serverSubmitter;
     private final Random random = new Random();
 
-    private final ModuleManager<MidnightCoreAPI> moduleManager;
+    private final ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> moduleManager;
 
     public MidnightCoreImpl(Path dataFolder, Version gameVersion, ItemConverter itemConverter, PlayerManager playerManager, Function<MComponent, InventoryGUI> guiFunction, BiFunction<String, MComponent, CustomScoreboard> scoreboardFunction, BiConsumer<String, Boolean> console, Consumer<Runnable> serverSubmitter) {
 
@@ -100,7 +102,7 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     }
 
     @Override
-    public ModuleManager<MidnightCoreAPI> getModuleManager() {
+    public ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> getModuleManager() {
 
         return moduleManager;
     }
@@ -162,7 +164,7 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     }
 
     @Override
-    public void shutdown() {
+    public void unloadModules() {
         moduleManager.unloadAll();
     }
 }

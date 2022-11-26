@@ -178,6 +178,7 @@ public class PlaceholderManager {
 
     private static <T> T find(Class<T> clazz, Function<T, Boolean> consumer, Object... args) {
         for(Object o : args) {
+            if(o == null) continue;
             if(clazz == o.getClass() || clazz.isAssignableFrom(o.getClass())) {
                 T obj = clazz.cast(o);
                 if(consumer.apply(obj)) return obj;
