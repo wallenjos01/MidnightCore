@@ -7,6 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.fabric.module.extension.Extension;
 import org.wallentines.midnightcore.fabric.module.extension.ExtensionModule;
+import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -35,12 +36,13 @@ public class ClientExtensionModule implements ExtensionModule {
             // Read server extensions
             int serverExtensions = buf.readVarInt();
 
-            List<String> ids = new ArrayList<>();
+            List<Identifier> ids = new ArrayList<>();
 
             for(int i = 0 ; i < serverExtensions ; i++) {
 
-                String id = buf.readUtf();
-                if(getLoadedExtensionIds().contains(Identifier.parse(id))) {
+                Identifier id = Identifier.parse(buf.readUtf());
+
+                if(getLoadedExtensionIds().contains(id)) {
 
                     ids.add(id);
                 }
@@ -50,8 +52,11 @@ public class ClientExtensionModule implements ExtensionModule {
             FriendlyByteBuf out = new FriendlyByteBuf(Unpooled.buffer());
             out.writeVarInt(ids.size());
 
-            for (String s : ids) {
-                out.writeUtf(s);
+            for (Identifier s : ids) {
+                out.writeUtf(s.toString());
+
+                Version ver = manager.getModuleById(s).getVersion();
+                out.writeUtf(ver.toString());
             }
 
             return out;
