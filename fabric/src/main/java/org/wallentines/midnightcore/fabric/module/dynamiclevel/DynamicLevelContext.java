@@ -98,7 +98,7 @@ public class DynamicLevelContext {
 
                 //RegistryOps<Tag> ops = RegistryOps.createAndLoad(NbtOps.INSTANCE, writable, resourceManager);
 
-                DynamicOps<Tag> ops = module.registryOps.get();
+                DynamicOps<Tag> ops = ((InjectedStorageAccess) ((AccessorMinecraftServer) server).getStorageSource()).getOps();
                 WorldData data = storageAccess.getDataTag(ops, dpConfig, Lifecycle.stable());
 
                 if (data != null) {

@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DynamicLevelModule implements Module<MidnightCoreAPI> {
-    public final AtomicReference<DynamicOps<Tag>> registryOps = new AtomicReference<>();
 
     @Override
     public boolean initialize(ConfigSection section, MidnightCoreAPI data) {

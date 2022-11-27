@@ -8,6 +8,7 @@ import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -16,12 +17,16 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.DummyFileLock;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
 import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelStorage;
+import org.wallentines.midnightcore.fabric.module.dynamiclevel.InjectedStorageAccess;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 @Mixin(LevelStorageSource.LevelStorageAccess.class)
-public class MixinLevelStorageAccess {
+public class MixinLevelStorageAccess implements InjectedStorageAccess {
+
+    @Unique
+    private DynamicOps<Tag> dynamicOps;
 
     // Create a dummy file lock that always reports as valid in order to allow multiple dynamic levels to be created from the same world folder
     @Redirect(method="<init>", at=@At(value="INVOKE", target="Lnet/minecraft/util/DirectoryLock;create(Ljava/nio/file/Path;)Lnet/minecraft/util/DirectoryLock;"))
@@ -42,10 +47,11 @@ public class MixinLevelStorageAccess {
         LevelStorageSource.LevelStorageAccess acc = (LevelStorageSource.LevelStorageAccess) (Object) this;
         if(acc instanceof DynamicLevelStorage.DynamicLevelStorageAccess) return;
 
-        DynamicLevelModule mod = MidnightCoreAPI.getInstance().getModuleManager().getModule(DynamicLevelModule.class);
-        if(mod == null) return;
-
-        mod.registryOps.set(dynamicOps);
+        this.dynamicOps = dynamicOps;
     }
 
+    @Override
+    public DynamicOps<Tag> getOps() {
+        return dynamicOps;
+    }
 }

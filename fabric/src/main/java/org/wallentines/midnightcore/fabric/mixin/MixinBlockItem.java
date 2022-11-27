@@ -29,11 +29,10 @@ public abstract class MixinBlockItem {
             target = "Lnet/minecraft/world/item/BlockItem;getPlacementState(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/level/block/state/BlockState;"))
     private BlockState onPlace(BlockItem instance, BlockPlaceContext blockPlaceContext) {
 
-        if(blockPlaceContext.getLevel().isClientSide) return null;
+        BlockState blockState = getPlacementState(blockPlaceContext);
+        if(blockPlaceContext.getLevel().isClientSide) return blockState;
 
         BlockItem it = (BlockItem) (Object) this;
-
-        BlockState blockState = getPlacementState(blockPlaceContext);
 
         ServerPlayer sp = ((ServerPlayer) blockPlaceContext.getPlayer());
         BlockPlaceEvent event = new BlockPlaceEvent(sp, blockPlaceContext.getClickedPos(), it, blockState, blockPlaceContext.getHand());
