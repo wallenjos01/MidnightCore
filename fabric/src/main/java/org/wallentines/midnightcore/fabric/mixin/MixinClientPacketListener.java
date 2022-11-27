@@ -15,7 +15,7 @@ public class MixinClientPacketListener {
     @Inject(method="handleCustomPayload", at=@At(value = "INVOKE", target="Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V", shift = At.Shift.AFTER), cancellable = true)
     private void onCustomPayload(ClientboundCustomPayloadPacket packet, CallbackInfo ci) {
 
-        ClientCustomMessageEvent ev = new ClientCustomMessageEvent(packet.getIdentifier(), packet.getData());
+        ClientCustomMessageEvent ev = new ClientCustomMessageEvent((ClientPacketListener) (Object) this, packet.getIdentifier(), packet.getData());
         Event.invoke(ev);
 
         if(ev.isHandled()) ci.cancel();

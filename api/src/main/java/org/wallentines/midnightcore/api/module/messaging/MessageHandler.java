@@ -3,9 +3,11 @@ package org.wallentines.midnightcore.api.module.messaging;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 
+import java.io.DataInput;
+
 public interface MessageHandler {
 
-    void handle(MPlayer player, ConfigSection configSection);
+    void handle(MPlayer player, MessageResponse configSection);
 
     /**
      * If true, messages under this channel from servers will be sent to clients.

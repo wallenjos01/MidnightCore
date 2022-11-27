@@ -6,6 +6,9 @@
     "entrypoints": {
         "main": [
             "${group}.${id}.${target}.${mainClass}"
+        ],
+        "client": [
+            "${group}.${id}.${target}.client.ClientInit"
         ]
     },
     "mixins": [

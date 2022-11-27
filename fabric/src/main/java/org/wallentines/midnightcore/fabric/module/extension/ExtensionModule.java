@@ -1,6 +1,5 @@
 package org.wallentines.midnightcore.fabric.module.extension;
 
-import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.module.Module;
@@ -19,7 +18,7 @@ public interface ExtensionModule extends Module<MidnightCoreAPI> {
     boolean isClient();
 
     Registry<ModuleInfo<ExtensionModule, Extension>> SUPPORTED_EXTENSIONS = new Registry<>();
-    ResourceLocation SUPPORTED_EXTENSION_PACKET = new ResourceLocation(Constants.DEFAULT_NAMESPACE, "supported_extensions");
+    Identifier SUPPORTED_EXTENSION_PACKET = new Identifier(Constants.DEFAULT_NAMESPACE, "supported_extensions");
 
     Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "extension");
 }

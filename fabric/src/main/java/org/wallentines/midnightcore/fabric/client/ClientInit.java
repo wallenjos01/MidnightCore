@@ -1,7 +1,9 @@
 package org.wallentines.midnightcore.fabric.client;
 
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.api.ModInitializer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.fabric.module.extension.ExtensionModule;
@@ -11,11 +13,17 @@ import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleManager;
 
 @Environment(EnvType.CLIENT)
-public class ClientInit {
+public class ClientInit implements ClientModInitializer {
 
-    private static final ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> CLIENT_MODULES = new ModuleManager<>();
+    private final ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> CLIENT_MODULES = new ModuleManager<>();
 
-    public static void init(MidnightCoreAPI api) {
+    @Override
+    public void onInitializeClient() {
+
+        MidnightCoreAPI.getLogger().info("Starting MidnightCore Client");
+
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) MidnightCoreAPI.getLogger().warn("api is null");
 
         Registries.CLIENT_MODULE_REGISTRY.register(ExtensionModule.ID, ClientExtensionModule.MODULE_INFO);
 

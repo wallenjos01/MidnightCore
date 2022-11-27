@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.common.module.messaging;
 
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.messaging.MessageHandler;
+import org.wallentines.midnightcore.api.module.messaging.MessageResponse;
 import org.wallentines.midnightcore.api.module.messaging.MessagingModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.Constants;
@@ -36,29 +37,17 @@ public abstract class AbstractMessagingModule implements MessagingModule {
         DataOutputStream out = new DataOutputStream(stream);
         try {
             out.writeUTF(JsonConfigProvider.INSTANCE.saveToString(data));
-            send(player, id, stream.toByteArray());
+            sendRawMessage(player, id, stream.toByteArray());
         } catch (IOException ex) {
             MidnightCoreAPI.getLogger().warn("An error occurred while sending a plugin message!");
         }
     }
 
-    protected abstract void send(MPlayer player, Identifier id, byte[] data);
-
-    protected void handle(MPlayer sender, Identifier id, DataInput data) {
+    protected void handle(MPlayer sender, Identifier id, MessageResponse res) {
 
         MessageHandler handler = handlers.get(id);
         if(handler == null) return;
 
-        try {
-
-            ConfigSection sec = JsonConfigProvider.INSTANCE.loadFromString(data.readUTF());
-            if (sec == null) return;
-
-            handler.handle(sender, sec);
-
-        } catch (Exception ex) {
-            MidnightCoreAPI.getLogger().warn("Unable to parse plugin message!");
-            ex.printStackTrace();
-        }
+        handler.handle(sender, res);
     }
 }

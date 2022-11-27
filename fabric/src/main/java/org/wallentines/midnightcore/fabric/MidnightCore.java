@@ -1,6 +1,5 @@
 package org.wallentines.midnightcore.fabric;
 
-import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -109,10 +108,6 @@ public class MidnightCore implements ModInitializer {
         // Find all mods that request to be loaded with the current Minecraft version only
         List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
         verInits.forEach(ModInitializer::onInitialize);
-
-        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            org.wallentines.midnightcore.fabric.client.ClientInit.init(api);
-        }
 
         // Create a lang provider for our use
         Path lang = dataFolder.resolve("lang");

@@ -5,10 +5,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.fabric.event.client.ClientCustomMessageEvent;
 import org.wallentines.midnightcore.fabric.module.extension.Extension;
 import org.wallentines.midnightcore.fabric.module.extension.ExtensionModule;
+import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
@@ -30,39 +33,49 @@ public class ClientExtensionModule implements ExtensionModule {
 
         manager.loadAll(section.getSection("extensions"), this, ExtensionModule.SUPPORTED_EXTENSIONS);
 
-        negotiator = new ClientNegotiator(this);
-        negotiator.registerHandler(ExtensionModule.SUPPORTED_EXTENSION_PACKET, buf -> {
+        Event.register(ClientCustomMessageEvent.class, this, 90, ev -> {
 
-            // Read server extensions
-            int serverExtensions = buf.readVarInt();
-
-            List<Identifier> ids = new ArrayList<>();
-
-            for(int i = 0 ; i < serverExtensions ; i++) {
-
-                Identifier id = Identifier.parse(buf.readUtf());
-
-                if(getLoadedExtensionIds().contains(id)) {
-
-                    ids.add(id);
-                }
+            if(ev.getId().equals(ConversionUtil.toResourceLocation(ExtensionModule.SUPPORTED_EXTENSION_PACKET))) {
+                ev.setHandled(true);
+                ev.respond(respond(ev.getData()));
             }
-
-            // Respond with supported server extensions
-            FriendlyByteBuf out = new FriendlyByteBuf(Unpooled.buffer());
-            out.writeVarInt(ids.size());
-
-            for (Identifier s : ids) {
-                out.writeUtf(s.toString());
-
-                Version ver = manager.getModuleById(s).getVersion();
-                out.writeUtf(ver.toString());
-            }
-
-            return out;
         });
 
+        negotiator = new ClientNegotiator(this);
+        negotiator.registerHandler(ConversionUtil.toResourceLocation(ExtensionModule.SUPPORTED_EXTENSION_PACKET), this::respond);
+
         return true;
+    }
+
+    private FriendlyByteBuf respond(FriendlyByteBuf buf) {
+
+        // Read server extensions
+        int serverExtensions = buf.readVarInt();
+
+        List<Identifier> ids = new ArrayList<>();
+
+        for(int i = 0 ; i < serverExtensions ; i++) {
+
+            Identifier id = Identifier.parse(buf.readUtf());
+
+            if(getLoadedExtensionIds().contains(id)) {
+
+                ids.add(id);
+            }
+        }
+
+        // Respond with supported server extensions
+        FriendlyByteBuf out = new FriendlyByteBuf(Unpooled.buffer());
+        out.writeVarInt(ids.size());
+
+        for (Identifier s : ids) {
+            out.writeUtf(s.toString());
+
+            Version ver = manager.getModuleById(s).getVersion();
+            out.writeUtf(ver.toString());
+        }
+
+        return out;
     }
 
     @Override

@@ -12,4 +12,6 @@ public interface MessagingModule extends Module<MidnightCoreAPI> {
 
     void sendMessage(MPlayer player, Identifier id, ConfigSection data);
 
+    void sendRawMessage(MPlayer player, Identifier id, byte[] data);
+
 }

@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.velocity.module.messaging;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.query.ProxyQueryEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
@@ -41,7 +42,7 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
     }
 
     @Override
-    protected void send(MPlayer player, Identifier id, byte[] data) {
+    public void sendRawMessage(MPlayer player, Identifier id, byte[] data) {
 
         Player pl = ((VelocityPlayer) player).getInternal();
         Optional<ServerConnection> conn = pl.getCurrentServer();
@@ -59,12 +60,14 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
         Identifier id = Identifier.parse(event.getIdentifier().getId());
 
         MessageHandler handler = handlers.get(id);
-        if(handler == null) return;
+        if(handler == null) {
+            return;
+        }
 
         boolean toClient = event.getTarget() instanceof Player;
         Player player = toClient ? (Player) event.getTarget() : (Player) event.getSource();
 
-        handle(VelocityPlayer.wrap(player), id, event.dataAsDataStream());
+        handle(VelocityPlayer.wrap(player), id, new VelocityResponse(event));
 
         if(!handler.visibleToPlayers()) {
             event.setResult(PluginMessageEvent.ForwardResult.handled());
@@ -76,11 +79,13 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
 
         registerHandler(new Identifier(Constants.DEFAULT_NAMESPACE, "send"), (player, data) -> {
 
-            if(!data.has("server")) {
+            ConfigSection sec = data.parseConfigSection();
+
+            if(sec == null || !sec.has("server")) {
                 MidnightCoreAPI.getLogger().warn("Received send request with invalid data!");
                 return;
             }
-            String server = data.getString("server");
+            String server = sec.getString("server");
 
             Optional<RegisteredServer> svr = MidnightCore.getInstance().getServer().getServer(server);
             if(svr.isEmpty()) return;
