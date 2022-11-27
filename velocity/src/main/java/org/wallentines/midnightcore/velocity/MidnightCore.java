@@ -12,6 +12,7 @@ import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.velocity.event.MidnightCoreInitializeEvent;
 import org.wallentines.midnightcore.velocity.item.DummyItem;
+import org.wallentines.midnightcore.velocity.module.extension.VelocityExtensionModule;
 import org.wallentines.midnightcore.velocity.module.globaljoin.GlobalJoinModule;
 import org.wallentines.midnightcore.velocity.module.lastserver.LastServerModule;
 import org.wallentines.midnightcore.velocity.module.messaging.VelocityMessagingModule;
@@ -59,6 +60,7 @@ public class MidnightCore {
         Registries.MODULE_REGISTRY.register(VelocityMessagingModule.ID, VelocityMessagingModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(LastServerModule.ID, LastServerModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(GlobalJoinModule.ID, GlobalJoinModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(VelocityExtensionModule.ID, VelocityExtensionModule.MODULE_INFO);
 
         playerManager.register();
         api.loadModules();

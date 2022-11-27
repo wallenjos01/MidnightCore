@@ -6,9 +6,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.messaging.LoginNegotiator;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
 import org.wallentines.midnightcore.fabric.event.server.CustomMessageEvent;
+import org.wallentines.midnightcore.fabric.event.server.ServerBeginQueryEvent;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
@@ -17,11 +19,25 @@ import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.io.DataInput;
+import java.io.IOException;
+
 public class FabricMessagingModule extends AbstractMessagingModule {
+
 
     private FabricMessagingModule() {
 
         Event.register(CustomMessageEvent.class, this, this::onMessage);
+    }
+
+    @Override
+    public boolean initialize(ConfigSection configuration, MidnightCoreAPI api) {
+
+        Event.register(ServerBeginQueryEvent.class, this, ev -> {
+            loginHandlers.forEach(l -> l.accept(ev.getNegotiator()));
+        });
+
+        return super.initialize(configuration, api);
     }
 
     @Override

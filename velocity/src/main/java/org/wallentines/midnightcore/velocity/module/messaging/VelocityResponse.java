@@ -1,6 +1,7 @@
 package org.wallentines.midnightcore.velocity.module.messaging;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 import com.google.gson.JsonParseException;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
@@ -10,21 +11,25 @@ import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
 public class VelocityResponse implements MessageResponse {
 
-    private final PluginMessageEvent event;
+    private final byte[] data;
 
     public VelocityResponse(PluginMessageEvent event) {
-        this.event = event;
+        this.data = event.getData();
+    }
+
+    public VelocityResponse(byte[] data) {
+        this.data = data;
     }
 
     @Override
     public byte[] getRawData() {
-        return event.getData();
+        return data;
     }
 
     @Override
     public ConfigSection parseConfigSection() {
 
-        ByteArrayDataInput is = event.dataAsDataStream();
+        ByteArrayDataInput is = ByteStreams.newDataInput(data);
         try {
             return JsonConfigProvider.INSTANCE.loadFromString(is.readUTF());
         } catch (JsonParseException ex) {

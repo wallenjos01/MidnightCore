@@ -2,6 +2,8 @@ package org.wallentines.midnightcore.velocity.module.messaging;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.event.player.ServerLoginPluginMessageEvent;
 import com.velocitypowered.api.event.query.ProxyQueryEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -10,6 +12,7 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.messaging.LoginNegotiator;
 import org.wallentines.midnightcore.api.module.messaging.MessageHandler;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.Constants;
@@ -39,6 +42,14 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
         ProxyServer server = MidnightCore.getInstance().getServer();
 
         server.getChannelRegistrar().register(cid);
+    }
+
+    @Subscribe
+    private void onPreLogin(PreLoginEvent event) {
+
+        LoginNegotiator ln = new VelocityLoginNegotiator(event);
+        loginHandlers.forEach(l -> l.accept(ln));
+
     }
 
     @Override

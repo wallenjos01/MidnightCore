@@ -6,6 +6,8 @@ import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.function.Consumer;
+
 public interface MessagingModule extends Module<MidnightCoreAPI> {
 
     void registerHandler(Identifier id, MessageHandler handler);
@@ -13,5 +15,7 @@ public interface MessagingModule extends Module<MidnightCoreAPI> {
     void sendMessage(MPlayer player, Identifier id, ConfigSection data);
 
     void sendRawMessage(MPlayer player, Identifier id, byte[] data);
+
+    void addLoginListener(Consumer<LoginNegotiator> onLogin);
 
 }

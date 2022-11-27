@@ -15,9 +15,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.fabric.event.server.ServerBeginQueryEvent;
-import org.wallentines.midnightcore.fabric.module.extension.ServerNegotiator;
+import org.wallentines.midnightcore.fabric.module.messaging.FabricLoginNegotiator;
 import org.wallentines.midnightlib.event.Event;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
@@ -29,7 +28,7 @@ public class MixinServerLoginPacketListener {
     @Shadow ServerLoginPacketListenerImpl.State state;
 
     @Unique
-    private ServerNegotiator negotiator;
+    private FabricLoginNegotiator negotiator;
 
     @Inject(method="tick", at=@At("TAIL"))
     private void onTick(CallbackInfo ci) {
@@ -45,7 +44,7 @@ public class MixinServerLoginPacketListener {
         // Check to see if negotiating has begun already
         if(negotiator == null) {
 
-            negotiator = new ServerNegotiator((ServerLoginPacketListenerImpl) (Object) this);
+            negotiator = new FabricLoginNegotiator((ServerLoginPacketListenerImpl) (Object) this, gameProfile == null ? null : gameProfile.getId());
             state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
 
             // Send "Negotiating" packets

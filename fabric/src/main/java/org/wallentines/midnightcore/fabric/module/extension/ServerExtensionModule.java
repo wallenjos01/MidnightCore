@@ -5,12 +5,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.Constants;
+import org.wallentines.midnightcore.common.module.extension.Extension;
+import org.wallentines.midnightcore.common.module.extension.ExtensionModule;
 import org.wallentines.midnightcore.fabric.event.player.PlayerJoinEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerBeginQueryEvent;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricResponse;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
-import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
@@ -50,8 +51,7 @@ public class ServerExtensionModule implements ExtensionModule {
             }
 
             mod.registerHandler(SUPPORTED_EXTENSION_PACKET, (mpl, res) -> {
-                FriendlyByteBuf buf = ((FabricResponse) res).getBuffer();
-                handleResponse(mpl.getUUID(), buf);
+                handleResponse(mpl.getUUID(), ((FabricResponse) res).getBuffer());
             });
 
             Event.register(PlayerJoinEvent.class, this, 90, ev -> {
@@ -62,8 +62,8 @@ public class ServerExtensionModule implements ExtensionModule {
         } else {
 
             Event.register(ServerBeginQueryEvent.class, this, ev -> {
-                ev.getNegotiator().sendPacket(ConversionUtil.toResourceLocation(SUPPORTED_EXTENSION_PACKET), supportedData, res -> {
-                    handleResponse(ev.getProfile().getId(), res);
+                ev.getNegotiator().sendMessage(SUPPORTED_EXTENSION_PACKET, supportedData, res -> {
+                    handleResponse(ev.getProfile().getId(), ((FabricResponse) res).getBuffer());
                 });
             });
         }
@@ -102,7 +102,6 @@ public class ServerExtensionModule implements ExtensionModule {
 
             MidnightCoreAPI.getLogger().info(bld.toString());
         }
-
     }
 
     @Override
