@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.fabric.module.messaging;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
@@ -55,9 +56,9 @@ public class FabricLoginNegotiator implements LoginNegotiator {
     }
 
     @Override
-    public void sendRawMessage(Identifier id, byte[] data, LoginMessageHandler response) {
+    public void sendRawMessage(Identifier id, ByteBuf data, LoginMessageHandler response) {
 
-        sendMessage(id, new FriendlyByteBuf(Unpooled.wrappedBuffer(data)), response);
+        sendMessage(id, new FriendlyByteBuf(data), response);
     }
 
     public void handlePacket(ServerboundCustomQueryPacket packet) {
@@ -65,7 +66,7 @@ public class FabricLoginNegotiator implements LoginNegotiator {
         TransactionInfo info = currentTransactions.get(packet.getTransactionId());
         if(info != null) {
 
-            info.onResponse.handle(new FabricResponse(packet.getData()));
+            info.onResponse.handle(packet.getData());
             currentTransactions.remove(packet.getTransactionId());
         }
     }

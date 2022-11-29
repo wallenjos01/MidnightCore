@@ -14,7 +14,7 @@ import org.wallentines.midnightcore.fabric.event.entity.EntityDismountVehicleEve
 import org.wallentines.midnightcore.fabric.event.entity.EntityLoadDataEvent;
 import org.wallentines.midnightcore.fabric.event.entity.EntitySaveDataEvent;
 import org.wallentines.midnightcore.fabric.event.entity.EntityTickEvent;
-import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelContext;
+import org.wallentines.midnightcore.fabric.level.DynamicLevelContext;
 import org.wallentines.midnightlib.event.Event;
 
 @Mixin(Entity.class)

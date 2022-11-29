@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.fabric.event.client.LoginQueryReceivedEvent;
+import org.wallentines.midnightcore.fabric.event.client.ClientLoginQueryEvent;
 import org.wallentines.midnightlib.event.Event;
 
 @Mixin(ClientHandshakePacketListenerImpl.class)
@@ -21,7 +21,9 @@ public class MixinClientLoginPacketListener {
     @Inject(method="handleCustomQuery", at=@At("HEAD"), cancellable = true)
     private void onCustomQuery(ClientboundCustomQueryPacket packet, CallbackInfo ci) {
 
-        LoginQueryReceivedEvent ev = new LoginQueryReceivedEvent(packet.getTransactionId(), connection, packet.getIdentifier(), packet.getData());
+        MidnightCoreAPI.getLogger().warn("Received Packet " + packet.getIdentifier());
+
+        ClientLoginQueryEvent ev = new ClientLoginQueryEvent(packet.getTransactionId(), connection, packet.getIdentifier(), packet.getData());
         Event.invoke(ev);
 
         if(ev.hasResponded()) ci.cancel();

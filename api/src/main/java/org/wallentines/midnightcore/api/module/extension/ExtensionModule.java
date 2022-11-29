@@ -1,7 +1,6 @@
-package org.wallentines.midnightcore.common.module.extension;
+package org.wallentines.midnightcore.api.module.extension;
 
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -19,9 +18,8 @@ public interface ExtensionModule extends Module<MidnightCoreAPI> {
 
     boolean isClient();
 
-    Registry<ModuleInfo<ExtensionModule, Extension>> SUPPORTED_EXTENSIONS = new Registry<>();
-    Identifier SUPPORTED_EXTENSION_PACKET = new Identifier(Constants.DEFAULT_NAMESPACE, "supported_extensions");
+    Registry<ModuleInfo<ExtensionModule, Extension>> REGISTRY = new Registry<>();
 
     ConfigSection DEFAULT_CONFIG = new ConfigSection().with("blacklisted_extensions", new ArrayList<>()).with("required_extensions", new ArrayList<>());
-    Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "extension");
+
 }

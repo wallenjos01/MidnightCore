@@ -22,9 +22,9 @@ import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
 import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
-import org.wallentines.midnightcore.fabric.module.dynamiclevel.EmptyGenerator;
-import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
-import org.wallentines.midnightcore.fabric.module.extension.ServerExtensionModule;
+import org.wallentines.midnightcore.fabric.level.EmptyGenerator;
+import org.wallentines.midnightcore.fabric.level.DynamicLevelModule;
+import org.wallentines.midnightcore.fabric.module.extension.FabricServerExtensionModule;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
 import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;
 import org.wallentines.midnightcore.fabric.module.session.FabricSessionModule;
@@ -96,7 +96,7 @@ public class MidnightCore implements ModInitializer {
         Registries.MODULE_REGISTRY.register(FabricVanishModule.ID, FabricVanishModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricMessagingModule.ID, FabricMessagingModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricSessionModule.ID, FabricSessionModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(ServerExtensionModule.ID, ServerExtensionModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(FabricServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
 
         // Register some Requirements too
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), FabricItem.ITEM_REQUIREMENT);

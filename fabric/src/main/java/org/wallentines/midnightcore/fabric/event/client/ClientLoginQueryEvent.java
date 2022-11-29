@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightlib.event.Event;
 
 @Environment(EnvType.CLIENT)
-public class LoginQueryReceivedEvent extends Event {
+public class ClientLoginQueryEvent extends Event {
 
     private final int transactionId;
 
@@ -19,7 +19,7 @@ public class LoginQueryReceivedEvent extends Event {
 
     private boolean responded = false;
 
-    public LoginQueryReceivedEvent(int transactionId, Connection connection, ResourceLocation id, FriendlyByteBuf data) {
+    public ClientLoginQueryEvent(int transactionId, Connection connection, ResourceLocation id, FriendlyByteBuf data) {
         this.transactionId = transactionId;
         this.connection = connection;
         this.id = id;

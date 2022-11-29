@@ -1,4 +1,4 @@
-package org.wallentines.midnightcore.fabric.module.dynamiclevel;
+package org.wallentines.midnightcore.fabric.level;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
@@ -64,7 +64,7 @@ public class DynamicLevelContext {
     private final Map<ResourceKey<Level>, DynamicLevel> levels = new HashMap<>();
     private boolean removed = false;
 
-    public DynamicLevelContext(MinecraftServer server, DynamicLevelModule module, String levelName, WorldConfig config, DynamicLevelStorage storage) {
+    public DynamicLevelContext(MinecraftServer server, String levelName, WorldConfig config, DynamicLevelStorage storage) {
 
         this.server = server;
         this.config = config;

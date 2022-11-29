@@ -2,8 +2,8 @@ package org.wallentines.midnightcore.api.module.messaging;
 
 import io.netty.buffer.ByteBuf;
 
+public interface ClientMessageHandler {
 
-public interface LoginMessageHandler {
-    void handle(ByteBuf data);
+    ByteBuf handle(ByteBuf buffer);
 
 }

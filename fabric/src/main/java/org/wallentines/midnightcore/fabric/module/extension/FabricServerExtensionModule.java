@@ -1,16 +1,15 @@
 package org.wallentines.midnightcore.fabric.module.extension;
 
-import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.extension.ServerExtensionModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightcore.common.module.extension.Extension;
-import org.wallentines.midnightcore.common.module.extension.ExtensionModule;
+import org.wallentines.midnightcore.api.module.extension.Extension;
+import org.wallentines.midnightcore.api.module.extension.ExtensionModule;
+import org.wallentines.midnightcore.common.module.extension.AbstractExtensionModule;
 import org.wallentines.midnightcore.fabric.event.player.PlayerJoinEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerBeginQueryEvent;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
-import org.wallentines.midnightcore.fabric.module.messaging.FabricResponse;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
@@ -22,7 +21,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
 
-public class ServerExtensionModule implements ExtensionModule {
+public class FabricServerExtensionModule extends AbstractExtensionModule implements ServerExtensionModule {
 
     private final ModuleManager<ExtensionModule, Extension> manager = new ModuleManager<>();
     private final HashMap<UUID, HashMap<Identifier, Version>> enabledExtensions = new HashMap<>();
@@ -33,14 +32,9 @@ public class ServerExtensionModule implements ExtensionModule {
         boolean delaySend = section.getBoolean("delay_send");
 
         // Load Extensions
-        manager.loadAll(section.getSection("extensions"), this, SUPPORTED_EXTENSIONS);
+        manager.loadAll(section.getSection("extensions"), this, REGISTRY);
 
-        FriendlyByteBuf supportedData = new FriendlyByteBuf(Unpooled.buffer());
-
-        supportedData.writeVarInt(manager.getCount());
-        for(Identifier id : manager.getLoadedModuleIds()) {
-            supportedData.writeUtf(id.toString());
-        }
+        FriendlyByteBuf supportedData = new FriendlyByteBuf(createPacket(manager.getLoadedModuleIds()));
 
         // Events
         if(delaySend) {
@@ -51,7 +45,7 @@ public class ServerExtensionModule implements ExtensionModule {
             }
 
             mod.registerHandler(SUPPORTED_EXTENSION_PACKET, (mpl, res) -> {
-                handleResponse(mpl.getUUID(), ((FabricResponse) res).getBuffer());
+                enabledExtensions.put(mpl.getUUID(), handleResponse(mpl.getUsername(), new FriendlyByteBuf(res)));
             });
 
             Event.register(PlayerJoinEvent.class, this, 90, ev -> {
@@ -63,45 +57,12 @@ public class ServerExtensionModule implements ExtensionModule {
 
             Event.register(ServerBeginQueryEvent.class, this, ev -> {
                 ev.getNegotiator().sendMessage(SUPPORTED_EXTENSION_PACKET, supportedData, res -> {
-                    handleResponse(ev.getProfile().getId(), ((FabricResponse) res).getBuffer());
+                    enabledExtensions.put(ev.getProfile().getId(), handleResponse(ev.getProfile().getName(), res));
                 });
             });
         }
 
         return true;
-    }
-
-
-    private void handleResponse(UUID user, FriendlyByteBuf res) {
-
-        if(res == null) {
-
-            MidnightCoreAPI.getLogger().info("Player " + user + " Ignored Extensions Packet");
-
-        } else {
-
-            HashMap<Identifier, Version> ids = new HashMap<>();
-
-            int count = res.readVarInt();
-            for(int i = 0 ; i < count ; i++) {
-                ids.put(Identifier.parseOrDefault(res.readUtf(), Constants.DEFAULT_NAMESPACE), Version.SERIALIZER.deserialize(res.readUtf()));
-            }
-
-            enabledExtensions.put(user, ids);
-
-            StringBuilder bld = new StringBuilder("Enabled Extensions for ").append(user).append(": ");
-
-            int i = 0;
-            for(Map.Entry<Identifier, Version> id : ids.entrySet()) {
-                if(i > 0) {
-                    bld.append(", ");
-                }
-                bld.append(id.getKey()).append(": ").append(id.getValue());
-                i++;
-            }
-
-            MidnightCoreAPI.getLogger().info(bld.toString());
-        }
     }
 
     @Override
@@ -134,7 +95,7 @@ public class ServerExtensionModule implements ExtensionModule {
         return playerHasExtension(player, id) ? enabledExtensions.get(player.getUUID()).get(id) : null;
     }
 
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>>(ServerExtensionModule::new, ID, new ConfigSection()
+    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>>(FabricServerExtensionModule::new, ID, new ConfigSection()
             .with("extensions", new ConfigSection())
             .with("delay_send", false)
     ).dependsOn(FabricMessagingModule.ID);

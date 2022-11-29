@@ -1,4 +1,4 @@
-package org.wallentines.midnightcore.fabric.module.dynamiclevel;
+package org.wallentines.midnightcore.fabric.level;
 
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.resources.ResourceKey;
@@ -16,15 +16,13 @@ import java.util.HashMap;
 public class DynamicLevelStorage extends LevelStorageSource {
 
     private final HashMap<String, DynamicLevelContext> preConfigCache = new HashMap<>();
-    private final DynamicLevelModule module;
 
-    private DynamicLevelStorage(DynamicLevelModule module, Path worldsPath, Path backupsPath, DataFixer dataFixer) {
+    private DynamicLevelStorage(Path worldsPath, Path backupsPath, DataFixer dataFixer) {
         super(worldsPath, backupsPath, dataFixer);
-        this.module = module;
     }
 
     public DynamicLevelContext createWorldContext(String levelName, WorldConfig config) {
-        return new DynamicLevelContext(MidnightCore.getInstance().getServer(), module, levelName, config, this);
+        return new DynamicLevelContext(MidnightCore.getInstance().getServer(), levelName, config, this);
     }
 
     @Deprecated
@@ -39,8 +37,8 @@ public class DynamicLevelStorage extends LevelStorageSource {
     }
 
 
-    static DynamicLevelStorage create(DynamicLevelModule module, Path worldsPath, Path backupsPath) {
-        return new DynamicLevelStorage(module, worldsPath, backupsPath, DataFixers.getDataFixer());
+    public static DynamicLevelStorage create(Path worldsPath, Path backupsPath) {
+        return new DynamicLevelStorage(worldsPath, backupsPath, DataFixers.getDataFixer());
     }
 
 

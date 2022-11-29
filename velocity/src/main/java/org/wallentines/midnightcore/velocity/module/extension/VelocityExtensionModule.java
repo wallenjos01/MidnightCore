@@ -1,16 +1,14 @@
 package org.wallentines.midnightcore.velocity.module.extension;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerLoginPluginMessageEvent;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.messaging.MessagingModule;
 import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightcore.common.module.extension.Extension;
-import org.wallentines.midnightcore.common.module.extension.ExtensionModule;
-import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
+import org.wallentines.midnightcore.api.module.extension.Extension;
+import org.wallentines.midnightcore.common.module.extension.AbstractExtensionModule;
 import org.wallentines.midnightcore.velocity.MidnightCore;
 import org.wallentines.midnightcore.velocity.module.messaging.VelocityMessagingModule;
 import org.wallentines.midnightlib.Version;
@@ -21,7 +19,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
 
-public class VelocityExtensionModule implements ExtensionModule {
+public class VelocityExtensionModule extends AbstractExtensionModule {
 
     private final HashMap<String, HashMap<Identifier, Version>> enabledExtensions = new HashMap<>();
     private final List<Identifier> supportedExtensions = new ArrayList<>();
@@ -48,18 +46,13 @@ public class VelocityExtensionModule implements ExtensionModule {
         if(mod == null) return false;
 
         supportedExtensions.clear();
-        supportedExtensions.addAll(section.getListFiltered("query_modules", String.class).stream().map(str -> Identifier.parseOrDefault(str, Constants.DEFAULT_NAMESPACE)).toList());
+        supportedExtensions.addAll(section.getListFiltered("query_extensions", String.class).stream().map(str -> Identifier.parseOrDefault(str, Constants.DEFAULT_NAMESPACE)).toList());
 
-        ByteArrayDataOutput supportedData = ByteStreams.newDataOutput();
-
-        AbstractMessagingModule.writeVarInt(supportedData, supportedExtensions.size());
-        for(Identifier id : supportedExtensions) {
-            supportedData.writeUTF(id.toString());
-        }
+        ByteBuf supportedData = createPacket(supportedExtensions);
 
         mod.addLoginListener(ln -> {
-            ln.sendRawMessage(SUPPORTED_EXTENSION_PACKET, supportedData.toByteArray(), res -> {
-                handleResponse(ln.getPlayerUsername(), res.getRawData());
+            ln.sendRawMessage(SUPPORTED_EXTENSION_PACKET, supportedData, res -> {
+                enabledExtensions.put(ln.getPlayerUsername(), handleResponse(ln.getPlayerUsername(), res));
             });
         });
 
@@ -72,60 +65,10 @@ public class VelocityExtensionModule implements ExtensionModule {
 
         if(event.getIdentifier().getId().equals(SUPPORTED_EXTENSION_PACKET.toString())) {
 
-            ByteArrayDataInput inp = ByteStreams.newDataInput(event.getContents());
+            ByteBuf data = Unpooled.wrappedBuffer(event.getContents());
+            String username = event.getConnection().getPlayer().getUsername();
 
-            Set<Identifier> serverIds = new HashSet<>();
-
-            int count = AbstractMessagingModule.readVarInt(inp);
-            for(int i = 0 ; i < count ; i++) {
-                serverIds.add(Identifier.parseOrDefault(inp.readUTF(), Constants.DEFAULT_NAMESPACE));
-            }
-
-            ByteArrayDataOutput out = ByteStreams.newDataOutput();
-            HashMap<Identifier, Version> ids = enabledExtensions.get(event.getConnection().getPlayer().getUsername());
-
-            for(Map.Entry<Identifier, Version> id : ids.entrySet()) {
-                if(!serverIds.contains(id.getKey())) continue;
-
-                out.writeUTF(id.getKey().toString());
-                out.writeUTF(id.getValue().toString());
-            }
-
-            event.setResult(ServerLoginPluginMessageEvent.ResponseResult.reply(out.toByteArray()));
-        }
-    }
-
-    private void handleResponse(String user, byte[] res) {
-
-        if(res == null) {
-
-            MidnightCoreAPI.getLogger().info("Player " + user + " Ignored Extensions Packet");
-
-        } else {
-
-            ByteArrayDataInput inp = ByteStreams.newDataInput(res);
-
-            HashMap<Identifier, Version> ids = new HashMap<>();
-
-            int count = AbstractMessagingModule.readVarInt(inp);
-            for(int i = 0 ; i < count ; i++) {
-                ids.put(Identifier.parseOrDefault(inp.readUTF(), Constants.DEFAULT_NAMESPACE), Version.SERIALIZER.deserialize(inp.readUTF()));
-            }
-
-            enabledExtensions.put(user, ids);
-
-            StringBuilder bld = new StringBuilder("Enabled Extensions for ").append(user).append(": ");
-
-            int i = 0;
-            for(Map.Entry<Identifier, Version> id : ids.entrySet()) {
-                if(i > 0) {
-                    bld.append(", ");
-                }
-                bld.append(id.getKey()).append(": ").append(id.getValue());
-                i++;
-            }
-
-            MidnightCoreAPI.getLogger().info(bld.toString());
+            event.setResult(ServerLoginPluginMessageEvent.ResponseResult.reply(createResponse(data, enabledExtensions.get(username).keySet(), id -> enabledExtensions.get(username).get(id)).array()));
         }
     }
 

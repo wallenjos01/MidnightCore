@@ -13,11 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.fabric.module.dynamiclevel.DummyFileLock;
-import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelModule;
-import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelStorage;
-import org.wallentines.midnightcore.fabric.module.dynamiclevel.InjectedStorageAccess;
+import org.wallentines.midnightcore.fabric.level.DummyFileLock;
+import org.wallentines.midnightcore.fabric.level.DynamicLevelStorage;
+import org.wallentines.midnightcore.fabric.level.InjectedStorageAccess;
 
 import java.io.IOException;
 import java.nio.file.Path;

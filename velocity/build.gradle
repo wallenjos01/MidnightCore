@@ -25,6 +25,7 @@ repositories {
 dependencies {
 
     compileOnly "com.velocitypowered:velocity-api:${project.velocity_version}"
+    compileOnly 'io.netty:netty-all:4.1.85.Final'
 
     implementation 'org.wallentines:midnightlib:1.0-SNAPSHOT'
     implementation project(':api')

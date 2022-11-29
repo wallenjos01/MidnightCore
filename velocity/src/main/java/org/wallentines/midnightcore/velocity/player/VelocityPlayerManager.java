@@ -37,7 +37,7 @@ public class VelocityPlayerManager extends AbstractPlayerManger<Player> {
     @Override
     protected UUID toUUID(String name) {
 
-        Optional<Player> opl =MidnightCore.getInstance().getServer().getPlayer(name);
+        Optional<Player> opl = MidnightCore.getInstance().getServer().getPlayer(name);
         if(opl.isPresent()) return opl.get().getUniqueId();
 
         try {

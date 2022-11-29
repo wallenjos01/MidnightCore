@@ -6,7 +6,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.messaging.LoginNegotiator;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
 import org.wallentines.midnightcore.fabric.event.server.CustomMessageEvent;
@@ -19,8 +18,6 @@ import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.io.DataInput;
-import java.io.IOException;
 
 public class FabricMessagingModule extends AbstractMessagingModule {
 
@@ -46,7 +43,7 @@ public class FabricMessagingModule extends AbstractMessagingModule {
         ServerPlayer pl = ((FabricPlayer) player).getInternal();
         if(pl == null) return;
 
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
+        FriendlyByteBuf buf = new FriendlyByteBuf(data == null ? Unpooled.buffer() : Unpooled.wrappedBuffer(data));
         pl.connection.send(new ClientboundCustomPayloadPacket(ConversionUtil.toResourceLocation(id), buf));
     }
 
@@ -64,7 +61,7 @@ public class FabricMessagingModule extends AbstractMessagingModule {
             if(!handlers.contains(id)) return;
 
             try {
-                handle(player, id, new FabricResponse(buf));
+                handle(player, id, buf);
             } catch (Exception ex) {
                 MidnightCoreAPI.getLogger().warn("An exception occurred while processing a plugin message!");
                 ex.printStackTrace();

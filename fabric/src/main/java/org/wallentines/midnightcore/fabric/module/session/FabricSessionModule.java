@@ -5,8 +5,8 @@ import org.wallentines.midnightcore.api.module.session.Session;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.session.AbstractSessionModule;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
-import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
+import org.wallentines.midnightcore.fabric.event.server.ServerTickEvent;
 import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
@@ -18,7 +18,8 @@ public class FabricSessionModule extends AbstractSessionModule {
 
     @Override
     public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
-        Event.register(ServerStartEvent.class, this, event -> event.getServer().addTickable(this::tickAll));
+
+        Event.register(ServerTickEvent.class, this, event -> this.tickAll());
         Event.register(ServerStopEvent.class, this, event -> shutdownAll());
         Event.register(PlayerLeaveEvent.class, this, 5, event -> {
             MPlayer mpl = FabricPlayer.wrap(event.getPlayer());

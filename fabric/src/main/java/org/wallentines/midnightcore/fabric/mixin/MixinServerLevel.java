@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.wallentines.midnightcore.fabric.event.entity.EntitySpawnEvent;
-import org.wallentines.midnightcore.fabric.module.dynamiclevel.DynamicLevelContext;
+import org.wallentines.midnightcore.fabric.level.DynamicLevelContext;
 import org.wallentines.midnightlib.event.Event;
 
 import java.util.Iterator;

@@ -3,23 +3,25 @@ package org.wallentines.midnightcore.velocity.module.messaging;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
-import com.velocitypowered.api.event.player.ServerLoginPluginMessageEvent;
-import com.velocitypowered.api.event.query.ProxyQueryEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.messaging.LoginNegotiator;
 import org.wallentines.midnightcore.api.module.messaging.MessageHandler;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
+import org.wallentines.midnightcore.common.module.messaging.PacketBufferUtils;
 import org.wallentines.midnightcore.velocity.MidnightCore;
 import org.wallentines.midnightcore.velocity.player.VelocityPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -78,7 +80,8 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
         boolean toClient = event.getTarget() instanceof Player;
         Player player = toClient ? (Player) event.getTarget() : (Player) event.getSource();
 
-        handle(VelocityPlayer.wrap(player), id, new VelocityResponse(event));
+        ByteBuf buf = Unpooled.wrappedBuffer(event.getData());
+        handle(VelocityPlayer.wrap(player), id, buf);
 
         if(!handler.visibleToPlayers()) {
             event.setResult(PluginMessageEvent.ForwardResult.handled());
@@ -90,7 +93,7 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
 
         registerHandler(new Identifier(Constants.DEFAULT_NAMESPACE, "send"), (player, data) -> {
 
-            ConfigSection sec = data.parseConfigSection();
+            ConfigSection sec = JsonConfigProvider.INSTANCE.loadFromString(PacketBufferUtils.readUtf(data));
 
             if(sec == null || !sec.has("server")) {
                 MidnightCoreAPI.getLogger().warn("Received send request with invalid data!");

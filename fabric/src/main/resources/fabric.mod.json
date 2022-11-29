@@ -8,7 +8,7 @@
             "${group}.${id}.${target}.${mainClass}"
         ],
         "client": [
-            "${group}.${id}.${target}.client.ClientInit"
+            "${group}.${id}.${target}.client.MidnightCoreClient"
         ]
     },
     "mixins": [

@@ -1,4 +1,4 @@
-package org.wallentines.midnightcore.fabric.module.dynamiclevel;
+package org.wallentines.midnightcore.fabric.level;
 
 import net.minecraft.server.level.ServerLevel;
 
