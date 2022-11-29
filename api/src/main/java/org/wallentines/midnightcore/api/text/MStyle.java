@@ -119,12 +119,12 @@ public class MStyle {
 
             MStyle out = new MStyle();
             if(section.has("color")) out.color = section.get("color", TextColor.class);
-            if(section.has("bold", Boolean.class)) out.bold = section.getBoolean("bold");
-            if(section.has("italic", Boolean.class)) out.italic = section.getBoolean("italic");
-            if(section.has("underlined", Boolean.class)) out.underlined = section.getBoolean("underlined");
-            if(section.has("strikethrough", Boolean.class)) out.strikethrough = section.getBoolean("strikethrough");
-            if(section.has("obfuscated", Boolean.class)) out.obfuscated = section.getBoolean("obfuscated");
-            if(section.has("font", Identifier.class)) out.font = section.get("font", Identifier.class);
+            if(section.has("bold")) out.bold = section.getBoolean("bold");
+            if(section.has("italic")) out.italic = section.getBoolean("italic");
+            if(section.has("underlined")) out.underlined = section.getBoolean("underlined");
+            if(section.has("strikethrough")) out.strikethrough = section.getBoolean("strikethrough");
+            if(section.has("obfuscated")) out.obfuscated = section.getBoolean("obfuscated");
+            if(section.has("font")) out.font = section.get("font", Identifier.class);
 
             return out;
         }
