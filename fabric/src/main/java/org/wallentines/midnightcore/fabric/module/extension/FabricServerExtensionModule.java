@@ -88,7 +88,8 @@ public class FabricServerExtensionModule extends AbstractExtensionModule impleme
     }
 
     public boolean playerHasExtension(MPlayer player, Identifier id) {
-        return enabledExtensions.containsKey(player.getUUID()) && enabledExtensions.get(player.getUUID()).containsKey(id);
+        Map<Identifier, Version> extensions = enabledExtensions.get(player.getUUID());
+        return extensions != null && extensions.containsKey(id);
     }
 
     public Version getExtensionVersion(MPlayer player, Identifier id) {

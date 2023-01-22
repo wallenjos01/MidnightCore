@@ -5,6 +5,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
@@ -23,7 +24,6 @@ import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
 import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.level.EmptyGenerator;
-import org.wallentines.midnightcore.fabric.level.DynamicLevelModule;
 import org.wallentines.midnightcore.fabric.module.extension.FabricServerExtensionModule;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
 import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;
@@ -44,9 +44,16 @@ import java.util.Optional;
 
 public class MidnightCore implements ModInitializer {
 
+    // Keep track of the first created MidnightCore instance. Right now, this is used to access the lang provider
+    // and currently running server. In the future, this should not be necessary
     private static MidnightCore INSTANCE;
+
+    // Keep track of the currently running server. In the future, a more consistent way to access the server should
+    // be implemented and this should be removed. This will likely come in the form of a "MServer" API, which exposes
+    // common server functions to all platforms.
     private MinecraftServer server;
 
+    // This should be moved to the common level, as it should be accessible by other platforms
     private LangProvider provider;
 
     public MidnightCore() {
@@ -71,7 +78,9 @@ public class MidnightCore implements ModInitializer {
         String versionStr = cont.isPresent() ? cont.get().getMetadata().getVersion().getFriendlyString() : "1.14";
         Version version = Version.SERIALIZER.deserialize(versionStr);
 
-        Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(Constants.DEFAULT_NAMESPACE, "empty"), EmptyGenerator.CODEC);
+        // Empty World Generator. Useful for some mods using the Dynamic Level system for quick creation of empty levels,
+        // or importing of levels that should not generate new chunks
+        Registry.register(BuiltInRegistries.CHUNK_GENERATOR, new ResourceLocation(Constants.DEFAULT_NAMESPACE, "empty"), EmptyGenerator.CODEC);
 
         // Create the API
         MidnightCoreImpl api = new MidnightCoreImpl(
@@ -92,13 +101,12 @@ public class MidnightCore implements ModInitializer {
         // Register default fabric modules
         Registries.MODULE_REGISTRY.register(FabricSkinModule.ID, FabricSkinModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricSavepointModule.ID, FabricSavepointModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(DynamicLevelModule.ID, DynamicLevelModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricVanishModule.ID, FabricVanishModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricMessagingModule.ID, FabricMessagingModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricSessionModule.ID, FabricSessionModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
 
-        // Register some Requirements too
+        // Register Requirements which cannot be implemented at the common level
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), FabricItem.ITEM_REQUIREMENT);
 
         // Find all mods that request to be loaded now
@@ -109,7 +117,7 @@ public class MidnightCore implements ModInitializer {
         List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
         verInits.forEach(ModInitializer::onInitialize);
 
-        // Create a lang provider for our use
+        // Create a lang provider for internal use
         Path lang = dataFolder.resolve("lang");
         FileUtil.tryCreateDirectory(lang);
 
@@ -119,26 +127,33 @@ public class MidnightCore implements ModInitializer {
                 api.getServerLocale()
         );
 
-        // Events
         Event.register(ServerStartEvent.class, this, 10, event -> {
 
             server = event.getServer();
 
+            // Load modules each time a server starts, so integrated servers load properly
             api.loadModules();
-            MidnightCoreModulesLoadedEvent.invoke(new MidnightCoreModulesLoadedEvent(api, api.getModuleManager()));
-        });
-
-        Event.register(CommandLoadEvent.class, this, event -> {
-            if(api.getConfig().getBoolean("register_main_command")) MainCommand.register(event.getDispatcher());
-            if(api.getConfig().getBoolean("register_test_command")) TestCommand.register(event.getDispatcher());
-            if(api.getConfig().getBoolean("augment_execute_command")) ExecuteAugment.register(event.getDispatcher());
+            MidnightCoreModulesLoadedEvent.invoke(new MidnightCoreModulesLoadedEvent(api, api.getModuleManager(), server));
         });
 
         Event.register(ServerStopEvent.class, this, 90, event -> {
 
+            // Unload server modules when the server shuts down
             api.unloadModules();
             server = null;
         });
+
+        Event.register(CommandLoadEvent.class, this, event -> {
+
+            // Register commands if enabled
+            if(api.getConfig().getBoolean("register_main_command")) MainCommand.register(event.getDispatcher());
+            if(api.getConfig().getBoolean("register_test_command")) TestCommand.register(event.getDispatcher());
+
+            // Adds a new "requirement" argument to the execute command, so requirements registered by this or other
+            // mods can be easily used in command blocks
+            if(api.getConfig().getBoolean("augment_execute_command")) ExecuteAugment.register(event.getDispatcher());
+        });
+
     }
 
     public MinecraftServer getServer() {

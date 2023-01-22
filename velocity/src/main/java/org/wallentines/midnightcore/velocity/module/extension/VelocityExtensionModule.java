@@ -68,6 +68,12 @@ public class VelocityExtensionModule extends AbstractExtensionModule {
             ByteBuf data = Unpooled.wrappedBuffer(event.getContents());
             String username = event.getConnection().getPlayer().getUsername();
 
+            if(enabledExtensions.get(username) == null) {
+
+                event.setResult(ServerLoginPluginMessageEvent.ResponseResult.unknown());
+                return;
+            }
+
             event.setResult(ServerLoginPluginMessageEvent.ResponseResult.reply(createResponse(data, enabledExtensions.get(username).keySet(), id -> enabledExtensions.get(username).get(id)).array()));
         }
     }

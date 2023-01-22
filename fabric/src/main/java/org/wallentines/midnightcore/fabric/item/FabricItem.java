@@ -1,6 +1,6 @@
 package org.wallentines.midnightcore.fabric.item;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,7 +23,7 @@ public class FabricItem extends AbstractItem {
     ItemStack internal;
 
     public FabricItem(ItemStack existing) {
-        super(ConversionUtil.toIdentifier(Registry.ITEM.getKey(existing.getItem())), existing.getCount(), ConversionUtil.toConfigSection(existing.getTag()));
+        super(ConversionUtil.toIdentifier(BuiltInRegistries.ITEM.getKey(existing.getItem())), existing.getCount(), ConversionUtil.toConfigSection(existing.getTag()));
         internal = existing;
     }
 
@@ -32,7 +32,7 @@ public class FabricItem extends AbstractItem {
 
         if(tag == null) tag = new ConfigSection();
 
-        internal = new ItemStack(Registry.ITEM.get(ConversionUtil.toResourceLocation(typeId)), count);
+        internal = new ItemStack(BuiltInRegistries.ITEM.get(ConversionUtil.toResourceLocation(typeId)), count);
         internal.setTag(ConversionUtil.toCompoundTag(tag));
 
     }
@@ -75,7 +75,7 @@ public class FabricItem extends AbstractItem {
         if(id.length() == 0) return false;
 
         ResourceLocation loc = new ResourceLocation(id);
-        Optional<Item> oit = Registry.ITEM.getOptional(loc);
+        Optional<Item> oit = BuiltInRegistries.ITEM.getOptional(loc);
         if(oit.isEmpty()) return false;
 
         Item it = oit.get();

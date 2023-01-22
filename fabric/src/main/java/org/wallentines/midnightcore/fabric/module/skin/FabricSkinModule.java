@@ -20,6 +20,7 @@ import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.event.player.PacketSendEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLoginEvent;
+import org.wallentines.midnightcore.fabric.mixin.AccessorClientboundPlayerInfoUpdatePacket;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
@@ -62,9 +63,11 @@ public class FabricSkinModule extends AbstractSkinModule {
 
         Event.register(PacketSendEvent.class, this, event -> {
 
-            if(event.getPacket() instanceof ClientboundPlayerInfoPacket pck) {
+            if(event.getPacket() instanceof ClientboundPlayerInfoUpdatePacket pck) {
 
-                MPlayer mpl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(pck.getEntries().get(0).getProfile().getId());
+                if(pck.entries().isEmpty()) return;
+
+                MPlayer mpl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(pck.entries().get(0).profileId());
                 applyActiveProfile(pck, getActiveSkin(mpl));
             }
         });
@@ -89,8 +92,8 @@ public class FabricSkinModule extends AbstractSkinModule {
         Vec3 velocity = player.getDeltaMovement();
 
         // Create Packets
-        ClientboundPlayerInfoPacket remove = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, player);
-        ClientboundPlayerInfoPacket add = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, player);
+        ClientboundPlayerInfoRemovePacket remove = new ClientboundPlayerInfoRemovePacket(List.of(player.getUUID()));
+        ClientboundPlayerInfoUpdatePacket add = ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player));
 
         List<Pair<EquipmentSlot, ItemStack>> items = new ArrayList<>();
 
@@ -105,7 +108,7 @@ public class FabricSkinModule extends AbstractSkinModule {
 
         ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(player.getId());
         ClientboundAddPlayerPacket spawn = new ClientboundAddPlayerPacket(player);
-        ClientboundSetEntityDataPacket tracker = new ClientboundSetEntityDataPacket(player.getId(), player.getEntityData(), true);
+        ClientboundSetEntityDataPacket tracker = new ClientboundSetEntityDataPacket(player.getId(), player.getEntityData().getNonDefaultValues());
 
         float headRot = player.getYHeadRot();
         int rot = (int) headRot;
@@ -122,7 +125,7 @@ public class FabricSkinModule extends AbstractSkinModule {
                 player.gameMode.getPreviousGameModeForPlayer(),
                 world.isDebug(),
                 world.isFlat(),
-                true,
+                (byte) 0,
                 Optional.empty()
         );
 
@@ -141,14 +144,15 @@ public class FabricSkinModule extends AbstractSkinModule {
             obs.connection.send(destroy);
             obs.connection.send(spawn);
             obs.connection.send(head);
-            obs.connection.send(tracker);
             obs.connection.send(equip);
+            obs.connection.send(tracker);
         }
 
         player.connection.send(respawn);
         player.connection.send(position);
         player.connection.send(abilities);
         player.connection.send(equip);
+        player.connection.send(tracker);
 
         server.getPlayerList().sendPlayerPermissionLevel(player);
         server.getPlayerList().sendAllPlayerInfo(player);
@@ -159,24 +163,25 @@ public class FabricSkinModule extends AbstractSkinModule {
         player.connection.send(new ClientboundSetEntityMotionPacket(player));
     }
 
-    private void applyActiveProfile(ClientboundPlayerInfoPacket packet, Skin skin) {
+    private static void applyActiveProfile(ClientboundPlayerInfoUpdatePacket packet, Skin skin) {
 
-        if(packet.getAction() != ClientboundPlayerInfoPacket.Action.ADD_PLAYER) return;
-        List<ClientboundPlayerInfoPacket.PlayerUpdate> entries = packet.getEntries();
+        // Will only get entries if ADD_PLAYER is present
+        List<ClientboundPlayerInfoUpdatePacket.Entry> entries = packet.newEntries();
+        if(entries.isEmpty()) return;
 
-        ClientboundPlayerInfoPacket.PlayerUpdate entry = null;
+        ClientboundPlayerInfoUpdatePacket.Entry entry = null;
         int index = 0;
         for(; index < entries.size() ; index++) {
-            ClientboundPlayerInfoPacket.PlayerUpdate ent = entries.get(index);
+            ClientboundPlayerInfoUpdatePacket.Entry ent = entries.get(index);
             for(MPlayer u : MidnightCoreAPI.getInstance().getPlayerManager()) {
-                if(u.getUUID().equals(ent.getProfile().getId())) {
+                if(u.getUUID().equals(ent.profileId())) {
                     entry = ent;
                     break;
                 }
             }
         }
-        if(entry == null || entry.getProfile() == null) return;
-        GameProfile profile = new GameProfile(entry.getProfile().getId(), entry.getProfile().getName());
+        if(entry == null || entry.profile() == null) return;
+        GameProfile profile = new GameProfile(entry.profileId(), entry.profile().getName());
 
         ServerPlayer player = MidnightCore.getInstance().getServer().getPlayerList().getPlayer(profile.getId());
         if(player == null) return;
@@ -189,13 +194,19 @@ public class FabricSkinModule extends AbstractSkinModule {
             profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
         }
 
-        entries.set(index - 1, new ClientboundPlayerInfoPacket.PlayerUpdate(
-                profile,
-                entry.getLatency(),
-                entry.getGameMode(),
-                entry.getDisplayName(),
-                entry.getProfilePublicKey()
+        List<ClientboundPlayerInfoUpdatePacket.Entry> newEntries = new ArrayList<>(entries);
+
+        newEntries.set(index - 1, new ClientboundPlayerInfoUpdatePacket.Entry(
+            profile.getId(),
+            profile,
+            entry.listed(),
+            entry.latency(),
+            entry.gameMode(),
+            entry.displayName(),
+            entry.chatSession()
         ));
+
+        ((AccessorClientboundPlayerInfoUpdatePacket) packet).setEntries(newEntries);
     }
 
     public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(FabricSkinModule::new, ID, DEFAULT_CONFIG);

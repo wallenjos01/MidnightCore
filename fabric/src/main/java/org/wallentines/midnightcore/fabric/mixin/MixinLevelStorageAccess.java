@@ -1,10 +1,15 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.DirectoryLock;
 import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +45,7 @@ public class MixinLevelStorageAccess implements InjectedStorageAccess {
 
     // Store the original DynamicOps created when the server starts, so additional worlds can be loaded later
     @Inject(method="getDataTag", at=@At("HEAD"))
-    private void injectLoadData(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig, Lifecycle lifecycle, CallbackInfoReturnable<WorldData> cir) {
+    private void injectLoadData(DynamicOps<Tag> dynamicOps, WorldDataConfiguration worldDataConfiguration, Registry<LevelStem> registry, Lifecycle lifecycle, CallbackInfoReturnable<Pair<WorldData, WorldDimensions.Complete>> cir) {
 
         LevelStorageSource.LevelStorageAccess acc = (LevelStorageSource.LevelStorageAccess) (Object) this;
         if(acc instanceof DynamicLevelStorage.DynamicLevelStorageAccess) return;

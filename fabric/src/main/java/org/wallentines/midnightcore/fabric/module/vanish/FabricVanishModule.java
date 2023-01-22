@@ -16,6 +16,8 @@ import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
+import java.util.List;
+
 public class FabricVanishModule extends AbstractVanishModule {
 
     @Override
@@ -26,7 +28,7 @@ public class FabricVanishModule extends AbstractVanishModule {
         ServerPlayer sp = FabricPlayer.getInternal(player);
 
         op.connection.send(new ClientboundRemoveEntitiesPacket(sp.getId()));
-        op.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, sp));
+        op.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(sp.getUUID())));
     }
 
     @Override
@@ -36,7 +38,7 @@ public class FabricVanishModule extends AbstractVanishModule {
         ServerPlayer op = FabricPlayer.getInternal(observer);
         ServerPlayer sp = FabricPlayer.getInternal(player);
 
-        op.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, sp));
+        op.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, sp));
 
         if(sp.getLevel() != op.getLevel()) return;
 
@@ -45,7 +47,7 @@ public class FabricVanishModule extends AbstractVanishModule {
         if (headRot < (float) rot) rot -= 1;
 
         op.connection.send(new ClientboundAddPlayerPacket(sp));
-        op.connection.send(new ClientboundSetEntityDataPacket(sp.getId(), sp.getEntityData(), true));
+        op.connection.send(new ClientboundSetEntityDataPacket(sp.getId(), sp.getEntityData().getNonDefaultValues()));
         op.connection.send(new ClientboundRotateHeadPacket(sp, (byte) ((rot * 256.0F) / 360.0F)));
 
     }

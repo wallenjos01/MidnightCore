@@ -6,6 +6,7 @@
   "mixins": [
     "AccessorArgumentTypeInfos",
     "AccessorChunkMap",
+    "AccessorClientboundPlayerInfoUpdatePacket",
     "AccessorCommandNode",
     "AccessorDerivedLevelData",
     "AccessorDirectoryLock",

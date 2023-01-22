@@ -22,6 +22,7 @@ import org.wallentines.midnightcore.api.module.vanish.VanishModule;
 import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
+import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.api.Registries;
@@ -29,7 +30,6 @@ import org.wallentines.midnightcore.common.util.Util;
 import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.level.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.level.DynamicLevelContext;
-import org.wallentines.midnightcore.fabric.level.DynamicLevelModule;
 import org.wallentines.midnightcore.fabric.level.DynamicLevelStorage;
 import org.wallentines.midnightcore.fabric.level.WorldConfig;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
@@ -175,19 +175,17 @@ public class TestCommand {
 
             MPlayer mpl = FabricPlayer.wrap(spl);
 
-            DynamicLevelModule mod = MidnightCoreAPI.getModule(DynamicLevelModule.class);
-            if(mod == null) return 0;
-
             WorldConfig conf = new WorldConfig(new Identifier(Constants.DEFAULT_NAMESPACE, "test"))
                 .generator(EmptyGenerator.create(Biomes.FOREST))
                 .rootDimensionType(LevelStem.NETHER);
 
             Path dataFolder = Util.getOr(MidnightCoreAPI.getInstance(), inst -> inst.getDataFolder().toPath(), () -> Path.of(""));
 
-            DynamicLevelStorage storage = mod.createLevelStorage(dataFolder, dataFolder.resolve("backups"));
+            DynamicLevelStorage storage = DynamicLevelStorage.create(dataFolder, dataFolder.resolve("backups"));
             DynamicLevelContext ctx = storage.createWorldContext("test", conf);
 
             ctx.loadDimension(conf.getRootDimensionId(), w -> mpl.teleport(new Location(ConversionUtil.toIdentifier(w.dimension().location()), new Vec3d(0.0d, 100.0d, 0.0d), 0.0f, 0.0f)));
+            mpl.sendMessage(new MTextComponent("Loading dimension..."));
 
         } catch (Exception ex) {
             ex.printStackTrace();

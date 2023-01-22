@@ -5,8 +5,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
-import net.minecraft.commands.synchronization.brigadier.StringArgumentSerializer;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +39,7 @@ public class ServerSideArgumentInfo<A extends ArgumentType<?>> implements Argume
     }
 
     public static <T extends ArgumentType<?>> ServerSideArgumentInfo<T> string(StringArgumentType.StringType type, Supplier<T> supplier) {
-        return new ServerSideArgumentInfo<>(Registry.COMMAND_ARGUMENT_TYPE.get(new ResourceLocation("brigadier", "string")), type, ctx -> supplier.get());
+        return new ServerSideArgumentInfo<>(BuiltInRegistries.COMMAND_ARGUMENT_TYPE.get(new ResourceLocation("brigadier", "string")), type, ctx -> supplier.get());
     }
 
     public void serializeToNetwork(ServerSideArgumentInfo<A>.@NotNull Template template, @NotNull FriendlyByteBuf friendlyByteBuf) {

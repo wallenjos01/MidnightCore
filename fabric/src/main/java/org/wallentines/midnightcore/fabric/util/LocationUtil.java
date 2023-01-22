@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.fabric.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -121,7 +122,7 @@ public class LocationUtil {
 
     public static ServerLevel getLevel(Location location) {
 
-        return MidnightCore.getInstance().getServer().getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, ConversionUtil.toResourceLocation(location.getWorldId())));
+        return MidnightCore.getInstance().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, ConversionUtil.toResourceLocation(location.getWorldId())));
     }
 
 }

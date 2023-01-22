@@ -1,6 +1,6 @@
 package org.wallentines.midnightcore.fabric.level;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -46,7 +46,7 @@ public class WorldConfig {
     }
 
     public WorldConfig(ResourceLocation rootDimensionId) {
-        this.rootDimensionId = ResourceKey.create(Registry.DIMENSION_REGISTRY, rootDimensionId);
+        this.rootDimensionId = ResourceKey.create(Registries.DIMENSION, rootDimensionId);
     }
 
     public WorldConfig(ResourceKey<Level> rootDimensionId) {

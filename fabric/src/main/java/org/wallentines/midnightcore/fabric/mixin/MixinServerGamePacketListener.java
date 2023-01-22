@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
+import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -32,16 +33,19 @@ public abstract class MixinServerGamePacketListener {
     @Shadow @Final private MinecraftServer server;
     private Entity midnight_core_currentEntity;
 
-    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V", at=@At("HEAD"), cancellable = true)
-    private void onSend(Packet<?> packet, PacketSendListener listener, CallbackInfo ci) {
+    @Redirect(method="send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V", at=@At(value = "INVOKE", target="Lnet/minecraft/network/Connection;send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V"))
+    private void onSend(Connection instance, Packet<?> packet, PacketSendListener packetSendListener) {
 
         PacketSendEvent ev = new PacketSendEvent(player, packet);
         Event.invoke(ev);
 
-        if(ev.isCancelled()) {
-            ci.cancel();
+        if(ev.isCancelled() || ev.getPacket() == null) {
+            return;
         }
+
+        instance.send(ev.getPacket(), packetSendListener);
     }
+
     @Inject(method = "handleChat(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;)V", at=@At(value = "HEAD"), cancellable = true)
     private void onChatSend(ServerboundChatPacket serverboundChatPacket, CallbackInfo ci) {
         PlayerChatEvent ev = new PlayerChatEvent(player, serverboundChatPacket.message());

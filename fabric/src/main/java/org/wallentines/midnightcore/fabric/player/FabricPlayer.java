@@ -2,10 +2,13 @@ package org.wallentines.midnightcore.fabric.player;
 
 import com.mojang.authlib.GameProfile;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,10 +31,7 @@ import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
@@ -148,11 +148,12 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
         run(player -> {
 
             SoundSource src = SoundSource.valueOf(category.toUpperCase(Locale.ROOT));
+            SoundEvent ev = BuiltInRegistries.SOUND_EVENT.get(ConversionUtil.toResourceLocation(soundId));
+            Holder<SoundEvent> holder = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(ev);
 
             long seed = player.getLevel().getRandom().nextLong();
-            player.connection.send(new ClientboundCustomSoundPacket(
-                    ConversionUtil.toResourceLocation(soundId),
-                    src, player.position(), volume, pitch, seed
+            player.connection.send(new ClientboundSoundPacket(
+                    holder, src, player.position().x, player.position().y, player.position().z, volume, pitch, seed
             ));
 
         }, () -> { });
@@ -174,8 +175,13 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     @Override
     public void sendChatMessage(String message) {
 
+        byte[] data = new byte[0];
+
         // Forged messages cannot be signed
-        run(player -> player.connection.send(new ServerboundChatPacket(message, Instant.now(), System.currentTimeMillis(), MessageSignature.EMPTY, false, new LastSeenMessages.Update(LastSeenMessages.EMPTY, Optional.empty()))), () -> { });
+        run(player -> player.connection.send(
+                new ServerboundChatPacket(message, Instant.now(), System.currentTimeMillis(), null,
+                        new LastSeenMessages.Update(0, BitSet.valueOf(data))
+                )), () -> { });
     }
 
     @Override

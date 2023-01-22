@@ -25,7 +25,7 @@ public class FabricClientExtensionModule extends AbstractExtensionModule {
 
         manager.loadAll(section.getSection("extensions"), this, ExtensionModule.REGISTRY);
 
-        FabricClientMessagingModule mod = MidnightCoreClient.CLIENT_MODULES.getModule(FabricClientMessagingModule.class);
+        FabricClientMessagingModule mod = MidnightCoreClient.getModule(FabricClientMessagingModule.class);
         mod.registerLoginHandler(AbstractExtensionModule.SUPPORTED_EXTENSION_PACKET, buf -> createResponse(buf, manager.getLoadedModuleIds(), id -> manager.getModuleById(id).getVersion()));
         mod.registerHandler(AbstractExtensionModule.SUPPORTED_EXTENSION_PACKET, buf -> createResponse(buf, manager.getLoadedModuleIds(), id -> manager.getModuleById(id).getVersion()));
 

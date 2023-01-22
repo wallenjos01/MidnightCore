@@ -16,7 +16,7 @@
     ],
     "accessWidener": "${id}.accesswidener",
     "depends": {
-        "fabricloader": ">=${fabricLoader}",
+        "fabricloader": "*",
         "minecraft": ">=${minecraftVersion}",
         "fabric-api-base": "*",
         "fabric-permissions-api-v0": "*"

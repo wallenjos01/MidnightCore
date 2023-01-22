@@ -7,8 +7,7 @@ import org.wallentines.midnightlib.event.Event;
 public class PacketSendEvent extends Event {
 
     private final ServerPlayer entity;
-    private final Packet<?> packet;
-
+    private Packet<?> packet;
     private boolean cancelled = false;
 
     public PacketSendEvent(ServerPlayer entity, Packet<?> packet) {
@@ -22,6 +21,10 @@ public class PacketSendEvent extends Event {
 
     public Packet<?> getPacket() {
         return packet;
+    }
+
+    public void setPacket(Packet<?> packet) {
+        this.packet = packet;
     }
 
     public boolean isCancelled() {
