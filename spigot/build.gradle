@@ -11,7 +11,7 @@ repositories {
 dependencies {
 
     compileOnly "org.spigotmc:spigot-api:${project.spigot_version}"
-    compileOnly 'com.mojang:authlib:3.11.49'
+    compileOnly 'com.mojang:authlib:2.1.28'
     compileOnly 'com.google.code.gson:gson:2.10'
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
