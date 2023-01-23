@@ -5,7 +5,6 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.LastSeenMessages;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -17,14 +16,14 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
-import org.wallentines.midnightcore.common.util.Util;
-import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.event.player.ResourcePackStatusEvent;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
+import org.wallentines.midnightcore.fabric.server.FabricServer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightcore.fabric.util.LocationUtil;
 import org.wallentines.midnightlib.event.Event;
@@ -41,14 +40,18 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
 
     private String locale = LangProvider.getServerLocale();
 
-    protected FabricPlayer(UUID uuid) {
-        super(uuid);
+    protected FabricPlayer(UUID uuid, MServer server) {
+        super(uuid, server);
     }
 
     @Override
     public String getUsername() {
         return run(player -> player.getGameProfile().getName(), () -> {
-            Optional<GameProfile> prof = MidnightCore.getInstance().getServer().getProfileCache().get(getUUID());
+
+            MServer server = MidnightCoreAPI.getRunningServer();
+            if(server == null) return getUUID().toString();
+
+            Optional<GameProfile> prof = ((FabricServer) server).getInternal().getProfileCache().get(getUUID());
             return prof.map(GameProfile::getName).orElseGet(() -> getUUID().toString());
         });
     }
@@ -57,7 +60,10 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     public MComponent getName() {
         return run(player -> ConversionUtil.toMComponent(player.getDisplayName()),
             () -> {
-                Optional<GameProfile> prof = MidnightCore.getInstance().getServer().getProfileCache().get(getUUID());
+                MServer server = MidnightCoreAPI.getRunningServer();
+                if(server == null) return new MTextComponent(getUUID().toString());
+
+                Optional<GameProfile> prof = ((FabricServer) server).getInternal().getProfileCache().get(getUUID());
                 return prof.map(gameProfile -> new MTextComponent(gameProfile.getName())).orElseGet(() -> new MTextComponent(getUUID().toString()));
             }
         );
@@ -149,6 +155,8 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
 
             SoundSource src = SoundSource.valueOf(category.toUpperCase(Locale.ROOT));
             SoundEvent ev = BuiltInRegistries.SOUND_EVENT.get(ConversionUtil.toResourceLocation(soundId));
+            if(ev == null) return;
+
             Holder<SoundEvent> holder = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(ev);
 
             long seed = player.getLevel().getRandom().nextLong();
@@ -169,7 +177,12 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     @Override
     public void executeCommand(String cmd) {
 
-        run(player -> MidnightCore.getInstance().getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack(), cmd), () -> { });
+        run(player -> {
+            MServer server = MidnightCoreAPI.getRunningServer();
+            if(server == null) return;
+
+            ((FabricServer) server).getInternal().getCommands().performPrefixedCommand(player.createCommandSourceStack(), cmd);
+        }, () -> { });
     }
 
     @Override
@@ -255,7 +268,14 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
     }
 
     public static FabricPlayer wrap(ServerPlayer player) {
-        return (FabricPlayer) Util.getOr(MidnightCoreAPI.getInstance(), inst -> inst.getPlayerManager().getPlayer(player.getUUID()), () -> new FabricPlayer(player.getUUID()));
+
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) throw new IllegalStateException("MidnightCoreAPI has not been created!");
+
+        MServer server = api.getServer();
+        if(server == null) throw new IllegalStateException("MidnightCoreAPI has not been created!");
+
+        return (FabricPlayer) server.getPlayer(player.getUUID());
     }
 
     public static ServerPlayer getInternal(MPlayer player) {

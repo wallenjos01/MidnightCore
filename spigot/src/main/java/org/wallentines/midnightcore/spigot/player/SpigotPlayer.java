@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.Location;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
@@ -21,8 +22,8 @@ import java.util.function.Consumer;
 
 public class SpigotPlayer extends AbstractPlayer<Player> {
 
-    protected SpigotPlayer(UUID uuid) {
-        super(uuid);
+    protected SpigotPlayer(UUID uuid, MServer server) {
+        super(uuid, server);
     }
 
     @Override
@@ -58,7 +59,11 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
     public String getLocale() {
 
         return run(pl -> {
-            if(MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() >= 12) {
+
+            MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+            int minorVersion = api == null ? 8 : api.getGameVersion().getMinorVersion();
+
+            if(minorVersion >= 12) {
                 return pl.getLocale();
             }
             return null;
@@ -157,7 +162,14 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
 
 
     public static SpigotPlayer wrap(Player player) {
-        return (SpigotPlayer) MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) throw new IllegalStateException("MidnightCoreAPI has not been created!");
+
+        MServer server = api.getServer();
+        if(server == null) throw new IllegalStateException("MidnightCoreAPI has not been created!");
+
+        return (SpigotPlayer) server.getPlayer(player.getUniqueId());
     }
 
 }

@@ -2,12 +2,19 @@ package org.wallentines.midnightcore.common.player;
 
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
+import org.wallentines.midnightcore.api.server.MServer;
 
 import java.util.*;
 
 public abstract class AbstractPlayerManger<T> implements PlayerManager {
 
     private final HashMap<UUID, AbstractPlayer<T>> cache = new HashMap<>();
+
+    protected final MServer server;
+
+    protected AbstractPlayerManger(MServer server) {
+        this.server = server;
+    }
 
     protected abstract AbstractPlayer<T> createPlayer(UUID u);
 
@@ -41,7 +48,7 @@ public abstract class AbstractPlayerManger<T> implements PlayerManager {
 
     @Override
     public Iterator<MPlayer> iterator() {
-        return new Iterator<MPlayer>() {
+        return new Iterator<>() {
 
             private int current = 0;
             private final List<MPlayer> players = new ArrayList<>(cache.values());

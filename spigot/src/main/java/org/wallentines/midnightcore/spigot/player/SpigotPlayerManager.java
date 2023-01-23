@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.common.player.AbstractPlayerManger;
 import org.wallentines.midnightcore.spigot.MidnightCore;
@@ -15,14 +16,15 @@ import java.util.UUID;
 
 public class SpigotPlayerManager extends AbstractPlayerManger<Player> implements Listener {
 
-    public SpigotPlayerManager() {
+    public SpigotPlayerManager(MServer server) {
 
+        super(server);
         Bukkit.getServer().getPluginManager().registerEvents(this, MidnightCore.getInstance());
     }
 
     @Override
     protected AbstractPlayer<Player> createPlayer(UUID u) {
-        return new SpigotPlayer(u);
+        return new SpigotPlayer(u, server);
     }
 
     @Override

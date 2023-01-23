@@ -7,7 +7,7 @@ import net.kyori.adventure.sound.Sound;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.Location;
-import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
@@ -21,8 +21,8 @@ import java.util.function.Consumer;
 
 public class VelocityPlayer extends AbstractPlayer<Player> {
 
-    protected VelocityPlayer(UUID uuid) {
-        super(uuid);
+    protected VelocityPlayer(UUID uuid, MServer server) {
+        super(uuid, server);
     }
 
     @Override
@@ -156,7 +156,14 @@ public class VelocityPlayer extends AbstractPlayer<Player> {
 
     }
 
-    public static MPlayer wrap(Player player) {
-        return MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+    public static VelocityPlayer wrap(Player player) {
+
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) throw new IllegalStateException("MidnightCoreAPI has not been created!");
+
+        MServer server = api.getServer();
+        if(server == null) throw new IllegalStateException("MidnightCoreAPI has not been created!");
+
+        return (VelocityPlayer) server.getPlayer(player.getUniqueId());
     }
 }

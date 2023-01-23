@@ -5,6 +5,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.common.player.AbstractPlayerManger;
 import org.wallentines.midnightcore.velocity.MidnightCore;
@@ -13,6 +14,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class VelocityPlayerManager extends AbstractPlayerManger<Player> {
+
+    public VelocityPlayerManager(MServer server) {
+        super(server);
+    }
 
     public void register() {
 
@@ -31,7 +36,7 @@ public class VelocityPlayerManager extends AbstractPlayerManger<Player> {
 
     @Override
     protected AbstractPlayer<Player> createPlayer(UUID u) {
-        return new VelocityPlayer(u);
+        return new VelocityPlayer(u, server);
     }
 
     @Override

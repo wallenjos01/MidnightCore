@@ -22,7 +22,7 @@ public class FabricServer extends AbstractServer {
 
     public FabricServer(MinecraftServer server) {
         this.internal = server;
-        this.playerManager = new FabricPlayerManager();
+        this.playerManager = new FabricPlayerManager(this);
     }
 
     @Override

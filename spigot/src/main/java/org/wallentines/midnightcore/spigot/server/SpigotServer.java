@@ -28,7 +28,7 @@ public class SpigotServer extends AbstractServer {
         this.server = server;
         this.plugin = plugin;
         this.itemConverter = itemConverter;
-        this.playerManager = new SpigotPlayerManager();
+        this.playerManager = new SpigotPlayerManager(this);
     }
 
     @Override

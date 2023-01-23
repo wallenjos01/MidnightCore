@@ -4,7 +4,7 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightcore.common.util.Util;
+import org.wallentines.midnightcore.api.server.MServer;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
@@ -15,16 +15,23 @@ import java.util.function.Supplier;
 public abstract class AbstractPlayer<T> implements MPlayer {
 
     private final UUID uuid;
+    private final MServer server;
     private WeakReference<T> cache = new WeakReference<>(null);
 
-    protected AbstractPlayer(UUID uuid) {
+    protected AbstractPlayer(UUID uuid, MServer server) {
         if(uuid == null) throw new IllegalArgumentException("UUID cannot be null!");
         this.uuid = uuid;
+        this.server = server;
     }
 
     @Override
     public UUID getUUID() {
         return uuid;
+    }
+
+    @Override
+    public MServer getServer() {
+        return server;
     }
 
     @Override

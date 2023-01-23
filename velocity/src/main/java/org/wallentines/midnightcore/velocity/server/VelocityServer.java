@@ -24,7 +24,7 @@ public class VelocityServer extends AbstractServer {
         this.server = server;
         this.plugin = plugin;
 
-        this.playerManager = new VelocityPlayerManager();
+        this.playerManager = new VelocityPlayerManager(this);
         this.playerManager.register();
     }
 

@@ -2,13 +2,14 @@ package org.wallentines.midnightcore.api.player;
 
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.module.skin.Skinnable;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.MComponent;
-import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.UUID;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public interface MPlayer extends Skinnable {
 
     UUID getUUID();
@@ -16,6 +17,8 @@ public interface MPlayer extends Skinnable {
     String getUsername();
 
     MComponent getName();
+
+    MServer getServer();
 
     Location getLocation();
 

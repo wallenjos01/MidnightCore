@@ -204,4 +204,17 @@ public abstract class MidnightCoreAPI {
         return inst.getModuleManager().getModule(clazz);
     }
 
+    /**
+     * Gets a reference to the server that is currently running. This may be null before the server has started, or for clients in the main menu
+     * @return The running server
+     */
+    @Nullable
+    public static MServer getRunningServer() {
+
+        MidnightCoreAPI inst = getInstance();
+        if(inst == null) return null;
+
+        return inst.getServer();
+    }
+
 }
