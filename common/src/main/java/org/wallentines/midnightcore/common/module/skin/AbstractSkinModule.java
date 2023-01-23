@@ -1,15 +1,13 @@
 package org.wallentines.midnightcore.common.module.skin;
 
 import com.mojang.authlib.GameProfile;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointCreatedEvent;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointLoadedEvent;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.module.skin.SkinUpdateEvent;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.util.MojangUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
@@ -22,8 +20,6 @@ import java.util.function.Consumer;
 
 public abstract class AbstractSkinModule implements SkinModule {
 
-    protected static final Logger LOGGER = LogManager.getLogger("SkinModule");
-
     private final HashMap<MPlayer, Skin> loginSkins = new HashMap<>();
     private final HashMap<MPlayer, Skin> loadedSkins = new HashMap<>();
     private final HashMap<MPlayer, Skin> activeSkins = new HashMap<>();
@@ -31,7 +27,7 @@ public abstract class AbstractSkinModule implements SkinModule {
     protected boolean getOfflineModeSkins = true;
 
     @Override
-    public boolean initialize(ConfigSection configuration, MidnightCoreAPI api) {
+    public boolean initialize(ConfigSection configuration, MServer server) {
 
         getOfflineModeSkins = configuration.getBoolean("get_skins_in_offline_mode");
 

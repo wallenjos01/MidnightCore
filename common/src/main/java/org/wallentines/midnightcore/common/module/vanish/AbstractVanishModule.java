@@ -1,10 +1,10 @@
 package org.wallentines.midnightcore.common.module.vanish;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointCreatedEvent;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointLoadedEvent;
 import org.wallentines.midnightcore.api.module.vanish.VanishModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
@@ -18,12 +18,12 @@ public abstract class AbstractVanishModule implements VanishModule {
     protected Set<MPlayer> globalVanished = new HashSet<>();
     protected HashMap<MPlayer, Set<MPlayer>> vanished = new HashMap<>();
 
-    protected MidnightCoreAPI api;
+    protected MServer server;
 
     @Override
-    public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
+    public boolean initialize(ConfigSection section, MServer server) {
 
-        this.api = data;
+        this.server = server;
         this.hideMessages = section.getBoolean("hide_join_messages");
 
         Event.register(SavepointCreatedEvent.class, this, ev -> {
@@ -49,7 +49,7 @@ public abstract class AbstractVanishModule implements VanishModule {
                 vanishPlayer(ev.getPlayer());
             }
             for(UUID u : sec.getListFiltered("vanished", UUID.class)) {
-                MPlayer mpl = api.getPlayerManager().getPlayer(u);
+                MPlayer mpl = server.getPlayerManager().getPlayer(u);
                 vanishPlayerFor(mpl, ev.getPlayer());
             }
         });
@@ -63,7 +63,7 @@ public abstract class AbstractVanishModule implements VanishModule {
     public void vanishPlayer(MPlayer player) {
 
         if(!globalVanished.contains(player)) {
-            for(MPlayer observer : api.getPlayerManager()) {
+            for(MPlayer observer : server.getPlayerManager()) {
                 doVanish(player, observer);
             }
             globalVanished.add(player);
@@ -86,7 +86,7 @@ public abstract class AbstractVanishModule implements VanishModule {
 
         if(globalVanished.contains(player)) {
             globalVanished.remove(player);
-            for(MPlayer observer : api.getPlayerManager()) {
+            for(MPlayer observer : server.getPlayerManager()) {
                 doReveal(player, observer);
             }
         }

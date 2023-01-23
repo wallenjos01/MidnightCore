@@ -1,10 +1,10 @@
 package org.wallentines.midnightcore.api.module.vanish;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.module.Module;
 
-public interface VanishModule extends Module<MidnightCoreAPI> {
+@SuppressWarnings("unused")
+public interface VanishModule extends ServerModule {
 
     void vanishPlayer(MPlayer player);
 

@@ -1,11 +1,11 @@
 package org.wallentines.midnightcore.common.module.data;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.data.DataModule;
 import org.wallentines.midnightcore.api.module.data.DataProvider;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -32,10 +32,10 @@ public class DataModuleImpl implements DataModule {
     }
 
     @Override
-    public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
+    public boolean initialize(ConfigSection section, MServer data) {
 
         String globalFolder = section.getString(CONFIG_GLOBAL_FOLDER);
-        Path folderPath = data.getDataFolder().toPath().resolve(globalFolder);
+        Path folderPath = getAPI().getDataFolder().toPath().resolve(globalFolder);
         global = new DataProviderImpl(folderPath);
 
         enabled = true;
@@ -51,5 +51,5 @@ public class DataModuleImpl implements DataModule {
 
     private static final String CONFIG_GLOBAL_FOLDER = "global_folder_name";
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "data");
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(DataModuleImpl::new, ID, new ConfigSection().with(CONFIG_GLOBAL_FOLDER, "data"));
+    public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(DataModuleImpl::new, ID, new ConfigSection().with(CONFIG_GLOBAL_FOLDER, "data"));
 }

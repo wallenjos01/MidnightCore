@@ -6,7 +6,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
 import org.wallentines.midnightcore.fabric.event.server.CustomMessageEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerBeginQueryEvent;
@@ -14,7 +16,6 @@ import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -28,13 +29,12 @@ public class FabricMessagingModule extends AbstractMessagingModule {
     }
 
     @Override
-    public boolean initialize(ConfigSection configuration, MidnightCoreAPI api) {
+    public boolean initialize(ConfigSection configuration, MServer server) {
 
-        Event.register(ServerBeginQueryEvent.class, this, ev -> {
-            loginHandlers.forEach(l -> l.accept(ev.getNegotiator()));
-        });
+        Event.register(ServerBeginQueryEvent.class, this, ev ->
+                loginHandlers.forEach(l -> l.accept(ev.getNegotiator())));
 
-        return super.initialize(configuration, api);
+        return super.initialize(configuration, server);
     }
 
     @Override
@@ -74,6 +74,6 @@ public class FabricMessagingModule extends AbstractMessagingModule {
         }
     }
 
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(FabricMessagingModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricMessagingModule::new, ID, new ConfigSection());
 
 }

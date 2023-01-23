@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -11,20 +12,20 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.common.util.MojangUtil;
-import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.event.player.PacketSendEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLoginEvent;
 import org.wallentines.midnightcore.fabric.mixin.AccessorClientboundPlayerInfoUpdatePacket;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
+import org.wallentines.midnightcore.fabric.server.FabricServer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.util.ArrayList;
@@ -34,19 +35,24 @@ import java.util.Optional;
 
 public class FabricSkinModule extends AbstractSkinModule {
 
-    @Override
-    public boolean initialize(ConfigSection config, MidnightCoreAPI api) {
 
-        super.initialize(config, api);
+    private FabricServer server;
+
+    @Override
+    public boolean initialize(ConfigSection config, MServer server) {
+
+        super.initialize(config, server);
+
+        this.server = (FabricServer) server;
 
         Event.register(PlayerLoginEvent.class, this, event -> {
 
             MPlayer player = FabricPlayer.wrap(event.getPlayer());
-            MinecraftServer server = event.getPlayer().getServer();
+            MinecraftServer mc = this.server.getInternal();
 
             Skin s = MojangUtil.getSkinFromProfile(event.getProfile());
             setLoginSkin(player, s);
-            if(getOfflineModeSkins && server != null && !server.usesAuthentication()) {
+            if(getOfflineModeSkins && !mc.usesAuthentication()) {
 
                 findOfflineSkin(player, event.getProfile());
 
@@ -57,7 +63,7 @@ public class FabricSkinModule extends AbstractSkinModule {
         });
         Event.register(PlayerLeaveEvent.class, this, event -> {
 
-            MPlayer player = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUUID());
+            MPlayer player = server.getPlayerManager().getPlayer(event.getPlayer().getUUID());
             onLeave(player);
         });
 
@@ -67,8 +73,8 @@ public class FabricSkinModule extends AbstractSkinModule {
 
                 if(pck.entries().isEmpty()) return;
 
-                MPlayer mpl = MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(pck.entries().get(0).profileId());
-                applyActiveProfile(pck, getActiveSkin(mpl));
+                MPlayer mpl = server.getPlayerManager().getPlayer(pck.entries().get(0).profileId());
+                applyActiveProfile(pck, getActiveSkin(mpl), this.server);
             }
         });
 
@@ -108,7 +114,12 @@ public class FabricSkinModule extends AbstractSkinModule {
 
         ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(player.getId());
         ClientboundAddPlayerPacket spawn = new ClientboundAddPlayerPacket(player);
-        ClientboundSetEntityDataPacket tracker = new ClientboundSetEntityDataPacket(player.getId(), player.getEntityData().getNonDefaultValues());
+
+        List<SynchedEntityData.DataValue<?>> entityData = player.getEntityData().getNonDefaultValues();
+        ClientboundSetEntityDataPacket tracker = null;
+        if(entityData != null) {
+             tracker = new ClientboundSetEntityDataPacket(player.getId(), entityData);
+        }
 
         float headRot = player.getYHeadRot();
         int rot = (int) headRot;
@@ -145,14 +156,14 @@ public class FabricSkinModule extends AbstractSkinModule {
             obs.connection.send(spawn);
             obs.connection.send(head);
             obs.connection.send(equip);
-            obs.connection.send(tracker);
+            if(tracker != null) obs.connection.send(tracker);
         }
 
         player.connection.send(respawn);
         player.connection.send(position);
         player.connection.send(abilities);
         player.connection.send(equip);
-        player.connection.send(tracker);
+        if(tracker != null) player.connection.send(tracker);
 
         server.getPlayerList().sendPlayerPermissionLevel(player);
         server.getPlayerList().sendAllPlayerInfo(player);
@@ -163,7 +174,7 @@ public class FabricSkinModule extends AbstractSkinModule {
         player.connection.send(new ClientboundSetEntityMotionPacket(player));
     }
 
-    private static void applyActiveProfile(ClientboundPlayerInfoUpdatePacket packet, Skin skin) {
+    private static void applyActiveProfile(ClientboundPlayerInfoUpdatePacket packet, Skin skin, FabricServer server) {
 
         // Will only get entries if ADD_PLAYER is present
         List<ClientboundPlayerInfoUpdatePacket.Entry> entries = packet.newEntries();
@@ -173,17 +184,17 @@ public class FabricSkinModule extends AbstractSkinModule {
         int index = 0;
         for(; index < entries.size() ; index++) {
             ClientboundPlayerInfoUpdatePacket.Entry ent = entries.get(index);
-            for(MPlayer u : MidnightCoreAPI.getInstance().getPlayerManager()) {
+            for(MPlayer u : server.getPlayerManager()) {
                 if(u.getUUID().equals(ent.profileId())) {
                     entry = ent;
                     break;
                 }
             }
         }
-        if(entry == null || entry.profile() == null) return;
+        if(entry == null) return;
         GameProfile profile = new GameProfile(entry.profileId(), entry.profile().getName());
 
-        ServerPlayer player = MidnightCore.getInstance().getServer().getPlayerList().getPlayer(profile.getId());
+        ServerPlayer player = server.getInternal().getPlayerList().getPlayer(profile.getId());
         if(player == null) return;
 
         profile.getProperties().clear();
@@ -209,6 +220,6 @@ public class FabricSkinModule extends AbstractSkinModule {
         ((AccessorClientboundPlayerInfoUpdatePacket) packet).setEntries(newEntries);
     }
 
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(FabricSkinModule::new, ID, DEFAULT_CONFIG);
+    public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricSkinModule::new, ID, DEFAULT_CONFIG);
 
 }

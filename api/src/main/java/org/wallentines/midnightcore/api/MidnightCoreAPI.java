@@ -5,13 +5,14 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.midnightcore.api.item.InventoryGUI;
 import org.wallentines.midnightcore.api.item.MItemStack;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.CustomScoreboard;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
@@ -20,7 +21,7 @@ import org.wallentines.midnightlib.requirement.RequirementType;
 import java.io.File;
 import java.util.Random;
 
-
+@SuppressWarnings("unused")
 public abstract class MidnightCoreAPI {
 
     private static final Logger LOGGER = LogManager.getLogger("MidnightCore");
@@ -63,7 +64,7 @@ public abstract class MidnightCoreAPI {
      *
      * @return The module manager
      */
-    public abstract ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> getModuleManager();
+    public abstract ModuleManager<MServer, ServerModule> getModuleManager();
 
     /**
      * Returns the requirement type registry, so additional requirement types can be added
@@ -77,6 +78,7 @@ public abstract class MidnightCoreAPI {
      *
      * @return The player manager
      */
+    @Deprecated
     public abstract PlayerManager getPlayerManager();
 
     /**
@@ -88,6 +90,7 @@ public abstract class MidnightCoreAPI {
      *
      * @return The version
      */
+    @Deprecated
     public abstract MItemStack createItem(Identifier id, int count, ConfigSection nbt);
 
     /**
@@ -96,6 +99,7 @@ public abstract class MidnightCoreAPI {
      * @param title  The title of the GUI
      * @return       The Inventory GUI
      */
+    @Deprecated
     public abstract InventoryGUI createGUI(MComponent title);
 
     /**
@@ -104,6 +108,7 @@ public abstract class MidnightCoreAPI {
      * @param title The title of the scoreboard
      * @return      The scoreboard
      */
+    @Deprecated
     public abstract CustomScoreboard createScoreboard(String id, MComponent title);
 
     /**
@@ -111,6 +116,7 @@ public abstract class MidnightCoreAPI {
      *
      * @param command The command to run
      */
+    @Deprecated
     public void executeConsoleCommand(String command) {
         executeConsoleCommand(command, true);
     }
@@ -121,12 +127,14 @@ public abstract class MidnightCoreAPI {
      * @param command The command to run
      * @param log     Whether the output should be logged or sent to admins
      */
+    @Deprecated
     public abstract void executeConsoleCommand(String command, boolean log);
 
     /**
      * Submits a function to be run synchronously on the server thread on the next tick
      * @param runnable The function to run
      */
+    @Deprecated
     public abstract void executeOnServer(Runnable runnable);
 
     /**
@@ -144,6 +152,13 @@ public abstract class MidnightCoreAPI {
     public abstract String getServerLocale();
 
     /**
+     * Retrieves the currently running server. This may return null on clients in the main menu, or on servers
+     * during startup before the MinecraftServer object has been created.
+     * @return The currently running server
+     */
+    public abstract MServer getServer();
+
+    /**
      * Reloads the main config and all registered modules
      */
     public abstract void reload();
@@ -151,6 +166,7 @@ public abstract class MidnightCoreAPI {
     /**
      * Disables all loaded modules
      */
+    @Deprecated
     public abstract void unloadModules();
 
     /**
@@ -172,7 +188,6 @@ public abstract class MidnightCoreAPI {
         return LOGGER;
     }
 
-
     /**
      * Gets a module from the global MidnightCoreAPI instance. Will be null if the API has not been created yet or the module is not enabled or the module has been unloaded
      *
@@ -181,7 +196,7 @@ public abstract class MidnightCoreAPI {
      * @param <T> The type of module to look up
      */
     @Nullable
-    public static <T extends Module<MidnightCoreAPI>> T getModule(Class<T> clazz) {
+    public static <T extends ServerModule> T getModule(Class<T> clazz) {
 
         MidnightCoreAPI inst = getInstance();
         if(inst == null) return null;

@@ -6,9 +6,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.common.util.MojangUtil;
 import org.wallentines.midnightcore.spigot.MidnightCore;
@@ -16,7 +17,6 @@ import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
 import org.wallentines.midnightcore.spigot.adapter.SkinUpdater;
 import org.wallentines.midnightcore.spigot.player.SpigotPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 public class SpigotSkinModule extends AbstractSkinModule implements Listener {
@@ -24,8 +24,8 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
     private SkinUpdater updater;
 
     @Override
-    public boolean initialize(ConfigSection configuration, MidnightCoreAPI api) {
-        if(!super.initialize(configuration, api)) return false;
+    public boolean initialize(ConfigSection configuration, MServer server) {
+        if(!super.initialize(configuration, server)) return false;
 
         updater = AdapterManager.getAdapter().getSkinUpdater();
 
@@ -67,5 +67,5 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
         onLeave(SpigotPlayer.wrap(event.getPlayer()));
     }
 
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(SpigotSkinModule::new, ID, DEFAULT_CONFIG);
+    public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(SpigotSkinModule::new, ID, DEFAULT_CONFIG);
 }

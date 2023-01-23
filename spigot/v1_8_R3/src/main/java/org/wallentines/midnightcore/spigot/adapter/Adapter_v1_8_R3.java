@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.spigot.adapter;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_8_R3.*;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -38,10 +39,9 @@ public class Adapter_v1_8_R3 implements SpigotAdapter {
         return pl.getItemInHand();
     }
 
-    @SuppressWarnings("deprecated")
     @Override
     public ItemStack getItemInOffHand(Player pl) {
-        return new ItemStack(0);
+        return new ItemStack(Material.AIR);
     }
 
     @Override

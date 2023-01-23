@@ -3,15 +3,16 @@ package org.wallentines.midnightcore.common;
 import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.api.item.InventoryGUI;
 import org.wallentines.midnightcore.api.item.MItemStack;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.CustomScoreboard;
 import org.wallentines.midnightcore.api.text.MComponent;
-import org.wallentines.midnightcore.common.item.ItemConverter;
+import org.wallentines.midnightcore.common.server.AbstractServer;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.FileConfig;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
@@ -22,28 +23,18 @@ import org.wallentines.midnightlib.requirement.RequirementType;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Random;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class MidnightCoreImpl extends MidnightCoreAPI {
 
     private final FileConfig config;
     private final File dataFolder;
     private final Version gameVersion;
-    private final ItemConverter itemConverter;
-    private final PlayerManager playerManager;
-    private final Function<MComponent, InventoryGUI> guiFunction;
-    private final BiFunction<String, MComponent, CustomScoreboard> scoreboardFunction;
-    private final BiConsumer<String, Boolean> console;
 
-    private final Consumer<Runnable> serverSubmitter;
     private final Random random = new Random();
 
-    private final ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> moduleManager;
+    private AbstractServer currentServer;
 
-    public MidnightCoreImpl(Path dataFolder, Version gameVersion, ItemConverter itemConverter, PlayerManager playerManager, Function<MComponent, InventoryGUI> guiFunction, BiFunction<String, MComponent, CustomScoreboard> scoreboardFunction, BiConsumer<String, Boolean> console, Consumer<Runnable> serverSubmitter) {
+    public MidnightCoreImpl(Path dataFolder, Version gameVersion) {
 
         super();
 
@@ -59,23 +50,20 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
         this.config.getRoot().fill(Constants.CONFIG_DEFAULTS);
         this.config.save();
 
-        this.moduleManager = new ModuleManager<>(Constants.DEFAULT_NAMESPACE);
         this.gameVersion = gameVersion;
-        this.itemConverter = itemConverter;
-        this.playerManager = playerManager;
-        this.guiFunction = guiFunction;
-        this.scoreboardFunction = scoreboardFunction;
-        this.console = console;
-        this.serverSubmitter = serverSubmitter;
     }
 
-    public void loadModules() {
-        ConfigSection sec = getConfig().getOrCreateSection("modules");
-        moduleManager.loadAll(sec, this, Registries.MODULE_REGISTRY);
+    public void setActiveServer(AbstractServer server) {
+        this.currentServer = server;
 
-        getLogger().info("Loaded " + moduleManager.getCount() + " modules");
+        if(server != null) {
 
-        config.save();
+            // Load Modules
+            ConfigSection sec = getConfig().getOrCreateSection("modules");
+            server.loadModules(sec, Registries.MODULE_REGISTRY);
+
+            config.save();
+        }
     }
 
     @Override
@@ -102,9 +90,9 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     }
 
     @Override
-    public ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> getModuleManager() {
+    public ModuleManager<MServer, ServerModule> getModuleManager() {
 
-        return moduleManager;
+        return currentServer.getModuleManager();
     }
 
     @Override
@@ -116,34 +104,39 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     @Override
     public PlayerManager getPlayerManager() {
 
-        return playerManager;
+        return currentServer.getPlayerManager();
     }
 
     @Override
     public MItemStack createItem(Identifier id, int count, ConfigSection nbt) {
 
-        return itemConverter.create(id, count, nbt);
+        return currentServer.createItemStack(id, count, nbt);
     }
 
     @Override
     public InventoryGUI createGUI(MComponent title) {
-        return guiFunction.apply(title);
+        return currentServer.createInventoryGUI(title);
     }
 
     @Override
     public CustomScoreboard createScoreboard(String id, MComponent title) {
-        return scoreboardFunction.apply(id, title);
+        return currentServer.createScoreboard(id, title);
     }
 
     @Override
     public void executeConsoleCommand(String command, boolean log) {
-        console.accept(command, log);
+        currentServer.executeCommand(command, log);
     }
 
 
     @Override
     public void executeOnServer(Runnable runnable) {
-        serverSubmitter.accept(runnable);
+        currentServer.submit(runnable);
+    }
+
+    @Override
+    public MServer getServer() {
+        return currentServer;
     }
 
     @Override
@@ -159,12 +152,15 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     @Override
     public void reload() {
         config.reload();
+
         ConfigSection sec = config.getRoot().getOrCreateSection("modules");
-        moduleManager.reloadAll(sec, this, Registries.MODULE_REGISTRY);
+        currentServer.reloadModules(sec, Registries.MODULE_REGISTRY);
+
+        config.save();
     }
 
     @Override
     public void unloadModules() {
-        moduleManager.unloadAll();
+        currentServer.getModuleManager().unloadAll();
     }
 }
