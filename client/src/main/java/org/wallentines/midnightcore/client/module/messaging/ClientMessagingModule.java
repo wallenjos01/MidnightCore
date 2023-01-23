@@ -1,11 +1,11 @@
-package org.wallentines.midnightcore.api.module.messaging;
+package org.wallentines.midnightcore.client.module.messaging;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.client.module.ClientModule;
 import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.registry.Identifier;
 
-public interface ClientMessagingModule extends Module<MidnightCoreAPI> {
+@SuppressWarnings("unused")
+public interface ClientMessagingModule extends ClientModule {
 
     void registerHandler(Identifier id, ClientMessageHandler handler);
 

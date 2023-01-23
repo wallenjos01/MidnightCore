@@ -42,9 +42,11 @@ dependencies {
 
     implementation project(':api')
     implementation project(':common')
+    implementation project(':client')
 
     shade project(':api')
     shade project(':common')
+    shade project(':client')
 
     shade 'org.wallentines:midnightlib:1.0-SNAPSHOT'
 

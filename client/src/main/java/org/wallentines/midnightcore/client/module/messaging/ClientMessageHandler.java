@@ -1,4 +1,4 @@
-package org.wallentines.midnightcore.api.module.messaging;
+package org.wallentines.midnightcore.client.module.messaging;
 
 import io.netty.buffer.ByteBuf;
 

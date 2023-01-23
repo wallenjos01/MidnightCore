@@ -1,0 +1,48 @@
+repositories {
+
+    maven {
+        url "https://libraries.minecraft.net/"
+    }
+}
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+dependencies {
+
+    compileOnly 'org.jetbrains:annotations:23.0.0'
+    compileOnly 'com.mojang:authlib:2.1.28'
+    compileOnly 'com.google.guava:guava:31.1-jre'
+    compileOnly 'io.netty:netty-all:4.1.85.Final'
+
+    compileOnly project(":api")
+    compileOnly project(":common")
+
+    testImplementation 'junit:junit:4.13.2'
+}
+
+test {
+
+    useJUnit()
+    maxHeapSize = '1G'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = "${project.group}.${project.mod_id}"
+        }
+    }
+    repositories {
+        maven {
+            if (project.hasProperty("pubUrl")) {
+                url = project.pubUrl as String
+                credentials {
+                    username project.pubUser as String
+                    password project.pubPass as String
+                }
+            }
+        }
+    }
+}

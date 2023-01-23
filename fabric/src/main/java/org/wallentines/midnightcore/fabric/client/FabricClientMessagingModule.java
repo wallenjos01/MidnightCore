@@ -8,8 +8,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.messaging.ClientMessageHandler;
-import org.wallentines.midnightcore.api.module.messaging.ClientMessagingModule;
+import org.wallentines.midnightcore.client.MidnightCoreClient;
+import org.wallentines.midnightcore.client.module.ClientModule;
+import org.wallentines.midnightcore.client.module.messaging.ClientMessageHandler;
+import org.wallentines.midnightcore.client.module.messaging.ClientMessagingModule;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
 import org.wallentines.midnightcore.fabric.event.client.ClientCustomMessageEvent;
 import org.wallentines.midnightcore.fabric.event.client.ClientLoginQueryEvent;
@@ -17,7 +19,6 @@ import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.event.Event;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -29,7 +30,7 @@ public class FabricClientMessagingModule implements ClientMessagingModule {
     private final HashMap<ResourceLocation, ClientMessageHandler> loginHandlers = new HashMap<>();
 
     @Override
-    public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
+    public boolean initialize(ConfigSection section, MidnightCoreClient data) {
 
         Event.register(ClientCustomMessageEvent.class, this, ev -> {
 
@@ -110,6 +111,6 @@ public class FabricClientMessagingModule implements ClientMessagingModule {
 
     }
 
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(FabricClientMessagingModule::new, AbstractMessagingModule.ID, new ConfigSection());
+    public static final ModuleInfo<MidnightCoreClient, ClientModule> MODULE_INFO = new ModuleInfo<>(FabricClientMessagingModule::new, AbstractMessagingModule.ID, new ConfigSection());
 
 }

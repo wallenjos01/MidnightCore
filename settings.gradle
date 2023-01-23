@@ -13,6 +13,8 @@ rootProject.name = "midnightcore"
 include 'api'
 include 'common'
 
+include 'client'
+
 include 'fabric'
 //include 'forge'
 include 'velocity'
