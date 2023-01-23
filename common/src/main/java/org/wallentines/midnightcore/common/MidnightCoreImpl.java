@@ -76,6 +76,8 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
             server.loadModules(sec, Registries.MODULE_REGISTRY);
 
             config.save();
+
+            STARTUP_LISTENERS.forEach(ls -> ls.accept(server));
         }
     }
 

@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.fabric.server;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.PlayerManager;
 import org.wallentines.midnightcore.common.server.AbstractServer;
 import org.wallentines.midnightcore.fabric.player.FabricPlayerManager;
@@ -11,7 +12,8 @@ public class FabricServer extends AbstractServer {
     private final MinecraftServer internal;
     private final FabricPlayerManager playerManager;
 
-    public FabricServer(MinecraftServer server) {
+    public FabricServer(MidnightCoreAPI api, MinecraftServer server) {
+        super(api);
         this.internal = server;
         this.playerManager = new FabricPlayerManager(this);
     }

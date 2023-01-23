@@ -72,7 +72,7 @@ public class MidnightCore {
         Registries.MODULE_REGISTRY.register(AbstractSkinModule.ID, SpigotSkinModule.MODULE_INFO);
         server.getPluginManager().callEvent(new MidnightCoreLoadModulesEvent(api, Registries.MODULE_REGISTRY));
 
-        api.setActiveServer(new SpigotServer(server, plugin));
+        api.setActiveServer(new SpigotServer(api, server, plugin));
 
         server.getPluginManager().callEvent(new MidnightCoreInitializeEvent(api));
     }

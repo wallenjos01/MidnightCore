@@ -13,6 +13,12 @@ public abstract class AbstractServer implements MServer {
 
     private final ModuleManager<MServer, ServerModule> moduleManager = new ModuleManager<>(Constants.DEFAULT_NAMESPACE);
 
+    protected final MidnightCoreAPI api;
+
+    public AbstractServer(MidnightCoreAPI api) {
+        this.api = api;
+    }
+
     public void loadModules(ConfigSection config, Registry<ModuleInfo<MServer, ServerModule>> registry) {
 
         moduleManager.loadAll(config, this, registry);
@@ -32,5 +38,10 @@ public abstract class AbstractServer implements MServer {
     @Override
     public ModuleManager<MServer, ServerModule> getModuleManager() {
         return moduleManager;
+    }
+
+    @Override
+    public MidnightCoreAPI getMidnightCore() {
+        return api;
     }
 }

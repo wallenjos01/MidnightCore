@@ -65,7 +65,7 @@ public class MidnightCore {
         Registries.MODULE_REGISTRY.register(GlobalJoinModule.ID, GlobalJoinModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(ExtensionHelper.ID, VelocityExtensionModule.MODULE_INFO);
 
-        api.setActiveServer(new VelocityServer(server, this));
+        api.setActiveServer(new VelocityServer(api, server, this));
 
         Event.invoke(new MidnightCoreInitializeEvent(this));
     }

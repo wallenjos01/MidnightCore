@@ -20,13 +20,19 @@ import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.requirement.RequirementType;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
 public abstract class MidnightCoreAPI {
 
     private static final Logger LOGGER = LogManager.getLogger("MidnightCore");
     private static MidnightCoreAPI INSTANCE;
+
+
+    protected static final List<Consumer<MServer>> STARTUP_LISTENERS = new ArrayList<>();
 
     protected MidnightCoreAPI() {
         if(INSTANCE == null) INSTANCE = this;
@@ -219,6 +225,20 @@ public abstract class MidnightCoreAPI {
         if(inst == null) return null;
 
         return inst.getServer();
+    }
+
+    /**
+     * Adds a listener which will be invoked each time a server starts up. If a server is already running, the listener will also be invoked immediately.
+     * @param function The function to run each time a server starts up.
+     */
+    public static void onServerStartup(Consumer<MServer> function) {
+
+        STARTUP_LISTENERS.add(function);
+
+        MServer server = getRunningServer();
+        if(server != null) {
+            function.accept(server);
+        }
     }
 
 }

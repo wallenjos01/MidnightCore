@@ -97,7 +97,7 @@ public class MidnightCore implements ModInitializer {
         verInits.forEach(ModInitializer::onInitialize);
 
 
-        Event.register(ServerStartEvent.class, this, 10, event -> api.setActiveServer(new FabricServer(event.getServer())));
+        Event.register(ServerStartEvent.class, this, 10, event -> api.setActiveServer(new FabricServer(api, event.getServer())));
 
         Event.register(ServerStopEvent.class, this, 90, event -> api.setActiveServer(null));
 

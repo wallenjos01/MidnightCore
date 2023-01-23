@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.api.server;
 
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
@@ -65,5 +66,12 @@ public interface MServer {
      * @return The server's module manager
      */
     ModuleManager<MServer, ServerModule> getModuleManager();
+
+
+    /**
+     * Returns a reference to the global MidnightCoreAPI instance
+     * @return A reference to MidnightCoreAPI
+     */
+    MidnightCoreAPI getMidnightCore();
 
 }

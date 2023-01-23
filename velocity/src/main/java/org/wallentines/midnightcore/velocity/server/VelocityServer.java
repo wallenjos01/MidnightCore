@@ -1,6 +1,7 @@
 package org.wallentines.midnightcore.velocity.server;
 
 import com.velocitypowered.api.proxy.ProxyServer;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.PlayerManager;
 import org.wallentines.midnightcore.common.server.AbstractServer;
 import org.wallentines.midnightcore.velocity.MidnightCore;
@@ -13,7 +14,10 @@ public class VelocityServer extends AbstractServer {
     private final MidnightCore plugin;
     private final VelocityPlayerManager playerManager;
 
-    public VelocityServer(ProxyServer server, MidnightCore plugin) {
+    public VelocityServer(MidnightCoreAPI api, ProxyServer server, MidnightCore plugin) {
+
+        super(api);
+
         this.server = server;
         this.plugin = plugin;
 
