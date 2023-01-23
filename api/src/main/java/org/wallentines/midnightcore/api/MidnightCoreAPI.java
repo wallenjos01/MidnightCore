@@ -90,7 +90,6 @@ public abstract class MidnightCoreAPI {
      *
      * @return The version
      */
-    @Deprecated
     public abstract MItemStack createItem(Identifier id, int count, ConfigSection nbt);
 
     /**
@@ -99,7 +98,6 @@ public abstract class MidnightCoreAPI {
      * @param title  The title of the GUI
      * @return       The Inventory GUI
      */
-    @Deprecated
     public abstract InventoryGUI createGUI(MComponent title);
 
     /**
@@ -108,7 +106,6 @@ public abstract class MidnightCoreAPI {
      * @param title The title of the scoreboard
      * @return      The scoreboard
      */
-    @Deprecated
     public abstract CustomScoreboard createScoreboard(String id, MComponent title);
 
     /**

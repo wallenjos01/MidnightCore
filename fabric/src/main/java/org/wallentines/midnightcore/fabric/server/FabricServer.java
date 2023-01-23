@@ -2,18 +2,9 @@ package org.wallentines.midnightcore.fabric.server;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import org.wallentines.midnightcore.api.item.InventoryGUI;
-import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.PlayerManager;
-import org.wallentines.midnightcore.api.text.CustomScoreboard;
-import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.server.AbstractServer;
-import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
-import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.player.FabricPlayerManager;
-import org.wallentines.midnightcore.fabric.text.FabricScoreboard;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.registry.Identifier;
 
 public class FabricServer extends AbstractServer {
 
@@ -57,24 +48,6 @@ public class FabricServer extends AbstractServer {
     public PlayerManager getPlayerManager() {
 
         return playerManager;
-    }
-
-    @Override
-    public InventoryGUI createInventoryGUI(MComponent title) {
-
-        return new FabricInventoryGUI(title);
-    }
-
-    @Override
-    public CustomScoreboard createScoreboard(String id, MComponent title) {
-
-        return new FabricScoreboard(id, title);
-    }
-
-    @Override
-    public MItemStack createItemStack(Identifier typeId, int count, ConfigSection tag) {
-
-        return new FabricItem(typeId, count, tag);
     }
 
     public MinecraftServer getInternal() {

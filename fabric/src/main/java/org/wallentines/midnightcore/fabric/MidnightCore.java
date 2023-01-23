@@ -21,6 +21,7 @@ import org.wallentines.midnightcore.fabric.command.TestCommand;
 import org.wallentines.midnightcore.fabric.event.server.CommandLoadEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
+import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.level.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.extension.FabricServerExtensionModule;
@@ -30,6 +31,7 @@ import org.wallentines.midnightcore.fabric.module.session.FabricSessionModule;
 import org.wallentines.midnightcore.fabric.module.skin.FabricSkinModule;
 import org.wallentines.midnightcore.fabric.module.vanish.FabricVanishModule;
 import org.wallentines.midnightcore.fabric.server.FabricServer;
+import org.wallentines.midnightcore.fabric.text.FabricScoreboard;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.event.Event;
@@ -76,7 +78,14 @@ public class MidnightCore implements ModInitializer {
         Registry.register(BuiltInRegistries.CHUNK_GENERATOR, new ResourceLocation(Constants.DEFAULT_NAMESPACE, "empty"), EmptyGenerator.CODEC);
 
         // Create the API
-        MidnightCoreImpl api = new MidnightCoreImpl(dataFolder, version);
+        MidnightCoreImpl api = new MidnightCoreImpl(
+                dataFolder,
+                version,
+                FabricItem::new,
+                FabricInventoryGUI::new,
+                FabricScoreboard::new
+        );
+
         MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version.toString());
 
         // Register default fabric modules

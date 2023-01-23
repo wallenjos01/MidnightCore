@@ -29,16 +29,23 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     private final FileConfig config;
     private final File dataFolder;
     private final Version gameVersion;
-
     private final Random random = new Random();
+
+
+    private final MItemStack.Factory itemFactory;
+    private final InventoryGUI.Factory guiFactory;
+    private final CustomScoreboard.Factory scoreboardFactory;
 
     private AbstractServer currentServer;
 
-    public MidnightCoreImpl(Path dataFolder, Version gameVersion) {
+    public MidnightCoreImpl(Path dataFolder, Version gameVersion, MItemStack.Factory itemFactory, InventoryGUI.Factory guiFactory, CustomScoreboard.Factory scoreboardFactory) {
 
         super();
 
         this.dataFolder = FileUtil.tryCreateDirectory(dataFolder);
+        this.itemFactory = itemFactory;
+        this.guiFactory = guiFactory;
+        this.scoreboardFactory = scoreboardFactory;
         if(this.dataFolder == null) {
             throw new IllegalStateException("Unable to create data folder!");
         }
@@ -110,17 +117,17 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     @Override
     public MItemStack createItem(Identifier id, int count, ConfigSection nbt) {
 
-        return currentServer.createItemStack(id, count, nbt);
+        return itemFactory.create(id, count, nbt);
     }
 
     @Override
     public InventoryGUI createGUI(MComponent title) {
-        return currentServer.createInventoryGUI(title);
+        return guiFactory.create(title);
     }
 
     @Override
     public CustomScoreboard createScoreboard(String id, MComponent title) {
-        return currentServer.createScoreboard(id, title);
+        return scoreboardFactory.create(id, title);
     }
 
     @Override

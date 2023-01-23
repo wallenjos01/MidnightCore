@@ -12,6 +12,7 @@ import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.common.module.extension.ExtensionHelper;
 import org.wallentines.midnightcore.velocity.event.MidnightCoreInitializeEvent;
+import org.wallentines.midnightcore.velocity.item.DummyItem;
 import org.wallentines.midnightcore.velocity.module.extension.VelocityExtensionModule;
 import org.wallentines.midnightcore.velocity.module.globaljoin.GlobalJoinModule;
 import org.wallentines.midnightcore.velocity.module.lastserver.LastServerModule;
@@ -46,7 +47,13 @@ public class MidnightCore {
 
         Constants.registerDefaults(JsonConfigProvider.INSTANCE);
 
-        MidnightCoreImpl api = new MidnightCoreImpl(dataFolder, Version.SERIALIZER.deserialize("1.19.3"));
+        MidnightCoreImpl api = new MidnightCoreImpl(
+                dataFolder,
+                Version.SERIALIZER.deserialize("1.19.3"),
+                DummyItem::new,
+                (title) -> null,
+                (id, title) -> null
+        );
 
         // Register Velocity Modules
         Registries.MODULE_REGISTRY.register(VelocityMessagingModule.ID, VelocityMessagingModule.MODULE_INFO);

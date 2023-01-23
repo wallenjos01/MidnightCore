@@ -5,12 +5,11 @@ import org.bukkit.inventory.ItemStack;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.common.item.AbstractItem;
-import org.wallentines.midnightcore.common.item.ItemConverter;
 import org.wallentines.midnightlib.Version;
 
-public final class ItemConverters {
+public final class ItemHelper {
 
-    public static ItemConverter getItemConverter(Version version) {
+    public static MItemStack.Factory getItemConverter(Version version) {
 
         if(version.getMinorVersion() < 13) {
             return LegacyItem::new;
@@ -19,9 +18,16 @@ public final class ItemConverters {
         return SpigotItem::new;
     }
 
+    private static boolean isLegacy() {
+
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        int minorVersion = api == null ? 13 : api.getGameVersion().getMinorVersion();
+        return minorVersion < 13;
+    }
+
     public static AbstractItem convertItem(ItemStack is) {
 
-        if(MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() < 13) {
+        if(isLegacy()) {
             return new LegacyItem(is);
         }
 
@@ -31,7 +37,7 @@ public final class ItemConverters {
 
     public static ItemStack getInternal(MItemStack is) {
 
-        if(MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() < 13) {
+        if(isLegacy()) {
             return ((LegacyItem) is).getInternal();
         }
 

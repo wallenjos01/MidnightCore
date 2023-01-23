@@ -12,10 +12,12 @@ import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.spigot.config.YamlConfigProvider;
 import org.wallentines.midnightcore.spigot.event.MidnightCoreInitializeEvent;
 import org.wallentines.midnightcore.spigot.event.MidnightCoreLoadModulesEvent;
-import org.wallentines.midnightcore.spigot.item.ItemConverters;
+import org.wallentines.midnightcore.spigot.item.ItemHelper;
+import org.wallentines.midnightcore.spigot.item.SpigotInventoryGUI;
 import org.wallentines.midnightcore.spigot.module.savepoint.SpigotSavepointModule;
 import org.wallentines.midnightcore.spigot.module.skin.SpigotSkinModule;
 import org.wallentines.midnightcore.spigot.server.SpigotServer;
+import org.wallentines.midnightcore.spigot.text.SpigotScoreboard;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigRegistry;
 
@@ -51,15 +53,22 @@ public class MidnightCore {
 
         Version version = Version.SERIALIZER.deserialize(ver);
 
-        MidnightCoreImpl api = new MidnightCoreImpl(dataDir, version);
-        MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version.toString());
+        MidnightCoreImpl api = new MidnightCoreImpl(
+                dataDir,
+                version,
+                ItemHelper.getItemConverter(version),
+                SpigotInventoryGUI::new,
+                SpigotScoreboard::new
+        );
+
+        MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version);
 
         // Register Spigot Modules
         Registries.MODULE_REGISTRY.register(AbstractSavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(AbstractSkinModule.ID, SpigotSkinModule.MODULE_INFO);
         server.getPluginManager().callEvent(new MidnightCoreLoadModulesEvent(api, Registries.MODULE_REGISTRY));
 
-        api.setActiveServer(new SpigotServer(server, plugin, ItemConverters.getItemConverter(version)));
+        api.setActiveServer(new SpigotServer(server, plugin));
 
         server.getPluginManager().callEvent(new MidnightCoreInitializeEvent(api));
     }

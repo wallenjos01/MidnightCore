@@ -1,15 +1,9 @@
 package org.wallentines.midnightcore.api.server;
 
-import org.wallentines.midnightcore.api.item.InventoryGUI;
-import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
-import org.wallentines.midnightcore.api.text.CustomScoreboard;
-import org.wallentines.midnightcore.api.text.MComponent;
-import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleManager;
-import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.UUID;
 
@@ -56,30 +50,6 @@ public interface MServer {
     default MPlayer getPlayer(UUID uuid) {
         return getPlayerManager().getPlayer(uuid);
     }
-
-    /**
-     * Creates a new Inventory GUI with the given title
-     * @param title The title of the new Inventory GUI
-     * @return A new inventory GUI
-     */
-    InventoryGUI createInventoryGUI(MComponent title);
-
-    /**
-     * Creates a custom scoreboard object which can be manipulated freely
-     * @param id The internal ID of the scoreboard.
-     * @param title The title which appears at the top at the scoreboard
-     * @return A new custom scoreboard
-     */
-    CustomScoreboard createScoreboard(String id, MComponent title);
-
-    /**
-     * Creates a new ItemStack with the given type, amount, and NBT tag
-     * @param typeId The type of item
-     * @param count The size of the item stack
-     * @param tag The item NBT
-     * @return A new ItemStack
-     */
-    MItemStack createItemStack(Identifier typeId, int count, ConfigSection tag);
 
 
     /**

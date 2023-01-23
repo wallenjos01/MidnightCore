@@ -1,9 +1,11 @@
 package org.wallentines.midnightcore.api.item;
 
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.text.MComponent;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public interface InventoryGUI {
 
     int getPageSize();
@@ -43,6 +45,10 @@ public interface InventoryGUI {
         THROW,
         THROW_ALL,
         NUMBER_KEY
+    }
+
+    interface Factory {
+        InventoryGUI create(MComponent title);
     }
 
 }

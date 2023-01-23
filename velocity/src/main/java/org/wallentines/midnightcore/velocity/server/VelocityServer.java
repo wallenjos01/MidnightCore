@@ -1,17 +1,10 @@
 package org.wallentines.midnightcore.velocity.server;
 
 import com.velocitypowered.api.proxy.ProxyServer;
-import org.wallentines.midnightcore.api.item.InventoryGUI;
-import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.PlayerManager;
-import org.wallentines.midnightcore.api.text.CustomScoreboard;
-import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.server.AbstractServer;
 import org.wallentines.midnightcore.velocity.MidnightCore;
-import org.wallentines.midnightcore.velocity.item.DummyItem;
 import org.wallentines.midnightcore.velocity.player.VelocityPlayerManager;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.registry.Identifier;
 
 public class VelocityServer extends AbstractServer {
 
@@ -51,21 +44,6 @@ public class VelocityServer extends AbstractServer {
     @Override
     public PlayerManager getPlayerManager() {
         return playerManager;
-    }
-
-    @Override
-    public InventoryGUI createInventoryGUI(MComponent title) {
-        return null;
-    }
-
-    @Override
-    public CustomScoreboard createScoreboard(String id, MComponent title) {
-        return null;
-    }
-
-    @Override
-    public MItemStack createItemStack(Identifier typeId, int count, ConfigSection tag) {
-        return new DummyItem(typeId, count, tag);
     }
 
     public ProxyServer getInternal() {

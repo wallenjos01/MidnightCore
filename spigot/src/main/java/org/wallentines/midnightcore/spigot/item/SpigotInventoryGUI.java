@@ -9,7 +9,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.item.AbstractInventoryGUI;
@@ -77,7 +76,7 @@ public class SpigotInventoryGUI extends AbstractInventoryGUI {
                 continue;
             }
 
-            ItemStack is = ItemConverters.getInternal(ent.item);
+            ItemStack is = ItemHelper.getInternal(ent.item);
             inv.setItem(ent.slot - offset, is);
         }
 
@@ -129,7 +128,7 @@ public class SpigotInventoryGUI extends AbstractInventoryGUI {
 
         @EventHandler
         private void onLeave(PlayerQuitEvent event) {
-            closeMenu(MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId()));
+            closeMenu(SpigotPlayer.wrap(event.getPlayer()));
         }
     }
 

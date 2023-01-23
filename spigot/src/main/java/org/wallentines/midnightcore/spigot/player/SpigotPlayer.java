@@ -12,7 +12,7 @@ import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
-import org.wallentines.midnightcore.spigot.item.ItemConverters;
+import org.wallentines.midnightcore.spigot.item.ItemHelper;
 import org.wallentines.midnightcore.spigot.util.ConversionUtil;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -47,12 +47,12 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
 
     @Override
     public MItemStack getItemInMainHand() {
-        return run(pl -> ItemConverters.convertItem(AdapterManager.getAdapter().getItemInMainHand(pl)), () -> null);
+        return run(pl -> ItemHelper.convertItem(AdapterManager.getAdapter().getItemInMainHand(pl)), () -> null);
     }
 
     @Override
     public MItemStack getItemInOffhand() {
-        return run(pl -> ItemConverters.convertItem(AdapterManager.getAdapter().getItemInOffHand(pl)), () -> null);
+        return run(pl -> ItemHelper.convertItem(AdapterManager.getAdapter().getItemInOffHand(pl)), () -> null);
     }
 
     @Override
@@ -127,12 +127,12 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
 
     @Override
     public void giveItem(MItemStack item) {
-        run(pl -> ItemConverters.giveItem(pl, item), () -> {});
+        run(pl -> ItemHelper.giveItem(pl, item), () -> {});
     }
 
     @Override
     public void giveItem(MItemStack item, int slot) {
-        run(pl -> ItemConverters.giveItem(pl, item, slot), () -> {});
+        run(pl -> ItemHelper.giveItem(pl, item, slot), () -> {});
     }
 
     @Override

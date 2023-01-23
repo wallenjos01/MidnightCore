@@ -2,7 +2,6 @@ package org.wallentines.midnightcore.api.item;
 
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
-import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.TextColor;
@@ -93,9 +92,6 @@ public interface MItemStack {
             MidnightCoreAPI api = MidnightCoreAPI.getInstance();
             if(api == null) return null;
 
-            MServer server = api.getServer();
-            if(server == null) return null;
-
             if(name != null || lore != null) {
                 ConfigSection display = new ConfigSection();
 
@@ -127,7 +123,7 @@ public interface MItemStack {
                 tag.set("SkullOwner", skullOwner);
             }
 
-            return server.createItemStack(type, amount, tag);
+            return api.createItem(type, amount, tag);
         }
 
 
@@ -251,12 +247,13 @@ public interface MItemStack {
                 MidnightCoreAPI api = MidnightCoreAPI.getInstance();
                 if(api == null) return null;
 
-                MServer server = api.getServer();
-                if(server == null) return null;
-
-                return server.createItemStack(type, count, tag);
+                return api.createItem(type, count, tag);
             }
     );
+
+    interface Factory {
+        MItemStack create(Identifier type, int count, ConfigSection nbt);
+    }
 
 
 }
