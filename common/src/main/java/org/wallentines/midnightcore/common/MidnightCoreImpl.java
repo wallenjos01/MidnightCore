@@ -8,6 +8,8 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
 import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.CustomScoreboard;
+import org.wallentines.midnightcore.api.text.LangProvider;
+import org.wallentines.midnightcore.api.text.LangRegistry;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.server.AbstractServer;
 import org.wallentines.midnightlib.Version;
@@ -37,8 +39,9 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     private final CustomScoreboard.Factory scoreboardFactory;
 
     private AbstractServer currentServer;
+    private final LangProvider langProvider;
 
-    public MidnightCoreImpl(Path dataFolder, Version gameVersion, MItemStack.Factory itemFactory, InventoryGUI.Factory guiFactory, CustomScoreboard.Factory scoreboardFactory) {
+    public MidnightCoreImpl(Path dataFolder, Version gameVersion, ConfigSection langDefaults, MItemStack.Factory itemFactory, InventoryGUI.Factory guiFactory, CustomScoreboard.Factory scoreboardFactory) {
 
         super();
 
@@ -58,6 +61,9 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
         this.config.save();
 
         this.gameVersion = gameVersion;
+
+        File langFolder = FileUtil.tryCreateDirectory(dataFolder.resolve("lang"));
+        this.langProvider = new LangProvider(langFolder, LangRegistry.fromConfigSection(langDefaults));
     }
 
     public void setActiveServer(AbstractServer server) {
@@ -169,5 +175,10 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     @Override
     public void unloadModules() {
         currentServer.getModuleManager().unloadAll();
+    }
+
+    @Override
+    public LangProvider getLangProvider() {
+        return langProvider;
     }
 }

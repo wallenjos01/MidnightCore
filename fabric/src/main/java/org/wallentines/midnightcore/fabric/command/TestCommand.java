@@ -5,9 +5,11 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +29,6 @@ import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.common.util.Util;
-import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.level.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.level.DynamicLevelContext;
 import org.wallentines.midnightcore.fabric.level.DynamicLevelStorage;
@@ -89,6 +90,7 @@ public class TestCommand {
         if(spl == null) return 0;
 
         SkinModule mod = MidnightCoreAPI.getModule(SkinModule.class);
+        if(mod == null) throw new CommandRuntimeException(Component.literal("Skin Module is not loaded!"));
 
         mod.getOnlineSkinAsync(SKIN_UUID, skin -> {
             try {
@@ -112,6 +114,8 @@ public class TestCommand {
 
         try {
             SavepointModule mod = MidnightCoreAPI.getModule(SavepointModule.class);
+            if(mod == null) throw new CommandRuntimeException(Component.literal("Savepoint Module is not loaded!"));
+
             mod.savePlayer(FabricPlayer.wrap(spl), SAVEPOINT_ID);
 
             context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Saved!")), false);
@@ -130,6 +134,8 @@ public class TestCommand {
 
         try {
             SavepointModule mod = MidnightCoreAPI.getModule(SavepointModule.class);
+            if(mod == null) throw new CommandRuntimeException(Component.literal("Savepoint Module is not loaded!"));
+
             mod.loadPlayer(FabricPlayer.wrap(spl), SAVEPOINT_ID);
 
             context.getSource().sendSuccess(MutableComponent.create(new LiteralContents("Loaded!")), false);
@@ -150,6 +156,8 @@ public class TestCommand {
             MPlayer mpl = FabricPlayer.wrap(spl);
 
             VanishModule mod = MidnightCoreAPI.getModule(VanishModule.class);
+            if(mod == null) throw new CommandRuntimeException(Component.literal("Vanish Module is not loaded!"));
+
             if(mod.isVanished(mpl)) {
 
                 mod.revealPlayer(mpl);
@@ -224,8 +232,9 @@ public class TestCommand {
             if(spl == null) return 0;
 
             FabricPlayer mpl = FabricPlayer.wrap(spl);
+            MidnightCoreAPI api = MidnightCoreAPI.getInstance();
 
-            MComponent txt = PlaceholderManager.INSTANCE.parseText(arg, mpl, MidnightCore.getInstance().getLangProvider());
+            MComponent txt = PlaceholderManager.INSTANCE.parseText(arg, mpl, api == null ? null : api.getLangProvider());
             mpl.sendMessage(txt);
 
         } catch (Throwable th) {

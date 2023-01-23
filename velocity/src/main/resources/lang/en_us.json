@@ -1,0 +1,14 @@
+{
+  "command.main": "MidnightCore version %midnightcore_version% for Minecraft %server_version%",
+  "command.module.list.header": "Available Modules:",
+  "command.module.list.enabled": "&7 - &f%module_id% - &aLOADED",
+  "command.module.list.disabled": "&7 - &f%module_id% - &cDISABLED",
+  "command.module.loaded": "&f%module_id% loaded",
+  "command.module.unloaded": "&f%module_id% unloaded",
+  "command.module.enabled": "&f%module_id% has been enabled",
+  "command.module.disabled": "&f%module_id% has been disabled",
+  "command.error.module_not_found": "&cThat module does not exist!",
+  "command.error.module_not_loaded": "&cThat module is not loaded!",
+  "command.error.module_loaded": "&cThat module is already loaded!",
+  "command.reload": "MidnightCore reloaded in %time%ms"
+}

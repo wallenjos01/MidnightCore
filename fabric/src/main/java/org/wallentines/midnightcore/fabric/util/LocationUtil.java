@@ -1,7 +1,6 @@
 package org.wallentines.midnightcore.fabric.util;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -14,10 +13,14 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ChunkPos;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.Location;
-import org.wallentines.midnightcore.fabric.MidnightCore;
+import org.wallentines.midnightcore.api.server.MServer;
+import org.wallentines.midnightcore.fabric.server.FabricServer;
 import org.wallentines.midnightlib.math.Vec3d;
 
+import java.util.Objects;
 
+
+@SuppressWarnings("unused")
 public class LocationUtil {
 
     public static Location getEntityLocation(Entity ent) {
@@ -28,7 +31,7 @@ public class LocationUtil {
     public static Location getPlayerSpawnLocation(ServerPlayer player) {
 
         BlockPos spawn = player.getRespawnPosition();
-        if(spawn == null) return getSpawnLocation(MidnightCore.getInstance().getServer().overworld());
+        if(spawn == null) return getSpawnLocation(Objects.requireNonNull(player.getServer()).overworld());
 
         return new Location(ConversionUtil.toIdentifier(player.getRespawnDimension().location()), new Vec3d(spawn.getX(), spawn.getY(), spawn.getZ()), player.getRespawnAngle(), 0.0f);
     }
@@ -122,7 +125,10 @@ public class LocationUtil {
 
     public static ServerLevel getLevel(Location location) {
 
-        return MidnightCore.getInstance().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, ConversionUtil.toResourceLocation(location.getWorldId())));
+        MServer server = MidnightCoreAPI.getRunningServer();
+        if(server == null) throw new IllegalStateException("Attempt to obtain server level before server startup!");
+
+        return ((FabricServer) server).getInternal().getLevel(ResourceKey.create(Registries.DIMENSION, ConversionUtil.toResourceLocation(location.getWorldId())));
     }
 
 }

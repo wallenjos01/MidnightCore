@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -20,9 +19,11 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
-import org.wallentines.midnightcore.fabric.MidnightCore;
+import org.jetbrains.annotations.NotNull;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.server.MServer;
+import org.wallentines.midnightcore.fabric.server.FabricServer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Arrays;
@@ -50,7 +51,7 @@ public class EmptyGenerator extends ChunkGenerator {
     }
 
     @Override
-    protected Codec<? extends ChunkGenerator> codec() {
+    protected @NotNull Codec<? extends ChunkGenerator> codec() {
         return CODEC;
     }
 
@@ -67,7 +68,7 @@ public class EmptyGenerator extends ChunkGenerator {
     public void createStructures(RegistryAccess registryAccess, ChunkGeneratorStructureState chunkGeneratorStructureState, StructureManager structureManager, ChunkAccess chunkAccess, StructureTemplateManager structureTemplateManager) { }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess) {
+    public @NotNull CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess) {
 
         return CompletableFuture.supplyAsync(() -> {
 
@@ -104,7 +105,7 @@ public class EmptyGenerator extends ChunkGenerator {
     }
 
     @Override
-    public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
+    public @NotNull NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
 
         BlockState[] states = new BlockState[levelHeightAccessor.getHeight()];
         Arrays.fill(states, Blocks.AIR.defaultBlockState());
@@ -117,7 +118,10 @@ public class EmptyGenerator extends ChunkGenerator {
 
     public static EmptyGenerator create(ResourceKey<Biome> biome) {
 
-        RegistryAccess acc = MidnightCore.getInstance().getServer().registryAccess();
+        MServer server = MidnightCoreAPI.getRunningServer();
+        if(server == null) throw new IllegalStateException("Attempt to create EmptyGenerator before server startup!");
+
+        RegistryAccess acc = ((FabricServer) server).getInternal().registryAccess();
         Registry<Biome> biomes = acc.registryOrThrow(Registries.BIOME);
         Optional<Holder<Biome>> holder = biomes.getHolder(biome).map(ref -> ref);
 
@@ -141,7 +145,11 @@ public class EmptyGenerator extends ChunkGenerator {
         public EmptyGeneratorSettings(Optional<Holder<Biome>> biome) {
 
             this.biome = biome.orElseGet(() -> {
-                RegistryAccess acc = MidnightCore.getInstance().getServer().registryAccess();
+
+                MServer server = MidnightCoreAPI.getRunningServer();
+                if(server == null) throw new IllegalStateException("Attempt to create EmptyGenerator before server startup!");
+
+                RegistryAccess acc = ((FabricServer) server).getInternal().registryAccess();
                 Registry<Biome> biomes = acc.registryOrThrow(Registries.BIOME);
                 return biomes.getHolderOrThrow(Biomes.PLAINS);
             });

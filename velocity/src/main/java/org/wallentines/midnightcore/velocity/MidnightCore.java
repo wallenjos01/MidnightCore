@@ -19,6 +19,7 @@ import org.wallentines.midnightcore.velocity.module.lastserver.LastServerModule;
 import org.wallentines.midnightcore.velocity.module.messaging.VelocityMessagingModule;
 import org.wallentines.midnightcore.velocity.server.VelocityServer;
 import org.wallentines.midnightlib.Version;
+import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.event.Event;
 
@@ -47,9 +48,12 @@ public class MidnightCore {
 
         Constants.registerDefaults(JsonConfigProvider.INSTANCE);
 
+        ConfigSection langDefaults = JsonConfigProvider.INSTANCE.loadFromStream(getClass().getResourceAsStream("/lang/en_us.json"));
+
         MidnightCoreImpl api = new MidnightCoreImpl(
                 dataFolder,
                 Version.SERIALIZER.deserialize("1.19.3"),
+                langDefaults,
                 DummyItem::new,
                 (title) -> null,
                 (id, title) -> null

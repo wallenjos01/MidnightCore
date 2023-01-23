@@ -3,10 +3,12 @@ package org.wallentines.midnightcore.fabric.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
@@ -15,7 +17,6 @@ import org.wallentines.midnightcore.api.text.CustomPlaceholderInline;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.api.Registries;
-import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.util.CommandUtil;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -66,7 +67,7 @@ public class MainCommand {
 
     private static int emptyCommand(CommandContext<CommandSourceStack> context) {
 
-        LangProvider prov = MidnightCore.getInstance().getLangProvider();
+        LangProvider prov = getLangProvider();
         context.getSource().sendSuccess(ConversionUtil.toComponent(prov.getMessage("command.main", "en_us")), false);
         return 1;
     }
@@ -74,11 +75,15 @@ public class MainCommand {
     private static int moduleLoadCommand(CommandContext<CommandSourceStack> context) {
 
         MidnightCoreAPI api = MidnightCoreAPI.getInstance();
-        LangProvider prov = MidnightCore.getInstance().getLangProvider();
+        if(api == null) {
+            throw new CommandRuntimeException(Component.literal("MidnightCoreAPI has not been created!"));
+        }
+
+        LangProvider prov = api.getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
         ModuleInfo<MServer, ServerModule> info = Registries.MODULE_REGISTRY.get(id);
-        if(api == null || info == null) {
+        if(info == null) {
             CommandUtil.sendCommandFailure(context, prov, "command.error.module_not_found");
             return 0;
         }
@@ -98,7 +103,7 @@ public class MainCommand {
     private static int moduleUnloadCommand(CommandContext<CommandSourceStack> context) {
 
         MidnightCoreAPI api = MidnightCoreAPI.getInstance();
-        LangProvider prov = MidnightCore.getInstance().getLangProvider();
+        LangProvider prov = getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
         if(api == null || !api.getModuleManager().isModuleLoaded(id)) {
@@ -117,7 +122,7 @@ public class MainCommand {
         MidnightCoreAPI api = MidnightCoreAPI.getInstance();
         if(api == null) return 0;
 
-        LangProvider prov = MidnightCore.getInstance().getLangProvider();
+        LangProvider prov = getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
         api.getConfig().getSection("modules").getOrCreateSection(id.toString()).set("enabled", true);
@@ -132,7 +137,7 @@ public class MainCommand {
         MidnightCoreAPI api = MidnightCoreAPI.getInstance();
         if(api == null) return 0;
 
-        LangProvider prov = MidnightCore.getInstance().getLangProvider();
+        LangProvider prov = getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
         api.getConfig().getSection("modules").getOrCreateSection(id.toString()).set("enabled", false);
@@ -147,7 +152,7 @@ public class MainCommand {
         MidnightCoreAPI api = MidnightCoreAPI.getInstance();
         if(api == null) return 0;
 
-        LangProvider prov = MidnightCore.getInstance().getLangProvider();
+        LangProvider prov = getLangProvider();
 
         context.getSource().sendSuccess(ConversionUtil.toComponent(prov.getMessage("command.module.list.header", "en_us")), false);
 
@@ -167,7 +172,7 @@ public class MainCommand {
 
     private static int reloadCommand(CommandContext<CommandSourceStack> context) {
 
-        LangProvider prov = MidnightCore.getInstance().getLangProvider();
+        LangProvider prov = getLangProvider();
 
         long elapsed = System.currentTimeMillis();
 
@@ -179,4 +184,15 @@ public class MainCommand {
         CommandUtil.sendCommandSuccess(context, prov, false, Constants.makeNode("command.reload"), CustomPlaceholderInline.create("time", elapsed + ""));
         return (int) elapsed;
     }
+
+    private static LangProvider getLangProvider() throws CommandRuntimeException {
+
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) {
+            throw new CommandRuntimeException(Component.literal("MidnightCoreAPI is not loaded!"));
+        }
+        return api.getLangProvider();
+    }
+
+
 }

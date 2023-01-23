@@ -20,6 +20,7 @@ import org.wallentines.midnightcore.spigot.server.SpigotServer;
 import org.wallentines.midnightcore.spigot.text.SpigotScoreboard;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigRegistry;
+import org.wallentines.midnightlib.config.ConfigSection;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -53,9 +54,12 @@ public class MidnightCore {
 
         Version version = Version.SERIALIZER.deserialize(ver);
 
+        ConfigSection langDefaults = YamlConfigProvider.INSTANCE.loadFromStream(MidnightCore.class.getResourceAsStream("/lang/en_us.yml"));
+
         MidnightCoreImpl api = new MidnightCoreImpl(
                 dataDir,
                 version,
+                langDefaults,
                 ItemHelper.getItemConverter(version),
                 SpigotInventoryGUI::new,
                 SpigotScoreboard::new

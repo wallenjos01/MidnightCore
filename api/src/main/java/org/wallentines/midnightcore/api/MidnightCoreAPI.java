@@ -10,6 +10,7 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
 import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.CustomScoreboard;
+import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.ConfigSection;
@@ -165,6 +166,12 @@ public abstract class MidnightCoreAPI {
      */
     @Deprecated
     public abstract void unloadModules();
+
+    /**
+     * Retrieves the lang provider used by MidnightCore commands
+     * @return The MidnightCore lang provider
+     */
+    public abstract LangProvider getLangProvider();
 
     /**
      * Returns the global MidnightCoreAPI instance. Will be null if the instance has not been created yet

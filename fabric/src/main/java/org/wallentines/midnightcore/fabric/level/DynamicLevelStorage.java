@@ -6,8 +6,10 @@ import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.NotNull;
-import org.wallentines.midnightcore.fabric.MidnightCore;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.fabric.mixin.AccessorLevelStorageAccess;
+import org.wallentines.midnightcore.fabric.server.FabricServer;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,12 +24,16 @@ public class DynamicLevelStorage extends LevelStorageSource {
     }
 
     public DynamicLevelContext createWorldContext(String levelName, WorldConfig config) {
-        return new DynamicLevelContext(MidnightCore.getInstance().getServer(), levelName, config, this);
+
+        MServer server = MidnightCoreAPI.getRunningServer();
+        if(server == null) throw new IllegalStateException("Attempt to create dynamic level before server startup!");
+
+        return new DynamicLevelContext(((FabricServer) server).getInternal(), levelName, config, this);
     }
 
     @Deprecated
     @Override
-    public DynamicLevelStorageAccess createAccess(@NotNull String worldId) {
+    public @NotNull DynamicLevelStorageAccess createAccess(@NotNull String worldId) {
         throw new UnsupportedOperationException("A DynamicLevelContext must be supplied in order to create a Dynamic world!");
     }
 
@@ -57,7 +63,7 @@ public class DynamicLevelStorage extends LevelStorageSource {
         }
 
         @Override
-        public Path getDimensionPath(ResourceKey<Level> resourceKey) {
+        public @NotNull Path getDimensionPath(ResourceKey<Level> resourceKey) {
 
             Path root = ((AccessorLevelStorageAccess) this).getLevelDirectory().path();
 

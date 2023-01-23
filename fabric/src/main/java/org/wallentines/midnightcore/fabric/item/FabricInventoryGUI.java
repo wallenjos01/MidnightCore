@@ -8,7 +8,6 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.item.AbstractInventoryGUI;
@@ -152,7 +151,7 @@ public class FabricInventoryGUI extends AbstractInventoryGUI {
     }
 
     private static void onLeave(PlayerLeaveEvent event) {
-        closeMenu(MidnightCoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUUID()));
+        closeMenu(FabricPlayer.wrap(event.getPlayer()));
     }
 
     public static void registerEvents(Object owner) {
