@@ -10,7 +10,6 @@ import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.requirement.CooldownRequirementType;
 import org.wallentines.midnightcore.api.text.*;
 import org.wallentines.midnightcore.common.item.AbstractItem;
-import org.wallentines.midnightcore.common.module.data.DataModuleImpl;
 import org.wallentines.midnightcore.common.module.session.AbstractSession;
 import org.wallentines.midnightcore.common.util.Util;
 import org.wallentines.midnightlib.Version;
@@ -56,7 +55,7 @@ public final class Constants {
         ConfigRegistry.INSTANCE.registerInlineSerializer(TextColor.class, TextColor.SERIALIZER);
 
         // Modules
-        Registries.MODULE_REGISTRY.register(DataModuleImpl.ID, DataModuleImpl.MODULE_INFO);
+        // Registries.MODULE_REGISTRY.register(DataModuleImpl.ID, DataModuleImpl.MODULE_INFO);
 
         // Requirements
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "cooldown"), new CooldownRequirementType());

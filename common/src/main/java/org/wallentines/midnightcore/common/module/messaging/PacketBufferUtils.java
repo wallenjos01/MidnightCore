@@ -10,7 +10,7 @@ public class PacketBufferUtils  {
     private static final int SEGMENT_BITS = 0x7F;
     private static final int CONTINUE_BIT = 0x80;
 
-    public static int readVarInt(ByteBuf buffer) {
+/*    public static int readVarInt(ByteBuf buffer) {
         int value = 0;
         int position = 0;
 
@@ -25,6 +25,29 @@ public class PacketBufferUtils  {
             position += 7;
             if (position >= 32) throw new IllegalArgumentException("Attempt to read a VarInt which is larger than 32-bits!");
         }
+
+        return value;
+    }*/
+
+    public static int readVarInt(ByteBuf buffer) {
+
+        int value = 0;
+        int position = 0;
+
+        byte currentByte;
+
+        do {
+
+            currentByte = buffer.readByte();
+            value |= (currentByte & SEGMENT_BITS) << position;
+
+            position += 7;
+
+            if(position >= 32) {
+                throw new IllegalArgumentException("Attempt to read a VarInt which is larger than 32-bits!");
+            }
+
+        } while((currentByte & CONTINUE_BIT) == CONTINUE_BIT);
 
         return value;
     }

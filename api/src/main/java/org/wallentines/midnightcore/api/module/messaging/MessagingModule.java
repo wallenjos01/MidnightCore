@@ -7,6 +7,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public interface MessagingModule extends ServerModule {
 
     void registerHandler(Identifier id, MessageHandler handler);
@@ -16,5 +17,7 @@ public interface MessagingModule extends ServerModule {
     void sendRawMessage(MPlayer player, Identifier id, byte[] data);
 
     void addLoginListener(Consumer<LoginNegotiator> onLogin);
+
+    void unregisterHandler(Identifier id);
 
 }

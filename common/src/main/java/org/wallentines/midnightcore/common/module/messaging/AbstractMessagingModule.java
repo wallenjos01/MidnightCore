@@ -51,6 +51,12 @@ public abstract class AbstractMessagingModule implements MessagingModule {
         loginHandlers.add(onLogin);
     }
 
+    @Override
+    public void unregisterHandler(Identifier id) {
+
+        handlers.removeById(id);
+    }
+
     protected void handle(MPlayer sender, Identifier id, ByteBuf res) {
 
         MessageHandler handler = handlers.get(id);
@@ -59,5 +65,12 @@ public abstract class AbstractMessagingModule implements MessagingModule {
         handler.handle(sender, res);
     }
 
+    @Override
+    public void disable() {
 
+        loginHandlers.clear();
+        handlers.clear();
+
+        MessagingModule.super.disable();
+    }
 }

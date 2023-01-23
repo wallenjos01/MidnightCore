@@ -111,6 +111,25 @@ public class FabricClientMessagingModule implements ClientMessagingModule {
 
     }
 
+    @Override
+    public void unregisterHandler(Identifier id) {
+
+        handlers.remove(ConversionUtil.toResourceLocation(id));
+    }
+
+    @Override
+    public void unregisterLoginHandler(Identifier id) {
+
+        loginHandlers.remove(ConversionUtil.toResourceLocation(id));
+    }
+
+    @Override
+    public void disable() {
+        handlers.clear();
+        loginHandlers.clear();
+        ClientMessagingModule.super.disable();
+    }
+
     public static final ModuleInfo<MidnightCoreClient, ClientModule> MODULE_INFO = new ModuleInfo<>(FabricClientMessagingModule::new, AbstractMessagingModule.ID, new ConfigSection());
 
 }

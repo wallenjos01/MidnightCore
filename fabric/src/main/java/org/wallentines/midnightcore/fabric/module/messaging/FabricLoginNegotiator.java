@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@SuppressWarnings("unused")
 public class FabricLoginNegotiator implements LoginNegotiator {
 
 
@@ -39,6 +40,7 @@ public class FabricLoginNegotiator implements LoginNegotiator {
 
     public void sendMessage(Identifier id, FriendlyByteBuf data, LoginMessageHandler response) {
 
+        data.resetReaderIndex();
         TransactionInfo inf = new TransactionInfo(packetListener.connection, response);
         int tid = transactionId.getAndIncrement();
         currentTransactions.put(tid, inf);
@@ -69,6 +71,10 @@ public class FabricLoginNegotiator implements LoginNegotiator {
             info.onResponse.handle(packet.getData());
             currentTransactions.remove(packet.getTransactionId());
         }
+    }
+
+    public UUID getUUID() {
+        return uuid;
     }
 
     public int itemsInQueue() {

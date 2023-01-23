@@ -17,6 +17,7 @@ public class ExtensionHelper {
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "extension");
 
     public static ByteBuf createPacket(Collection<Identifier> supported) {
+
         ByteBuf supportedData = Unpooled.buffer();
 
         PacketBufferUtils.writeVarInt(supportedData, supported.size());

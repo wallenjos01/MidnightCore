@@ -15,4 +15,8 @@ public interface ClientMessagingModule extends ClientModule {
 
     void sendRawMessage(Identifier id, byte[] data);
 
+    void unregisterHandler(Identifier id);
+
+    void unregisterLoginHandler(Identifier id);
+
 }

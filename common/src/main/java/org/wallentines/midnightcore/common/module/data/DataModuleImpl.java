@@ -12,6 +12,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 import java.nio.file.Path;
 import java.util.HashMap;
 
+@Deprecated
 public class DataModuleImpl implements DataModule {
 
     private final HashMap<Path, DataProviderImpl> providers = new HashMap<>();

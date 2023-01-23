@@ -43,7 +43,6 @@ public class FabricClientExtensionModule implements ClientExtensionModule {
     }
 
 
-
     public static final ModuleInfo<MidnightCoreClient, ClientModule> MODULE_INFO =
         new ModuleInfo<MidnightCoreClient, ClientModule>(
             FabricClientExtensionModule::new,
