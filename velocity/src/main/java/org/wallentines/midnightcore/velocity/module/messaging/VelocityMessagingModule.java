@@ -12,9 +12,11 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.messaging.LoginNegotiator;
 import org.wallentines.midnightcore.api.module.messaging.MessageHandler;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
 import org.wallentines.midnightcore.common.module.messaging.PacketBufferUtils;
@@ -22,7 +24,6 @@ import org.wallentines.midnightcore.velocity.MidnightCore;
 import org.wallentines.midnightcore.velocity.player.VelocityPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -109,6 +110,6 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
 
     }
 
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(VelocityMessagingModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(VelocityMessagingModule::new, ID, new ConfigSection());
 
 }

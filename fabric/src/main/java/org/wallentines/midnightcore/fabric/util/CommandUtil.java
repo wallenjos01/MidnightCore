@@ -6,11 +6,12 @@ import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
-import org.wallentines.midnightlib.module.Module;
 
+@SuppressWarnings("unused")
 public class CommandUtil {
 
     public static void sendCommandSuccess(CommandContext<CommandSourceStack> context, LangProvider langProvider, boolean notify, String key, Object... args) {
@@ -41,11 +42,11 @@ public class CommandUtil {
 
     }
 
-    public static <T extends Module<MidnightCoreAPI>> T getModule(Class<T> clazz) throws CommandRuntimeException {
+    public static <T extends ServerModule> T getModule(Class<T> clazz) throws CommandRuntimeException {
 
         return getModule(clazz, Component.literal("A module of class " + clazz.getName() + " could not be found!"));
     }
-    public static <T extends Module<MidnightCoreAPI>> T getModule(Class<T> clazz, Component message) throws CommandRuntimeException {
+    public static <T extends ServerModule> T getModule(Class<T> clazz, Component message) throws CommandRuntimeException {
 
         T mod = MidnightCoreAPI.getModule(clazz);
         if(mod == null) throw new CommandRuntimeException(message);

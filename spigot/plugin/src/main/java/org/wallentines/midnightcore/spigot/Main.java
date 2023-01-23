@@ -16,8 +16,7 @@ public class Main extends JavaPlugin {
 
         // Adapter
         Adapters.findAdapter();
-
-        MidnightCore.onEnable(getDataFolder(), getServer());
+        MidnightCore.onEnable(getDataFolder(), getServer(), this);
 
     }
 

@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.api.item;
 
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.TextColor;
@@ -12,6 +13,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
 
+@SuppressWarnings("unused")
 public interface MItemStack {
 
     Identifier getType();
@@ -43,7 +45,7 @@ public interface MItemStack {
         private final Identifier type;
 
         private int amount = 1;
-        private final int majorVersion = MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion();
+        private final int majorVersion = MidnightCoreAPI.getInstance() == null ? 14 : MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion();
 
         private Skin headSkin = null;
         private MComponent name = null;
@@ -88,6 +90,12 @@ public interface MItemStack {
 
         public MItemStack build() {
 
+            MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+            if(api == null) return null;
+
+            MServer server = api.getServer();
+            if(server == null) return null;
+
             if(name != null || lore != null) {
                 ConfigSection display = new ConfigSection();
 
@@ -119,7 +127,7 @@ public interface MItemStack {
                 tag.set("SkullOwner", skullOwner);
             }
 
-            return MidnightCoreAPI.getInstance().createItem(type, amount, tag);
+            return server.createItemStack(type, amount, tag);
         }
 
 
@@ -155,11 +163,7 @@ public interface MItemStack {
 
         StringBuilder builder = new StringBuilder("{");
 
-        List<String> keys = new ArrayList<>();
-
-        for (String s : section.getKeys()) {
-            keys.add(s);
-        }
+        List<String> keys = new ArrayList<>(section.getKeys());
 
         for (int i = 0; i < keys.size(); i++) {
 
@@ -242,7 +246,16 @@ public interface MItemStack {
             ConfigSerializer.entry(Identifier.class, "type", MItemStack::getType),
             PrimitiveSerializers.INT.entry("count", MItemStack::getCount).orDefault(1),
             ConfigSerializer.RAW.entry("tag", MItemStack::getTag).orDefault(new ConfigSection()),
-            (type, count, tag) -> MidnightCoreAPI.getInstance().createItem(type, count, tag)
+            (type, count, tag) -> {
+
+                MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+                if(api == null) return null;
+
+                MServer server = api.getServer();
+                if(server == null) return null;
+
+                return server.createItemStack(type, count, tag);
+            }
     );
 
 

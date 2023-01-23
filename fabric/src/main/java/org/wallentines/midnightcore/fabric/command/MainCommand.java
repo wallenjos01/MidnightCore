@@ -9,6 +9,8 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.resources.ResourceLocation;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.CustomPlaceholderInline;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.common.Constants;
@@ -16,7 +18,6 @@ import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.fabric.MidnightCore;
 import org.wallentines.midnightcore.fabric.util.CommandUtil;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -76,7 +77,7 @@ public class MainCommand {
         LangProvider prov = MidnightCore.getInstance().getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> info = Registries.MODULE_REGISTRY.get(id);
+        ModuleInfo<MServer, ServerModule> info = Registries.MODULE_REGISTRY.get(id);
         if(api == null || info == null) {
             CommandUtil.sendCommandFailure(context, prov, "command.error.module_not_found");
             return 0;
@@ -88,7 +89,7 @@ public class MainCommand {
             return 0;
         }
 
-        api.getModuleManager().loadModule(info, MidnightCoreAPI.getInstance(), api.getConfig().getSection("modules").getOrCreateSection(id.toString()));
+        api.getModuleManager().loadModule(info, api.getServer(), api.getConfig().getSection("modules").getOrCreateSection(id.toString()));
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.loaded", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -150,8 +151,8 @@ public class MainCommand {
 
         context.getSource().sendSuccess(ConversionUtil.toComponent(prov.getMessage("command.module.list.header", "en_us")), false);
 
-        ModuleManager<MidnightCoreAPI, Module<MidnightCoreAPI>> manager = api.getModuleManager();
-        for (ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> info : Registries.MODULE_REGISTRY) {
+        ModuleManager<MServer, ServerModule> manager = api.getModuleManager();
+        for (ModuleInfo<MServer, ServerModule> info : Registries.MODULE_REGISTRY) {
 
             CustomPlaceholderInline cp = CustomPlaceholderInline.create("module_id", info.getId().toString());
 

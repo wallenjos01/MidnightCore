@@ -3,7 +3,6 @@ package org.wallentines.midnightcore.common.module.extension;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.extension.ExtensionModule;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.module.messaging.PacketBufferUtils;
 import org.wallentines.midnightlib.Version;
@@ -12,12 +11,12 @@ import org.wallentines.midnightlib.registry.Identifier;
 import java.util.*;
 import java.util.function.Function;
 
-public abstract class AbstractExtensionModule implements ExtensionModule {
+public class ExtensionHelper {
 
     public static final Identifier SUPPORTED_EXTENSION_PACKET = new Identifier(Constants.DEFAULT_NAMESPACE, "supported_extensions");
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "extension");
 
-    protected ByteBuf createPacket(Collection<Identifier> supported) {
+    public static ByteBuf createPacket(Collection<Identifier> supported) {
         ByteBuf supportedData = Unpooled.buffer();
 
         PacketBufferUtils.writeVarInt(supportedData, supported.size());
@@ -28,7 +27,7 @@ public abstract class AbstractExtensionModule implements ExtensionModule {
         return supportedData;
     }
 
-    protected ByteBuf createResponse(ByteBuf query, Collection<Identifier> loaded, Function<Identifier, Version> versions) {
+    public static ByteBuf createResponse(ByteBuf query, Collection<Identifier> loaded, Function<Identifier, Version> versions) {
 
         // Read server extensions
         int serverExtensions = PacketBufferUtils.readVarInt(query);
@@ -58,7 +57,7 @@ public abstract class AbstractExtensionModule implements ExtensionModule {
         return out;
     }
 
-    protected HashMap<Identifier, Version> handleResponse(String user, ByteBuf res) {
+    public static  HashMap<Identifier, Version> handleResponse(String user, ByteBuf res) {
 
         if(res == null) {
 

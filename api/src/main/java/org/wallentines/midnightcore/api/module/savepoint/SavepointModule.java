@@ -1,11 +1,11 @@
 package org.wallentines.midnightcore.api.module.savepoint;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.registry.Identifier;
 
-public interface SavepointModule extends Module<MidnightCoreAPI> {
+@SuppressWarnings("unused")
+public interface SavepointModule extends ServerModule {
 
     void savePlayer(MPlayer pl, Identifier id);
 

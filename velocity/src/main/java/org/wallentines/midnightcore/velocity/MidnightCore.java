@@ -10,13 +10,13 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.api.Registries;
+import org.wallentines.midnightcore.common.module.extension.ExtensionHelper;
 import org.wallentines.midnightcore.velocity.event.MidnightCoreInitializeEvent;
-import org.wallentines.midnightcore.velocity.item.DummyItem;
 import org.wallentines.midnightcore.velocity.module.extension.VelocityExtensionModule;
 import org.wallentines.midnightcore.velocity.module.globaljoin.GlobalJoinModule;
 import org.wallentines.midnightcore.velocity.module.lastserver.LastServerModule;
 import org.wallentines.midnightcore.velocity.module.messaging.VelocityMessagingModule;
-import org.wallentines.midnightcore.velocity.player.VelocityPlayerManager;
+import org.wallentines.midnightcore.velocity.server.VelocityServer;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.event.Event;
@@ -46,24 +46,15 @@ public class MidnightCore {
 
         Constants.registerDefaults(JsonConfigProvider.INSTANCE);
 
-        VelocityPlayerManager playerManager = new VelocityPlayerManager();
-        MidnightCoreImpl api = new MidnightCoreImpl(
-                dataFolder,
-                Version.SERIALIZER.deserialize("1.19.2"),
-                DummyItem::new,
-                playerManager,
-                title -> null,
-                (id,title) -> null,
-                (str, b) -> server.getCommandManager().executeAsync(server.getConsoleCommandSource(), str),
-                run -> server.getScheduler().buildTask(this, run).schedule());
+        MidnightCoreImpl api = new MidnightCoreImpl(dataFolder, Version.SERIALIZER.deserialize("1.19.3"));
 
+        // Register Velocity Modules
         Registries.MODULE_REGISTRY.register(VelocityMessagingModule.ID, VelocityMessagingModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(LastServerModule.ID, LastServerModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(GlobalJoinModule.ID, GlobalJoinModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(VelocityExtensionModule.ID, VelocityExtensionModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(ExtensionHelper.ID, VelocityExtensionModule.MODULE_INFO);
 
-        playerManager.register();
-        api.loadModules();
+        api.setActiveServer(new VelocityServer(server, this));
 
         Event.invoke(new MidnightCoreInitializeEvent(this));
     }

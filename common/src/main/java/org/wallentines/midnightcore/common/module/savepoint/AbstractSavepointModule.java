@@ -1,9 +1,9 @@
 package org.wallentines.midnightcore.common.module.savepoint;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.savepoint.Savepoint;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.config.ConfigRegistry;
 import org.wallentines.midnightlib.config.ConfigSection;
@@ -12,14 +12,16 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.HashMap;
 
+@SuppressWarnings("unused")
 public abstract class AbstractSavepointModule implements SavepointModule {
 
     private final HashMap<MPlayer, HashMap<Identifier, Savepoint>> savepoints = new HashMap<>();
 
-    @Override
-    public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
 
-        ConfigRegistry.INSTANCE.registerSerializer(Savepoint.class, new ConfigSerializer<Savepoint>() {
+    @Override
+    public boolean initialize(ConfigSection section, MServer data) {
+
+        ConfigRegistry.INSTANCE.registerSerializer(Savepoint.class, new ConfigSerializer<>() {
             @Override
             public Savepoint deserialize(ConfigSection section) {
 

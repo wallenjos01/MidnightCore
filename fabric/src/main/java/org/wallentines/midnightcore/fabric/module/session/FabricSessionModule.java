@@ -1,8 +1,9 @@
 package org.wallentines.midnightcore.fabric.module.session;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.session.Session;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.module.session.AbstractSessionModule;
 import org.wallentines.midnightcore.fabric.event.player.PlayerLeaveEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
@@ -11,13 +12,12 @@ import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModul
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 public class FabricSessionModule extends AbstractSessionModule {
 
     @Override
-    public boolean initialize(ConfigSection section, MidnightCoreAPI data) {
+    public boolean initialize(ConfigSection section, MServer data) {
 
         Event.register(ServerTickEvent.class, this, event -> this.tickAll());
         Event.register(ServerStopEvent.class, this, event -> shutdownAll());
@@ -29,6 +29,6 @@ public class FabricSessionModule extends AbstractSessionModule {
         return super.initialize(section, data);
     }
 
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>>(FabricSessionModule::new, ID, new ConfigSection()).dependsOn(FabricSavepointModule.ID);
+    public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<MServer, ServerModule>(FabricSessionModule::new, ID, new ConfigSection()).dependsOn(FabricSavepointModule.ID);
 
 }

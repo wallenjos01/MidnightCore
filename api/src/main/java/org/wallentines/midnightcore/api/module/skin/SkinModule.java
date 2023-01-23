@@ -1,14 +1,13 @@
 package org.wallentines.midnightcore.api.module.skin;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.config.ConfigProvider;
-import org.wallentines.midnightlib.module.Module;
 
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public interface SkinModule extends Module<MidnightCoreAPI> {
+@SuppressWarnings("unused")
+public interface SkinModule extends ServerModule {
 
     Skin getSkin(MPlayer user);
 

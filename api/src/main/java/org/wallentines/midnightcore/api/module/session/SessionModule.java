@@ -1,14 +1,14 @@
 package org.wallentines.midnightcore.api.module.session;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.module.Module;
 
 import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public interface SessionModule extends Module<MidnightCoreAPI> {
+@SuppressWarnings("unused")
+public interface SessionModule extends ServerModule {
 
     void registerSession(Session session);
 

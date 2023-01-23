@@ -5,33 +5,33 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.ServerModule;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.velocity.MidnightCore;
+import org.wallentines.midnightcore.velocity.server.VelocityServer;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.FileConfig;
-import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Optional;
 
-public class LastServerModule implements Module<MidnightCoreAPI> {
-
-    private ProxyServer server;
+public class LastServerModule implements ServerModule {
 
     private FileConfig locations;
+    private VelocityServer server;
 
     @Override
-    public boolean initialize(ConfigSection configuration, MidnightCoreAPI api) {
+    public boolean initialize(ConfigSection configuration, MServer server) {
 
-        locations = FileConfig.findOrCreate("locations", MidnightCoreAPI.getInstance().getDataFolder());
+        this.server = (VelocityServer) server;
 
-        server = MidnightCore.getInstance().getServer();
-        server.getEventManager().register(MidnightCore.getInstance(), this);
+        locations = FileConfig.findOrCreate("locations", getAPI().getDataFolder());
+
+        this.server.getInternal().getEventManager().register(MidnightCore.getInstance(), this);
 
         return true;
     }
@@ -43,7 +43,7 @@ public class LastServerModule implements Module<MidnightCoreAPI> {
         if(locations.getRoot().has(uid)) {
 
             String serverId = locations.getRoot().getString(uid);
-            Optional<RegisteredServer> srv = server.getServer(serverId);
+            Optional<RegisteredServer> srv = server.getInternal().getServer(serverId);
 
             srv.ifPresent(event::setInitialServer);
         }
@@ -65,6 +65,6 @@ public class LastServerModule implements Module<MidnightCoreAPI> {
     }
 
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "last_server");
-    public static final ModuleInfo<MidnightCoreAPI, Module<MidnightCoreAPI>> MODULE_INFO = new ModuleInfo<>(LastServerModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(LastServerModule::new, ID, new ConfigSection());
 
 }

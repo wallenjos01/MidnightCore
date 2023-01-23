@@ -3,25 +3,24 @@ package org.wallentines.midnightcore.fabric;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.api.Registries;
+import org.wallentines.midnightcore.common.module.extension.ExtensionHelper;
 import org.wallentines.midnightcore.common.util.FileUtil;
 import org.wallentines.midnightcore.fabric.command.ExecuteAugment;
 import org.wallentines.midnightcore.fabric.command.MainCommand;
 import org.wallentines.midnightcore.fabric.command.TestCommand;
-import org.wallentines.midnightcore.fabric.event.MidnightCoreModulesLoadedEvent;
 import org.wallentines.midnightcore.fabric.event.server.CommandLoadEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
-import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.level.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.extension.FabricServerExtensionModule;
@@ -30,8 +29,7 @@ import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModul
 import org.wallentines.midnightcore.fabric.module.session.FabricSessionModule;
 import org.wallentines.midnightcore.fabric.module.skin.FabricSkinModule;
 import org.wallentines.midnightcore.fabric.module.vanish.FabricVanishModule;
-import org.wallentines.midnightcore.fabric.player.FabricPlayerManager;
-import org.wallentines.midnightcore.fabric.text.FabricScoreboard;
+import org.wallentines.midnightcore.fabric.server.FabricServer;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.event.Event;
@@ -47,11 +45,6 @@ public class MidnightCore implements ModInitializer {
     // Keep track of the first created MidnightCore instance. Right now, this is used to access the lang provider
     // and currently running server. In the future, this should not be necessary
     private static MidnightCore INSTANCE;
-
-    // Keep track of the currently running server. In the future, a more consistent way to access the server should
-    // be implemented and this should be removed. This will likely come in the form of a "MServer" API, which exposes
-    // common server functions to all platforms.
-    private MinecraftServer server;
 
     // This should be moved to the common level, as it should be accessible by other platforms
     private LangProvider provider;
@@ -83,19 +76,7 @@ public class MidnightCore implements ModInitializer {
         Registry.register(BuiltInRegistries.CHUNK_GENERATOR, new ResourceLocation(Constants.DEFAULT_NAMESPACE, "empty"), EmptyGenerator.CODEC);
 
         // Create the API
-        MidnightCoreImpl api = new MidnightCoreImpl(
-                dataFolder,
-                version,
-                FabricItem::new,
-                new FabricPlayerManager(),
-                FabricInventoryGUI::new,
-                FabricScoreboard::new,
-                (str, b) -> {
-                    CommandSourceStack sta = b ? server.createCommandSourceStack().withSuppressedOutput() : server.createCommandSourceStack();
-                    server.getCommands().performPrefixedCommand(sta, str);
-                },
-                run -> server.submit(run)
-        );
+        MidnightCoreImpl api = new MidnightCoreImpl(dataFolder, version);
         MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version.toString());
 
         // Register default fabric modules
@@ -104,7 +85,7 @@ public class MidnightCore implements ModInitializer {
         Registries.MODULE_REGISTRY.register(FabricVanishModule.ID, FabricVanishModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricMessagingModule.ID, FabricMessagingModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(FabricSessionModule.ID, FabricSessionModule.MODULE_INFO);
-        Registries.MODULE_REGISTRY.register(FabricServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(ExtensionHelper.ID, FabricServerExtensionModule.MODULE_INFO);
 
         // Register Requirements which cannot be implemented at the common level
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), FabricItem.ITEM_REQUIREMENT);
@@ -127,21 +108,9 @@ public class MidnightCore implements ModInitializer {
                 api.getServerLocale()
         );
 
-        Event.register(ServerStartEvent.class, this, 10, event -> {
+        Event.register(ServerStartEvent.class, this, 10, event -> api.setActiveServer(new FabricServer(event.getServer())));
 
-            server = event.getServer();
-
-            // Load modules each time a server starts, so integrated servers load properly
-            api.loadModules();
-            MidnightCoreModulesLoadedEvent.invoke(new MidnightCoreModulesLoadedEvent(api, api.getModuleManager(), server));
-        });
-
-        Event.register(ServerStopEvent.class, this, 90, event -> {
-
-            // Unload server modules when the server shuts down
-            api.unloadModules();
-            server = null;
-        });
+        Event.register(ServerStopEvent.class, this, 90, event -> api.setActiveServer(null));
 
         Event.register(CommandLoadEvent.class, this, event -> {
 
@@ -156,9 +125,16 @@ public class MidnightCore implements ModInitializer {
 
     }
 
+    @Deprecated
     public MinecraftServer getServer() {
 
-        return server;
+        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
+        if(api == null) return null;
+
+        MServer server = api.getServer();
+        if(server == null) return null;
+
+        return ((FabricServer) server).getInternal();
     }
 
     public LangProvider getLangProvider() {
