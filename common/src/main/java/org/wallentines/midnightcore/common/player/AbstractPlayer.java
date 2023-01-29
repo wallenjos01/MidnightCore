@@ -1,6 +1,5 @@
 package org.wallentines.midnightcore.common.player;
 
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
@@ -74,7 +73,7 @@ public abstract class AbstractPlayer<T> implements MPlayer {
 
     @Override
     public void setSkin(Skin skin) {
-        SkinModule mod = MidnightCoreAPI.getModule(SkinModule.class);
+        SkinModule mod = server.getModule(SkinModule.class);
         if(mod != null) {
             mod.setSkin(this, skin);
             mod.updateSkin(this);
@@ -83,7 +82,7 @@ public abstract class AbstractPlayer<T> implements MPlayer {
 
     @Override
     public void resetSkin() {
-        SkinModule mod = MidnightCoreAPI.getModule(SkinModule.class);
+        SkinModule mod = server.getModule(SkinModule.class);
         if(mod != null) {
             mod.resetSkin(this);
             mod.updateSkin(this);
@@ -93,7 +92,7 @@ public abstract class AbstractPlayer<T> implements MPlayer {
     @Override
     public Skin getSkin() {
 
-        SkinModule mod = MidnightCoreAPI.getModule(SkinModule.class);
+        SkinModule mod = server.getModule(SkinModule.class);
         if(mod != null) {
             return mod.getSkin(this);
         }

@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+@Deprecated
 public class DataProviderImpl implements DataProvider {
 
     private final File dataFolder;

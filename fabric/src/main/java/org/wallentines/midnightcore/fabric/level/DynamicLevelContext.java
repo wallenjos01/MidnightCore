@@ -10,6 +10,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldLoader;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
@@ -52,6 +54,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public class DynamicLevelContext {
 
     private final MinecraftServer server;
@@ -81,14 +84,6 @@ public class DynamicLevelContext {
         this.chunkProgressListener = ((AccessorMinecraftServer) server).getProgressListenerFactory().create(11);
 
         try {
-
-/*          WorldDataConfiguration worldDataConfiguration = storageAccess.getDataConfiguration();
-
-            boolean init = false;
-            if (worldDataConfiguration == null) {
-                init = true;
-                worldDataConfiguration = server.getWorldData().getDataConfiguration();
-            }*/
 
             WorldDataConfiguration worldDataConfiguration = server.getWorldData().getDataConfiguration();
 
@@ -263,6 +258,7 @@ public class DynamicLevelContext {
                         }
                         serverLevelData.setInitialized(true);
                     }
+                    addWorldBorderListener(level);
                 } else {
                     WorldBorder wb = levels.get(config.getRootDimensionId()).getWorldBorder();
                     wb.addListener(new BorderChangeListener.DelegateBorderChangeListener(level.getWorldBorder()));
@@ -287,6 +283,47 @@ public class DynamicLevelContext {
                 MidnightCoreAPI.getLogger().warn("An exception occurred while loading a dynamic dimension!");
                 ex.printStackTrace();
             }
+        });
+    }
+
+    public static void addWorldBorderListener(ServerLevel serverLevel) {
+
+        serverLevel.getWorldBorder().addListener(new BorderChangeListener() {
+            @Override
+            public void onBorderSizeSet(@NotNull WorldBorder worldBorder, double d) {
+                ClientboundSetBorderSizePacket pck = new ClientboundSetBorderSizePacket(worldBorder);
+                serverLevel.players().forEach(pl -> pl.connection.send(pck));
+            }
+
+            @Override
+            public void onBorderSizeLerping(@NotNull WorldBorder worldBorder, double d, double e, long l) {
+                ClientboundSetBorderLerpSizePacket pck = new ClientboundSetBorderLerpSizePacket(worldBorder);
+                serverLevel.players().forEach(pl -> pl.connection.send(pck));
+            }
+
+            @Override
+            public void onBorderCenterSet(@NotNull WorldBorder worldBorder, double d, double e) {
+                ClientboundSetBorderCenterPacket pck = new ClientboundSetBorderCenterPacket(worldBorder);
+                serverLevel.players().forEach(pl -> pl.connection.send(pck));
+            }
+
+            @Override
+            public void onBorderSetWarningTime(@NotNull WorldBorder worldBorder, int i) {
+                ClientboundSetBorderWarningDelayPacket pck = new ClientboundSetBorderWarningDelayPacket(worldBorder);
+                serverLevel.players().forEach(pl -> pl.connection.send(pck));
+            }
+
+            @Override
+            public void onBorderSetWarningBlocks(@NotNull WorldBorder worldBorder, int i) {
+                ClientboundSetBorderWarningDistancePacket pck = new ClientboundSetBorderWarningDistancePacket(worldBorder);
+                serverLevel.players().forEach(pl -> pl.connection.send(pck));
+            }
+
+            @Override
+            public void onBorderSetDamagePerBlock(@NotNull WorldBorder worldBorder, double d) { }
+
+            @Override
+            public void onBorderSetDamageSafeZOne(@NotNull WorldBorder worldBorder, double d) { }
         });
     }
 

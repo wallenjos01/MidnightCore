@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.api.module.session;
 
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightlib.event.HandlerList;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -25,5 +26,9 @@ public interface SessionModule extends ServerModule {
     void shutdownAll(Predicate<Session> test);
 
     Collection<Session> getSessions();
+
+    HandlerList<Session.SessionShutdownEvent> shutdownEvent();
+    HandlerList<Session.SessionPlayerEvent> joinEvent();
+    HandlerList<Session.SessionPlayerEvent> leaveEvent();
 
 }

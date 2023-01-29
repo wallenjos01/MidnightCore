@@ -71,13 +71,13 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
 
         if(server != null) {
 
+            STARTUP_LISTENERS.forEach(ls -> ls.accept(server));
+
             // Load Modules
             ConfigSection sec = getConfig().getOrCreateSection("modules");
             server.loadModules(sec, Registries.MODULE_REGISTRY);
 
             config.save();
-
-            STARTUP_LISTENERS.forEach(ls -> ls.accept(server));
         }
     }
 

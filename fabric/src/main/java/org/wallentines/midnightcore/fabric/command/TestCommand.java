@@ -23,6 +23,8 @@ import org.wallentines.midnightcore.api.module.skin.Skinnable;
 import org.wallentines.midnightcore.api.module.vanish.VanishModule;
 import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
+import org.wallentines.midnightcore.api.server.MServer;
+import org.wallentines.midnightcore.api.text.CustomScoreboard;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.api.text.PlaceholderManager;
@@ -80,6 +82,9 @@ public class TestCommand {
                 .then(Commands.argument("value", StringArgumentType.greedyString())
                     .executes(TestCommand::placeholderTestCommand)
                 )
+            )
+            .then(Commands.literal("scoreboard")
+                .executes(TestCommand::scoreboardTestCommand)
             )
         );
     }
@@ -240,6 +245,26 @@ public class TestCommand {
         } catch (Throwable th) {
             th.printStackTrace();
         }
+        return 1;
+    }
+
+    private static int scoreboardTestCommand(CommandContext<CommandSourceStack> context) {
+
+        try {
+            ServerPlayer spl = extractPlayer(context);
+            FabricPlayer fpl = FabricPlayer.wrap(spl);
+            MServer srv = fpl.getServer();
+
+            CustomScoreboard sb = srv.getMidnightCore().createScoreboard(CustomScoreboard.generateRandomId(), MComponent.parse("&aScoreboard Test"));
+            sb.setLine(9, MComponent.parse("Line 9"));
+            sb.setLine(6, PlaceholderManager.INSTANCE.parseText("Hello, %player_name%", fpl));
+
+            sb.addViewer(fpl);
+
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+
         return 1;
     }
 

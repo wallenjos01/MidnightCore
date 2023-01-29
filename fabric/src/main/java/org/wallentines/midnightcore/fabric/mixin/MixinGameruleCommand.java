@@ -1,60 +1,39 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.GameRuleCommand;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(GameRuleCommand.class)
 public class MixinGameruleCommand {
 
-    private static CommandSourceStack midnight_core_src;
-    private static GameRules.Key<?> midnight_core_activeKey;
+    @Redirect(method="setRule", at=@At(value="INVOKE", target="Lnet/minecraft/server/MinecraftServer;getGameRules()Lnet/minecraft/world/level/GameRules;"))
+    private static GameRules redirectGetGameRules(MinecraftServer instance, CommandContext<CommandSourceStack> ctx) {
 
-    @Inject(method= "setRule", at=@At("HEAD"))
-    private static <T extends GameRules.Value<T>> void onSet(CommandContext<CommandSourceStack> context, GameRules.Key<T> key, CallbackInfoReturnable<Integer> cir) {
-        midnight_core_src = context.getSource();
-        midnight_core_activeKey = key;
-    }
-
-    @ModifyVariable(method="setRule", at=@At("STORE"), ordinal = 0)
-    private static <T extends GameRules.Value<T>> T onSetGetGameRule(T rule) {
-
-        return getGameRule();
-    }
-
-    @Inject(method= "queryRule", at=@At("HEAD"))
-    private static <T extends GameRules.Value<T>> void onQuery(CommandSourceStack source, GameRules.Key<T> key, CallbackInfoReturnable<Integer> cir) {
-        midnight_core_src = source;
-        midnight_core_activeKey = key;
+        return getGameRules(ctx.getSource());
     }
 
     @SuppressWarnings("executeQuery")
-    @ModifyVariable(method="queryRule", at=@At("STORE"), ordinal = 0)
-    private static <T extends GameRules.Value<T>> T onQueryGetGameRule(T rule) {
+    @Redirect(method="queryRule", at=@At(value="INVOKE", target="Lnet/minecraft/server/MinecraftServer;getGameRules()Lnet/minecraft/world/level/GameRules;"))
+    private static GameRules onQueryGetGameRule(MinecraftServer instance, CommandSourceStack stack) {
 
-        return getGameRule();
+        return getGameRules(stack);
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T extends GameRules.Value<T>> T getGameRule() {
-        T out;
-        try {
-            out = midnight_core_src.getPlayerOrException().getLevel().getGameRules().getRule((GameRules.Key<T>) midnight_core_activeKey);
-        } catch(CommandSyntaxException ex) {
-            out = midnight_core_src.getServer().getGameRules().getRule((GameRules.Key<T>) midnight_core_activeKey);
+    private static GameRules getGameRules(CommandSourceStack stack) {
+
+        ServerPlayer spl = stack.getPlayer();
+        if(spl == null) {
+            return stack.getServer().overworld().getGameRules();
         }
 
-        midnight_core_src = null;
-        midnight_core_activeKey = null;
-
-        return out;
+        return spl.getLevel().getGameRules();
     }
 
 }

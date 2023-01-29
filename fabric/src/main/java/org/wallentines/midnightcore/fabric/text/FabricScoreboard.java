@@ -1,56 +1,55 @@
 package org.wallentines.midnightcore.fabric.text;
 
+import io.netty.buffer.Unpooled;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.text.AbstractScoreboard;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
-import org.wallentines.midnightcore.fabric.server.FabricServer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class FabricScoreboard extends AbstractScoreboard {
 
-    private final boolean[] updated = new boolean[15];
-    private final Component[] lines = new Component[15];
+    private final TeamInfo[] teams = new TeamInfo[15];
+    private boolean titleUpdated = false;
     private Component mcTitle;
-    private ServerData serverData;
 
     public FabricScoreboard(String id, MComponent title) {
 
         super(id, title);
         mcTitle = ConversionUtil.toComponent(title);
-    }
 
-    private ServerData getServerData(MServer server) {
-        if(serverData == null) {
-            serverData = new ServerData(server);
+        String teamPrefix = id;
+        if(teamPrefix.length() > 15) {
+            teamPrefix = teamPrefix.substring(0,14);
         }
-        return serverData;
+
+        for(int i = 0 ; i < teams.length ; i++) {
+            teams[i] = new TeamInfo(teamPrefix, i, null);
+        }
     }
 
     @Override
     public void setTitle(MComponent cmp) {
         super.setTitle(cmp);
-        mcTitle = ConversionUtil.toComponent(cmp);
 
-        if(serverData == null) return;
-        serverData.objective.setDisplayName(mcTitle);
+        mcTitle = ConversionUtil.toComponent(cmp);
+        titleUpdated = true;
     }
 
     public void setLine(int line, MComponent message) {
@@ -58,84 +57,58 @@ public class FabricScoreboard extends AbstractScoreboard {
         if(line < 1 || line > 15) return;
 
         Component mcLine = ConversionUtil.toComponent(message);
-        lines[line] = mcLine;
-
-        if(serverData == null) return;
-
-        updateLine(line, serverData);
-        updated[line] = true;
+        teams[line].setPrefix(mcLine);
     }
 
     @Override
     protected void onPlayerAdded(MPlayer u) {
 
-        ServerData data = getServerData(u.getServer());
-
         ServerPlayer player = FabricPlayer.getInternal(u);
         if(player == null) return;
 
-        player.connection.send(new ClientboundSetObjectivePacket(data.objective, 0));
+        player.connection.send(createUpdateObjectivePacket(id, mcTitle, true));
 
-        for(int i = 0 ; i < data.teams.length ; i++) {
-            player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(data.teams[i], true));
+        for (TeamInfo team : teams) {
 
-            String name = "§" + Integer.toHexString(i);
-            Score s = data.board.getOrCreatePlayerScore(name, data.objective);
-            if(s.getScore() > 0) {
-                player.connection.send(new ClientboundSetScorePacket(ServerScoreboard.Method.CHANGE, data.objective.getName(), name, s.getScore()));
+            ClientboundSetPlayerTeamPacket addTeam = team.addPacket();
+            player.connection.send(addTeam);
+            if (team.getPrefix() != null) {
+                player.connection.send(team.scorePacket());
             }
         }
 
-        player.connection.send(new ClientboundSetDisplayObjectivePacket(1, data.objective));
+        player.connection.send(createDisplayObjectivePacket(id));
 
     }
 
     @Override
     protected void onPlayerRemoved(MPlayer u) {
 
-        ServerData data = getServerData(u.getServer());
-
         ServerPlayer player = FabricPlayer.getInternal(u);
         if(player == null) return;
 
-        player.connection.send(new ClientboundSetDisplayObjectivePacket(1, null));
+        player.connection.send(createDisplayObjectivePacket(null));
 
-        for(int i = 0 ; i < data.teams.length ; i++) {
-            player.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(data.teams[i]));
-
-            String name = "§" + Integer.toHexString(i);
-            player.connection.send(new ClientboundSetScorePacket(ServerScoreboard.Method.REMOVE, data.objective.getName(), name, 0));
-
+        for (TeamInfo team : teams) {
+            player.connection.send(team.removePacket());
+            player.connection.send(team.removeScorePacket());
         }
 
-        player.connection.send(new ClientboundSetObjectivePacket(data.objective, 1));
-
-        if(players.size() == 0) {
-            data.destroy();
-            serverData = null;
-        }
-
+        player.connection.send(createRemoveObjectivePacket(id));
     }
 
     public void update() {
 
-        if(serverData == null) return;
-
         List<Packet<?>> packets = new ArrayList<>();
 
-        if(serverData.objective.getDisplayName() != mcTitle) {
-
-            serverData.objective.setDisplayName(mcTitle);
-            packets.add(new ClientboundSetObjectivePacket(serverData.objective, 2));
+        if(titleUpdated) {
+            packets.add(createUpdateObjectivePacket(id, mcTitle, false));
         }
 
-        for(int i = 0 ; i < serverData.teams.length ; i++) {
-            if(updated[i]) {
-
-                packets.add(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(serverData.teams[i], false));
-                packets.add(new ClientboundSetScorePacket(ServerScoreboard.Method.CHANGE, serverData.objective.getName(), "§" + Integer.toHexString(i), i));
-
-                updated[i] = false;
+        for (TeamInfo team : teams) {
+            if (team.isUpdated()) {
+                packets.add(team.updatePacket());
+                packets.add(team.scorePacket());
             }
         }
 
@@ -148,57 +121,138 @@ public class FabricScoreboard extends AbstractScoreboard {
                 player.connection.send(pck);
             }
         }
+    }
+
+    private class TeamInfo {
+
+        private final String name;
+        private final int index;
+        private final String userName;
+        private Component prefix;
+        private boolean updated = false;
+
+        public TeamInfo(String name, int index, Component prefix) {
+
+            String hexIndex = Integer.toHexString(index);
+
+            this.name = name + hexIndex;
+            this.index = index;
+            this.prefix = prefix;
+
+            this.userName = "§" + hexIndex;
+        }
+
+        public boolean isUpdated() {
+            return updated;
+        }
+
+        public Component getPrefix() {
+            return prefix;
+        }
+
+        public void setPrefix(Component prefix) {
+            this.prefix = prefix;
+            this.updated = true;
+        }
+
+        public ClientboundSetPlayerTeamPacket addPacket() {
+            return createUpdateTeamPacket(name, prefix, userName, true);
+        }
+
+        public ClientboundSetPlayerTeamPacket updatePacket() {
+            updated = false;
+            return createUpdateTeamPacket(name, prefix, userName, false);
+        }
+
+        public ClientboundSetPlayerTeamPacket removePacket() {
+            return createRemoveTeamPacket(name);
+        }
+
+        public ClientboundSetScorePacket scorePacket() {
+
+            if(prefix == null) {
+                return removeScorePacket();
+            }
+
+            return new ClientboundSetScorePacket(ServerScoreboard.Method.CHANGE, id, userName, index);
+        }
+
+        public ClientboundSetScorePacket removeScorePacket() {
+            return new ClientboundSetScorePacket(ServerScoreboard.Method.REMOVE, id, userName, 0);
+        }
+    }
+
+    public static ClientboundSetPlayerTeamPacket createUpdateTeamPacket(String name, Component prefix, String playerName, boolean add) {
+        return createUpdateTeamPacket(name, prefix, playerName == null ? new ArrayList<>() : List.of(playerName), add, ChatFormatting.WHITE);
+    }
+    public static ClientboundSetPlayerTeamPacket createUpdateTeamPacket(String name, Component prefix, Collection<String> playerNames, boolean add, ChatFormatting color) {
+
+        FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
+        fakeBuf.writeUtf(name); // Team name
+        fakeBuf.writeByte(add ? 0 : 2); // Action (0 = ADD, 2 = UPDATE)
+
+        Component realPrefix = prefix == null ? Component.empty() : prefix;
+
+        // Parameters
+        fakeBuf.writeComponent(Component.empty()); // Team Display Name
+        fakeBuf.writeByte(0); // Options
+        fakeBuf.writeUtf(Team.Visibility.ALWAYS.name, 40); // Name Tag Visibility
+        fakeBuf.writeUtf(Team.CollisionRule.ALWAYS.name, 40); // Collision
+        fakeBuf.writeEnum(color); // Team Color
+        fakeBuf.writeComponent(realPrefix); // Team Prefix
+        fakeBuf.writeComponent(Component.empty()); // Team Suffix
+
+        // Players
+        if(playerNames.size() > 0) {
+            fakeBuf.writeVarInt(playerNames.size());
+
+            for(String s : playerNames) {
+                fakeBuf.writeUtf(s);
+            }
+        }
+
+        return new ClientboundSetPlayerTeamPacket(fakeBuf);
+    }
+
+    public static ClientboundSetPlayerTeamPacket createRemoveTeamPacket(String name) {
+
+        FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
+        fakeBuf.writeUtf(name); // Team name
+        fakeBuf.writeByte(1); // Action (1 = REMOVE)
+
+        return new ClientboundSetPlayerTeamPacket(fakeBuf);
+    }
+
+    private static ClientboundSetObjectivePacket createUpdateObjectivePacket(String id, Component title, boolean add) {
+
+
+        FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
+        fakeBuf.writeUtf(id); // Objective ID
+        fakeBuf.writeByte(add ? 0 : 2); // Action (0 = ADD, 2 = UPDATE)
+
+        fakeBuf.writeComponent(title);
+        fakeBuf.writeEnum(ObjectiveCriteria.RenderType.INTEGER);
+
+        return new ClientboundSetObjectivePacket(fakeBuf);
 
     }
 
-    private void updateLine(int line, ServerData data) {
+    private static ClientboundSetObjectivePacket createRemoveObjectivePacket(String id) {
 
-        Component text = lines[line];
-        if(text == null) {
-            data.teams[line].setPlayerPrefix(null);
-            data.board.resetPlayerScore("§" + Integer.toHexString(line), serverData.objective);
-        } else {
-            data.board.getOrCreatePlayerScore("§" + Integer.toHexString(line), serverData.objective).setScore(line);
-            data.teams[line].setPlayerPrefix(text);
-        }
+        FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
+        fakeBuf.writeUtf(id); // Objective ID
+        fakeBuf.writeByte(1); // Action (1 = REMOVE)
+
+        return new ClientboundSetObjectivePacket(fakeBuf);
     }
 
+    private static ClientboundSetDisplayObjectivePacket createDisplayObjectivePacket(String id) {
 
-    private class ServerData {
+        FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
+        fakeBuf.writeByte(1); // Position (1 = SIDEBAR)
+        fakeBuf.writeUtf(id == null ? "" : id); // Objective ID
 
-        final ServerScoreboard board;
-        final Objective objective;
-        final PlayerTeam[] teams = new PlayerTeam[15];
-
-        ServerData(MServer server) {
-
-            MinecraftServer mc = ((FabricServer) server).getInternal();
-
-            this.board = mc.getScoreboard();
-            this.objective = new Objective(board, id, ObjectiveCriteria.DUMMY, mcTitle, ObjectiveCriteria.RenderType.INTEGER);
-
-            String teamPrefix = id;
-            if(teamPrefix.length() > 15) {
-                teamPrefix = teamPrefix.substring(0,14);
-            }
-
-            for(int i = 0 ; i < teams.length ; i++) {
-
-                teams[i] = new PlayerTeam(board, teamPrefix + Integer.toHexString(i));
-                teams[i].getPlayers().add("§" + Integer.toHexString(i));
-
-                updateLine(i, serverData);
-
-            }
-        }
-
-        void destroy() {
-            board.removeObjective(objective);
-            for(PlayerTeam team : teams) {
-                board.removePlayerTeam(team);
-            }
-        }
-
+        return new ClientboundSetDisplayObjectivePacket(fakeBuf);
     }
 
 }

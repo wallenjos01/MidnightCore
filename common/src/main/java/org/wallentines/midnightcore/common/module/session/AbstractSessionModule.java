@@ -6,6 +6,7 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
@@ -15,6 +16,10 @@ public abstract class AbstractSessionModule implements SessionModule {
 
     private final HashMap<UUID, Session> sessions = new HashMap<>();
 
+    private final HandlerList<Session.SessionShutdownEvent> shutdownCallbacks = new HandlerList<>();
+    private final HandlerList<Session.SessionPlayerEvent> joinCallbacks = new HandlerList<>();
+    private final HandlerList<Session.SessionPlayerEvent> leaveCallbacks = new HandlerList<>();
+
     @Override
     public void registerSession(Session session) {
 
@@ -23,7 +28,12 @@ public abstract class AbstractSessionModule implements SessionModule {
         }
 
         sessions.put(session.getId(), session);
-        session.shutdownEvent().register(this, ev -> sessions.remove(ev.getSession().getId()));
+        session.shutdownEvent().register(this, ev -> {
+            shutdownEvent().invoke(ev);
+            sessions.remove(ev.getSession().getId());
+        });
+        session.joinEvent().register(this, ev -> joinEvent().invoke(ev));
+        session.leaveEvent().register(this, ev -> leaveEvent().invoke(ev));
     }
 
     @Override
@@ -99,6 +109,21 @@ public abstract class AbstractSessionModule implements SessionModule {
             sess.tick();
         }
 
+    }
+
+    @Override
+    public HandlerList<Session.SessionShutdownEvent> shutdownEvent() {
+        return shutdownCallbacks;
+    }
+
+    @Override
+    public HandlerList<Session.SessionPlayerEvent> joinEvent() {
+        return joinCallbacks;
+    }
+
+    @Override
+    public HandlerList<Session.SessionPlayerEvent> leaveEvent() {
+        return leaveCallbacks;
     }
 
     public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "session");
