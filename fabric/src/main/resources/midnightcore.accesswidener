@@ -1,3 +1,4 @@
 accessWidener   v1  named
 
 accessible  class   net/minecraft/server/network/ServerLoginPacketListenerImpl$State
+accessible  class   net/minecraft/server/MinecraftServer$ReloadableResources

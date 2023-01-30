@@ -1,7 +1,9 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
+import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.world.level.Level;
@@ -28,10 +30,13 @@ public interface AccessorMinecraftServer {
     @Accessor("levels")
     Map<ResourceKey<Level>, ServerLevel> getLevels();
 
-    @Accessor("storageSource")
-    LevelStorageSource.LevelStorageAccess getStorageSource();
-
     @Accessor("progressListenerFactory")
     ChunkProgressListenerFactory getProgressListenerFactory();
+
+    @Accessor("registries")
+    LayeredRegistryAccess<RegistryLayer> getRegistries();
+
+    @Accessor("resources")
+    MinecraftServer.ReloadableResources getReloadableResources();
 
 }

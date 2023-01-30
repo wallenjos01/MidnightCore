@@ -2,6 +2,8 @@ package org.wallentines.midnightcore.spigot.adapter;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.v1_12_R1.*;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -9,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
 import java.lang.reflect.Field;
 
@@ -145,4 +146,9 @@ public class Adapter_v1_12_R1 implements SpigotAdapter {
         return CraftItemStack.asCraftCopy(item);
     }
 
+    @Override
+    public void addTickable(Runnable runnable) {
+        CraftServer server = (CraftServer) Bukkit.getServer();
+        server.getHandle().getServer().a((ITickable) runnable);
+    }
 }

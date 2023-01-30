@@ -16,6 +16,8 @@ public class FabricServer extends AbstractServer {
         super(api);
         this.internal = server;
         this.playerManager = new FabricPlayerManager(this);
+
+        server.addTickable(() -> tickEvent.invoke(new ServerEvent(this)));
     }
 
     @Override

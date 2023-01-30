@@ -15,6 +15,7 @@ import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
+@SuppressWarnings("unused")
 public class WorldConfig {
 
     private final ResourceKey<Level> rootDimensionId;
@@ -23,6 +24,7 @@ public class WorldConfig {
     private boolean generateStructures = true;
     private boolean bonusChest = false;
     private boolean noSave = false;
+    private boolean deleteOnUnload = false;
 
     private long seed = RandomSource.create().nextLong();
 
@@ -35,7 +37,7 @@ public class WorldConfig {
     private ResourceKey<Level> netherOverride = null;
     private ResourceKey<Level> endOverride = null;
     private ChunkGenerator generator;
-    private ConfigSection generatorSettings = new ConfigSection();
+    private ConfigSection generatorSettings = null;
 
     private int functionPermissionLevel = 2;
     private boolean ignoreSessionLock = false;
@@ -189,6 +191,15 @@ public class WorldConfig {
 
     public WorldConfig setBonusChest(boolean bonusChest) {
         this.bonusChest = bonusChest;
+        return this;
+    }
+
+    public boolean shouldDeleteOnUnload() {
+        return deleteOnUnload;
+    }
+
+    public WorldConfig deleteOnUnload(boolean deleteOnUnload) {
+        this.deleteOnUnload = deleteOnUnload;
         return this;
     }
 }

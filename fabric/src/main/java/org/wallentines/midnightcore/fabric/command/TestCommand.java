@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -24,19 +25,14 @@ import org.wallentines.midnightcore.api.module.vanish.VanishModule;
 import org.wallentines.midnightcore.api.player.Location;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.api.text.CustomScoreboard;
-import org.wallentines.midnightcore.api.text.MComponent;
-import org.wallentines.midnightcore.api.text.MTextComponent;
-import org.wallentines.midnightcore.api.text.PlaceholderManager;
+import org.wallentines.midnightcore.api.text.*;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.common.util.Util;
-import org.wallentines.midnightcore.fabric.level.EmptyGenerator;
-import org.wallentines.midnightcore.fabric.level.DynamicLevelContext;
-import org.wallentines.midnightcore.fabric.level.DynamicLevelStorage;
-import org.wallentines.midnightcore.fabric.level.WorldConfig;
+import org.wallentines.midnightcore.fabric.level.*;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.requirement.Requirement;
@@ -190,14 +186,37 @@ public class TestCommand {
 
             WorldConfig conf = new WorldConfig(new Identifier(Constants.DEFAULT_NAMESPACE, "test"))
                 .generator(EmptyGenerator.create(Biomes.FOREST))
-                .rootDimensionType(LevelStem.NETHER);
+                .rootDimensionType(LevelStem.NETHER)
+                .deleteOnUnload(true);
 
             Path dataFolder = Util.getOr(MidnightCoreAPI.getInstance(), inst -> inst.getDataFolder().toPath(), () -> Path.of(""));
 
             DynamicLevelStorage storage = DynamicLevelStorage.create(dataFolder, dataFolder.resolve("backups"));
             DynamicLevelContext ctx = storage.createWorldContext("test", conf);
 
-            ctx.loadDimension(conf.getRootDimensionId(), w -> mpl.teleport(new Location(ConversionUtil.toIdentifier(w.dimension().location()), new Vec3d(0.0d, 100.0d, 0.0d), 0.0f, 0.0f)));
+            ctx.loadDimension(conf.getRootDimensionId(), new DynamicLevelCallback() {
+
+                private float lastPercent = -1f;
+
+                @Override
+                public void onLoaded(ServerLevel level) {
+                    mpl.teleport(new Location(ConversionUtil.toIdentifier(level.dimension().location()), new Vec3d(0.0d, 100.0d, 0.0d), 0.0f, 0.0f));
+                }
+
+                @Override
+                public void onProgress(float percent) {
+                    if(percent != lastPercent) {
+                        lastPercent = percent;
+                        mpl.sendMessage(new MTextComponent("World loading: " + (percent * 100.0f) + "% complete"));
+                    }
+                }
+
+                @Override
+                public void onFail() {
+                    mpl.sendMessage(new MTextComponent("Failed to load dimension!").withStyle(new MStyle().withColor(Color.fromRGBI(12))));
+                }
+            });
+
             mpl.sendMessage(new MTextComponent("Loading dimension..."));
 
         } catch (Exception ex) {

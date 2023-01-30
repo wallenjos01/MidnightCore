@@ -42,6 +42,8 @@ public interface SpigotAdapter {
 
     ItemStack setupInternal(ItemStack item);
 
+    void addTickable(Runnable runnable);
+
     default String toJsonString(MComponent component) {
 
         return getJsonSerializer().saveToString(MComponent.SERIALIZER.serialize(component));

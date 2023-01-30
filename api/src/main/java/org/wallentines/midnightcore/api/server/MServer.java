@@ -4,6 +4,8 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.player.PlayerManager;
+import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
 
 import java.util.UUID;
@@ -73,5 +75,27 @@ public interface MServer {
      * @return A reference to MidnightCoreAPI
      */
     MidnightCoreAPI getMidnightCore();
+
+
+    /**
+     * Returns a reference to the handler list for this server's tick event, which will be fired each tick
+     * @return A reference to this server's tick handler list
+     */
+    HandlerList<ServerEvent> tickEvent();
+
+
+    class ServerEvent extends Event {
+
+        private final MServer server;
+
+        public ServerEvent(MServer server) {
+            this.server = server;
+        }
+
+        public MServer getServer() {
+            return server;
+        }
+    }
+
 
 }

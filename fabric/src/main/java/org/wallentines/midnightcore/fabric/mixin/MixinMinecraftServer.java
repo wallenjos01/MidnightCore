@@ -54,5 +54,5 @@ public class MixinMinecraftServer {
         MinecraftServer srv = (MinecraftServer) (Object) this;
         srv.submit(() -> Event.invoke(new ServerStopEvent(srv)));
     }
-
 }
+

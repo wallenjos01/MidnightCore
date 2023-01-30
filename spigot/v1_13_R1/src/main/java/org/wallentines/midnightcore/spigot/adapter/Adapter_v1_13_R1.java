@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.server.v1_13_R1.*;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_13_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -16,7 +18,6 @@ import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import java.lang.reflect.Field;
 
 public class Adapter_v1_13_R1 implements SpigotAdapter {
-
 
     private SkinUpdater_v1_13_R1 updater;
     private Field f_handle;
@@ -156,4 +157,11 @@ public class Adapter_v1_13_R1 implements SpigotAdapter {
     public ItemStack setupInternal(ItemStack item) {
         return CraftItemStack.asCraftCopy(item);
     }
+
+    @Override
+    public void addTickable(Runnable runnable) {
+        CraftServer server = (CraftServer) Bukkit.getServer();
+        server.getHandle().getServer().a((ITickable) runnable);
+    }
+
 }

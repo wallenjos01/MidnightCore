@@ -6,6 +6,7 @@ import org.bukkit.plugin.Plugin;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.PlayerManager;
 import org.wallentines.midnightcore.common.server.AbstractServer;
+import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
 import org.wallentines.midnightcore.spigot.player.SpigotPlayerManager;
 
 public class SpigotServer extends AbstractServer {
@@ -21,6 +22,8 @@ public class SpigotServer extends AbstractServer {
         this.server = server;
         this.plugin = plugin;
         this.playerManager = new SpigotPlayerManager(this);
+
+        AdapterManager.getAdapter().addTickable(() -> tickEvent.invoke(new ServerEvent(this)));
     }
 
     @Override

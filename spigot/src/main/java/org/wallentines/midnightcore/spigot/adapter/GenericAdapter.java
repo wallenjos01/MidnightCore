@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.wallentines.midnightcore.api.text.MComponent;
+import org.wallentines.midnightcore.spigot.MidnightCore;
 import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
 import org.wallentines.midnightlib.config.serialization.InlineSerializer;
@@ -174,6 +176,11 @@ public class GenericAdapter implements SpigotAdapter {
     @Override
     public ItemStack setupInternal(ItemStack item) {
         return item;
+    }
+
+    @Override
+    public void addTickable(Runnable runnable) {
+        Bukkit.getScheduler().runTaskTimer(MidnightCore.getInstance(), runnable, 50L, 50L);
     }
 
     private static class PlayerTag {

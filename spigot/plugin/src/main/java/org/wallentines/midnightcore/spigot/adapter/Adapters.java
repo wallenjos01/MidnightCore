@@ -41,6 +41,9 @@ public class Adapters {
             case "v1_13_R2":
                 adapter = new Adapter_v1_13_R2();
                 break;
+            case "v1_13_R1":
+                adapter = new Adapter_v1_13_R1();
+                break;
             case "v1_12_R1":
                 adapter = new Adapter_v1_12_R1();
                 break;

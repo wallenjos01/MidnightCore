@@ -9,10 +9,12 @@ import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.*;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerChunkCache;
@@ -57,115 +59,66 @@ import java.util.function.Consumer;
 @SuppressWarnings("unused")
 public class DynamicLevelContext {
 
+    private final String levelName;
     private final MinecraftServer server;
     private final WorldConfig config;
     private final DynamicLevelStorage.DynamicLevelStorageAccess storageAccess;
-    private final WorldData worldData;
     private final ChunkProgressListener chunkProgressListener;
     private final Map<ResourceKey<Level>, DynamicLevel> levels = new HashMap<>();
+    private WorldStem worldStem;
     private boolean removed = false;
 
     public DynamicLevelContext(MinecraftServer server, String levelName, WorldConfig config, DynamicLevelStorage storage) {
 
         this.server = server;
         this.config = config;
+        this.levelName = levelName;
 
         Event.register(ServerStopEvent.class, this, ev -> {
-            if(!isRemoved()) unload(!config.shouldNotSave());
+            if(!isRemoved()) {
+                if(config.shouldDeleteOnUnload()) {
+                    unloadAndDelete();
+                } else {
+                    unload(!config.shouldNotSave());
+                }
+            }
         });
 
         try {
+            // Create access to world folder including session lock
             this.storageAccess = storage.createAccess(levelName, this);
-
         } catch (IOException ex) {
             throw new IllegalStateException("Unable to create dynamic level!");
         }
 
+        // Create a progress listener for loading dimensions
         this.chunkProgressListener = ((AccessorMinecraftServer) server).getProgressListenerFactory().create(11);
 
-        try {
-
-            WorldDataConfiguration worldDataConfiguration = server.getWorldData().getDataConfiguration();
-
-            WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(server.getPackRepository(), worldDataConfiguration, false, false);
-            WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(
-                packConfig,
-                server.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED,
-                server.getFunctionCompilationLevel()
-            );
-
-            WorldStem stem = Util.blockUntilDone(executor -> WorldLoader.load(initConfig, dataLoadContext -> {
-
-                RegistryAccess.Frozen access = server.registryAccess();
-                Registry<LevelStem> registry = access.registryOrThrow(Registries.LEVEL_STEM); // Load dimension types from global datapacks only
-
-                DynamicOps<Tag> ops = ((InjectedStorageAccess) ((AccessorMinecraftServer) server).getStorageSource()).getOps();
-                Pair<WorldData, WorldDimensions.Complete> data = storageAccess.getDataTag(ops, dataLoadContext.dataConfiguration(), registry, Lifecycle.stable());
-
-                if (data != null) {
-                    return new WorldLoader.DataLoadOutput<>(data.getFirst(), data.getSecond().dimensionsRegistryAccess());
-                }
-
-                Registry<WorldPreset> presetRegistry = access.registryOrThrow(Registries.WORLD_PRESET);
-                Holder.Reference<WorldPreset> defaultWorldPreset = presetRegistry.getHolder(WorldPresets.NORMAL)
-                        .or(() -> presetRegistry.holders().findAny())
-                        .orElseThrow(() -> new IllegalStateException("Invalid datapack contents: can't find default world preset for dynamic level " + levelName + "!"));
-
-                Holder.Reference<WorldPreset> worldPreset = presetRegistry.getHolder(config.getWorldType()).orElseGet(() -> {
-                    MidnightCoreAPI.getLogger().warn("Failed to find level type for dynamic level " + levelName + ", defaulting to " + defaultWorldPreset.unwrapKey().map(key -> key.location().toString()).orElse("[unnamed]"));
-                    return defaultWorldPreset;
-                });
-
-                LevelSettings levelSettings = new LevelSettings(
-                        levelName,
-                        config.getDefaultGameMode(),
-                        config.isHardcore(),
-                        config.getDifficulty(),
-                        false, new GameRules(), dataLoadContext.dataConfiguration());
-
-                WorldOptions worldOptions = new WorldOptions(config.getSeed(), config.shouldGenerateStructures(), config.hasBonusChest());
-                WorldDimensions worldDimensions = new WorldDimensions(registry);
-
-                if(config.getGenerator() != null) {
-
-                    //worldDimensions = replaceGenerator(worldDimensions, config.getRootDimensionType(), config.getGenerator());
-                    worldDimensions = replaceGenerator(registry, config.getRootDimensionType(), config.getGenerator());
-
-                }
-                else if (worldPreset.is(WorldPresets.FLAT)) {
-
-                    RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, access);
-
-                    JsonObject generatorSettings = JsonConfigProvider.INSTANCE.toJson(config.getGeneratorSettings());
-                    DataResult<FlatLevelGeneratorSettings> result = FlatLevelGeneratorSettings.CODEC.parse(new Dynamic<>(registryOps, generatorSettings));
-
-                    Optional<FlatLevelGeneratorSettings> settings = result.resultOrPartial(str -> MidnightCoreAPI.getLogger().error(str));
-                    if (settings.isPresent()) {
-                        worldDimensions = replaceGenerator(
-                                registry,
-                                config.getRootDimensionType(),
-                                new FlatLevelSource(settings.get())
-                        );
-                    }
-                }
-
-                WorldDimensions.Complete complete = worldDimensions.bake(worldDimensions.dimensions());
-                Lifecycle lifecycle = complete.lifecycle().add(dataLoadContext.datapackWorldgen().allRegistriesLifecycle());
-
-                PrimaryLevelData primary = new PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), lifecycle);
-                //this.storageAccess.saveDataTag(access, primary);
-
-                return new WorldLoader.DataLoadOutput<>(primary, complete.dimensionsRegistryAccess());
-
-            }, WorldStem::new, Util.backgroundExecutor(), executor)).get();
-
-            this.worldData = stem.worldData();
-
-        } catch (Exception ex) {
-
-            ex.printStackTrace();
-            throw new IllegalStateException("Failed to load datapacks for dynamic dimension " + storageAccess.getLevelId() + "! World load aborted.");
-        }
+//        try {
+//
+//            // Get DataPack config from server
+//            WorldDataConfiguration worldDataConfiguration = server.getWorldData().getDataConfiguration();
+//
+//            WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(server.getPackRepository(), worldDataConfiguration, false, false);
+//            WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(
+//                packConfig,
+//                server.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED,
+//                server.getFunctionCompilationLevel()
+//            );
+//
+//            // Create or load level.dat
+//            this.worldStem = Util.blockUntilDone(executor -> WorldLoader.load(initConfig, this::loadLevelData, WorldStem::new, Util.backgroundExecutor(), executor)).get();
+//
+//            // Save level.dat unless requested not to
+//            if(!config.shouldNotSave()) {
+//                this.storageAccess.saveDataTag(worldStem.registries().compositeAccess(), worldStem.worldData());
+//            }
+//
+//        } catch (Exception ex) {
+//
+//            ex.printStackTrace();
+//            throw new IllegalStateException("Failed to load datapacks for dynamic dimension " + storageAccess.getLevelId() + "! World load aborted.");
+//        }
 
     }
 
@@ -185,6 +138,145 @@ public class DynamicLevelContext {
         return removed;
     }
 
+    public void initialize(Runnable onSuccess, Runnable onFail) {
+
+        ExecutorService exe = Util.backgroundExecutor();
+        exe.submit(() -> {
+
+            try {
+                // Get DataPack config from server
+                WorldDataConfiguration worldDataConfiguration = server.getWorldData().getDataConfiguration();
+
+                WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(server.getPackRepository(), worldDataConfiguration, false, false);
+                WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(
+                        packConfig,
+                        server.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED,
+                        server.getFunctionCompilationLevel()
+                );
+                AccessorMinecraftServer acc = (AccessorMinecraftServer) server;
+
+                WorldLoader.DataLoadContext dlc = new WorldLoader.DataLoadContext(
+                        server.getResourceManager(),
+                        worldDataConfiguration,
+                        acc.getRegistries().getAccessForLoading(RegistryLayer.DIMENSIONS),
+                        acc.getRegistries().compositeAccess()
+                );
+                WorldLoader.DataLoadOutput<WorldData> dl = loadLevelData(dlc);
+
+                LayeredRegistryAccess<RegistryLayer> serverAccess = acc.getRegistries();
+                LayeredRegistryAccess<RegistryLayer> dimensions = serverAccess.replaceFrom(RegistryLayer.DIMENSIONS, dl.finalDimensions());
+
+                this.worldStem = new WorldStem(
+                        acc.getReloadableResources().resourceManager(),
+                        acc.getReloadableResources().managers(),
+                        dimensions,
+                        dl.cookie()
+                );
+
+                if(!config.shouldNotSave()) {
+                    storageAccess.saveDataTag(worldStem.registries().compositeAccess(), worldStem.worldData());
+                }
+
+                server.submit(onSuccess);
+
+            } catch (Exception ex) {
+                MidnightCoreAPI.getLogger().error("An error occurred while initializing a dynamic level!");
+                ex.printStackTrace();
+
+                unload(false);
+                server.submit(onFail);
+            }
+        });
+    }
+
+    private WorldLoader.DataLoadOutput<WorldData> loadLevelData(WorldLoader.DataLoadContext dataLoadContext) {
+
+        // Obtain dimension types from server
+        RegistryAccess.Frozen access = dataLoadContext.datapackDimensions();
+
+        // Get access to the server's world presets
+        Registry<WorldPreset> presetRegistry = access.registryOrThrow(Registries.WORLD_PRESET);
+
+        // Try to get the world preset specified in the world config
+        Holder.Reference<WorldPreset> worldPreset = presetRegistry.getHolder(config.getWorldType()).orElseGet(() -> {
+
+            // Get a reference to a fallback world preset if the one specified in the config could not be found
+            Holder.Reference<WorldPreset> defaultWorldPreset = presetRegistry.getHolder(WorldPresets.NORMAL)
+                    .or(() -> presetRegistry.holders().findAny())
+                    .orElseThrow(() -> new IllegalStateException("Invalid datapack contents: can't find default world preset for dynamic level " + levelName + "!"));
+
+            MidnightCoreAPI.getLogger().warn("Failed to find level type for dynamic level " + levelName + ", defaulting to " + defaultWorldPreset.unwrapKey().map(key -> key.location().toString()).orElse("[unnamed]"));
+            return defaultWorldPreset;
+        });
+
+        // Load dimensions from world preset
+        WorldDimensions worldDimensions = worldPreset.value().createWorldDimensions();
+
+
+
+        // Replace generator if requested
+        if(config.getGenerator() != null) {
+
+            worldDimensions = replaceGenerator(worldDimensions.dimensions(), config.getRootDimensionType(), config.getGenerator());
+
+        }
+        // Load Superflat settings from config if necessary
+        else if(worldPreset.is(WorldPresets.FLAT) && config.getGeneratorSettings() != null) {
+
+            // Create new loading ops with access to the registry
+            RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, access);
+
+            // Load and parse settings from config
+            JsonObject generatorSettings = JsonConfigProvider.INSTANCE.toJson(config.getGeneratorSettings());
+            DataResult<FlatLevelGeneratorSettings> result = FlatLevelGeneratorSettings.CODEC.parse(new Dynamic<>(registryOps, generatorSettings));
+            Optional<FlatLevelGeneratorSettings> settings = result.resultOrPartial(str -> MidnightCoreAPI.getLogger().error(str));
+
+            // If the settings could be loaded, apply them
+            if (settings.isPresent()) {
+                worldDimensions = replaceGenerator(
+                        worldDimensions.dimensions(),
+                        config.getRootDimensionType(),
+                        new FlatLevelSource(settings.get())
+                );
+            }
+        }
+
+        // Try to load level.dat
+        //DynamicOps<Tag> ops = ((InjectedStorageAccess) ((AccessorMinecraftServer) server).getStorageSource()).getOps();
+        DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, dataLoadContext.datapackWorldgen());
+        Pair<WorldData, WorldDimensions.Complete> data = storageAccess.getDataTag(ops, dataLoadContext.dataConfiguration(), worldDimensions.dimensions(), dataLoadContext.datapackWorldgen().allRegistriesLifecycle());
+
+        // Return early if level.dat was loaded
+        if (data != null) {
+            return new WorldLoader.DataLoadOutput<>(data.getFirst(), data.getSecond().dimensionsRegistryAccess());
+        }
+
+        // Create a new level.dat
+
+        // Create default level settings from config
+        LevelSettings levelSettings = new LevelSettings(
+                levelName,
+                config.getDefaultGameMode(),
+                config.isHardcore(),
+                config.getDifficulty(),
+                false, new GameRules(), dataLoadContext.dataConfiguration()
+        );
+
+        // Create default world options from config
+        WorldOptions worldOptions = new WorldOptions(config.getSeed(), config.shouldGenerateStructures(), config.hasBonusChest());
+
+        // Finalize dimension registry now that custom settings have been applied
+        WorldDimensions.Complete complete = worldDimensions.bake(worldDimensions.dimensions());
+        Lifecycle lifecycle = complete.lifecycle().add(dataLoadContext.datapackWorldgen().allRegistriesLifecycle());
+
+        // Create level data for this dynamic level
+        PrimaryLevelData primary = new PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), lifecycle);
+
+        // Return the level data and the dimension registry
+        return new WorldLoader.DataLoadOutput<>(primary, complete.dimensionsRegistryAccess());
+
+    }
+
     public void loadDimension(ResourceKey<Level> dimensionKey, Consumer<ServerLevel> onComplete) {
 
         loadDimension(dimensionKey, new DynamicLevelCallback() {
@@ -199,15 +291,26 @@ public class DynamicLevelContext {
     }
     public void loadDimension(ResourceKey<Level> dimensionKey, DynamicLevelCallback callback) {
 
-        if (removed) throw new IllegalStateException("Attempt to access an unloaded DynamicLevelContext!");
+        if(removed) throw new IllegalStateException("Attempt to access an unloaded DynamicLevelContext!");
 
+        // Initialize the level data if not done already
+        if(worldStem == null) {
+            initialize(() -> loadDimension(dimensionKey, callback), callback::onFail);
+            return;
+        }
+
+        // Do not attempt to load the same dimension twice
         if (levels.containsKey(dimensionKey)) {
             callback.onLoaded(levels.get(dimensionKey));
             return;
         }
 
+        // Tell the progress listener that chunks are about to start generating
         chunkProgressListener.start();
 
+        WorldData worldData = worldStem.worldData();
+
+        // Determine whether this is the root dimension or not, and obtain the appropriate level data
         boolean root = dimensionKey.equals(config.getRootDimensionId());
         ServerLevelData serverLevelData = root ? worldData.overworldData() : new DerivedLevelData(worldData, worldData.overworldData());
 
@@ -215,10 +318,11 @@ public class DynamicLevelContext {
         long seed = worldData.worldGenOptions().seed();
         long seedHash = BiomeManager.obfuscateSeed(seed);
 
+        // These should be present in all worlds. GameRules can still disable spawning
         List<CustomSpawner> spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(serverLevelData));
 
-        //Registry<LevelStem> levelStemRegistry = levelSettings.dimensions();
-        Registry<LevelStem> levelStemRegistry = server.registryAccess().registryOrThrow(Registries.LEVEL_STEM);
+        // Obtain access to this world's dimension registry, and find the root dimension type
+        Registry<LevelStem> levelStemRegistry = worldStem.registries().compositeAccess().registryOrThrow(Registries.LEVEL_STEM);
         LevelStem rootLevel = levelStemRegistry.getOrThrow(config.getRootDimensionType());
 
         DynamicLevel level = new DynamicLevel(Util.backgroundExecutor(), serverLevelData, dimensionKey, rootLevel, chunkProgressListener, seedHash, spawners, root);
@@ -239,7 +343,7 @@ public class DynamicLevelContext {
 
                 while (serverChunkCache.getTickingGenerated() < 441) {
                     Thread.yield();
-                    LockSupport.parkNanos("waiting for tasks", 100000L);
+                    LockSupport.parkNanos("waiting for tasks", 250000000L); // Quarter Second
 
                     float progress = Math.min(1.0f, (float) serverChunkCache.getTickingGenerated() / 441.0f);
                     try {
@@ -278,10 +382,13 @@ public class DynamicLevelContext {
                 level.setSpawnSettings(server.isSpawningMonsters(), server.isSpawningAnimals());
 
                 chunkProgressListener.stop();
-                callback.onLoaded(level);
+                server.submit(() -> callback.onLoaded(level));
+
             } catch (Exception ex) {
+
                 MidnightCoreAPI.getLogger().warn("An exception occurred while loading a dynamic dimension!");
                 ex.printStackTrace();
+                server.submit(callback::onFail);
             }
         });
     }
@@ -352,7 +459,27 @@ public class DynamicLevelContext {
         }
     }
 
+    public void unloadAndDelete() {
+
+        if(removed) throw new IllegalStateException("Attempt to access an unloaded DynamicLevelContext!");
+
+        for(ResourceKey<Level> key : new ArrayList<>(levels.keySet())) {
+            unloadDimension(key, false);
+        }
+        try {
+
+            storageAccess.deleteLevel();
+
+        } catch (IOException ex) {
+            MidnightCoreAPI.getLogger().warn("An exception occurred while deleting a dynamic world!");
+            ex.printStackTrace();
+        }
+
+        removed = true;
+    }
+
     public void unload(boolean save) {
+
 
         if(removed) throw new IllegalStateException("Attempt to access an unloaded DynamicLevelContext!");
 
@@ -363,7 +490,7 @@ public class DynamicLevelContext {
         try {
             // Unload session
             if (save) {
-                storageAccess.saveDataTag(server.registryAccess(), worldData);
+                storageAccess.saveDataTag(worldStem.registries().compositeAccess(), worldStem.worldData());
             }
             storageAccess.close();
 
@@ -449,7 +576,7 @@ public class DynamicLevelContext {
         @Override
         public BlockPos findNearestMapStructure(TagKey<Structure> tagKey, BlockPos blockPos, int i, boolean bl) {
 
-            if (!worldData.worldGenOptions().generateStructures()) {
+            if (!worldStem.worldData().worldGenOptions().generateStructures()) {
                 return null;
             } else {
                 Optional<HolderSet.Named<Structure>> optional = server.registryAccess().registryOrThrow(Registries.STRUCTURE).getTag(tagKey);
@@ -464,7 +591,7 @@ public class DynamicLevelContext {
 
         @Override
         public boolean isFlat() {
-            return worldData.isFlatWorld();
+            return worldStem.worldData().isFlatWorld();
         }
     }
 

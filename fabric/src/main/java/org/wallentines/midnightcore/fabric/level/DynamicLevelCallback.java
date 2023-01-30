@@ -8,4 +8,6 @@ public interface DynamicLevelCallback {
 
     void onProgress(float percent);
 
+    default void onFail() { }
+
 }
