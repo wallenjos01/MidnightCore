@@ -35,6 +35,10 @@ public interface MItemStack {
 
     MItemStack copy();
 
+    default MItemStack.Builder builder() {
+        return MItemStack.Builder.of(getType()).withAmount(getCount()).withTag(getTag());
+    }
+
     String saveToNBT();
 
     void update();

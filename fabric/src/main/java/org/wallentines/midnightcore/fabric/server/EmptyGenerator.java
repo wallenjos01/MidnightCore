@@ -1,9 +1,11 @@
-package org.wallentines.midnightcore.fabric.level;
+package org.wallentines.midnightcore.fabric.server;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -21,9 +23,7 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.jetbrains.annotations.NotNull;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.fabric.server.FabricServer;
+import org.slf4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Arrays;
@@ -32,14 +32,16 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+@SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
 public class EmptyGenerator extends ChunkGenerator {
 
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final Codec<EmptyGenerator> CODEC = RecordCodecBuilder.create(instance ->
-        instance.group(
-            EmptyGeneratorSettings.CODEC.fieldOf("settings").forGetter(gen -> gen.settings)
-        )
-        .apply(instance, instance.stable(EmptyGenerator::new))
+            instance.group(
+                            EmptyGeneratorSettings.CODEC.fieldOf("settings").forGetter(gen -> gen.settings)
+                    )
+                    .apply(instance, instance.stable(EmptyGenerator::new))
     );
 
     private final EmptyGeneratorSettings settings;
@@ -96,7 +98,7 @@ public class EmptyGenerator extends ChunkGenerator {
 
     @Override
     public int getMinY() {
-        return 0;
+        return -64;
     }
 
     @Override
@@ -116,24 +118,21 @@ public class EmptyGenerator extends ChunkGenerator {
     @Override
     public void addDebugScreenInfo(List<String> list, RandomState randomState, BlockPos blockPos) { }
 
-    public static EmptyGenerator create(ResourceKey<Biome> biome) {
+    public static EmptyGenerator create(ResourceKey<Biome> biome, RegistryAccess.Frozen frozen) {
 
-        MServer server = MidnightCoreAPI.getRunningServer();
-        if(server == null) throw new IllegalStateException("Attempt to create EmptyGenerator before server startup!");
+        Registry<Biome> reg = frozen.registryOrThrow(Registries.BIOME);
+        Optional<Holder<Biome>> holder = reg.getHolder(biome).map(val -> val);
 
-        RegistryAccess acc = ((FabricServer) server).getInternal().registryAccess();
-        Registry<Biome> biomes = acc.registryOrThrow(Registries.BIOME);
-        Optional<Holder<Biome>> holder = biomes.getHolder(biome).map(ref -> ref);
-
-        return new EmptyGenerator(new EmptyGeneratorSettings(holder));
+        return new EmptyGenerator(new EmptyGeneratorSettings(holder, reg.getHolderOrThrow(Biomes.PLAINS)));
     }
 
     public static class EmptyGeneratorSettings {
 
         public static final Codec<EmptyGeneratorSettings> CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(
-                Biome.CODEC.optionalFieldOf("biome").orElseGet(Optional::empty).forGetter(settings -> Optional.of(settings.biome))
-            ).apply(instance, EmptyGeneratorSettings::new));
+                instance.group(
+                        Biome.CODEC.optionalFieldOf("biome").orElseGet(Optional::empty).forGetter(settings -> Optional.of(settings.biome)),
+                        RegistryOps.retrieveElement(Biomes.PLAINS)
+                ).apply(instance, EmptyGeneratorSettings::new));
 
         private final Holder<Biome> biome;
 
@@ -142,16 +141,11 @@ public class EmptyGenerator extends ChunkGenerator {
         }
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        public EmptyGeneratorSettings(Optional<Holder<Biome>> biome) {
+        public EmptyGeneratorSettings(Optional<Holder<Biome>> biome, Holder<Biome> defaultBiome) {
 
             this.biome = biome.orElseGet(() -> {
-
-                MServer server = MidnightCoreAPI.getRunningServer();
-                if(server == null) throw new IllegalStateException("Attempt to create EmptyGenerator before server startup!");
-
-                RegistryAccess acc = ((FabricServer) server).getInternal().registryAccess();
-                Registry<Biome> biomes = acc.registryOrThrow(Registries.BIOME);
-                return biomes.getHolderOrThrow(Biomes.PLAINS);
+                LOGGER.warn("Unknown biome requested, defaulting for plains");
+                return defaultBiome;
             });
         }
     }

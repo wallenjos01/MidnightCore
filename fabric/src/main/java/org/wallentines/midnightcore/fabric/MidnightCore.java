@@ -19,7 +19,7 @@ import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
 import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
-import org.wallentines.midnightcore.fabric.level.EmptyGenerator;
+import org.wallentines.midnightcore.fabric.server.EmptyGenerator;
 import org.wallentines.midnightcore.fabric.module.extension.FabricServerExtensionModule;
 import org.wallentines.midnightcore.fabric.module.messaging.FabricMessagingModule;
 import org.wallentines.midnightcore.fabric.module.savepoint.FabricSavepointModule;

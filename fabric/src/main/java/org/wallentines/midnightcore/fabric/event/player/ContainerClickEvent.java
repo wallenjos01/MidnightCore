@@ -61,7 +61,15 @@ public class ContainerClickEvent extends Event {
 
     public ItemStack getItem() {
 
-        return slot == AbstractContainerMenu.SLOT_CLICKED_OUTSIDE ? handler.getCarried() : handler.getSlot(slot).getItem();
+        if(slot == AbstractContainerMenu.SLOT_CLICKED_OUTSIDE) {
+            return handler.getCarried();
+        }
+
+        if(slot < 0 || handler.slots.size() <= slot) {
+            return null;
+        }
+
+        return handler.getSlot(slot).getItem();
 
     }
 

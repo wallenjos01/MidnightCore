@@ -22,7 +22,7 @@ public class MixinAbstractContainerMenu {
     @Inject(method = "doClick", at=@At("HEAD"), cancellable = true)
     private void onClick(int i, int j, ClickType slotActionType, Player playerEntity, CallbackInfo ci) {
 
-        if(playerEntity.level.isClientSide()) return;
+        if(playerEntity.level.isClientSide() || i == -1) return;
         AbstractContainerMenu handler = (AbstractContainerMenu) (Object) this;
 
         Container inv = getInventory(playerEntity, handler);

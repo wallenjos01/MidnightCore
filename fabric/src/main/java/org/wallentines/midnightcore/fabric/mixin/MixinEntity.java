@@ -1,7 +1,6 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +13,6 @@ import org.wallentines.midnightcore.fabric.event.entity.EntityDismountVehicleEve
 import org.wallentines.midnightcore.fabric.event.entity.EntityLoadDataEvent;
 import org.wallentines.midnightcore.fabric.event.entity.EntitySaveDataEvent;
 import org.wallentines.midnightcore.fabric.event.entity.EntityTickEvent;
-import org.wallentines.midnightcore.fabric.level.DynamicLevelContext;
 import org.wallentines.midnightlib.event.Event;
 
 @Mixin(Entity.class)
@@ -63,16 +61,6 @@ public class MixinEntity {
         Event.invoke(event);
 
         return event.getTag();
-    }
-
-    @ModifyVariable(method="handleNetherPortal", at=@At(value="STORE"), ordinal = 0)
-    private ResourceKey<Level> onNetherPortal(ResourceKey<Level> value) {
-
-        if(level instanceof DynamicLevelContext.DynamicLevel lvl) {
-            ResourceKey<Level> nether = lvl.getNether();
-            return nether == level.dimension() ? lvl.getRoot() : nether;
-        }
-        return value;
     }
 
     @Inject(method = "tick", at=@At("RETURN"))
