@@ -45,6 +45,8 @@ public class MidnightCore implements ModInitializer {
     @Override
     public void onInitialize() {
 
+        Constants.registerDefaults();
+
         // Determine the data folder
         Path dataFolder = Paths.get("config/MidnightCore");
 
