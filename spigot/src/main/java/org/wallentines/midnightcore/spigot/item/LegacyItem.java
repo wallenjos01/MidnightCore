@@ -6,7 +6,7 @@ import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTranslateComponent;
 import org.wallentines.midnightcore.common.item.AbstractItem;
 import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Locale;

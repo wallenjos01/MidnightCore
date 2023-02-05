@@ -1,5 +1,9 @@
 package org.wallentines.midnightcore.common;
 
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.FileWrapper;
+import org.wallentines.midnightcore.api.FileConfig;
 import org.wallentines.midnightcore.api.Registries;
 import org.wallentines.midnightcore.api.item.InventoryGUI;
 import org.wallentines.midnightcore.api.item.MItemStack;
@@ -13,8 +17,6 @@ import org.wallentines.midnightcore.api.text.LangRegistry;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.common.server.AbstractServer;
 import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.FileConfig;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
@@ -28,7 +30,7 @@ import java.util.Random;
 
 public class MidnightCoreImpl extends MidnightCoreAPI {
 
-    private final FileConfig config;
+    private final FileWrapper<ConfigObject> config;
     private final File dataFolder;
     private final Version gameVersion;
     private final Random random = new Random();
@@ -54,10 +56,6 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
         }
 
         this.config = FileConfig.findOrCreate("config", this.dataFolder, Constants.CONFIG_DEFAULTS);
-        if(this.config == null) {
-            throw new IllegalStateException("Unable to create config!");
-        }
-        this.config.getRoot().fill(Constants.CONFIG_DEFAULTS);
         this.config.save();
 
         this.gameVersion = gameVersion;
@@ -84,13 +82,12 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     @Override
     public ConfigSection getConfig() {
 
-        return config.getRoot();
+        return config.getRoot().asSection();
     }
 
     @Override
     public void saveConfig() {
 
-        config.getRoot().fill(Constants.CONFIG_DEFAULTS);
         config.save();
     }
 
@@ -161,14 +158,14 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
 
     @Override
     public String getServerLocale() {
-        return config.getRoot().getString("locale");
+        return config.getRoot().asSection().getString("locale");
     }
 
     @Override
     public void reload() {
-        config.reload();
+        config.load();
 
-        ConfigSection sec = config.getRoot().getOrCreateSection("modules");
+        ConfigSection sec = config.getRoot().asSection().getOrCreateSection("modules");
         currentServer.reloadModules(sec, Registries.MODULE_REGISTRY);
 
         config.save();

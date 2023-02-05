@@ -16,7 +16,7 @@ import org.wallentines.midnightcore.spigot.MidnightCore;
 import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
 import org.wallentines.midnightcore.spigot.adapter.SkinUpdater;
 import org.wallentines.midnightcore.spigot.player.SpigotPlayer;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 public class SpigotSkinModule extends AbstractSkinModule implements Listener {

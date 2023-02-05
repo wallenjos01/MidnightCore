@@ -7,6 +7,8 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.client.MidnightCoreClient;
 import org.wallentines.midnightcore.client.module.ClientModule;
@@ -16,8 +18,7 @@ import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingMod
 import org.wallentines.midnightcore.fabric.event.client.ClientCustomMessageEvent;
 import org.wallentines.midnightcore.fabric.event.client.ClientLoginQueryEvent;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -93,7 +94,7 @@ public class FabricClientMessagingModule implements ClientMessagingModule {
     public void sendMessage(Identifier id, ConfigSection data) {
 
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeUtf(JsonConfigProvider.INSTANCE.saveToString(data));
+        buf.writeUtf(JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, data));
 
         sendRawMessage(id, buf.array());
     }

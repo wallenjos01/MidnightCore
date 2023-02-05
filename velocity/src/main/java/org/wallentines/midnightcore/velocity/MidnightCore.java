@@ -7,6 +7,8 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.api.Registries;
@@ -19,8 +21,7 @@ import org.wallentines.midnightcore.velocity.module.lastserver.LastServerModule;
 import org.wallentines.midnightcore.velocity.module.messaging.VelocityMessagingModule;
 import org.wallentines.midnightcore.velocity.server.VelocityServer;
 import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 
 import java.nio.file.Path;
@@ -46,9 +47,9 @@ public class MidnightCore {
     @Subscribe(order= PostOrder.FIRST)
     public void onInitialize(ProxyInitializeEvent event) {
 
-        Constants.registerDefaults(JsonConfigProvider.INSTANCE);
+        Constants.registerDefaults();
 
-        ConfigSection langDefaults = JsonConfigProvider.INSTANCE.loadFromStream(getClass().getResourceAsStream("/lang/en_us.json"));
+        ConfigSection langDefaults = JSONCodec.minified().decode(ConfigContext.INSTANCE, getClass().getResourceAsStream("/lang/en_us.json")).asSection();
 
         MidnightCoreImpl api = new MidnightCoreImpl(
                 dataFolder,

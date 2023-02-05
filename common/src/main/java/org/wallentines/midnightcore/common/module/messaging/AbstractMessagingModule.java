@@ -2,14 +2,15 @@ package org.wallentines.midnightcore.common.module.messaging;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.messaging.LoginNegotiator;
 import org.wallentines.midnightcore.api.module.messaging.MessageHandler;
 import org.wallentines.midnightcore.api.module.messaging.MessagingModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
@@ -21,9 +22,9 @@ public abstract class AbstractMessagingModule implements MessagingModule {
 
     protected List<Consumer<LoginNegotiator>> loginHandlers = new ArrayList<>();
 
-    public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "messaging");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "messaging");
 
-    protected final Registry<MessageHandler> handlers = new Registry<>();
+    protected final Registry<MessageHandler> handlers = new Registry<>(MidnightCoreAPI.DEFAULT_NAMESPACE);
 
     @Override
     public boolean initialize(ConfigSection configuration, MServer server) {
@@ -40,7 +41,7 @@ public abstract class AbstractMessagingModule implements MessagingModule {
     public void sendMessage(MPlayer player, Identifier id, ConfigSection data) {
 
         ByteBuf buf = Unpooled.buffer();
-        PacketBufferUtils.writeUtf(buf, JsonConfigProvider.INSTANCE.saveToString(data));
+        PacketBufferUtils.writeUtf(buf, JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, data));
 
         sendRawMessage(player, id, buf.array());
     }

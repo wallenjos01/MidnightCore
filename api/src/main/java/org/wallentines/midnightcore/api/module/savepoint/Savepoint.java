@@ -1,7 +1,7 @@
 package org.wallentines.midnightcore.api.module.savepoint;
 
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
 public interface Savepoint {
@@ -13,9 +13,5 @@ public interface Savepoint {
     Identifier getId();
 
     ConfigSection getExtraData();
-
-    void deserialize(ConfigSection section);
-
-    ConfigSection serialize();
 
 }

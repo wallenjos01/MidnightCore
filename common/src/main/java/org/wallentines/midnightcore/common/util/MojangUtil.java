@@ -3,16 +3,16 @@ package org.wallentines.midnightcore.common.util;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.module.skin.Skin;
-import org.wallentines.midnightlib.config.ConfigProvider;
-import org.wallentines.midnightlib.config.ConfigRegistry;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collection;
 import java.util.UUID;
 
 public final class MojangUtil {
@@ -51,9 +51,9 @@ public final class MojangUtil {
             ConfigSection sec = makeHttpRequest(url);
             if(sec == null) return null;
 
-            if(!sec.has("properties", Collection.class)) return null;
+            if(!sec.hasList("properties")) return null;
 
-            for(ConfigSection property : sec.getListFiltered("properties", ConfigSection.class)) {
+            for(ConfigSection property : sec.getListFiltered("properties", ConfigSection.SERIALIZER)) {
 
                 if(!property.has("name") || !property.getString("name").equals("textures")) continue;
 
@@ -97,10 +97,10 @@ public final class MojangUtil {
         if(conn.getResponseCode() != 200) return null;
         InputStream responseStream = conn.getInputStream();
 
-        ConfigProvider json = ConfigRegistry.INSTANCE.getProviderForFileType(".json");
-        if(json == null) return new ConfigSection();
+        ConfigObject obj = JSONCodec.minified().decode(ConfigContext.INSTANCE, responseStream);
+        if(obj == null || !obj.isSection()) return new ConfigSection();
 
-        ConfigSection out = json.loadFromStream(responseStream);
+        ConfigSection out = obj.asSection();
 
         responseStream.close();
         conn.disconnect();

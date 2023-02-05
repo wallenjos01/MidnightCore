@@ -1,14 +1,17 @@
 package org.wallentines.midnightcore.api.text;
 
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.FileWrapper;
+import org.wallentines.midnightcore.api.FileConfig;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.FileConfig;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 
+@SuppressWarnings("unused")
 public class LangProvider {
 
     protected final File folder;
@@ -33,19 +36,19 @@ public class LangProvider {
         this.defaults = defaults;
         this.serverLocale = serverLocale;
 
-        FileConfig def = FileConfig.findOrCreate(serverLocale, folder);
+        FileConfig def = FileConfig.findOrCreate(serverLocale, folder, new ConfigSection());
         def.getRoot().fill(defaults.save());
         def.save();
 
-        LangRegistry reg = LangRegistry.fromConfigSection(def.getRoot());
+        LangRegistry reg = LangRegistry.fromConfigSection(def.getRoot().asSection());
         registries.put(serverLocale, reg);
     }
 
     private LangRegistry getEntries(String key) {
         return registries.computeIfAbsent(key, lang -> {
-            FileConfig conf = FileConfig.findFile(folder.listFiles(), lang);
-            if(conf != null) {
-                LangRegistry reg = LangRegistry.fromConfigSection(conf.getRoot());
+            FileWrapper<ConfigObject> conf = FileConfig.find(lang, folder);
+            if(conf != null && conf.getRoot().isSection()) {
+                LangRegistry reg = LangRegistry.fromConfigSection(conf.getRoot().asSection());
                 return registries.put(lang, reg);
             }
             return registries.get(serverLocale);
@@ -87,8 +90,11 @@ public class LangProvider {
     public void loadEntries(String locale, LangRegistry reg) {
         registries.put(locale, reg);
 
-        FileConfig conf = FileConfig.findOrCreate(locale, folder);
-        conf.getRoot().fill(reg.save());
+        FileWrapper<ConfigObject> conf = FileConfig.findOrCreate(locale, folder, new ConfigSection());
+
+
+        conf.load();
+        conf.getRoot().asSection().fill(reg.save());
         conf.save();
     }
 
@@ -104,11 +110,13 @@ public class LangProvider {
 
         registries.clear();
 
-        FileConfig def = FileConfig.findOrCreate(serverLocale, folder);
-        def.getRoot().fill(defaults.save());
+        FileWrapper<ConfigObject> def = FileConfig.findOrCreate(serverLocale, folder, new ConfigSection());
+
+        def.load();
+        def.getRoot().asSection().fill(defaults.save());
         def.save();
 
-        LangRegistry reg = LangRegistry.fromConfigSection(def.getRoot());
+        LangRegistry reg = LangRegistry.fromConfigSection(def.getRoot().asSection());
         registries.put(serverLocale, reg);
     }
 

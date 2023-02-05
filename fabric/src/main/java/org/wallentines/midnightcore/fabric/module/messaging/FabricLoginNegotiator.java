@@ -7,11 +7,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.module.messaging.LoginMessageHandler;
 import org.wallentines.midnightcore.api.module.messaging.LoginNegotiator;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.HashMap;
@@ -52,7 +53,7 @@ public class FabricLoginNegotiator implements LoginNegotiator {
     public void sendMessage(Identifier id, ConfigSection data, LoginMessageHandler response) {
 
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeUtf(JsonConfigProvider.INSTANCE.saveToString(data));
+        buffer.writeUtf(JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, data));
 
         sendMessage(id, buffer, response);
     }

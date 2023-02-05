@@ -6,15 +6,20 @@ import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
+import org.wallentines.mdcfg.ConfigList;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigPrimitive;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.text.*;
 import org.wallentines.midnightcore.api.text.TextColor;
 import org.wallentines.midnightcore.fabric.mixin.AccessorStyle;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ConversionUtil {
@@ -79,7 +84,7 @@ public class ConversionUtil {
 
         } else {
 
-            return MComponent.SERIALIZER.deserialize(JsonConfigProvider.INSTANCE.loadFromString(Component.Serializer.toJson(component)));
+            return MComponent.SERIALIZER.deserialize(GsonContext.INSTANCE, Component.Serializer.toJsonTree(component)).getOrThrow();
         }
 
         out.withStyle(toMStyle(component.getStyle()));
@@ -114,13 +119,17 @@ public class ConversionUtil {
     public static MHoverEvent toMHoverEvent(HoverEvent event) {
 
         if(event == null) return null;
-        return MHoverEvent.SERIALIZER.deserialize(JsonConfigProvider.INSTANCE.loadFromString(event.serialize().toString()));
+
+        String json = event.serialize().toString();
+        ConfigObject obj = JSONCodec.minified().decode(ConfigContext.INSTANCE, json);
+
+        return MHoverEvent.SERIALIZER.deserialize(ConfigContext.INSTANCE, obj).getOrThrow();
     }
 
     public static MClickEvent toMClickEvent(ClickEvent event) {
 
         if(event == null) return null;
-        return new MClickEvent(MClickEvent.ClickAction.getById(event.getAction().getName()), event.getValue());
+        return new MClickEvent(MClickEvent.ClickAction.byId(event.getAction().getName()), event.getValue());
     }
 
     public static Component toComponent(@Nullable MComponent component) {
@@ -134,18 +143,19 @@ public class ConversionUtil {
 
         } else if(component instanceof MTranslateComponent) {
 
-            List<MComponent> data = ((MTranslateComponent) component).getArgs();
-            Object[] comps = new Component[data.size()];
+            Collection<MComponent> args = ((MTranslateComponent) component).getArgs();
+            Object[] comps = new Component[args.size()];
 
-            for(int i = 0 ; i < comps.length ; i ++) {
-                comps[i] = toComponent(data.get(i));
+            int i = 0;
+            for(MComponent arg : args) {
+                comps[i++] = toComponent(arg);
             }
 
             out = Component.translatable(component.getContent(), comps);
 
         } else {
 
-            return Component.Serializer.fromJson(JsonConfigProvider.INSTANCE.toJson(MComponent.SERIALIZER.serialize(component)));
+            return Component.Serializer.fromJson(JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, MComponent.SERIALIZER.serialize(ConfigContext.INSTANCE, component).getOrThrow()));
         }
 
         out.setStyle(toStyle(component.getStyle())
@@ -179,7 +189,7 @@ public class ConversionUtil {
     public static HoverEvent toHoverEvent(MHoverEvent event) {
 
         if(event == null) return null;
-        return HoverEvent.deserialize(JsonConfigProvider.INSTANCE.toJson(MHoverEvent.SERIALIZER.serialize(event)));
+        return HoverEvent.deserialize(MHoverEvent.SERIALIZER.serialize(GsonContext.INSTANCE, event).getOrThrow().getAsJsonObject());
     }
 
     public static ClickEvent toClickEvent(MClickEvent event) {
@@ -189,7 +199,7 @@ public class ConversionUtil {
     }
 
 
-    private static Object fromNBT(Tag t) {
+    private static ConfigObject fromNBT(Tag t) {
 
         if(t instanceof CompoundTag) {
 
@@ -202,35 +212,35 @@ public class ConversionUtil {
 
         } else if(t instanceof IntTag) {
 
-            return ((IntTag) t).getAsInt();
+            return new ConfigPrimitive(((IntTag) t).getAsInt());
 
         } else if(t instanceof DoubleTag) {
 
-            return ((DoubleTag) t).getAsDouble();
+            return new ConfigPrimitive(((DoubleTag) t).getAsDouble());
 
         } else if(t instanceof FloatTag) {
 
-            return ((FloatTag) t).getAsFloat();
+            return new ConfigPrimitive(((FloatTag) t).getAsFloat());
 
         } else if(t instanceof ShortTag) {
 
-            return ((ShortTag) t).getAsShort();
+            return new ConfigPrimitive(((ShortTag) t).getAsShort());
 
         } else if(t instanceof ByteTag) {
 
-            return ((ByteTag) t).getAsByte();
+            return new ConfigPrimitive(((ByteTag) t).getAsByte());
 
         } else if(t instanceof LongTag) {
 
-            return ((LongTag) t).getAsLong();
+            return new ConfigPrimitive(((LongTag) t).getAsLong());
 
         } else if(t instanceof StringTag) {
 
-            return t.getAsString();
+            return new ConfigPrimitive(t.getAsString());
 
         } else if(t instanceof ListTag lt) {
 
-            List<Object> objs = new ArrayList<>();
+            ConfigList objs = new ConfigList();
             for(Tag t1 : lt) {
 
                 objs.add(fromNBT(t1));
@@ -239,7 +249,7 @@ public class ConversionUtil {
 
         } else if(t instanceof IntArrayTag lt) {
 
-            List<Integer> objs = new ArrayList<>();
+            ConfigList objs = new ConfigList();
             for(IntTag t1 : lt) {
 
                 objs.add(t1.getAsInt());
@@ -248,7 +258,7 @@ public class ConversionUtil {
 
         } else if(t instanceof LongArrayTag lt) {
 
-            List<Long> objs = new ArrayList<>();
+            ConfigList objs = new ConfigList();
             for(LongTag t1 : lt) {
 
                 objs.add(t1.getAsLong());
@@ -257,7 +267,7 @@ public class ConversionUtil {
 
         } else if(t instanceof ByteArrayTag lt) {
 
-            List<Byte> objs = new ArrayList<>();
+            ConfigList objs = new ConfigList();
             for(ByteTag t1 : lt) {
 
                 objs.add(t1.getAsByte());

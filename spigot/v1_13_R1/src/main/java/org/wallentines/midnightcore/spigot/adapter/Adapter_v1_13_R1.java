@@ -10,10 +10,10 @@ import org.bukkit.craftbukkit.v1_13_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 
 import java.lang.reflect.Field;
 
@@ -59,7 +59,7 @@ public class Adapter_v1_13_R1 implements SpigotAdapter {
     public void sendMessage(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.a(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), false);
+        epl.a(IChatBaseComponent.ChatSerializer.a(comp.toJSONString()), false);
 
     }
 
@@ -67,7 +67,7 @@ public class Adapter_v1_13_R1 implements SpigotAdapter {
     public void sendActionBar(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.a(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), true);
+        epl.a(IChatBaseComponent.ChatSerializer.a(comp.toJSONString()), true);
 
     }
 
@@ -76,7 +76,7 @@ public class Adapter_v1_13_R1 implements SpigotAdapter {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
 
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), fadeIn, stay, fadeOut));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a(comp.toJSONString()), fadeIn, stay, fadeOut));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class Adapter_v1_13_R1 implements SpigotAdapter {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
 
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), fadeIn, stay, fadeOut));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, IChatBaseComponent.ChatSerializer.a(comp.toJSONString()), fadeIn, stay, fadeOut));
     }
 
     @Override
@@ -117,7 +117,7 @@ public class Adapter_v1_13_R1 implements SpigotAdapter {
         NBTTagCompound cmp = mis.getTag();
         if(cmp == null) return null;
 
-        return JsonConfigProvider.INSTANCE.loadFromString(cmp.b_());
+        return JSONCodec.loadConfig(cmp.b_()).asSection();
     }
 
     @Override
@@ -132,7 +132,7 @@ public class Adapter_v1_13_R1 implements SpigotAdapter {
         NBTTagCompound tag = new NBTTagCompound();
         tag = epl.save(tag);
 
-        return JsonConfigProvider.INSTANCE.loadFromString(tag.b_());
+        return JSONCodec.loadConfig(tag.b_()).asSection();
     }
 
     @Override

@@ -4,18 +4,20 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerLoginPluginMessageEvent;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.wallentines.mdcfg.ConfigList;
+import org.wallentines.mdcfg.serializer.Serializer;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.extension.ServerExtensionModule;
 import org.wallentines.midnightcore.api.module.messaging.MessagingModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.api.module.extension.ServerExtension;
 import org.wallentines.midnightcore.common.module.extension.ExtensionHelper;
 import org.wallentines.midnightcore.velocity.MidnightCore;
 import org.wallentines.midnightcore.velocity.module.messaging.VelocityMessagingModule;
 import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -57,8 +59,8 @@ public class VelocityExtensionModule implements ServerExtensionModule {
         if(mod == null) return false;
 
         supportedExtensions.clear();
-        supportedExtensions.addAll(section.getListFiltered("query_extensions", String.class).stream().map(str ->
-                Identifier.parseOrDefault(str, Constants.DEFAULT_NAMESPACE)).toList());
+        supportedExtensions.addAll(section.getListFiltered("query_extensions", Serializer.STRING).stream().map(str ->
+                Identifier.parseOrDefault(str, MidnightCoreAPI.DEFAULT_NAMESPACE)).toList());
 
         ByteBuf supportedData = ExtensionHelper.createPacket(supportedExtensions);
 
@@ -101,6 +103,6 @@ public class VelocityExtensionModule implements ServerExtensionModule {
             new ModuleInfo<MServer, ServerModule>(
                     VelocityExtensionModule::new,
                     ExtensionHelper.ID,
-                    DEFAULT_CONFIG.copy().with("query_extensions", new ArrayList<>())
+                    DEFAULT_CONFIG.copy().with("query_extensions", new ConfigList())
             ).dependsOn(VelocityMessagingModule.ID);
 }

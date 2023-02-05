@@ -1,7 +1,9 @@
 package org.wallentines.midnightcore.api.player;
 
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.FileConfig;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.FileWrapper;
+import org.wallentines.midnightcore.api.FileConfig;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,7 +13,7 @@ import java.util.HashMap;
 public class DataProvider {
 
     private final File dataFolder;
-    private final HashMap<String, FileConfig> loaded = new HashMap<>();
+    private final HashMap<String, FileWrapper<ConfigObject>> loaded = new HashMap<>();
 
     public DataProvider(File dataFolder) {
 
@@ -21,12 +23,12 @@ public class DataProvider {
         this.dataFolder = dataFolder;
     }
 
-    private FileConfig findOrCreate(String id) {
-        return loaded.computeIfAbsent(id, k -> FileConfig.findOrCreate(id, dataFolder));
+    private FileWrapper<ConfigObject> findOrCreate(String id) {
+        return loaded.computeIfAbsent(id, k -> FileConfig.findOrCreate(id, dataFolder, new ConfigSection()));
     }
 
     public ConfigSection getData(String id) {
-        return findOrCreate(id).getRoot();
+        return findOrCreate(id).getRoot().asSection();
     }
 
     public void setData(String id, ConfigSection sec) {

@@ -1,7 +1,8 @@
 package org.wallentines.midnightcore.api.text;
 
+import org.wallentines.mdcfg.serializer.InlineSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightlib.config.serialization.InlineSerializer;
 import org.wallentines.midnightlib.math.Color;
 
 public class TextColor extends Color {
@@ -49,7 +50,23 @@ public class TextColor extends Color {
         return LEGACY_COLOR_NAMES[toRGBI()];
     }
 
-    public static final InlineSerializer<TextColor> SERIALIZER = InlineSerializer.of(Color::toHex, TextColor::parse);
+    public static final Serializer<TextColor> SERIALIZER = new InlineSerializer<>() {
+        @Override
+        public TextColor readString(String str) {
+            return parse(str);
+        }
 
-    public static final InlineSerializer<TextColor> LEGACY_SERIALIZER = InlineSerializer.of(TextColor::toLegacyColor, TextColor::parse);
+        @Override
+        public String writeString(TextColor value) {
+
+            MidnightCoreAPI instance = MidnightCoreAPI.getInstance();
+            if(instance == null || instance.getGameVersion().getMinorVersion() >= 16) {
+                return value.toHex();
+            }
+
+            return value.toLegacyColor();
+        }
+    };
+
+
 }

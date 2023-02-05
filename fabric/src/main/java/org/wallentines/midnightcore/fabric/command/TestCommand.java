@@ -34,7 +34,7 @@ import java.util.UUID;
 
 public class TestCommand {
 
-    private static final Identifier SAVEPOINT_ID = new Identifier(Constants.DEFAULT_NAMESPACE, "test");
+    private static final Identifier SAVEPOINT_ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "test");
     private static final UUID SKIN_UUID = UUID.fromString("ce784258-10ca-45fb-b787-8dde07375f2b");
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {

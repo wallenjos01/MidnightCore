@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.config.ConfigProvider;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 
 import java.util.UUID;
 
@@ -44,11 +44,13 @@ public interface SpigotAdapter {
 
     void addTickable(Runnable runnable);
 
+    @Deprecated
     default String toJsonString(MComponent component) {
 
-        return getJsonSerializer().saveToString(MComponent.SERIALIZER.serialize(component));
+        return component.toJSONString();
     }
 
+    @Deprecated
     default ConfigProvider getJsonSerializer() {
 
         return org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider.INSTANCE;

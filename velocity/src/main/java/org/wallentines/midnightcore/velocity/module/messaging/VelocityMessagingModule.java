@@ -11,19 +11,20 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.messaging.LoginNegotiator;
 import org.wallentines.midnightcore.api.module.messaging.MessageHandler;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
 import org.wallentines.midnightcore.common.module.messaging.PacketBufferUtils;
 import org.wallentines.midnightcore.velocity.MidnightCore;
 import org.wallentines.midnightcore.velocity.player.VelocityPlayer;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -92,15 +93,15 @@ public class VelocityMessagingModule extends AbstractMessagingModule {
 
     private void registerDefaults() {
 
-        registerHandler(new Identifier(Constants.DEFAULT_NAMESPACE, "send"), (player, data) -> {
+        registerHandler(new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "send"), (player, data) -> {
 
-            ConfigSection sec = JsonConfigProvider.INSTANCE.loadFromString(PacketBufferUtils.readUtf(data));
+            ConfigObject sec = JSONCodec.minified().decode(ConfigContext.INSTANCE, PacketBufferUtils.readUtf(data));
 
-            if(sec == null || !sec.has("server")) {
+            if(sec == null || !sec.isSection() || !sec.asSection().has("server")) {
                 MidnightCoreAPI.getLogger().warn("Received send request with invalid data!");
                 return;
             }
-            String server = sec.getString("server");
+            String server = sec.asSection().getString("server");
 
             Optional<RegisteredServer> svr = MidnightCore.getInstance().getServer().getServer(server);
             if(svr.isEmpty()) return;

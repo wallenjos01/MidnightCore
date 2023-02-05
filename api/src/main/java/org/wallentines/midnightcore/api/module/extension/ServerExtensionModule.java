@@ -1,12 +1,12 @@
 package org.wallentines.midnightcore.api.module.extension;
 
+import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 @SuppressWarnings("unused")
@@ -21,6 +21,6 @@ public interface ServerExtensionModule extends ServerModule {
     Version getExtensionVersion(MPlayer player, Identifier id);
 
 
-    ConfigSection DEFAULT_CONFIG = new ConfigSection().with("blacklisted_extensions", new ArrayList<>()).with("required_extensions", new ArrayList<>());
+    ConfigSection DEFAULT_CONFIG = new ConfigSection().with("blacklisted_extensions", new ConfigList()).with("required_extensions", new ConfigList());
 
 }

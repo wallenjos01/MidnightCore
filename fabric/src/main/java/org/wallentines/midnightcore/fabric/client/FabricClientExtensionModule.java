@@ -8,7 +8,7 @@ import org.wallentines.midnightcore.client.module.extension.ClientExtension;
 import org.wallentines.midnightcore.client.module.extension.ClientExtensionModule;
 import org.wallentines.midnightcore.common.module.extension.ExtensionHelper;
 import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;

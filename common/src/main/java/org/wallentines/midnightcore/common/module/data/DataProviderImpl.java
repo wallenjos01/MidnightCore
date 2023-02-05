@@ -1,9 +1,9 @@
 package org.wallentines.midnightcore.common.module.data;
 
+import org.wallentines.midnightcore.api.FileConfig;
 import org.wallentines.midnightcore.api.module.data.DataProvider;
 import org.wallentines.midnightcore.common.util.FileUtil;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.FileConfig;
+import org.wallentines.mdcfg.ConfigSection;
 
 import java.io.File;
 import java.nio.file.Path;

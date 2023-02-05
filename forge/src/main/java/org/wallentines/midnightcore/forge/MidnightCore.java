@@ -1,9 +1,9 @@
 package org.wallentines.midnightcore.forge;
 
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod("midnightcore")
+@Mod(MidnightCoreAPI.DEFAULT_NAMESPACE)
 public class MidnightCore {
 
     public MidnightCore() {

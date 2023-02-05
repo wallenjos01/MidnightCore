@@ -9,10 +9,10 @@ import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.api.text.*;
-import org.wallentines.midnightcore.common.Constants;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.velocity.MidnightCore;
 import org.wallentines.midnightcore.velocity.player.VelocityPlayer;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -31,7 +31,7 @@ public class GlobalJoinModule implements ServerModule {
 
         ConfigSection sec = section.getSection("servers");
         for(String key : sec.getKeys()) {
-            serverDisplayNames.put(key, sec.get(key, MComponent.class));
+            serverDisplayNames.put(key, sec.get(key, MComponent.SERIALIZER));
         }
 
         MidnightCore.getInstance().getServer().getEventManager().register(MidnightCore.getInstance(), this);
@@ -81,17 +81,16 @@ public class GlobalJoinModule implements ServerModule {
         }
     }
 
-    public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "global_join_messages");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "global_join_messages");
 
     public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(
             GlobalJoinModule::new,
             ID,
             new ConfigSection()
                 .with("servers", new ConfigSection()
-                    .with("hub", new MTextComponent("Hub"))
-                    .with("survival", new MTextComponent("Survival").withStyle(new MStyle().withColor(Color.fromRGBI(11))))
-                    .with("creative", new MTextComponent("Creative").withStyle(new MStyle().withColor(Color.fromRGBI(10))))
-            )
+                    .with("hub", "Hub"))
+                    .with("survival", "&bSurvival")
+                    .with("creative", "&aCreative")
     );
 
 }

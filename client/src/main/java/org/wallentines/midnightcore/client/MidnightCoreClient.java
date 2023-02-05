@@ -1,9 +1,9 @@
 package org.wallentines.midnightcore.client;
 
+import org.wallentines.midnightcore.api.FileConfig;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.client.module.ClientModule;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.FileConfig;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleManager;
 
 @SuppressWarnings("unused")

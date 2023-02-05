@@ -1,6 +1,7 @@
 package org.wallentines.midnightcore.common.module.skin;
 
 import com.mojang.authlib.GameProfile;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointCreatedEvent;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointLoadedEvent;
 import org.wallentines.midnightcore.api.module.skin.Skin;
@@ -8,9 +9,8 @@ import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.module.skin.SkinUpdateEvent;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.util.MojangUtil;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -31,14 +31,14 @@ public abstract class AbstractSkinModule implements SkinModule {
 
         getOfflineModeSkins = configuration.getBoolean("get_skins_in_offline_mode");
 
-        Event.register(SavepointCreatedEvent.class, this, event -> event.getSavepoint().getExtraData().set("skin", getSkin(event.getPlayer())));
+        Event.register(SavepointCreatedEvent.class, this, event -> event.getSavepoint().getExtraData().set("skin", getSkin(event.getPlayer()), Skin.SERIALIZER));
         Event.register(SavepointLoadedEvent.class, this, 100, event -> {
 
             if(event.isCancelled() || !event.getSavepoint().getExtraData().has("skin")) return;
 
             MPlayer player = event.getPlayer();
 
-            setSkin(player, event.getSavepoint().getExtraData().get("skin", Skin.class));
+            setSkin(player, event.getSavepoint().getExtraData().get("skin", Skin.SERIALIZER));
             updateSkin(player);
         });
 
@@ -161,6 +161,6 @@ public abstract class AbstractSkinModule implements SkinModule {
     protected abstract void doUpdate(MPlayer mpl, Skin skin);
 
     protected static final ConfigSection DEFAULT_CONFIG = new ConfigSection().with("get_skins_in_offline_mode", true);
-    public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "skin");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "skin");
 
 }

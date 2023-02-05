@@ -15,13 +15,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.wallentines.mdcfg.ConfigList;
+import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.InlineSerializer;
+import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.spigot.MidnightCore;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
-import org.wallentines.midnightlib.config.serialization.InlineSerializer;
-import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 
 import java.util.*;
 
@@ -31,7 +32,7 @@ public class GenericAdapter implements SpigotAdapter {
 
     public static BaseComponent toBaseComponent(MComponent comp) {
 
-        return ComponentSerializer.parse(JsonConfigProvider.INSTANCE.saveToString(MComponent.SERIALIZER.serialize(comp)))[0];
+        return ComponentSerializer.parse(comp.toJSONString())[0];
     }
 
     @Override
@@ -83,13 +84,13 @@ public class GenericAdapter implements SpigotAdapter {
         ItemMeta im = is.getItemMeta();
         if(im == null) return;
 
-        if(tag.has("display", ConfigSection.class)) {
+        if(tag.hasSection("display")) {
             ConfigSection display = tag.getSection("display");
-            if(display.has("Name")) im.setDisplayName(display.get("Name", MComponent.class).toLegacyText());
-            if(display.has("Lore", List.class)) {
+            if(display.has("Name")) im.setDisplayName(display.get("Name", MComponent.SERIALIZER).toLegacyText());
+            if(display.hasList("Lore")) {
 
                 List<String> lore = new ArrayList<>();
-                for(MComponent s : display.getListFiltered("Lore", MComponent.class)) {
+                for(MComponent s : display.getListFiltered("Lore", MComponent.SERIALIZER)) {
                     lore.add(s.toLegacyText());
                 }
 
@@ -97,9 +98,9 @@ public class GenericAdapter implements SpigotAdapter {
             }
         }
 
-        if(tag.has("Enchantments", List.class)) {
+        if(tag.hasList("Enchantments")) {
 
-            for(ConfigSection enchantment : tag.getListFiltered("Enchantments", ConfigSection.class)) {
+            for(ConfigSection enchantment : tag.getListFiltered("Enchantments", ConfigSection.SERIALIZER)) {
 
                 Enchantment enchant = Enchantment.getByKey(NamespacedKey.fromString(enchantment.getString("id")));
                 if(enchant == null) continue;
@@ -108,7 +109,7 @@ public class GenericAdapter implements SpigotAdapter {
             }
         }
 
-        if(tag.has("CustomModelData", Number.class)) {
+        if(tag.has("CustomModelData")) {
             im.setCustomModelData(tag.getInt("CustomModelData"));
         }
         is.setItemMeta(im);
@@ -128,7 +129,7 @@ public class GenericAdapter implements SpigotAdapter {
 
             List<String> lore = im.getLore();
             if(lore != null) {
-                display.set("Lore", lore);
+                display.set("Lore", ConfigList.of(lore));
             }
 
             tag.set("display", display);
@@ -136,7 +137,7 @@ public class GenericAdapter implements SpigotAdapter {
 
         if(im.getEnchants().size() > 0) {
 
-            List<ConfigSection> enchants = new ArrayList<>();
+            ConfigList enchants = new ConfigList();
             for(Map.Entry<Enchantment, Integer> ent : im.getEnchants().entrySet()) {
                 ConfigSection enchant = new ConfigSection();
                 enchant.set("id", ent.getKey().getKey().toString());
@@ -160,12 +161,12 @@ public class GenericAdapter implements SpigotAdapter {
 
     @Override
     public ConfigSection getTag(Player pl) {
-        return PlayerTag.SERIALIZER.serialize(new PlayerTag(pl));
+        return PlayerTag.SERIALIZER.serialize(ConfigContext.INSTANCE, new PlayerTag(pl)).getOrThrow().asSection();
     }
 
     @Override
     public void loadTag(Player pl, ConfigSection tag) {
-        PlayerTag.SERIALIZER.deserialize(tag).apply(pl);
+        PlayerTag.SERIALIZER.deserialize(ConfigContext.INSTANCE, tag).getOrThrow().apply(pl);
     }
 
     @Override
@@ -257,37 +258,37 @@ public class GenericAdapter implements SpigotAdapter {
             player.setFlying(flying);
         }
 
-        private static final ConfigSerializer<ItemStack> ITEM_SERIALIZER = ConfigSerializer.create(
-
-            PrimitiveSerializers.STRING.entry("type", it -> it.getType().name()),
-            type -> new ItemStack(Material.valueOf(type))
+        private static final Serializer<ItemStack> ITEM_SERIALIZER = ObjectSerializer.create(
+            InlineSerializer.of(Material::name, Material::valueOf).entry("type", ItemStack::getType),
+            Serializer.INT.entry("Count", ItemStack::getAmount),
+            ItemStack::new
         );
 
         private static final InlineSerializer<PotionEffectType> EFFECT_TYPE_SERIALIZER = InlineSerializer.of(PotionEffectType::getName, PotionEffectType::getByName);
 
-        private static final ConfigSerializer<PotionEffect> EFFECT_SERIALIZER = ConfigSerializer.create(
+        private static final Serializer<PotionEffect> EFFECT_SERIALIZER = ObjectSerializer.create(
                 EFFECT_TYPE_SERIALIZER.entry("type", PotionEffect::getType),
-                PrimitiveSerializers.INT.entry("duration", PotionEffect::getDuration),
-                PrimitiveSerializers.INT.entry("amplifier", PotionEffect::getAmplifier),
-                PrimitiveSerializers.BOOLEAN.entry("ambient", PotionEffect::isAmbient),
-                PrimitiveSerializers.BOOLEAN.entry("particles", PotionEffect::hasParticles),
-                PrimitiveSerializers.BOOLEAN.entry("icon", PotionEffect::hasIcon),
+                Serializer.INT.entry("duration", PotionEffect::getDuration),
+                Serializer.INT.entry("amplifier", PotionEffect::getAmplifier),
+                Serializer.BOOLEAN.entry("ambient", PotionEffect::isAmbient),
+                Serializer.BOOLEAN.entry("particles", PotionEffect::hasParticles),
+                Serializer.BOOLEAN.entry("icon", PotionEffect::hasIcon),
                 PotionEffect::new
         );
 
-        public static final ConfigSerializer<PlayerTag> SERIALIZER = ConfigSerializer.create(
-                PrimitiveSerializers.INT.entry("fire_ticks", pt -> pt.fireTicks),
+        public static final Serializer<PlayerTag> SERIALIZER = ObjectSerializer.create(
+                Serializer.INT.entry("fire_ticks", pt -> pt.fireTicks),
                 EFFECT_SERIALIZER.listOf().entry("effects", pt -> pt.effects),
                 ITEM_SERIALIZER.listOf().entry("items", pt -> pt.inventory),
                 ITEM_SERIALIZER.listOf().entry("armor", pt -> pt.armor),
-                PrimitiveSerializers.DOUBLE.entry("health", pt -> pt.health),
-                PrimitiveSerializers.DOUBLE.entry("max_health", pt -> pt.maxHealth),
-                PrimitiveSerializers.INT.entry("hunger", pt -> pt.hunger),
-                PrimitiveSerializers.FLOAT.entry("saturation", pt -> pt.saturation),
-                PrimitiveSerializers.INT.entry("exp", pt -> pt.exp),
-                PrimitiveSerializers.INT.entry("levels", pt -> pt.expLevels),
-                PrimitiveSerializers.BOOLEAN.entry("allow_flight", pt -> pt.allowFlight),
-                PrimitiveSerializers.BOOLEAN.entry("flying", pt -> pt.flying),
+                Serializer.DOUBLE.entry("health", pt -> pt.health),
+                Serializer.DOUBLE.entry("max_health", pt -> pt.maxHealth),
+                Serializer.INT.entry("hunger", pt -> pt.hunger),
+                Serializer.FLOAT.entry("saturation", pt -> pt.saturation),
+                Serializer.INT.entry("exp", pt -> pt.exp),
+                Serializer.INT.entry("levels", pt -> pt.expLevels),
+                Serializer.BOOLEAN.entry("allow_flight", pt -> pt.allowFlight),
+                Serializer.BOOLEAN.entry("flying", pt -> pt.flying),
                 PlayerTag::new
         );
 

@@ -5,6 +5,11 @@ import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.GameType;
+import org.wallentines.mdcfg.serializer.InlineSerializer;
+import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.savepoint.Savepoint;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointCreatedEvent;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointLoadedEvent;
 import org.wallentines.midnightcore.api.player.Location;
@@ -12,7 +17,7 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.common.module.savepoint.AbstractSavepoint;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -24,6 +29,14 @@ public class FabricSavepoint extends AbstractSavepoint {
 
     protected FabricSavepoint(Identifier id) {
         super(id);
+    }
+
+    public FabricSavepoint(Identifier id, Location location, GameType gameMode, ConfigSection entityTag, ConfigSection extraData) {
+        super(id);
+        this.location = location;
+        this.entityTag = ConversionUtil.toCompoundTag(entityTag);
+        this.gameMode = gameMode;
+        this.extraData = extraData;
     }
 
     @Override
@@ -41,25 +54,6 @@ public class FabricSavepoint extends AbstractSavepoint {
 
         gameMode = pl.gameMode.getGameModeForPlayer();
         return true;
-    }
-
-    @Override
-    public void deserialize(ConfigSection section) {
-
-        location = section.get("location", Location.class);
-        gameMode = GameType.byName(section.getString("gameMode"));
-        entityTag = ConversionUtil.toCompoundTag(section.getSection("tag"));
-        extraData = section.getSection("extraData");
-
-    }
-
-    @Override
-    public ConfigSection serialize() {
-        return new ConfigSection()
-            .with("location", location)
-            .with("gameMode", gameMode.getName())
-            .with("tag", ConversionUtil.toConfigSection(entityTag))
-            .with("extraData", extraData);
     }
 
     @Override
@@ -82,4 +76,13 @@ public class FabricSavepoint extends AbstractSavepoint {
 
         pl.setGameMode(gameMode);
     }
+
+    public static final Serializer<FabricSavepoint> SERIALIZER = ObjectSerializer.create(
+            Identifier.serializer(MidnightCoreAPI.DEFAULT_NAMESPACE).entry("id",Savepoint::getId),
+            Location.SERIALIZER.entry("location", fs -> fs.location),
+            InlineSerializer.of(GameType::getName, GameType::byName).entry("gameMode", fs -> fs.gameMode),
+            ConfigSection.SERIALIZER.entry("tag", fs -> ConversionUtil.toConfigSection(fs.entityTag)),
+            ConfigSection.SERIALIZER.<FabricSavepoint>entry("extraData", fs -> ConversionUtil.toConfigSection(fs.entityTag)).optional(),
+            FabricSavepoint::new
+    );
 }

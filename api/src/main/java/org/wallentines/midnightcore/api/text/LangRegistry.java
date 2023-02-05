@@ -1,7 +1,8 @@
 package org.wallentines.midnightcore.api.text;
 
 import org.jetbrains.annotations.Nullable;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,12 +50,12 @@ public class LangRegistry {
     private void registerAll(ConfigSection sec, String prefix) {
 
         for(String key : sec.getKeys()) {
-            Object obj = sec.get(key);
-            if(obj instanceof String) {
+            ConfigObject obj = sec.get(key);
+            if(obj.isString()) {
 
-                register(prefix + key, (String) obj);
+                register(prefix + key, obj.asString());
 
-            } else if(obj instanceof ConfigSection) {
+            } else if(obj.isSection()) {
 
                 registerAll((ConfigSection) obj, prefix + key + ".");
             }

@@ -1,7 +1,7 @@
 package org.wallentines.midnightcore.api.module.data;
 
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 
 @SuppressWarnings("unused")
 @Deprecated

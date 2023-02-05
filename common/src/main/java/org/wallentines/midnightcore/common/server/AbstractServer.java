@@ -1,10 +1,9 @@
 package org.wallentines.midnightcore.common.server;
 
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
@@ -12,7 +11,7 @@ import org.wallentines.midnightlib.registry.Registry;
 
 public abstract class AbstractServer implements MServer {
 
-    private final ModuleManager<MServer, ServerModule> moduleManager = new ModuleManager<>(Constants.DEFAULT_NAMESPACE);
+    private final ModuleManager<MServer, ServerModule> moduleManager = new ModuleManager<>(MidnightCoreAPI.DEFAULT_NAMESPACE);
 
     protected final MidnightCoreAPI api;
 

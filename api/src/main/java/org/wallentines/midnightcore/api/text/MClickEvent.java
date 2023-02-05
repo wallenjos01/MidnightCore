@@ -1,8 +1,8 @@
 package org.wallentines.midnightcore.api.text;
 
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
-import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
+import org.wallentines.mdcfg.serializer.InlineSerializer;
+import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 
 public class MClickEvent {
 
@@ -22,15 +22,18 @@ public class MClickEvent {
         return value;
     }
 
+    @Override
     public String toString() {
-
-        return SERIALIZER.serialize(this).toString();
+        return "MClickEvent{" +
+                "action=" + action +
+                ", value='" + value + '\'' +
+                '}';
     }
 
-    public static final ConfigSerializer<MClickEvent> SERIALIZER = ConfigSerializer.create(
-            PrimitiveSerializers.STRING.entry("action", ev -> ev.action.getId()),
-            PrimitiveSerializers.STRING.entry("value", ev -> ev.value),
-            (action, value) -> new MClickEvent(ClickAction.getById(action), value));
+    public static final Serializer<MClickEvent> SERIALIZER = ObjectSerializer.create(
+            InlineSerializer.of(ClickAction::getId, ClickAction::byId).entry("action", MClickEvent::getAction),
+            Serializer.STRING.entry("value", MClickEvent::getValue),
+            MClickEvent::new);
 
     public enum ClickAction {
 
@@ -50,7 +53,7 @@ public class MClickEvent {
             return id;
         }
 
-        public static ClickAction getById(String id) {
+        public static ClickAction byId(String id) {
             for(ClickAction t : values()) {
                 if(t.id.equals(id)) return t;
             }

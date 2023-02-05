@@ -1,7 +1,7 @@
 package org.wallentines.midnightcore.client.module.messaging;
 
 import org.wallentines.midnightcore.client.module.ClientModule;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
 @SuppressWarnings("unused")

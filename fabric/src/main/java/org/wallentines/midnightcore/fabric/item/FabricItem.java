@@ -12,7 +12,7 @@ import org.wallentines.midnightcore.api.text.*;
 import org.wallentines.midnightcore.common.item.AbstractItem;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.requirement.RequirementType;
 

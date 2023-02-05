@@ -1,13 +1,16 @@
 package org.wallentines.midnightcore.api.item;
 
+import org.wallentines.mdcfg.ConfigList;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigPrimitive;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.TextColor;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
-import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
@@ -106,7 +109,7 @@ public interface MItemStack {
 
                 if(lore != null) {
 
-                    List<String> listLore = new ArrayList<>();
+                    ConfigList listLore = new ConfigList();
                     for(MComponent cmp : lore) {
                         listLore.add(cmp.toItemText());
                     }
@@ -121,8 +124,8 @@ public interface MItemStack {
 
                 ConfigSection skullOwner = new ConfigSection();
 
-                skullOwner.set("Id", majorVersion > 15 ? UUIDtoInts(headSkin.getUUID()) : headSkin.getUUID().toString());
-                skullOwner.set("Properties", new ConfigSection().with("textures", Collections.singletonList(new ConfigSection().with("Value", headSkin.getValue()))));
+                skullOwner.set("Id", majorVersion > 15 ? UUIDtoInts(headSkin.getUUID()) : new ConfigPrimitive(headSkin.getUUID().toString()));
+                skullOwner.set("Properties", new ConfigSection().with("textures", new ConfigList().append(new ConfigSection().with("Value", headSkin.getValue()))));
 
                 tag.set("SkullOwner", skullOwner);
             }
@@ -152,10 +155,10 @@ public interface MItemStack {
 
         }
 
-        private static List<Integer> UUIDtoInts(UUID u) {
+        private static ConfigList UUIDtoInts(UUID u) {
             long u1 = u.getMostSignificantBits();
             long u2 = u.getLeastSignificantBits();
-            return Arrays.asList((int) (u1 >> 32), (int) u1, (int) (u2 >> 32), (int) u2);
+            return ConfigList.of((int) (u1 >> 32), (int) u1, (int) (u2 >> 32), (int) u2);
         }
     }
 
@@ -242,16 +245,16 @@ public interface MItemStack {
         return builder.toString();
     }
 
-    ConfigSerializer<MItemStack> SERIALIZER = ConfigSerializer.create(
-            ConfigSerializer.entry(Identifier.class, "type", MItemStack::getType),
-            PrimitiveSerializers.INT.entry("count", MItemStack::getCount).orDefault(1),
-            ConfigSerializer.RAW.entry("tag", MItemStack::getTag).orDefault(new ConfigSection()),
+    Serializer<MItemStack> SERIALIZER = ObjectSerializer.create(
+            Identifier.serializer("minecraft").entry("type", MItemStack::getType),
+            Serializer.INT.entry("count", MItemStack::getCount).orElse(1),
+            ConfigObject.SERIALIZER.entry("tag", MItemStack::getTag).orElse(new ConfigSection()),
             (type, count, tag) -> {
 
                 MidnightCoreAPI api = MidnightCoreAPI.getInstance();
                 if(api == null) return null;
 
-                return api.createItem(type, count, tag);
+                return api.createItem(type, count, tag.asSection());
             }
     );
 

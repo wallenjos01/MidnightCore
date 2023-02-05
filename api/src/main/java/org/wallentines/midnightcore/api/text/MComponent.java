@@ -1,17 +1,18 @@
 package org.wallentines.midnightcore.api.text;
 
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigPrimitive;
+import org.wallentines.mdcfg.codec.DecodeException;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightlib.config.ConfigProvider;
-import org.wallentines.midnightlib.config.ConfigRegistry;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
-import org.wallentines.midnightlib.config.serialization.InlineSerializer;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+@SuppressWarnings("unused")
 public abstract class MComponent {
 
     protected ComponentType type;
@@ -172,13 +173,17 @@ public abstract class MComponent {
 
         return out;
     }
+
+    public String toJSONString() {
+        return JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, OBJECT_SERIALIZER.serialize(ConfigContext.INSTANCE, this).getOrThrow());
+    }
+
     @Override
     public String toString() {
-
-        ConfigProvider prov = ConfigRegistry.INSTANCE.getProviderForFileType(".json");
-        if(prov == null) prov = ConfigRegistry.INSTANCE.getDefaultProvider();
-
-        return prov.saveToString(SERIALIZER.serialize(this));
+        return "MComponent{" +
+                "type=" + type +
+                ", content='" + content + '\'' +
+                '}';
     }
 
     protected abstract MComponent baseCopy();
@@ -191,20 +196,15 @@ public abstract class MComponent {
 
     public static MComponent parse(String s) {
 
-        if(s.startsWith("{")) {
-
+        if(s.stripLeading().charAt(0) == '{') {
             try {
-                ConfigSection sec = JsonConfigProvider.INSTANCE.loadFromString(s);
-                MComponent comp = SERIALIZER.deserialize(sec);
-                if(comp != null) return comp;
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                return parseJSON(s);
+            } catch (DecodeException ex) {
                 // Ignore
             }
         }
 
-        return parsePlainText(s);
+        return SERIALIZER.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(s)).getOrThrow();
     }
 
     private static int getGameVersion() {
@@ -212,6 +212,14 @@ public abstract class MComponent {
         if(api == null) return 19;
 
         return api.getGameVersion().getMinorVersion();
+    }
+
+    public static MComponent parseJSON(String s) throws DecodeException {
+
+        JSONCodec codec = JSONCodec.minified();
+        ConfigObject obj = codec.decode(ConfigContext.INSTANCE, s);
+
+        return OBJECT_SERIALIZER.deserialize(ConfigContext.INSTANCE, obj).getOrThrow();
     }
 
     private static MComponent parsePlainText(String content) {
@@ -291,83 +299,192 @@ public abstract class MComponent {
         return outComp;
     }
 
-    // Protected Methods
-    protected abstract void onSerialize(ConfigSection sec);
+    public static final ComponentSerializer SERIALIZER = new ComponentSerializer(true, true);
+    public static final ComponentSerializer OBJECT_SERIALIZER = new ComponentSerializer(true, false);
 
-    // Static Fields
-    public static final ConfigSerializer<MComponent> SERIALIZER = new ConfigSerializer<>() {
+
+    public static class ComponentSerializer implements Serializer<MComponent> {
+
+        private final boolean tryParseStrings;
+        private final boolean trySaveStrings;
+
+        public ComponentSerializer(boolean tryParseStrings, boolean trySaveStrings) {
+            this.tryParseStrings = tryParseStrings;
+            this.trySaveStrings = trySaveStrings;
+        }
 
         @Override
-        public MComponent deserialize(ConfigSection section) {
+        public <O> SerializeResult<O> serialize(SerializeContext<O> context, MComponent value) {
 
-            ComponentType type = null;
-            for (String s : section.getKeys()) {
-                ComponentType ct = ComponentType.getById(s);
-                if (ct != null) {
-                    type = ct;
-                    break;
+            if(trySaveStrings && !value.hasNonLegacyComponents()) {
+
+                String s = value.toPlainText('&', getGameVersion() > 15 ? '#' : null);
+                return SerializeResult.ofNullable(context.toString(s));
+            }
+
+            ComponentType type = value.type;
+            SerializeResult<O> baseResult = type.serialize(this, context, value);
+            if(!baseResult.isComplete()) return SerializeResult.failure(baseResult.getError());
+            O out = baseResult.getOrThrow();
+
+            if(value.style != null) {
+                SerializeResult<O> styleResult = MStyle.SERIALIZER.serialize(context, value.style);
+                if (!styleResult.isComplete()) return SerializeResult.failure(styleResult.getError());
+
+                context.mergeMap(out, styleResult.getOrThrow());
+            }
+
+            if(value.hoverEvent != null) {
+                SerializeResult<O> hoverResult = MHoverEvent.SERIALIZER.serialize(context, value.hoverEvent);
+                if(!hoverResult.isComplete()) return SerializeResult.failure(hoverResult.getError());
+
+                context.set("hoverEvent", hoverResult.getOrThrow(), out);
+            }
+
+            if(value.clickEvent != null) {
+                SerializeResult<O> clickResult = MClickEvent.SERIALIZER.serialize(context, value.clickEvent);
+                if(!clickResult.isComplete()) return SerializeResult.failure(clickResult.getError());
+
+                context.set("clickEvent", clickResult.getOrThrow(), out);
+            }
+
+            if(value.insertion != null) {
+                context.set("insertion", context.toString(value.insertion), out);
+            }
+
+            if(value.children.size() > 0) {
+                List<O> extra = new ArrayList<>();
+                for(MComponent child : value.children) {
+                    SerializeResult<O> childResult = serialize(context, child);
+                    if(!childResult.isComplete()) return SerializeResult.failure(childResult.getError());
+                    extra.add(childResult.getOrThrow());
                 }
+                context.set("extra", context.toList(extra), out);
             }
 
-            if (type == null) return null;
-
-            MComponent out = type.deserialize(section).withStyle(MStyle.SERIALIZER.deserialize(section));
-
-            if (section.has("clickEvent")) out.clickEvent = section.get("clickEvent", MClickEvent.class);
-            if (section.has("hoverEvent")) out.hoverEvent = section.get("hoverEvent", MHoverEvent.class);
-
-            if (section.has("insertion", String.class)) out.insertion = section.getString("insertion");
-            if (section.has("extra", List.class)) {
-                out.children.addAll(section.getList("extra", MComponent.class));
-            }
-
-            return out;
+            return SerializeResult.success(out);
         }
 
         @Override
-        public ConfigSection serialize(MComponent object) {
+        public <O> SerializeResult<MComponent> deserialize(SerializeContext<O> context, O value) {
 
-            ConfigSection sec = new ConfigSection()
-                    .with(object.type.getId(), object.content);
-
-            if (object.style != null) sec.fill(MStyle.SERIALIZER.serialize(object.style));
-            if (object.clickEvent != null) sec.set("clickEvent", object.clickEvent);
-            if (object.hoverEvent != null) sec.set("hoverEvent", object.hoverEvent);
-
-            object.onSerialize(sec);
-
-            List<ConfigSection> extra = new ArrayList<>();
-            for (MComponent comp : object.children) {
-                extra.add(serialize(comp));
+            if(context.isString(value)) {
+                if(tryParseStrings) {
+                    String s = context.asString(value);
+                    return SerializeResult.success(MComponent.parsePlainText(s));
+                }
+                return SerializeResult.success(new MTextComponent(context.asString(value)));
             }
-            if (!extra.isEmpty()) sec.set("extra", extra);
-            if (object.insertion != null) sec.set("insertion", object.insertion);
+            if(context.isBoolean(value)) {
+                return SerializeResult.success(new MTextComponent(context.asBoolean(value).toString()));
+            }
+            if(context.isNumber(value)) {
+                return SerializeResult.success(new MTextComponent(context.asNumber(value).toString()));
+            }
+            if(context.isList(value)) {
+                List<MComponent> values = new ArrayList<>();
+                for(O o : context.asList(value)) {
 
-            return sec;
+                    SerializeResult<MComponent> result = deserialize(context, o);
+                    if(!result.isComplete()) {
+                        return result;
+                    }
+
+                    values.add(result.getOrThrow());
+                }
+
+                MComponent out = values.get(0);
+                for(int i = 1 ; i < values.size() ; i++) {
+                    out.addChild(values.get(1));
+                }
+
+                return SerializeResult.success(out);
+            }
+            if(context.isMap(value)) {
+
+                ComponentType type = null;
+                for (String s : context.getOrderedKeys(value)) {
+                    ComponentType ct = ComponentType.getById(s);
+                    if (ct != null) {
+                        type = ct;
+                        break;
+                    }
+                }
+
+                if(type == null) return SerializeResult.failure("Don't know to parse " + value + " as a component!");
+
+                SerializeResult<MComponent> result = type.deserialize(this, context, value);
+                if(!result.isComplete()) return SerializeResult.failure(result.getError());
+
+                MComponent out = result.getOrThrow();
+                SerializeResult<MStyle> style = MStyle.SERIALIZER.deserialize(context, value);
+                if(!style.isComplete()) return SerializeResult.failure(style.getError());
+
+                out.withStyle(style.getOrThrow());
+
+                if(context.get("hoverEvent", value) != null) {
+                    SerializeResult<MHoverEvent> hover = MHoverEvent.SERIALIZER.deserialize(context, context.get("hoverEvent", value));
+                    if(!hover.isComplete()) return SerializeResult.failure(hover.getError());
+                    out.setHoverEvent(hover.getOrThrow());
+                }
+
+                if(context.get("clickEvent", value) != null) {
+                    SerializeResult<MClickEvent> click = MClickEvent.SERIALIZER.deserialize(context, context.get("clickEvent", value));
+                    if(!click.isComplete()) return SerializeResult.failure(click.getError());
+                    out.setClickEvent(click.getOrThrow());
+                }
+
+                if(context.get("insertion", value) != null) {
+                    O insertion = context.get("insertion", value);
+                    String str = context.asString(insertion);
+                    if(str == null) return SerializeResult.failure("Found invalid insertion " + insertion);
+                    out.insertion = str;
+                }
+
+                // Extra
+                if(context.get("extra", value) != null) {
+
+                    O extra = context.get("extra", value);
+                    if(context.isList(extra)) {
+
+                        Collection<O> objects = context.asList(extra);
+                        for(O o : objects) {
+                            SerializeResult<MComponent> childResult = deserialize(context, o);
+                            if(!childResult.isComplete()) return SerializeResult.failure(childResult.getError());
+                            out.addChild(childResult.getOrThrow());
+                        }
+                    }
+                }
+
+                return SerializeResult.success(out);
+            }
+
+            return SerializeResult.failure("Don't know how to parse " + value + " as a component!");
         }
-    };
-
-    public static final InlineSerializer<MComponent> INLINE_SERIALIZER = InlineSerializer.of(MComponent::toConfigText, MComponent::parse);
+    }
 
     protected enum ComponentType {
 
-        TEXT("text", sec -> new MTextComponent(sec.getString("text"))),
-        TRANSLATE("translate", sec -> new MTranslateComponent(sec.getString("translate"), sec.has("with", List.class) ? sec.getListFiltered("with", MComponent.class) : null));
+        TEXT("text", parent -> ObjectSerializer.create(Serializer.STRING.entry("text", MComponent::getContent), MTextComponent::new)),
+        TRANSLATE("translate", parent -> ObjectSerializer.create(
+                Serializer.STRING.entry("translate", MComponent::getContent),
+                parent.listOf().<MComponent>entry("with", mc -> ((MTranslateComponent) mc).getArgs()).optional(),
+                MTranslateComponent::new
+        ));
 
         final String id;
-        final Function<ConfigSection, MComponent> deserializer;
+        final Function<Serializer<MComponent>, Serializer<MComponent>> serializer;
 
-        ComponentType(String id, Function<ConfigSection, MComponent> deserializer) {
+        ComponentType(String id, Function<Serializer<MComponent>, Serializer<MComponent>> serializer) {
             this.id = id;
-            this.deserializer = deserializer;
+            this.serializer = serializer;
+        }
+        <O> SerializeResult<MComponent> deserialize(Serializer<MComponent> parent, SerializeContext<O> context, O object) {
+            return serializer.apply(parent).deserialize(context, object);
         }
 
-        String getId() {
-            return id;
-        }
-
-        MComponent deserialize(ConfigSection section) {
-            return deserializer.apply(section);
+        <O> SerializeResult<O> serialize(Serializer<MComponent> parent, SerializeContext<O> context, MComponent component) {
+            return serializer.apply(parent).serialize(context, component);
         }
 
         static ComponentType getById(String id) {

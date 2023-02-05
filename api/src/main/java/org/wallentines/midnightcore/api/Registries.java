@@ -9,7 +9,7 @@ import org.wallentines.midnightlib.requirement.RequirementType;
 
 public final class Registries {
 
-    public static final Registry<ModuleInfo<MServer, ServerModule>> MODULE_REGISTRY = new Registry<>();
-    public static final Registry<RequirementType<MPlayer>> REQUIREMENT_REGISTRY = new Registry<>();
+    public static final Registry<ModuleInfo<MServer, ServerModule>> MODULE_REGISTRY = new Registry<>(MidnightCoreAPI.DEFAULT_NAMESPACE);
+    public static final Registry<RequirementType<MPlayer>> REQUIREMENT_REGISTRY = new Registry<>(MidnightCoreAPI.DEFAULT_NAMESPACE);
 
 }

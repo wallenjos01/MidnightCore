@@ -14,7 +14,7 @@ import org.wallentines.midnightcore.fabric.event.server.CustomMessageEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerBeginQueryEvent;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;

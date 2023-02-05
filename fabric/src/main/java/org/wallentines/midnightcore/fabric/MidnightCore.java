@@ -6,6 +6,8 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
@@ -29,8 +31,7 @@ import org.wallentines.midnightcore.fabric.module.vanish.FabricVanishModule;
 import org.wallentines.midnightcore.fabric.server.FabricServer;
 import org.wallentines.midnightcore.fabric.text.FabricScoreboard;
 import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -48,7 +49,7 @@ public class MidnightCore implements ModInitializer {
         Path dataFolder = Paths.get("config/MidnightCore");
 
         // Register all the things
-        Constants.registerDefaults(JsonConfigProvider.INSTANCE);
+        //Constants.registerDefaults(JsonConfigProvider.INSTANCE);
         Constants.CONFIG_DEFAULTS.set("vanilla_permissions", true);
         Constants.CONFIG_DEFAULTS.set("register_main_command", true);
         Constants.CONFIG_DEFAULTS.set("register_test_command", false);
@@ -61,9 +62,9 @@ public class MidnightCore implements ModInitializer {
 
         // Empty World Generator. Useful for some mods using the Dynamic Level system for quick creation of empty levels,
         // or importing of levels that should not generate new chunks
-        Registry.register(BuiltInRegistries.CHUNK_GENERATOR, new ResourceLocation(Constants.DEFAULT_NAMESPACE, "empty"), EmptyGenerator.CODEC);
+        Registry.register(BuiltInRegistries.CHUNK_GENERATOR, new ResourceLocation(MidnightCoreAPI.DEFAULT_NAMESPACE, "empty"), EmptyGenerator.CODEC);
 
-        ConfigSection langDefaults = JsonConfigProvider.INSTANCE.loadFromStream(getClass().getResourceAsStream("/midnightcore/lang/en_us.json"));
+        ConfigSection langDefaults = JSONCodec.minified().decode(ConfigContext.INSTANCE, getClass().getResourceAsStream("/midnightcore/lang/en_us.json")).asSection();
 
         // Create the API
         MidnightCoreImpl api = new MidnightCoreImpl(
@@ -86,14 +87,14 @@ public class MidnightCore implements ModInitializer {
         Registries.MODULE_REGISTRY.register(ExtensionHelper.ID, FabricServerExtensionModule.MODULE_INFO);
 
         // Register Requirements which cannot be implemented at the common level
-        Registries.REQUIREMENT_REGISTRY.register(new Identifier(Constants.DEFAULT_NAMESPACE, "item"), FabricItem.ITEM_REQUIREMENT);
+        Registries.REQUIREMENT_REGISTRY.register(new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "item"), FabricItem.ITEM_REQUIREMENT);
 
         // Find all mods that request to be loaded now
-        List<ModInitializer> inits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE, ModInitializer.class);
+        List<ModInitializer> inits = FabricLoader.getInstance().getEntrypoints(MidnightCoreAPI.DEFAULT_NAMESPACE, ModInitializer.class);
         inits.forEach(ModInitializer::onInitialize);
 
         // Find all mods that request to be loaded with the current Minecraft version only
-        List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(Constants.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
+        List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(MidnightCoreAPI.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
         verInits.forEach(ModInitializer::onInitialize);
 
 

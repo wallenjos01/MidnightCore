@@ -1,12 +1,14 @@
 package org.wallentines.midnightcore.common.module.vanish;
 
+import org.wallentines.mdcfg.ConfigList;
+import org.wallentines.mdcfg.serializer.Serializer;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointCreatedEvent;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointLoadedEvent;
 import org.wallentines.midnightcore.api.module.vanish.VanishModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -28,27 +30,27 @@ public abstract class AbstractVanishModule implements VanishModule {
 
         Event.register(SavepointCreatedEvent.class, this, ev -> {
 
-            List<UUID> uuids = new ArrayList<>();
+            ConfigList uuids = new ConfigList();
             if(vanished.containsKey(ev.getPlayer())) {
                 for (MPlayer mpl : vanished.get(ev.getPlayer())) {
-                    uuids.add(mpl.getUUID());
+                    uuids.add(mpl.getUUID().toString());
                 }
             }
 
-            ev.getSavepoint().getExtraData().set(Constants.DEFAULT_NAMESPACE + "_savepoint", new ConfigSection()
+            ev.getSavepoint().getExtraData().set(MidnightCoreAPI.DEFAULT_NAMESPACE + "_savepoint", new ConfigSection()
                    .with("global", globalVanished.contains(ev.getPlayer()))
                    .with("vanished", uuids));
         });
 
         Event.register(SavepointLoadedEvent.class, this, ev -> {
 
-            if(!ev.getSavepoint().getExtraData().has(Constants.DEFAULT_NAMESPACE + "_savepoint")) return;
-            ConfigSection sec = ev.getSavepoint().getExtraData().getSection(Constants.DEFAULT_NAMESPACE + "_savepoint");
+            if(!ev.getSavepoint().getExtraData().has(MidnightCoreAPI.DEFAULT_NAMESPACE + "_savepoint")) return;
+            ConfigSection sec = ev.getSavepoint().getExtraData().getSection(MidnightCoreAPI.DEFAULT_NAMESPACE + "_savepoint");
 
             if(sec.getBoolean("global")) {
                 vanishPlayer(ev.getPlayer());
             }
-            for(UUID u : sec.getListFiltered("vanished", UUID.class)) {
+            for(UUID u : sec.getListFiltered("vanished", Serializer.UUID)) {
                 MPlayer mpl = server.getPlayerManager().getPlayer(u);
                 vanishPlayerFor(mpl, ev.getPlayer());
             }
@@ -121,6 +123,6 @@ public abstract class AbstractVanishModule implements VanishModule {
     }
 
     protected static final ConfigSection DEFAULTS = new ConfigSection().with("hide_join_messages", true);
-    public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "vanish");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "vanish");
 
 }

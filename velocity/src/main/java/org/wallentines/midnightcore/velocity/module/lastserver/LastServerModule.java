@@ -7,13 +7,13 @@ import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import org.wallentines.midnightcore.api.FileConfig;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.velocity.MidnightCore;
 import org.wallentines.midnightcore.velocity.server.VelocityServer;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.FileConfig;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -64,7 +64,7 @@ public class LastServerModule implements ServerModule {
         locations.save();
     }
 
-    public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "last_server");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "last_server");
     public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(LastServerModule::new, ID, new ConfigSection());
 
 }

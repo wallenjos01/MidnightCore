@@ -8,10 +8,10 @@ import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
+import org.wallentines.mdcfg.ConfigSection;
 
 import java.lang.reflect.Field;
 
@@ -55,21 +55,21 @@ public class Adapter_v1_9_R1 implements SpigotAdapter {
     public void sendMessage(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), (byte) 1));
+        epl.playerConnection.sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(comp.toJSONString()), (byte) 1));
     }
 
     @Override
     public void sendActionBar(Player pl, MComponent comp) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(toJsonString(comp)), (byte) 2));
+        epl.playerConnection.sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(comp.toJSONString()), (byte) 2));
     }
 
     @Override
     public void sendTitle(Player pl, MComponent comp, int fadeIn, int stay, int fadeOut) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a(toJsonString(comp))));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, IChatBaseComponent.ChatSerializer.a(comp.toJSONString())));
         epl.playerConnection.sendPacket(new PacketPlayOutTitle(fadeIn, stay, fadeOut));
     }
 
@@ -77,7 +77,7 @@ public class Adapter_v1_9_R1 implements SpigotAdapter {
     public void sendSubtitle(Player pl, MComponent comp, int fadeIn, int stay, int fadeOut) {
 
         EntityPlayer epl = ((CraftPlayer) pl).getHandle();
-        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, IChatBaseComponent.ChatSerializer.a(toJsonString(comp))));
+        epl.playerConnection.sendPacket(new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, IChatBaseComponent.ChatSerializer.a(comp.toJSONString())));
         epl.playerConnection.sendPacket(new PacketPlayOutTitle(fadeIn, stay, fadeOut));
     }
 
@@ -121,7 +121,7 @@ public class Adapter_v1_9_R1 implements SpigotAdapter {
         NBTTagCompound tag = new NBTTagCompound();
         epl.b(tag);
 
-        return JsonConfigProvider.INSTANCE.loadFromString(tag.toString());
+        return JSONCodec.loadConfig(tag.toString()).asSection();
     }
 
     @Override

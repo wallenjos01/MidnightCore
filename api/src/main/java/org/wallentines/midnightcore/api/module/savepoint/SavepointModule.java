@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.api.module.savepoint;
 
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -16,5 +17,7 @@ public interface SavepointModule extends ServerModule {
     void resetPlayer(MPlayer pl);
 
     Savepoint createSavepoint(Identifier id);
+
+    Serializer<Savepoint> getSerializer();
 
 }

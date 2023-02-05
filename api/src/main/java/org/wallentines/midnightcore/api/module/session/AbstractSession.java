@@ -1,17 +1,14 @@
-package org.wallentines.midnightcore.common.module.session;
+package org.wallentines.midnightcore.api.module.session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.api.module.session.SessionModule;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.api.text.PlaceholderSupplier;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointModule;
-import org.wallentines.midnightcore.api.module.session.Session;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.text.MComponent;
-import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -36,10 +33,6 @@ public abstract class AbstractSession implements Session {
     private final HandlerList<SessionShutdownEvent> shutdownCallbacks = new HandlerList<>();
     private final HandlerList<SessionPlayerEvent> joinCallbacks = new HandlerList<>();
     private final HandlerList<SessionPlayerEvent> leaveCallbacks = new HandlerList<>();
-
-    public AbstractSession() {
-        this(Constants.DEFAULT_NAMESPACE);
-    }
 
     public AbstractSession(String namespace) {
 

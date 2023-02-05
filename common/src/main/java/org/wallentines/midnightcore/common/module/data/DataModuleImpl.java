@@ -1,11 +1,12 @@
 package org.wallentines.midnightcore.common.module.data;
 
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.data.DataModule;
 import org.wallentines.midnightcore.api.module.data.DataProvider;
 import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -51,6 +52,6 @@ public class DataModuleImpl implements DataModule {
     }
 
     private static final String CONFIG_GLOBAL_FOLDER = "global_folder_name";
-    public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "data");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "data");
     public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(DataModuleImpl::new, ID, new ConfigSection().with(CONFIG_GLOBAL_FOLDER, "data"));
 }

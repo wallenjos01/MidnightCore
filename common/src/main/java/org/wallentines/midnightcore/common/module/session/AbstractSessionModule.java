@@ -1,11 +1,11 @@
 package org.wallentines.midnightcore.common.module.session;
 
+import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.session.Session;
 import org.wallentines.midnightcore.api.module.session.SessionModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightcore.api.server.MServer;
-import org.wallentines.midnightcore.common.Constants;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -126,5 +126,5 @@ public abstract class AbstractSessionModule implements SessionModule {
         return leaveCallbacks;
     }
 
-    public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "session");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "session");
 }

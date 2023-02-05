@@ -24,7 +24,7 @@ import org.wallentines.midnightcore.fabric.event.player.PlayerLoginEvent;
 import org.wallentines.midnightcore.fabric.mixin.AccessorClientboundPlayerInfoUpdatePacket;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.server.FabricServer;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;
 

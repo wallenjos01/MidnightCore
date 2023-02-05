@@ -4,6 +4,9 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
+import org.wallentines.mdcfg.serializer.SerializeContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.module.savepoint.Savepoint;
 import org.wallentines.midnightcore.api.player.MPlayer;
@@ -41,6 +44,22 @@ public class SpigotSavepointModule extends AbstractSavepointModule {
     public Savepoint createSavepoint(Identifier id) {
 
         return new SpigotSavepoint(id);
+    }
+
+    @Override
+    public Serializer<Savepoint> getSerializer() {
+        return new Serializer<>() {
+            @Override
+            public <O> SerializeResult<O> serialize(SerializeContext<O> context, Savepoint value) {
+                if(!(value instanceof SpigotSavepoint)) return SerializeResult.failure(value + " is not a Spigot Savepoint!");
+                return SpigotSavepoint.SERIALIZER.serialize(context, (SpigotSavepoint) value).flatMap(sp -> sp);
+            }
+
+            @Override
+            public <O> SerializeResult<Savepoint> deserialize(SerializeContext<O> context, O value) {
+                return SpigotSavepoint.SERIALIZER.deserialize(context, value).flatMap(sp -> sp);
+            }
+        };
     }
 
     public static final ModuleInfo<MServer, ServerModule> MODULE_INFO = new ModuleInfo<>(SpigotSavepointModule::new, ID, DEFAULT_CONFIG);

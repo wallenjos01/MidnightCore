@@ -2,9 +2,6 @@ package org.wallentines.midnightcore.api.module.messaging;
 
 import io.netty.buffer.ByteBuf;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.config.ConfigSection;
-
-import java.io.DataInput;
 
 public interface MessageHandler {
 

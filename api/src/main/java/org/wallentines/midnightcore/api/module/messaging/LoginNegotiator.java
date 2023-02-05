@@ -1,7 +1,7 @@
 package org.wallentines.midnightcore.api.module.messaging;
 
 import io.netty.buffer.ByteBuf;
-import org.wallentines.midnightlib.config.ConfigSection;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
 public interface LoginNegotiator {

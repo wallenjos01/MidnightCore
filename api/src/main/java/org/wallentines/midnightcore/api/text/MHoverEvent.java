@@ -1,11 +1,14 @@
 package org.wallentines.midnightcore.api.text;
 
 
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.InlineSerializer;
+import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.player.MPlayer;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.ConfigSerializer;
-import org.wallentines.midnightlib.config.serialization.PrimitiveSerializers;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.UUID;
@@ -15,7 +18,7 @@ public class MHoverEvent {
     private final HoverAction action;
     private final ConfigSection data;
 
-    private MHoverEvent(HoverAction action, ConfigSection data) {
+    public MHoverEvent(HoverAction action, ConfigSection data) {
 
         this.action = action;
         this.data = data;
@@ -31,12 +34,8 @@ public class MHoverEvent {
     }
 
     public static MHoverEvent createTextHover(MComponent hover) {
-        return createTextHover(hover, true);
-    }
 
-    public static MHoverEvent createTextHover(MComponent hover, boolean rgb) {
-
-        return new MHoverEvent(HoverAction.SHOW_TEXT, MComponent.SERIALIZER.serialize(hover));
+        return new MHoverEvent(HoverAction.SHOW_TEXT, MComponent.OBJECT_SERIALIZER.serialize(ConfigContext.INSTANCE, hover).getOrThrow().asSection());
     }
 
     public static MHoverEvent createItemHover(MItemStack stack) {
@@ -50,9 +49,9 @@ public class MHoverEvent {
     public static MHoverEvent createEntityHover(Identifier entityType, UUID uid, MComponent name) {
 
         return new MHoverEvent(HoverAction.SHOW_ENTITY, new ConfigSection()
-                .with("type", entityType)
-                .with("id", uid)
-                .with("name", name));
+                .with("type", entityType.toString())
+                .with("id", uid.toString())
+                .with("name", name.toJSONString()));
     }
 
     public static MHoverEvent createPlayerHover(MPlayer player) {
@@ -60,13 +59,14 @@ public class MHoverEvent {
         return new MHoverEvent(HoverAction.SHOW_ENTITY, new ConfigSection()
                 .with("type", "minecraft:player")
                 .with("id", player.getUUID().toString())
-                .with("name", MComponent.SERIALIZER.serialize(player.getName())));
+                .with("name", player.getName().toJSONString()));
     }
 
-    public static final ConfigSerializer<MHoverEvent> SERIALIZER = ConfigSerializer.create(
-            PrimitiveSerializers.STRING.entry("action", ev -> ev.action.getId()),
-            ConfigSerializer.RAW.entry("contents", ev -> ev.data),
-            (action, contents) -> new MHoverEvent(HoverAction.getById(action), contents));
+    public static final Serializer<MHoverEvent> SERIALIZER = ObjectSerializer.create(
+            InlineSerializer.of(HoverAction::getId, HoverAction::byId).entry("action", MHoverEvent::getAction),
+            ConfigObject.SERIALIZER.entry("contents", ev -> ev.data),
+            (action, obj) -> new MHoverEvent(action, obj.asSection())
+    );
 
     public enum HoverAction {
 
@@ -80,7 +80,7 @@ public class MHoverEvent {
             this.id = id;
         }
 
-        public static HoverAction getById(String id) {
+        public static HoverAction byId(String id) {
             for(HoverAction act : values()) {
                 if(act.id.equals(id)) return act;
             }

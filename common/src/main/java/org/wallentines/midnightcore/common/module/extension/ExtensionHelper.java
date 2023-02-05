@@ -3,7 +3,6 @@ package org.wallentines.midnightcore.common.module.extension;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
-import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.module.messaging.PacketBufferUtils;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -13,8 +12,8 @@ import java.util.function.Function;
 
 public class ExtensionHelper {
 
-    public static final Identifier SUPPORTED_EXTENSION_PACKET = new Identifier(Constants.DEFAULT_NAMESPACE, "supported_extensions");
-    public static final Identifier ID = new Identifier(Constants.DEFAULT_NAMESPACE, "extension");
+    public static final Identifier SUPPORTED_EXTENSION_PACKET = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "supported_extensions");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "extension");
 
     public static ByteBuf createPacket(Collection<Identifier> supported) {
 
@@ -74,7 +73,7 @@ public class ExtensionHelper {
                 String str = PacketBufferUtils.readUtf(res);
                 String ver = PacketBufferUtils.readUtf(res);
 
-                ids.put(Identifier.parseOrDefault(str, Constants.DEFAULT_NAMESPACE), Version.SERIALIZER.deserialize(ver));
+                ids.put(Identifier.parseOrDefault(str, MidnightCoreAPI.DEFAULT_NAMESPACE), Version.SERIALIZER.deserialize(ver));
             }
 
             StringBuilder bld = new StringBuilder("Enabled Extensions for ").append(user).append(": ");

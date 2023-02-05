@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightcore.api.item.InventoryGUI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.module.ServerModule;
@@ -13,7 +14,6 @@ import org.wallentines.midnightcore.api.text.CustomScoreboard;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
@@ -30,9 +30,8 @@ public abstract class MidnightCoreAPI {
 
     private static final Logger LOGGER = LogManager.getLogger("MidnightCore");
     private static MidnightCoreAPI INSTANCE;
-
-
     protected static final List<Consumer<MServer>> STARTUP_LISTENERS = new ArrayList<>();
+    public static final String DEFAULT_NAMESPACE = "midnightcore";
 
     protected MidnightCoreAPI() {
         if(INSTANCE == null) INSTANCE = this;

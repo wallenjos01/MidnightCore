@@ -1,15 +1,16 @@
 package org.wallentines.midnightcore.common.item;
 
+import org.wallentines.mdcfg.ConfigList;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MHoverEvent;
 import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.MTextComponent;
-import org.wallentines.midnightlib.config.ConfigSection;
-import org.wallentines.midnightlib.config.serialization.json.JsonConfigProvider;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractItem implements MItemStack {
@@ -54,10 +55,10 @@ public abstract class AbstractItem implements MItemStack {
     @Override
     public MComponent getName() {
         MComponent out = null;
-        if(tag != null && tag.has("display", ConfigSection.class)) {
+        if(tag != null && tag.hasSection("display")) {
             ConfigSection display = tag.getSection("display");
-            if(display.has("Name", String.class)) {
-                out = MComponent.SERIALIZER.deserialize(JsonConfigProvider.INSTANCE.loadFromString(display.getString("Name")));
+            if(display.has("Name") && display.get("Name").isString()) {
+                out = JSONCodec.minified().decode(ConfigContext.INSTANCE, MComponent.SERIALIZER, display.getString("Name")).getOrThrow();
             }
         }
 
@@ -78,24 +79,24 @@ public abstract class AbstractItem implements MItemStack {
         MComponent newComp = new MTextComponent("").withStyle(MStyle.ITEM_NAME_BASE).withChild(component);
         if(tag == null) tag = new ConfigSection();
 
-        tag.getOrCreateSection("display").set("Name", MComponent.SERIALIZER.serialize(newComp).toString());
+        tag.getOrCreateSection("display").set("Name", newComp.toJSONString());
         update();
     }
 
     @Override
     public List<MComponent> getLore() {
-        if(tag == null || !tag.has("display", ConfigSection.class)) return null;
+        if(tag == null || !tag.hasSection("display")) return null;
 
         ConfigSection display = tag.getSection("display");
-        if(!display.has("Lore", List.class)) return null;
+        if(!display.hasList("Lore")) return null;
 
-        return display.getListFiltered("Lore", MComponent.class);
+        return display.getListFiltered("Lore", MComponent.SERIALIZER);
     }
 
     @Override
     public void setLore(List<MComponent> lore) {
 
-        List<String> newLore = new ArrayList<>();
+        ConfigList newLore = new ConfigList();
         for(MComponent cmp : lore) {
             newLore.add(new MTextComponent("").withStyle(MStyle.ITEM_LORE_BASE).withChild(cmp.copy()).toString());
         }
@@ -113,7 +114,7 @@ public abstract class AbstractItem implements MItemStack {
 
     @Override
     public String saveToNBT() {
-        return MItemStack.toNBT(new ConfigSection().with("id", typeId).with("Count", count).with("tag", tag));
+        return MItemStack.toNBT(new ConfigSection().with("id", typeId.toString()).with("Count", count).with("tag", tag));
     }
 
     protected abstract MComponent getTranslationComponent();
