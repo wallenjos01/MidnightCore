@@ -125,8 +125,8 @@ public class MainCommand {
         LangProvider prov = getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        api.getConfig().getSection("modules").getOrCreateSection(id.toString()).set("enabled", true);
-        api.saveConfig();
+        api.getServer().getModuleConfig().getRoot().getOrCreateSection(id.toString()).set("enabled", true);
+        api.getServer().getModuleConfig().save();
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.enabled", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -140,8 +140,8 @@ public class MainCommand {
         LangProvider prov = getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        api.getConfig().getSection("modules").getOrCreateSection(id.toString()).set("enabled", false);
-        api.saveConfig();
+        api.getServer().getModuleConfig().getRoot().getOrCreateSection(id.toString()).set("enabled", false);
+        api.getServer().getModuleConfig().save();
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.disabled", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
