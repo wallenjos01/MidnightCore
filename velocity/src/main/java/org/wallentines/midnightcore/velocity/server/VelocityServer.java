@@ -16,7 +16,7 @@ public class VelocityServer extends AbstractServer {
 
     public VelocityServer(MidnightCoreAPI api, ProxyServer server, MidnightCore plugin) {
 
-        super(api);
+        super(api, getDedicatedConfigPath(api));
 
         this.server = server;
         this.plugin = plugin;

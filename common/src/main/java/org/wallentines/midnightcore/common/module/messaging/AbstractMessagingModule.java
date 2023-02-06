@@ -55,7 +55,7 @@ public abstract class AbstractMessagingModule implements MessagingModule {
     @Override
     public void unregisterHandler(Identifier id) {
 
-        handlers.removeById(id);
+        handlers.remove(id);
     }
 
     protected void handle(MPlayer sender, Identifier id, ByteBuf res) {

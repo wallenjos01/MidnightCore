@@ -47,7 +47,7 @@ public class FileConfig extends FileWrapper<ConfigObject> {
 
     private static FileConfig fromWrapper(FileWrapper<ConfigObject> wrapper) {
 
-        if(wrapper.getRoot() == null && !wrapper.getRoot().isSection()) {
+        if(wrapper.getRoot() == null || !wrapper.getRoot().isSection()) {
             wrapper.setRoot(new ConfigSection());
         }
 

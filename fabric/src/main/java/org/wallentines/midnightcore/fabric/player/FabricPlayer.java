@@ -273,7 +273,7 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
         if(api == null) throw new IllegalStateException("MidnightCoreAPI has not been created!");
 
         MServer server = api.getServer();
-        if(server == null) throw new IllegalStateException("MidnightCoreAPI has not been created!");
+        if(server == null) throw new IllegalStateException("The server has not been created!");
 
         return (FabricPlayer) server.getPlayer(player.getUUID());
     }

@@ -14,6 +14,8 @@ import org.wallentines.midnightlib.math.Region;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
+import java.util.Objects;
+
 public final class Constants {
 
     public static final Version VERSION = Version.SERIALIZER.deserialize("1.0.0");
@@ -21,7 +23,6 @@ public final class Constants {
 
     public static final IllegalStateException MODULE_DISABLED = new IllegalStateException("Attempt to access disabled Module!");
     public static final ConfigSection CONFIG_DEFAULTS = new ConfigSection()
-            .with("modules", new ConfigSection())
             .with("locale", "en_us");
 
     public static String makeNode(String node) {
@@ -34,7 +35,7 @@ public final class Constants {
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "cooldown"), new CooldownRequirementType());
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "permission"), (pl,req,data) -> pl.hasPermission(data));
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "world"), (pl,req,data) -> pl.getLocation().getWorldId().equals(Identifier.parse(data)));
-        Registries.REQUIREMENT_REGISTRY.register(new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "in_region"), (pl,req,data) -> Region.parse(data).isWithin(pl.getLocation().getCoordinates()));
+        Registries.REQUIREMENT_REGISTRY.register(new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "region"), (pl,req,data) -> Region.parse(data).isWithin(pl.getLocation().getCoordinates()));
         Registries.REQUIREMENT_REGISTRY.register(new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "locale"), (pl,req,data) -> data.contains("_") ? pl.getLocale().equals(data) : pl.getLocale().startsWith(data));
 
         // Placeholders
@@ -45,7 +46,7 @@ public final class Constants {
         inline.register("player_uuid", PlaceholderSupplier.create(MPlayer.class, mp -> mp.getUUID().toString()));
         inline.register("player_world", PlaceholderSupplier.create(MPlayer.class, mp -> mp.getLocation().getWorldId().toString()));
         inline.register("player_locale", PlaceholderSupplier.create(MPlayer.class, MPlayer::getLocale));
-        inline.register("player_health", PlaceholderSupplier.create(MPlayer.class, mp -> ((int) mp.getHealth()) + ""));
+        inline.register("player_health", PlaceholderSupplier.create(MPlayer.class, mp -> Objects.toString((int) mp.getHealth())));
         placeholders.register("player_name", PlaceholderSupplier.create(MPlayer.class, MPlayer::getName));
 
         inline.register("server_version", PlaceholderSupplier.create(Util.getOr(MidnightCoreAPI.getInstance(), inst -> inst.getGameVersion().toString(), () -> "Unknown")));

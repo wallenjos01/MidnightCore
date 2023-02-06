@@ -2,6 +2,8 @@ package org.wallentines.midnightcore.fabric.server;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.LevelResource;
+import org.wallentines.midnightcore.api.FileConfig;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.player.PlayerManager;
 import org.wallentines.midnightcore.common.server.AbstractServer;
@@ -13,7 +15,7 @@ public class FabricServer extends AbstractServer {
     private final FabricPlayerManager playerManager;
 
     public FabricServer(MidnightCoreAPI api, MinecraftServer server) {
-        super(api);
+        super(api, getModuleConfig(api, server));
         this.internal = server;
         this.playerManager = new FabricPlayerManager(this);
         server.addTickable(() -> tickEvent.invoke(new ServerEvent(this)));
@@ -56,4 +58,13 @@ public class FabricServer extends AbstractServer {
     public MinecraftServer getInternal() {
         return internal;
     }
+
+    private static FileConfig getModuleConfig(MidnightCoreAPI api, MinecraftServer server) {
+
+        if(server.isDedicatedServer()) {
+            return getDedicatedConfigPath(api);
+        }
+        return FileConfig.findOrCreate("modules", server.getWorldPath(LevelResource.ROOT).toFile());
+    }
+
 }

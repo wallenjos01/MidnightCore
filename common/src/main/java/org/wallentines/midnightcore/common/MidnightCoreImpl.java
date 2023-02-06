@@ -72,9 +72,7 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
             STARTUP_LISTENERS.forEach(ls -> ls.accept(server));
 
             // Load Modules
-            ConfigSection sec = getConfig().getOrCreateSection("modules");
-            server.loadModules(sec, Registries.MODULE_REGISTRY);
-
+            server.loadModules(Registries.MODULE_REGISTRY);
             config.save();
         }
     }
@@ -164,11 +162,7 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     @Override
     public void reload() {
         config.load();
-
-        ConfigSection sec = config.getRoot().asSection().getOrCreateSection("modules");
-        currentServer.reloadModules(sec, Registries.MODULE_REGISTRY);
-
-        config.save();
+        currentServer.reloadModules(Registries.MODULE_REGISTRY);
     }
 
     @Override

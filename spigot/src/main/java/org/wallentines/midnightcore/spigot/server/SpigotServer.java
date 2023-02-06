@@ -17,7 +17,7 @@ public class SpigotServer extends AbstractServer {
 
     public SpigotServer(MidnightCoreAPI api, Server server, Plugin plugin) {
 
-        super(api);
+        super(api, getDedicatedConfigPath(api));
         
         this.server = server;
         this.plugin = plugin;

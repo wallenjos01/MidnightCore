@@ -1,6 +1,6 @@
 package org.wallentines.midnightcore.common.server;
 
-import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightcore.api.FileConfig;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.server.MServer;
@@ -14,22 +14,25 @@ public abstract class AbstractServer implements MServer {
     private final ModuleManager<MServer, ServerModule> moduleManager = new ModuleManager<>(MidnightCoreAPI.DEFAULT_NAMESPACE);
 
     protected final MidnightCoreAPI api;
+    protected final FileConfig moduleConfig;
 
     protected final HandlerList<ServerEvent> tickEvent = new HandlerList<>();
 
-    public AbstractServer(MidnightCoreAPI api) {
+    public AbstractServer(MidnightCoreAPI api, FileConfig moduleConfig) {
         this.api = api;
+        this.moduleConfig = moduleConfig;
     }
 
-    public void loadModules(ConfigSection config, Registry<ModuleInfo<MServer, ServerModule>> registry) {
+    public void loadModules(Registry<ModuleInfo<MServer, ServerModule>> registry) {
 
-        moduleManager.loadAll(config, this, registry);
+        moduleManager.loadAll(moduleConfig.getRoot(), this, registry);
+        moduleConfig.save();
         MidnightCoreAPI.getLogger().info("Loaded " + moduleManager.getCount() + " modules");
     }
 
-    public void reloadModules(ConfigSection config, Registry<ModuleInfo<MServer, ServerModule>> registry) {
+    public void reloadModules(Registry<ModuleInfo<MServer, ServerModule>> registry) {
         moduleManager.unloadAll();
-        loadModules(config, registry);
+        loadModules(registry);
     }
 
     @Override
@@ -47,9 +50,17 @@ public abstract class AbstractServer implements MServer {
         return api;
     }
 
+    @Override
+    public FileConfig getModuleConfig() {
+        return moduleConfig;
+    }
 
     @Override
     public HandlerList<ServerEvent> tickEvent() {
         return tickEvent;
+    }
+
+    protected static FileConfig getDedicatedConfigPath(MidnightCoreAPI api) {
+        return FileConfig.findOrCreate("modules", api.getDataFolder());
     }
 }

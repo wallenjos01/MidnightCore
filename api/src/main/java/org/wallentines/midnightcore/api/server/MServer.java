@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.api.server;
 
+import org.wallentines.midnightcore.api.FileConfig;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
@@ -83,6 +84,13 @@ public interface MServer {
      */
     HandlerList<ServerEvent> tickEvent();
 
+
+    /**
+     * Returns a reference to the configuration file where module configuration is stored. This is usually a File called
+     * modules.[json/yml] in the mod/plugin's data folder, but is in the world folder on integrated servers.
+     * @return A reference to the module configuration file
+     */
+    FileConfig getModuleConfig();
 
     class ServerEvent extends Event {
 
