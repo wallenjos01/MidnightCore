@@ -1,7 +1,6 @@
 package org.wallentines.midnightcore.api.text;
 
 import org.wallentines.mdcfg.ConfigObject;
-import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.*;
@@ -126,7 +125,7 @@ public abstract class MComponent {
     public String toItemText() {
 
         if(getGameVersion() > 12) {
-            return toString();
+            return toJSONString();
         }
 
         return toLegacyText();
@@ -196,6 +195,7 @@ public abstract class MComponent {
 
     public static MComponent parse(String s) {
 
+        if(s.isEmpty()) return new MTextComponent("");
         if(s.stripLeading().charAt(0) == '{') {
             try {
                 return parseJSON(s);
@@ -204,7 +204,7 @@ public abstract class MComponent {
             }
         }
 
-        return SERIALIZER.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(s)).getOrThrow();
+        return parsePlainText(s);
     }
 
     private static int getGameVersion() {
@@ -371,7 +371,7 @@ public abstract class MComponent {
             if(context.isString(value)) {
                 if(tryParseStrings) {
                     String s = context.asString(value);
-                    return SerializeResult.success(MComponent.parsePlainText(s));
+                    return SerializeResult.success(MComponent.parse(s));
                 }
                 return SerializeResult.success(new MTextComponent(context.asString(value)));
             }
@@ -411,7 +411,7 @@ public abstract class MComponent {
                     }
                 }
 
-                if(type == null) return SerializeResult.failure("Don't know to parse " + value + " as a component!");
+                if(type == null) return SerializeResult.failure("Don't know to parse " + value + " with null type as a component!");
 
                 SerializeResult<MComponent> result = type.deserialize(this, context, value);
                 if(!result.isComplete()) return SerializeResult.failure(result.getError());

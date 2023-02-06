@@ -55,7 +55,7 @@ public class FabricServerExtensionModule implements ServerExtensionModule {
 
             Event.register(ServerBeginQueryEvent.class, this, ev ->
                 ev.getNegotiator().sendMessage(ExtensionHelper.SUPPORTED_EXTENSION_PACKET, supportedData, res ->
-                        enabledExtensions.put(ev.getProfile().getId(), ExtensionHelper.handleResponse(ev.getProfile().getName(), res))));
+                    enabledExtensions.put(ev.getProfile().getId(), ExtensionHelper.handleResponse(ev.getProfile().getName(), res))));
         }
 
         return true;

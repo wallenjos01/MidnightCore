@@ -1,14 +1,11 @@
 package org.wallentines.midnightcore.fabric.util;
 
-import com.google.gson.internal.LazilyParsedNumber;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
-import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigObject;
-import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.text.*;
@@ -37,28 +34,15 @@ public class ConversionUtil {
     public static ConfigSection toConfigSection(CompoundTag tag) {
 
         if(tag == null) return null;
-
-        ConfigSection out = new ConfigSection();
-        for(String s : tag.getAllKeys()) {
-
-            Tag o = tag.get(s);
-            out.set(s, fromNBT(o));
-        }
-
-        return out;
+        NBTContext ctx = new NBTContext();
+        return ctx.convert(ConfigContext.INSTANCE, tag).asSection();
     }
 
     public static CompoundTag toCompoundTag(ConfigSection section) {
 
-        CompoundTag out = new CompoundTag();
-
-        for(String s : section.getKeys()) {
-
-            Object o = section.get(s);
-            out.put(s, toNBT(o));
-        }
-
-        return out;
+        if(section == null) return null;
+        NBTContext ctx = new NBTContext(true);
+        return (CompoundTag) ConfigContext.INSTANCE.convert(ctx, section);
     }
 
     public static MComponent toMComponent(@Nullable Component component) {
@@ -199,156 +183,156 @@ public class ConversionUtil {
     }
 
 
-    private static ConfigObject fromNBT(Tag t) {
-
-        if(t instanceof CompoundTag) {
-
-            ConfigSection sec = new ConfigSection();
-            for(String s : ((CompoundTag) t).getAllKeys()) {
-
-                sec.set(s, fromNBT(((CompoundTag) t).get(s)));
-            }
-            return sec;
-
-        } else if(t instanceof IntTag) {
-
-            return new ConfigPrimitive(((IntTag) t).getAsInt());
-
-        } else if(t instanceof DoubleTag) {
-
-            return new ConfigPrimitive(((DoubleTag) t).getAsDouble());
-
-        } else if(t instanceof FloatTag) {
-
-            return new ConfigPrimitive(((FloatTag) t).getAsFloat());
-
-        } else if(t instanceof ShortTag) {
-
-            return new ConfigPrimitive(((ShortTag) t).getAsShort());
-
-        } else if(t instanceof ByteTag) {
-
-            return new ConfigPrimitive(((ByteTag) t).getAsByte());
-
-        } else if(t instanceof LongTag) {
-
-            return new ConfigPrimitive(((LongTag) t).getAsLong());
-
-        } else if(t instanceof StringTag) {
-
-            return new ConfigPrimitive(t.getAsString());
-
-        } else if(t instanceof ListTag lt) {
-
-            ConfigList objs = new ConfigList();
-            for(Tag t1 : lt) {
-
-                objs.add(fromNBT(t1));
-            }
-            return objs;
-
-        } else if(t instanceof IntArrayTag lt) {
-
-            ConfigList objs = new ConfigList();
-            for(IntTag t1 : lt) {
-
-                objs.add(t1.getAsInt());
-            }
-            return objs;
-
-        } else if(t instanceof LongArrayTag lt) {
-
-            ConfigList objs = new ConfigList();
-            for(LongTag t1 : lt) {
-
-                objs.add(t1.getAsLong());
-            }
-            return objs;
-
-        } else if(t instanceof ByteArrayTag lt) {
-
-            ConfigList objs = new ConfigList();
-            for(ByteTag t1 : lt) {
-
-                objs.add(t1.getAsByte());
-            }
-            return objs;
-        }
-
-        return null;
-    }
-
-    private static Tag toNBT(Object o) {
-
-        if(o instanceof ConfigSection) {
-            return toCompoundTag((ConfigSection) o);
-
-        } else if(o instanceof LazilyParsedNumber num) {
-
-            String s = num.toString();
-            if(s.contains(".")) {
-                return DoubleTag.valueOf(num.doubleValue());
-            } else {
-                return IntTag.valueOf(num.intValue());
-            }
-
-        } else if(o instanceof Integer) {
-            return IntTag.valueOf((int) o);
-
-        } else if(o instanceof Double) {
-            return DoubleTag.valueOf((double) o);
-
-        } else if(o instanceof Float) {
-            return FloatTag.valueOf((float) o);
-
-        } else if(o instanceof Short) {
-            return ShortTag.valueOf((short) o);
-
-        } else if(o instanceof Byte) {
-            return ByteTag.valueOf((byte) o);
-
-        } else if(o instanceof Long) {
-            return LongTag.valueOf((long) o);
-
-        } else if(o instanceof String) {
-            return StringTag.valueOf(o.toString());
-
-        } else if(o instanceof Boolean) {
-            return (Boolean) o ? ByteTag.ONE : ByteTag.ZERO;
-
-        } else if(o instanceof List<?> l) {
-
-            if (l.size() == 0) {
-                return new ListTag();
-            }
-
-            Object l1 = ((List<?>) o).get(0);
-            if (l1 instanceof Number) {
-
-                int[] values = new int[l.size()];
-
-                for (int i = 0; i < values.length; i++) {
-                    values[i] = ((Number) l.get(i)).intValue();
-                }
-
-                return new IntArrayTag(values);
-
-            } else {
-
-                ListTag t = new ListTag();
-
-                for(Object lv : l) {
-                    Tag tag = toNBT(lv);
-                    if(tag == null) continue;
-
-                    t.add(tag);
-                }
-
-                return t;
-            }
-        }
-
-        return StringTag.valueOf(o.toString());
-    }
+//    private static ConfigObject fromNBT(Tag t) {
+//
+//        if(t instanceof CompoundTag) {
+//
+//            ConfigSection sec = new ConfigSection();
+//            for(String s : ((CompoundTag) t).getAllKeys()) {
+//
+//                sec.set(s, fromNBT(((CompoundTag) t).get(s)));
+//            }
+//            return sec;
+//
+//        } else if(t instanceof IntTag) {
+//
+//            return new ConfigPrimitive(((IntTag) t).getAsInt());
+//
+//        } else if(t instanceof DoubleTag) {
+//
+//            return new ConfigPrimitive(((DoubleTag) t).getAsDouble());
+//
+//        } else if(t instanceof FloatTag) {
+//
+//            return new ConfigPrimitive(((FloatTag) t).getAsFloat());
+//
+//        } else if(t instanceof ShortTag) {
+//
+//            return new ConfigPrimitive(((ShortTag) t).getAsShort());
+//
+//        } else if(t instanceof ByteTag) {
+//
+//            return new ConfigPrimitive(((ByteTag) t).getAsByte());
+//
+//        } else if(t instanceof LongTag) {
+//
+//            return new ConfigPrimitive(((LongTag) t).getAsLong());
+//
+//        } else if(t instanceof StringTag) {
+//
+//            return new ConfigPrimitive(t.getAsString());
+//
+//        } else if(t instanceof ListTag lt) {
+//
+//            ConfigList objs = new ConfigList();
+//            for(Tag t1 : lt) {
+//
+//                objs.add(fromNBT(t1));
+//            }
+//            return objs;
+//
+//        } else if(t instanceof IntArrayTag lt) {
+//
+//            ConfigList objs = new ConfigList();
+//            for(IntTag t1 : lt) {
+//
+//                objs.add(t1.getAsInt());
+//            }
+//            return objs;
+//
+//        } else if(t instanceof LongArrayTag lt) {
+//
+//            ConfigList objs = new ConfigList();
+//            for(LongTag t1 : lt) {
+//
+//                objs.add(t1.getAsLong());
+//            }
+//            return objs;
+//
+//        } else if(t instanceof ByteArrayTag lt) {
+//
+//            ConfigList objs = new ConfigList();
+//            for(ByteTag t1 : lt) {
+//
+//                objs.add(t1.getAsByte());
+//            }
+//            return objs;
+//        }
+//
+//        return null;
+//    }
+//
+//    private static Tag toNBT(ConfigObject o) {
+//
+//        if(o.isSection()) {
+//            return toCompoundTag(o.asSection());
+//
+//        } else if(o.isNumber()) {
+//
+//            String s = num.toString();
+//            if(s.contains(".")) {
+//                return DoubleTag.valueOf(num.doubleValue());
+//            } else {
+//                return IntTag.valueOf(num.intValue());
+//            }
+//
+//        } else if(o instanceof Integer) {
+//            return IntTag.valueOf((int) o);
+//
+//        } else if(o instanceof Double) {
+//            return DoubleTag.valueOf((double) o);
+//
+//        } else if(o instanceof Float) {
+//            return FloatTag.valueOf((float) o);
+//
+//        } else if(o instanceof Short) {
+//            return ShortTag.valueOf((short) o);
+//
+//        } else if(o instanceof Byte) {
+//            return ByteTag.valueOf((byte) o);
+//
+//        } else if(o instanceof Long) {
+//            return LongTag.valueOf((long) o);
+//
+//        } else if(o instanceof String) {
+//            return StringTag.valueOf(o.toString());
+//
+//        } else if(o instanceof Boolean) {
+//            return (Boolean) o ? ByteTag.ONE : ByteTag.ZERO;
+//
+//        } else if(o instanceof ConfigList l) {
+//
+//            if (l.size() == 0) {
+//                return new ListTag();
+//            }
+//
+//            Object l1 = ((List<?>) o).get(0);
+//            if (l1 instanceof Number) {
+//
+//                int[] values = new int[l.size()];
+//
+//                for (int i = 0; i < values.length; i++) {
+//                    values[i] = ((Number) l.get(i)).intValue();
+//                }
+//
+//                return new IntArrayTag(values);
+//
+//            } else {
+//
+//                ListTag t = new ListTag();
+//
+//                for(Object lv : l) {
+//                    Tag tag = toNBT(lv);
+//                    if(tag == null) continue;
+//
+//                    t.add(tag);
+//                }
+//
+//                return t;
+//            }
+//        }
+//
+//        return StringTag.valueOf(o.toString());
+//    }
 
 }

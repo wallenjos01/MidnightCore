@@ -15,7 +15,9 @@ import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointModule;
+import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.module.skin.Skinnable;
 import org.wallentines.midnightcore.api.module.vanish.VanishModule;
@@ -69,6 +71,9 @@ public class TestCommand {
             )
             .then(Commands.literal("scoreboard")
                 .executes(TestCommand::scoreboardTestCommand)
+            )
+            .then(Commands.literal("item")
+                .executes(TestCommand::itemTestCommand)
             )
         );
     }
@@ -215,6 +220,23 @@ public class TestCommand {
             sb.setLine(6, PlaceholderManager.INSTANCE.parseText("Hello, %player_name%", fpl));
 
             sb.addViewer(fpl);
+
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+
+        return 1;
+    }
+
+    private static int itemTestCommand(CommandContext<CommandSourceStack> context) {
+
+        try {
+            ServerPlayer spl = extractPlayer(context);
+            FabricPlayer fpl = FabricPlayer.wrap(spl);
+
+            fpl.giveItem(MItemStack.Builder
+                    .headWithSkin(new Skin(UUID.fromString("bc4ea7fc-63c3-415a-b5b9-204e5acadd5c"), "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTRkODQ0ZmVlMjRkNWYyN2RkYjY2OTQzODUyOGQ4M2I2ODRkOTAxYjc1YTY4ODlmZTc0ODhkZmM0Y2Y3YTFjIn19fQ==", ""))
+                    .withName(fpl.getName()).build());
 
         } catch (Throwable th) {
             th.printStackTrace();

@@ -28,12 +28,12 @@ public class MixinServerLoginPacketListener {
     @Shadow ServerLoginPacketListenerImpl.State state;
 
     @Unique
-    private FabricLoginNegotiator negotiator;
+    private FabricLoginNegotiator mcore$negotiator;
 
     @Inject(method="tick", at=@At("TAIL"))
     private void onTick(CallbackInfo ci) {
 
-        if(state == ServerLoginPacketListenerImpl.State.NEGOTIATING && negotiator.itemsInQueue() == 0) {
+        if(state == ServerLoginPacketListenerImpl.State.NEGOTIATING && mcore$negotiator.itemsInQueue() == 0) {
             state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
         }
     }
@@ -42,13 +42,13 @@ public class MixinServerLoginPacketListener {
     private void onAccepted(CallbackInfo ci) {
 
         // Check to see if negotiating has begun already
-        if(negotiator == null) {
+        if(mcore$negotiator == null) {
 
-            negotiator = new FabricLoginNegotiator((ServerLoginPacketListenerImpl) (Object) this, gameProfile == null ? null : gameProfile.getId());
+            mcore$negotiator = new FabricLoginNegotiator((ServerLoginPacketListenerImpl) (Object) this, gameProfile == null ? null : gameProfile.getId());
             state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
 
             // Send "Negotiating" packets
-            Event.invoke(new ServerBeginQueryEvent(server, gameProfile, negotiator));
+            Event.invoke(new ServerBeginQueryEvent(server, gameProfile, mcore$negotiator));
             ci.cancel();
 
         }
@@ -63,8 +63,8 @@ public class MixinServerLoginPacketListener {
     private void onCustomQuery(ServerboundCustomQueryPacket packet, CallbackInfo ci) {
 
         // Handle Negotiation responses
-        if(negotiator != null) {
-            negotiator.handlePacket(packet);
+        if(mcore$negotiator != null) {
+            mcore$negotiator.handlePacket(packet);
         }
     }
 }

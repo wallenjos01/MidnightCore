@@ -9,7 +9,6 @@ import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.wallentines.mdcfg.codec.JSONCodec;
-import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.mdcfg.ConfigSection;
@@ -122,7 +121,7 @@ public class Adapter_v1_10_R1 implements SpigotAdapter {
         NBTTagCompound tag = new NBTTagCompound();
         tag = epl.e(tag);
 
-        return JSONCodec.minified().decode(ConfigContext.INSTANCE, tag.toString()).asSection();
+        return JSONCodec.loadConfig(tag.toString()).asSection();
     }
 
     @Override

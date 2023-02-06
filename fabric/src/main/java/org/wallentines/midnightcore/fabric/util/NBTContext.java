@@ -11,6 +11,16 @@ import java.util.stream.Collectors;
 
 public class NBTContext implements SerializeContext<Tag> {
 
+    private final boolean tryNumericArrays;
+
+    public NBTContext() {
+        this.tryNumericArrays = false;
+    }
+
+    public NBTContext(boolean tryNumericArrays) {
+        this.tryNumericArrays = tryNumericArrays;
+    }
+
     @Override
     public String asString(Tag object) {
         return isString(object) ? object.getAsString() : null;
@@ -125,6 +135,43 @@ public class NBTContext implements SerializeContext<Tag> {
     @Override
     public Tag toList(Collection<Tag> list) {
         if(list == null) return null;
+        if (list.size() == 0) {
+            return new ListTag();
+        }
+
+        if(tryNumericArrays) {
+
+            int byteCount = 0;
+            byte[] bytes = new byte[list.size()];
+            int intCount = 0;
+            int[] ints = new int[list.size()];
+            int longCount = 0;
+            long[] longs = new long[list.size()];
+
+            for(Tag t : list) {
+                if(t.getType() == ByteTag.TYPE) {
+                    bytes[byteCount++] = ((ByteTag) t).getAsByte();
+                }
+                else if(t.getType() == IntTag.TYPE) {
+                    ints[intCount++] = ((IntTag) t).getAsInt();
+                }
+                else if(t.getType() == LongTag.TYPE) {
+                    longs[longCount++] = ((LongTag) t).getAsLong();
+                }
+            }
+
+            if(intCount == list.size()) {
+                return new IntArrayTag(ints);
+            }
+            if(byteCount == list.size()) {
+                return new ByteArrayTag(bytes);
+            }
+            if(longCount == list.size()) {
+                return new LongArrayTag(longs);
+            }
+
+        }
+
         ListTag out = new ListTag();
         out.addAll(list);
         return out;

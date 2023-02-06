@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.api.text;
 
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.InlineSerializer;
 import org.wallentines.mdcfg.serializer.ObjectSerializer;
@@ -43,7 +44,7 @@ public class MHoverEvent {
         return new MHoverEvent(HoverAction.SHOW_ITEM, new ConfigSection()
                 .with("id", stack.getType().toString())
                 .with("Count", stack.getCount())
-                .with("tag", stack.getTag() == null ? null : stack.getTag().toString()));
+                .with("tag", stack.getTag() == null ? null : JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, stack.getTag())));
     }
 
     public static MHoverEvent createEntityHover(Identifier entityType, UUID uid, MComponent name) {
