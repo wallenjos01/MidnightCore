@@ -128,14 +128,19 @@ public class ConversionUtil {
         } else if(component instanceof MTranslateComponent) {
 
             Collection<MComponent> args = ((MTranslateComponent) component).getArgs();
-            Object[] comps = new Component[args.size()];
+            if(args == null) {
+                out = Component.translatable(component.getContent());
+            } else {
 
-            int i = 0;
-            for(MComponent arg : args) {
-                comps[i++] = toComponent(arg);
+                Object[] comps = new Component[args.size()];
+
+                int i = 0;
+                for (MComponent arg : args) {
+                    comps[i++] = toComponent(arg);
+                }
+
+                out = Component.translatable(component.getContent(), comps);
             }
-
-            out = Component.translatable(component.getContent(), comps);
 
         } else {
 

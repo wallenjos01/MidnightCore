@@ -125,21 +125,18 @@ public class FabricScoreboard extends AbstractScoreboard {
 
     private class TeamInfo {
 
-        private final String name;
         private final int index;
         private final String userName;
-        private Component prefix;
+        private final TeamBuilder builder;
         private boolean updated = false;
 
         public TeamInfo(String name, int index, Component prefix) {
 
             String hexIndex = Integer.toHexString(index);
 
-            this.name = name + hexIndex;
             this.index = index;
-            this.prefix = prefix;
-
             this.userName = "§" + hexIndex;
+            this.builder = new TeamBuilder(name + hexIndex).prefix(prefix).addMember(userName);
         }
 
         public boolean isUpdated() {
@@ -147,30 +144,30 @@ public class FabricScoreboard extends AbstractScoreboard {
         }
 
         public Component getPrefix() {
-            return prefix;
+            return this.builder.getPrefix();
         }
 
         public void setPrefix(Component prefix) {
-            this.prefix = prefix;
+            this.builder.prefix(prefix);
             this.updated = true;
         }
 
         public ClientboundSetPlayerTeamPacket addPacket() {
-            return createUpdateTeamPacket(name, prefix, userName, true);
+            return builder.addPacket();
         }
 
         public ClientboundSetPlayerTeamPacket updatePacket() {
             updated = false;
-            return createUpdateTeamPacket(name, prefix, userName, false);
+            return builder.updatePacket();
         }
 
         public ClientboundSetPlayerTeamPacket removePacket() {
-            return createRemoveTeamPacket(name);
+            return builder.removePacket();
         }
 
         public ClientboundSetScorePacket scorePacket() {
 
-            if(prefix == null) {
+            if(builder.getPrefix() == null) {
                 return removeScorePacket();
             }
 
@@ -182,9 +179,11 @@ public class FabricScoreboard extends AbstractScoreboard {
         }
     }
 
+    @Deprecated
     public static ClientboundSetPlayerTeamPacket createUpdateTeamPacket(String name, Component prefix, String playerName, boolean add) {
         return createUpdateTeamPacket(name, prefix, playerName == null ? new ArrayList<>() : List.of(playerName), add, ChatFormatting.WHITE);
     }
+    @Deprecated
     public static ClientboundSetPlayerTeamPacket createUpdateTeamPacket(String name, Component prefix, Collection<String> playerNames, boolean add, ChatFormatting color) {
 
         FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
@@ -214,6 +213,7 @@ public class FabricScoreboard extends AbstractScoreboard {
         return new ClientboundSetPlayerTeamPacket(fakeBuf);
     }
 
+    @Deprecated
     public static ClientboundSetPlayerTeamPacket createRemoveTeamPacket(String name) {
 
         FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());

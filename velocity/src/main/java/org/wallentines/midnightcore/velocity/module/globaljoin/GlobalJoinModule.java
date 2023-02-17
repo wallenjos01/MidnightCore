@@ -88,9 +88,9 @@ public class GlobalJoinModule implements ServerModule {
             ID,
             new ConfigSection()
                 .with("servers", new ConfigSection()
-                    .with("hub", "Hub"))
+                    .with("hub", "Hub")
                     .with("survival", "&bSurvival")
                     .with("creative", "&aCreative")
-    );
+                ));
 
 }

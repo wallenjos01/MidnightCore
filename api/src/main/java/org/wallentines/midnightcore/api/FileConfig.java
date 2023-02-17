@@ -67,6 +67,8 @@ public class FileConfig extends FileWrapper<ConfigObject> {
         try {
             wrapper.load();
         } catch (DecodeException ex) {
+            MidnightCoreAPI.getLogger().warn("An error occurred while parsing a file!");
+            ex.printStackTrace();
             wrapper.setRoot(new ConfigSection());
         }
 

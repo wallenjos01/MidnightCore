@@ -18,7 +18,7 @@ import org.wallentines.midnightcore.fabric.command.MainCommand;
 import org.wallentines.midnightcore.fabric.command.TestCommand;
 import org.wallentines.midnightcore.fabric.event.server.CommandLoadEvent;
 import org.wallentines.midnightcore.fabric.event.server.ServerStartEvent;
-import org.wallentines.midnightcore.fabric.event.server.ServerStopEvent;
+import org.wallentines.midnightcore.fabric.event.server.ServerStoppedEvent;
 import org.wallentines.midnightcore.fabric.item.FabricInventoryGUI;
 import org.wallentines.midnightcore.fabric.item.FabricItem;
 import org.wallentines.midnightcore.fabric.server.EmptyGenerator;
@@ -99,10 +99,11 @@ public class MidnightCore implements ModInitializer {
         List<ModInitializer> verInits = FabricLoader.getInstance().getEntrypoints(MidnightCoreAPI.DEFAULT_NAMESPACE + ":" + versionStr, ModInitializer.class);
         verInits.forEach(ModInitializer::onInitialize);
 
+        // Set the active server the moment a server starts up
+        Event.register(ServerStartEvent.class, this, Integer.MIN_VALUE, event -> api.setActiveServer(new FabricServer(api, event.getServer())));
 
-        Event.register(ServerStartEvent.class, this, 10, event -> api.setActiveServer(new FabricServer(api, event.getServer())));
-
-        Event.register(ServerStopEvent.class, this, 90, event -> api.setActiveServer(null));
+        // Destroy the active server after the server shuts down
+        Event.register(ServerStoppedEvent.class, this, Integer.MAX_VALUE, event -> api.setActiveServer(null));
 
         Event.register(CommandLoadEvent.class, this, event -> {
 

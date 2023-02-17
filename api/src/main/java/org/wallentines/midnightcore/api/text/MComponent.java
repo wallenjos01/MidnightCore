@@ -195,10 +195,11 @@ public abstract class MComponent {
 
     public static MComponent parse(String s) {
 
-        if(s.isEmpty()) return new MTextComponent("");
-        if(s.stripLeading().charAt(0) == '{') {
+        String stripped = s.stripLeading();
+        if(stripped.isEmpty()) return new MTextComponent(s);
+        if(stripped.charAt(0) == '{') {
             try {
-                return parseJSON(s);
+                return parseJSON(stripped);
             } catch (DecodeException ex) {
                 // Ignore
             }
