@@ -14,6 +14,8 @@ import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.EnumSet;
+
 public class FabricSavepointModule extends AbstractSavepointModule {
 
     @Override
@@ -33,9 +35,9 @@ public class FabricSavepointModule extends AbstractSavepointModule {
     }
 
     @Override
-    public AbstractSavepoint createSavepoint(Identifier id) {
+    public AbstractSavepoint createSavepoint(Identifier id, EnumSet<Savepoint.SaveFlag> flags) {
 
-        return new FabricSavepoint(id);
+        return new FabricSavepoint(id, flags);
     }
 
     @Override

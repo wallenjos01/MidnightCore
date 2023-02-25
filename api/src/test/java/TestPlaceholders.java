@@ -45,6 +45,11 @@ public class TestPlaceholders {
 
         Assertions.assertEquals("Hello, Title Case, World", parsed);
 
+        // Percent signs
+        toParse = "%name% 50%% Complete, %name%";
+        parsed = manager.applyInlinePlaceholders(toParse, CustomPlaceholderInline.create("name", "test"));
+
+        Assertions.assertEquals("test 50% Complete, test", parsed);
 
         // Component
         toParse = "&bHello, &f%to_title_case<%id%>%, %name%";
@@ -53,6 +58,12 @@ public class TestPlaceholders {
         Assertions.assertEquals("Hello, Title Case, Bingus", parsedComponent.getAllContent());
         Assertions.assertEquals("Hello, ", parsedComponent.getContent());
 
+
+        // Percent signs (Component)
+        toParse = "%name% 50%% Complete, %name%";
+        parsedComponent = manager.parseText(toParse, CustomPlaceholder.create("name", new MTextComponent("test")));
+
+        Assertions.assertEquals("test 50% Complete, test", parsedComponent.getAllContent());
 
         // With Context
         UsernameHolder holder = new UsernameHolder(new MTextComponent("User").withChild(new MTextComponent(" Name")));

@@ -12,8 +12,8 @@ import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.wallentines.midnightcore.fabric.event.player.PlayerInteractEvent;
 import org.wallentines.midnightlib.event.Event;
 
@@ -21,28 +21,15 @@ import org.wallentines.midnightlib.event.Event;
 @Mixin(BucketItem.class)
 public class MixinBucketItem {
 
-    private BlockHitResult midnight_core_result;
-
-    @ModifyVariable(method = "use", at=@At(value="STORE"), ordinal = 0)
-    private BlockHitResult onUseCalculate(BlockHitResult res) {
-
-        if(res.getType() != HitResult.Type.MISS) {
-            midnight_core_result = res;
-        }
-
-        return res;
-    }
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method="use", at=@At(value = "INVOKE", target = "Lnet/minecraft/world/phys/BlockHitResult;getBlockPos()Lnet/minecraft/core/BlockPos;"), cancellable = true)
-    private void onUse(Level level, Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+    @Inject(method="use", at=@At(value = "INVOKE", target = "Lnet/minecraft/world/phys/BlockHitResult;getBlockPos()Lnet/minecraft/core/BlockPos;"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    private void onUse(Level level, Player player, InteractionHand interactionHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, ItemStack itemStack, BlockHitResult blockHitResult) {
 
-        if(midnight_core_result == null || level.isClientSide) return;
+        if(blockHitResult == null || blockHitResult.getType() == HitResult.Type.MISS || level.isClientSide) return;
         ItemStack is = player.getItemInHand(interactionHand);
 
-        BlockHitResult res = midnight_core_result;
-
-        PlayerInteractEvent event = new PlayerInteractEvent((ServerPlayer) player, is, interactionHand, PlayerInteractEvent.InteractionType.INTERACT, res);
+        PlayerInteractEvent event = new PlayerInteractEvent((ServerPlayer) player, is, interactionHand, PlayerInteractEvent.InteractionType.INTERACT, blockHitResult);
         level.getServer().submit(() -> Event.invoke(event));
 
         if(event.isCancelled()) {
@@ -50,7 +37,6 @@ public class MixinBucketItem {
             cir.cancel();
         }
 
-        midnight_core_result = null;
     }
 
 }

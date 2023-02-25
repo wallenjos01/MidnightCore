@@ -42,6 +42,8 @@ public abstract class AbstractPlayer<T> implements MPlayer {
         cache = new WeakReference<>(player);
     }
 
+    protected abstract T regenCache();
+
     protected <R> R run(Function<T, R> consumer, Supplier<R> def) {
         T pl = getInternal();
         if(pl == null) return def.get();
@@ -58,7 +60,12 @@ public abstract class AbstractPlayer<T> implements MPlayer {
     }
 
     public T getInternal() {
-        return cache.get();
+        T out = cache.get();
+        if(out == null) {
+            out = regenCache();
+            onLogin(out);
+        }
+        return out;
     }
 
     @Override

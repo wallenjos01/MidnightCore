@@ -17,14 +17,15 @@ import org.wallentines.midnightlib.event.Event;
 @Mixin(LivingEntity.class)
 public class MixinLivingEntity {
 
-    private EntityDamageEvent midnight_core_lastEvent;
+    private EntityDamageEvent mcore$lastEvent;
 
     @Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", at=@At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;die(Lnet/minecraft/world/damagesource/DamageSource;)V"))
     public void damageDeath(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
 
         LivingEntity le = (LivingEntity) (Object) this;
-        Event.invoke(new EntityDeathEvent(le, midnight_core_lastEvent, source));
+        Event.invoke(new EntityDeathEvent(le, mcore$lastEvent, source));
 
+        mcore$lastEvent = null;
     }
 
     @Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", at=@At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"), cancellable = true)
@@ -41,7 +42,7 @@ public class MixinLivingEntity {
             return;
         }
 
-        midnight_core_lastEvent = ev;
+        mcore$lastEvent = ev;
     }
 
     @Inject(method = "eat", at=@At(value="INVOKE", target="Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"), cancellable = true)

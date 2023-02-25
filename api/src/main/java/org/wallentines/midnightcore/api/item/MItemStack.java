@@ -11,6 +11,7 @@ import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MStyle;
 import org.wallentines.midnightcore.api.text.TextColor;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
@@ -90,6 +91,11 @@ public interface MItemStack {
         }
 
         public Builder withTag(ConfigSection sec) {
+            tag.fillOverwrite(sec);
+            return this;
+        }
+
+        public Builder setTag(ConfigSection sec) {
             tag = sec;
             return this;
         }
@@ -117,6 +123,7 @@ public interface MItemStack {
                     display.set("Lore", listLore);
                 }
 
+                if(tag == null) tag = new ConfigSection();
                 tag.set("display", display);
             }
 
@@ -127,6 +134,7 @@ public interface MItemStack {
                 skullOwner.set("Id", majorVersion > 15 ? UUIDtoInts(headSkin.getUUID()) : new ConfigPrimitive(headSkin.getUUID().toString()));
                 skullOwner.set("Properties", new ConfigSection().with("textures", new ConfigList().append(new ConfigSection().with("Value", headSkin.getValue()))));
 
+                if(tag == null) tag = new ConfigSection();
                 tag.set("SkullOwner", skullOwner);
             }
 
@@ -138,11 +146,17 @@ public interface MItemStack {
             return new Builder(type);
         }
 
-        public static Builder woolWithColor(TextColor color) {
+        public static Builder woolWithColor(Color color) {
 
-            String colorName = color.toDyeColor();
-
+            String colorName = TextColor.toDyeColor(color);
             return new Builder(new Identifier("minecraft", colorName + "_wool"));
+
+        }
+
+        public static Builder paneWithColor(Color color) {
+
+            String colorName = TextColor.toDyeColor(color);
+            return new Builder(new Identifier("minecraft", colorName + "_stained_glass_pane"));
 
         }
 

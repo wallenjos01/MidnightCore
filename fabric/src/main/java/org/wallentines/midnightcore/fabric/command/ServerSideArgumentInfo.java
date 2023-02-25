@@ -50,11 +50,11 @@ public class ServerSideArgumentInfo<A extends ArgumentType<?>> implements Argume
     public void serializeToJson(ServerSideArgumentInfo<A>.@NotNull Template template, @NotNull JsonObject jsonObject) {
     }
 
-    public ServerSideArgumentInfo<A>.Template deserializeFromNetwork(@NotNull FriendlyByteBuf friendlyByteBuf) {
+    public ServerSideArgumentInfo<A>.@NotNull Template deserializeFromNetwork(@NotNull FriendlyByteBuf friendlyByteBuf) {
         return this.template;
     }
 
-    public ServerSideArgumentInfo<A>.Template unpack(@NotNull A argumentType) {
+    public ServerSideArgumentInfo<A>.@NotNull Template unpack(@NotNull A argumentType) {
         return this.template;
     }
 
@@ -65,11 +65,11 @@ public class ServerSideArgumentInfo<A extends ArgumentType<?>> implements Argume
             this.constructor = function;
         }
 
-        public A instantiate(@NotNull CommandBuildContext commandBuildContext) {
+        public @NotNull A instantiate(@NotNull CommandBuildContext commandBuildContext) {
             return this.constructor.apply(commandBuildContext);
         }
 
-        public ArgumentTypeInfo<A, ?> type() {
+        public @NotNull ArgumentTypeInfo<A, ?> type() {
             return ServerSideArgumentInfo.this;
         }
     }

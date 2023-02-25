@@ -16,6 +16,8 @@ import org.wallentines.midnightcore.spigot.player.SpigotPlayer;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.EnumSet;
+
 public class SpigotSavepointModule extends AbstractSavepointModule {
 
     @Override
@@ -41,9 +43,9 @@ public class SpigotSavepointModule extends AbstractSavepointModule {
     }
 
     @Override
-    public Savepoint createSavepoint(Identifier id) {
+    public Savepoint createSavepoint(Identifier id, EnumSet<Savepoint.SaveFlag> flags) {
 
-        return new SpigotSavepoint(id);
+        return new SpigotSavepoint(id, flags);
     }
 
     @Override

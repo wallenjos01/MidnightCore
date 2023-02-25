@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.api.module.session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.module.savepoint.Savepoint;
 import org.wallentines.midnightcore.api.text.LangProvider;
 import org.wallentines.midnightcore.api.text.PlaceholderManager;
 import org.wallentines.midnightcore.api.text.PlaceholderSupplier;
@@ -23,6 +24,7 @@ public abstract class AbstractSession implements Session {
 
     private final UUID uid;
     private final SavepointModule spm;
+    private final EnumSet<Savepoint.SaveFlag> flags;
     private final String namespace;
     private final Identifier spId;
 
@@ -35,11 +37,16 @@ public abstract class AbstractSession implements Session {
     private final HandlerList<SessionPlayerEvent> leaveCallbacks = new HandlerList<>();
 
     public AbstractSession(String namespace) {
+        this(namespace, EnumSet.allOf(Savepoint.SaveFlag.class));
+    }
+
+    public AbstractSession(String namespace, EnumSet<Savepoint.SaveFlag> savepointFlags) {
 
         this.namespace = namespace;
 
         this.uid = UUID.randomUUID();
         this.spm = MidnightCoreAPI.getModule(SavepointModule.class);
+        this.flags = savepointFlags;
 
         this.spId = new Identifier(namespace, uid.toString());
     }
@@ -60,7 +67,7 @@ public abstract class AbstractSession implements Session {
         if(players.contains(player)) return false;
         if(!shouldAddPlayer(player)) return false;
 
-        spm.savePlayer(player, spId);
+        spm.savePlayer(player, spId, flags);
 
         players.add(player);
 

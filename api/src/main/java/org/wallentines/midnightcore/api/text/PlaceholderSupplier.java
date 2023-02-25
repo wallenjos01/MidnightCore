@@ -1,6 +1,6 @@
 package org.wallentines.midnightcore.api.text;
 
-import org.wallentines.midnightlib.config.serialization.Functions;
+import org.wallentines.mdcfg.Functions;
 
 import java.util.HashMap;
 import java.util.function.Supplier;
@@ -22,16 +22,16 @@ public interface PlaceholderSupplier<T> {
             }
         };
     }
-    static <P, T> PlaceholderSupplier<T> create(Class<P> clazz, Functions.Function1<P, T> run) {
+    static <P, T> PlaceholderSupplier<T> create(Class<P> clazz, Functions.F1<P, T> run) {
         return create(clazz, run, () -> null);
     }
-    static <P, T> PlaceholderSupplier<T> create(Class<P> clazz, Functions.Function1<P, T> run, Supplier<T> def) {
+    static <P, T> PlaceholderSupplier<T> create(Class<P> clazz, Functions.F1<P, T> run, Supplier<T> def) {
         return new PlaceholderSupplier<>() {
             @Override
             public T get(PlaceholderContext ctx) {
 
                 P p = ctx.getArgument(clazz);
-                if(p != null) return run.create(p);
+                if(p != null) return run.apply(p);
 
                 return def.get();
             }
@@ -41,18 +41,18 @@ public interface PlaceholderSupplier<T> {
         };
     }
 
-    static <P, T> PlaceholderSupplier<T> createWithParameter(Class<P> clazz, Functions.Function2<P, String, T> run, Functions.Function1<String, T> def) {
+    static <P, T> PlaceholderSupplier<T> createWithParameter(Class<P> clazz, Functions.F2<P, String, T> run, Functions.F1<String, T> def) {
 
         return ctx -> {
 
             P p = ctx.getArgument(clazz);
-            if(p != null) return run.create(p, ctx.getParameter());
+            if(p != null) return run.apply(p, ctx.getParameter());
 
-            return def.create(ctx.getParameter());
+            return def.apply(ctx.getParameter());
         };
     }
 
-    static <P, P2, T> PlaceholderSupplier<T> create(Class<P> clazz, Class<P2> clazz2, Functions.Function2<P, P2, T> run, Functions.Function1<P, T> onlyFirst, Functions.Function1<P2, T> onlySecond, Supplier<T> def) {
+    static <P, P2, T> PlaceholderSupplier<T> create(Class<P> clazz, Class<P2> clazz2, Functions.F2<P, P2, T> run, Functions.F1<P, T> onlyFirst, Functions.F1<P2, T> onlySecond, Supplier<T> def) {
         return new PlaceholderSupplier<>() {
             @Override
             public T get(PlaceholderContext ctx) {
@@ -60,10 +60,10 @@ public interface PlaceholderSupplier<T> {
 
                 if(p.x == null && p.y == null) return def.get();
 
-                if(p.x == null) return onlySecond.create(p.y);
-                if(p.y == null) return onlyFirst.create(p.x);
+                if(p.x == null) return onlySecond.apply(p.y);
+                if(p.y == null) return onlyFirst.apply(p.x);
 
-                return run.create(p.x, p.y);
+                return run.apply(p.x, p.y);
             }
 
             @Override
@@ -73,23 +73,23 @@ public interface PlaceholderSupplier<T> {
         };
     }
 
-    static <P, P2, T> PlaceholderSupplier<T> createWithParameter(Class<P> clazz, Class<P2> clazz2, Functions.Function3<P, P2, String, T> run, Functions.Function2<P, String, T> onlyFirst, Functions.Function2<P2, String, T> onlySecond, Functions.Function1<String, T> def) {
+    static <P, P2, T> PlaceholderSupplier<T> createWithParameter(Class<P> clazz, Class<P2> clazz2, Functions.F3<P, P2, String, T> run, Functions.F2<P, String, T> onlyFirst, Functions.F2<P2, String, T> onlySecond, Functions.F1<String, T> def) {
 
         return ctx -> {
 
             Tuple<P, P2> p = extractParameters(clazz, clazz2, ctx);
 
-            if(p.x == null && p.y == null) return def.create(ctx.getParameter());
+            if(p.x == null && p.y == null) return def.apply(ctx.getParameter());
 
-            if(p.x == null) return onlySecond.create(p.y, ctx.getParameter());
-            if(p.y == null) return onlyFirst.create(p.x, ctx.getParameter());
+            if(p.x == null) return onlySecond.apply(p.y, ctx.getParameter());
+            if(p.y == null) return onlyFirst.apply(p.x, ctx.getParameter());
 
-            return run.create(p.x, p.y, ctx.getParameter());
+            return run.apply(p.x, p.y, ctx.getParameter());
         };
     }
 
-    static <T> PlaceholderSupplier<T> createWithParameter(Functions.Function1<String, T> out) {
-        return args -> out.create(args.getParameter());
+    static <T> PlaceholderSupplier<T> createWithParameter(Functions.F1<String, T> out) {
+        return args -> out.apply(args.getParameter());
     }
 
     static <T> T get(PlaceholderSupplier<T> supp, PlaceholderContext ctx) {

@@ -1,5 +1,6 @@
 package org.wallentines.midnightcore.fabric.mixin;
 
+import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,5 +18,8 @@ public interface AccessorServerPlayer {
 
     @Invoker
     void callInitMenu(AbstractContainerMenu menu);
+
+    @Accessor("advancements")
+    void setAdvancements(PlayerAdvancements advancements);
 
 }

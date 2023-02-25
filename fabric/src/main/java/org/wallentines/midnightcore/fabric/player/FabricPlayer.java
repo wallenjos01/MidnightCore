@@ -263,6 +263,11 @@ public class FabricPlayer extends AbstractPlayer<ServerPlayer> {
 
     }
 
+    @Override
+    protected ServerPlayer regenCache() {
+        return ((FabricServer) getServer()).getInternal().getPlayerList().getPlayer(getUUID());
+    }
+
     public void setLocale(String locale) {
         this.locale = locale;
     }

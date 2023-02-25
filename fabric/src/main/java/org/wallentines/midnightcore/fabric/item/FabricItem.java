@@ -13,6 +13,7 @@ import org.wallentines.midnightcore.common.item.AbstractItem;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.requirement.RequirementType;
 
@@ -42,7 +43,7 @@ public class FabricItem extends AbstractItem {
         MTranslateComponent out = new MTranslateComponent(internal.getDescriptionId());
 
         int id = internal.getRarity().color.getId();
-        if(id > -1) out.getStyle().withColor(TextColor.fromRGBI(id));
+        if(id > -1) out.getStyle().withColor(Color.fromRGBI(id));
         return out;
     }
 

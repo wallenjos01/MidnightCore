@@ -5,22 +5,26 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
-import org.wallentines.midnightcore.api.module.skin.SkinModule;
 import org.wallentines.midnightcore.api.module.skin.Skinnable;
 import org.wallentines.midnightcore.fabric.event.player.ContainerCloseEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerChangeDimensionEvent;
 import org.wallentines.midnightcore.fabric.event.player.PlayerDropItemEvent;
+import org.wallentines.midnightcore.fabric.event.player.PlayerXPEvent;
 import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightlib.event.Event;
 
 @Mixin(ServerPlayer.class)
 public class MixinServerPlayer implements Skinnable {
+
+    @Shadow private int lastRecordedLevel;
+
+    @Shadow private int lastRecordedExperience;
 
     @Inject(method = "doCloseContainer()V", at = @At("HEAD"))
     private void onClose(CallbackInfo ci) {
@@ -58,6 +62,30 @@ public class MixinServerPlayer implements Skinnable {
         if(event.isCancelled()) {
             ci.cancel();
         }
+    }
+
+    @Inject(method="giveExperienceLevels", at=@At(value="RETURN"))
+    private void onExpGiveLevels(int i, CallbackInfo ci) {
+        if(i == 0) return;
+        Event.invoke(new PlayerXPEvent((ServerPlayer) (Object) this, lastRecordedLevel, lastRecordedExperience));
+    }
+
+    @Inject(method="giveExperiencePoints", at=@At(value="RETURN"))
+    private void onExpGivePoints(int i, CallbackInfo ci) {
+        if(i == 0) return;
+        Event.invoke(new PlayerXPEvent((ServerPlayer) (Object) this, lastRecordedLevel, lastRecordedExperience));
+    }
+
+    @Inject(method="setExperienceLevels", at=@At(value="RETURN"))
+    private void onExpSetLevels(int i, CallbackInfo ci) {
+        if(i == lastRecordedLevel) return;
+        Event.invoke(new PlayerXPEvent((ServerPlayer) (Object) this, lastRecordedLevel, lastRecordedExperience));
+    }
+
+    @Inject(method="setExperiencePoints", at=@At(value="RETURN"))
+    private void onExpSetPoints(int i, CallbackInfo ci) {
+        if(i == lastRecordedExperience) return;
+        Event.invoke(new PlayerXPEvent((ServerPlayer) (Object) this, lastRecordedLevel, lastRecordedExperience));
     }
 
     @Override

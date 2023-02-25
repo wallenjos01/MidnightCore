@@ -8,6 +8,7 @@ import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 
 @SuppressWarnings("unused")
@@ -23,9 +24,9 @@ public abstract class AbstractSavepointModule implements SavepointModule {
     }
 
     @Override
-    public void savePlayer(MPlayer pl, Identifier id) {
+    public void savePlayer(MPlayer pl, Identifier id, EnumSet<Savepoint.SaveFlag> flags) {
 
-        Savepoint sp = createSavepoint(id);
+        Savepoint sp = createSavepoint(id, flags);
         if(sp == null || !sp.save(pl)) return;
 
         savepoints.compute(pl, (k,v) -> {

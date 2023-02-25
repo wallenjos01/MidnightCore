@@ -31,7 +31,7 @@ public abstract class MixinServerGamePacketListener {
     @Shadow public ServerPlayer player;
 
     @Shadow @Final private MinecraftServer server;
-    private Entity midnight_core_currentEntity;
+    private Entity mcore$currentEntity;
 
     @Redirect(method="send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V", at=@At(value = "INVOKE", target="Lnet/minecraft/network/Connection;send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V"))
     private void onSend(Connection instance, Packet<?> packet, PacketSendListener packetSendListener) {
@@ -71,13 +71,13 @@ public abstract class MixinServerGamePacketListener {
 
     @ModifyVariable(method = "handleInteract(Lnet/minecraft/network/protocol/game/ServerboundInteractPacket;)V", at = @At(value = "STORE"), ordinal = 0)
     private Entity onInteract(Entity ent) {
-        midnight_core_currentEntity = ent;
+        mcore$currentEntity = ent;
         return ent;
     }
 
     @ModifyArg(method = "handleInteract(Lnet/minecraft/network/protocol/game/ServerboundInteractPacket;)V", at=@At(value="INVOKE", target="Lnet/minecraft/network/protocol/game/ServerboundInteractPacket;dispatch(Lnet/minecraft/network/protocol/game/ServerboundInteractPacket$Handler;)V"), index=0)
     private ServerboundInteractPacket.Handler onInteract(ServerboundInteractPacket.Handler other) {
-        return new WrappedHandler(player, midnight_core_currentEntity, other);
+        return new WrappedHandler(player, mcore$currentEntity, other);
     }
 
     @Inject(method = "handleClientInformation(Lnet/minecraft/network/protocol/game/ServerboundClientInformationPacket;)V", at=@At(value = "HEAD"))

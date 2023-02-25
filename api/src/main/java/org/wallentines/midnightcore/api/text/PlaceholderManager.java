@@ -34,26 +34,38 @@ public class PlaceholderManager {
 
     public String getInlinePlaceholderValue(PlaceholderSupplier.PlaceholderContext ctx) {
 
+        if(ctx.getName().isEmpty()) return "%";
         CustomPlaceholderInline cp = find(CustomPlaceholderInline.class, pl -> pl.getId().equals(ctx.getName()), ctx.getArgs());
-        if(cp != null) return cp.get();
+        if(cp != null) return cp.get(ctx);
 
         return PlaceholderSupplier.get(inlinePlaceholders.get(ctx.getName()), ctx);
     }
 
     public MComponent getPlaceholderValue(PlaceholderSupplier.PlaceholderContext ctx) {
 
+        if(ctx.getName().isEmpty()) return new MTextComponent("%");
         CustomPlaceholder cp = find(CustomPlaceholder.class, pl -> pl.getId().equals(ctx.getName()), ctx.getArgs());
-        if(cp != null) return cp.get();
+        if(cp != null) return cp.get(ctx);
 
         return PlaceholderSupplier.get(placeholders.get(ctx.getName()), ctx);
     }
 
     public String getFlattenedPlaceholderValue(PlaceholderSupplier.PlaceholderContext ctx) {
 
+        if(ctx.getName().isEmpty()) return "%";
         CustomPlaceholder cp = find(CustomPlaceholder.class, pl -> pl.getId().equals(ctx.getName()), ctx.getArgs());
-        if(cp != null) return cp.get().getAllContent();
+        if(cp != null) return cp.get(ctx).getAllContent();
 
         return Optional.ofNullable(PlaceholderSupplier.get(placeholders.get(ctx.getName()), ctx)).map(MComponent::getAllContent).orElse(null);
+    }
+
+    private String getPreComponentPlaceholderValue(PlaceholderSupplier.PlaceholderContext ctx) {
+
+        if(ctx.getName().isEmpty()) return "%%";
+        CustomPlaceholderInline cp = find(CustomPlaceholderInline.class, pl -> pl.getId().equals(ctx.getName()), ctx.getArgs());
+        if(cp != null) return cp.get(ctx);
+
+        return PlaceholderSupplier.get(inlinePlaceholders.get(ctx.getName()), ctx);
     }
 
     public String applyInlinePlaceholders(String data, Object... args) {
@@ -78,7 +90,7 @@ public class PlaceholderManager {
 
     public MComponent parseText(String text, Object... data) {
 
-        text = applyInlinePlaceholders(text, this::getInlinePlaceholderValue, data);
+        text = applyInlinePlaceholders(text, this::getPreComponentPlaceholderValue, data);
         MComponent comp = MComponent.parse(text);
         return applyPlaceholders(comp, data);
     }
@@ -176,6 +188,8 @@ public class PlaceholderManager {
             out = components.get(0);
         }
         out.getStyle().fillFrom(input.getStyle());
+        out.setHoverEvent(input.getHoverEvent());
+        out.setClickEvent(input.getClickEvent());
 
         for(int i = 1 ; i < components.size() ; i++) {
             out.addChild(components.get(i));
@@ -207,6 +221,10 @@ public class PlaceholderManager {
             } else {
                 placeholder.appendCodePoint(c);
             }
+        }
+
+        if(placeholder.length() == 0) {
+            return new MTextComponent("%");
         }
 
         PlaceholderSupplier.PlaceholderContext ctx = new PlaceholderSupplier.PlaceholderContext(placeholder.toString(), parameter, args);

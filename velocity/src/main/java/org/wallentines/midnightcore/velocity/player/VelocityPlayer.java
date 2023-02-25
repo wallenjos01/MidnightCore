@@ -12,6 +12,7 @@ import org.wallentines.midnightcore.api.text.MComponent;
 import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.velocity.MidnightCore;
+import org.wallentines.midnightcore.velocity.server.VelocityServer;
 import org.wallentines.midnightcore.velocity.util.ConversionUtil;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -23,6 +24,11 @@ public class VelocityPlayer extends AbstractPlayer<Player> {
 
     protected VelocityPlayer(UUID uuid, MServer server) {
         super(uuid, server);
+    }
+
+    @Override
+    protected Player regenCache() {
+        return ((VelocityServer) getServer()).getInternal().getPlayer(getUUID()).orElse(null);
     }
 
     @Override

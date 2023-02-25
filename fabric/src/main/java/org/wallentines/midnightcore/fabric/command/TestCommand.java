@@ -15,6 +15,7 @@ import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.api.item.InventoryGUI;
 import org.wallentines.midnightcore.api.item.MItemStack;
 import org.wallentines.midnightcore.api.module.savepoint.SavepointModule;
 import org.wallentines.midnightcore.api.module.skin.Skin;
@@ -74,6 +75,9 @@ public class TestCommand {
             )
             .then(Commands.literal("item")
                 .executes(TestCommand::itemTestCommand)
+            )
+            .then(Commands.literal("gui")
+                .executes(TestCommand::guiTestCommand)
             )
         );
     }
@@ -237,6 +241,26 @@ public class TestCommand {
             fpl.giveItem(MItemStack.Builder
                     .headWithSkin(new Skin(UUID.fromString("bc4ea7fc-63c3-415a-b5b9-204e5acadd5c"), "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTRkODQ0ZmVlMjRkNWYyN2RkYjY2OTQzODUyOGQ4M2I2ODRkOTAxYjc1YTY4ODlmZTc0ODhkZmM0Y2Y3YTFjIn19fQ==", ""))
                     .withName(fpl.getName()).build());
+
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+
+        return 1;
+    }
+
+    private static int guiTestCommand(CommandContext<CommandSourceStack> context) {
+
+        try {
+            ServerPlayer spl = extractPlayer(context);
+            FabricPlayer fpl = FabricPlayer.wrap(spl);
+
+            InventoryGUI gui = fpl.getServer().getMidnightCore().createGUI(new MTextComponent("Test GUI").withStyle(new MStyle().withColor(TextColor.RED)));
+            gui.setItem(4, MItemStack.Builder.paneWithColor(TextColor.BLUE).withName(new MTextComponent("Hello").withStyle(new MStyle().withColor(TextColor.GOLD))).build(), (click, mpl) -> {
+                mpl.sendMessage(new MTextComponent("Hello"));
+            });
+
+            gui.open(fpl, 0);
 
         } catch (Throwable th) {
             th.printStackTrace();

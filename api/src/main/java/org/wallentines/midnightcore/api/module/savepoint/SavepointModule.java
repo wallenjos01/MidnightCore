@@ -5,10 +5,16 @@ import org.wallentines.midnightcore.api.module.ServerModule;
 import org.wallentines.midnightcore.api.player.MPlayer;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.EnumSet;
+
 @SuppressWarnings("unused")
 public interface SavepointModule extends ServerModule {
 
-    void savePlayer(MPlayer pl, Identifier id);
+    default void savePlayer(MPlayer pl, Identifier id) {
+        savePlayer(pl, id, EnumSet.allOf(Savepoint.SaveFlag.class));
+    }
+
+    void savePlayer(MPlayer pl, Identifier id, EnumSet<Savepoint.SaveFlag> flags);
 
     void loadPlayer(MPlayer pl, Identifier id);
 
@@ -16,7 +22,11 @@ public interface SavepointModule extends ServerModule {
 
     void resetPlayer(MPlayer pl);
 
-    Savepoint createSavepoint(Identifier id);
+    default Savepoint createSavepoint(Identifier id) {
+        return createSavepoint(id, EnumSet.allOf(Savepoint.SaveFlag.class));
+    }
+
+    Savepoint createSavepoint(Identifier id, EnumSet<Savepoint.SaveFlag> flags);
 
     Serializer<Savepoint> getSerializer();
 

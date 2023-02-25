@@ -13,6 +13,7 @@ import org.wallentines.midnightcore.api.text.MTextComponent;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
 import org.wallentines.midnightcore.spigot.adapter.AdapterManager;
 import org.wallentines.midnightcore.spigot.item.ItemHelper;
+import org.wallentines.midnightcore.spigot.server.SpigotServer;
 import org.wallentines.midnightcore.spigot.util.ConversionUtil;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -24,6 +25,11 @@ public class SpigotPlayer extends AbstractPlayer<Player> {
 
     protected SpigotPlayer(UUID uuid, MServer server) {
         super(uuid, server);
+    }
+
+    @Override
+    protected Player regenCache() {
+        return ((SpigotServer) getServer()).getServer().getPlayer(getUUID());
     }
 
     @Override

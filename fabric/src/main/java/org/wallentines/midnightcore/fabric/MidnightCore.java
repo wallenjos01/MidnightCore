@@ -51,7 +51,6 @@ public class MidnightCore implements ModInitializer {
         Path dataFolder = Paths.get("config/MidnightCore");
 
         // Register all the things
-        //Constants.registerDefaults(JsonConfigProvider.INSTANCE);
         Constants.CONFIG_DEFAULTS.set("vanilla_permissions", true);
         Constants.CONFIG_DEFAULTS.set("register_main_command", true);
         Constants.CONFIG_DEFAULTS.set("register_test_command", false);
@@ -115,6 +114,5 @@ public class MidnightCore implements ModInitializer {
             // mods can be easily used in command blocks
             if(api.getConfig().getBoolean("augment_execute_command")) ExecuteAugment.register(event.getDispatcher());
         });
-
     }
 }

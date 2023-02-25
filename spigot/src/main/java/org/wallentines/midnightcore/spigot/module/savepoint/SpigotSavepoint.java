@@ -20,18 +20,22 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+
 public class SpigotSavepoint extends AbstractSavepoint {
 
     private Location location;
     private GameMode gameMode;
     private ConfigSection tag;
 
-    protected SpigotSavepoint(Identifier id) {
-        super(id);
+    protected SpigotSavepoint(Identifier id, EnumSet<SaveFlag> flags) {
+        super(id, flags);
     }
 
-    public SpigotSavepoint(Identifier id, Location location, GameMode gameMode, ConfigSection tag, ConfigSection extraData) {
-        super(id);
+    public SpigotSavepoint(Identifier id, Location location, GameMode gameMode, ConfigSection tag, ConfigSection extraData, EnumSet<SaveFlag> flags) {
+        super(id, flags);
         this.location = location;
         this.gameMode = gameMode;
         this.tag = tag;
@@ -84,10 +88,18 @@ public class SpigotSavepoint extends AbstractSavepoint {
 
     public static final Serializer<SpigotSavepoint> SERIALIZER = ObjectSerializer.create(
             Identifier.serializer(MidnightCoreAPI.DEFAULT_NAMESPACE).entry("id", Savepoint::getId),
-            Location.SERIALIZER.entry("location", sp -> sp.location),
-            InlineSerializer.of(GameMode::name, GameMode::valueOf).entry("gameMode", sp -> sp.gameMode),
-            ConfigSection.SERIALIZER.entry("tag", sp -> sp.tag),
-            ConfigSection.SERIALIZER.entry("extraData", Savepoint::getExtraData),
-            SpigotSavepoint::new
+            Location.SERIALIZER.<SpigotSavepoint>entry("location", sp -> sp.location).optional(),
+            InlineSerializer.of(GameMode::name, GameMode::valueOf).<SpigotSavepoint>entry("gameMode", sp -> sp.gameMode).optional(),
+            ConfigSection.SERIALIZER.<SpigotSavepoint>entry("tag", sp -> sp.tag).optional(),
+            ConfigSection.SERIALIZER.<SpigotSavepoint>entry("extraData", Savepoint::getExtraData).optional(),
+            (id, location, gameMode, tag, extraData) -> {
+                Collection<SaveFlag> flags = new ArrayList<>();
+                if(location != null) flags.add(SaveFlag.LOCATION);
+                if(gameMode != null) flags.add(SaveFlag.GAME_MODE);
+                if(tag != null) flags.add(SaveFlag.DATA_TAG);
+                // TODO: Advancements
+
+                return new SpigotSavepoint(id, location, gameMode, tag, extraData, EnumSet.copyOf(flags));
+            }
     );
 }

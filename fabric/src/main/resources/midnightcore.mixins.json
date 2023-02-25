@@ -4,9 +4,9 @@
   "package": "org.wallentines.midnightcore.fabric.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AccessorArgumentTypeInfos",
     "AccessorClientboundPlayerInfoUpdatePacket",
     "AccessorCommandNode",
+    "AccessorPlayerAdvancements",
     "AccessorServerPlayer",
     "AccessorStyle",
     "MixinAbstractContainerMenu",

@@ -20,29 +20,29 @@ public class MixinEntity {
 
     @Shadow private Entity vehicle;
     @Shadow public Level level;
-    private Entity midnightcore_previous_vehicle;
+    private Entity mcore$lastVehicle;
 
     @Inject(method="removeVehicle", at=@At(value = "HEAD"))
     private void onDismount(CallbackInfo ci) {
 
-        midnightcore_previous_vehicle = vehicle;
+        mcore$lastVehicle = vehicle;
     }
 
     @Inject(method="removeVehicle", at=@At(value = "INVOKE", target="Lnet/minecraft/world/entity/Entity;removePassenger(Lnet/minecraft/world/entity/Entity;)V", shift = At.Shift.AFTER))
     private void afterRemove(CallbackInfo ci) {
 
-        if(midnightcore_previous_vehicle != null) {
+        if(mcore$lastVehicle != null) {
 
             Entity ent = Entity.class.cast(this);
-            EntityDismountVehicleEvent ev = new EntityDismountVehicleEvent(midnightcore_previous_vehicle, ent);
+            EntityDismountVehicleEvent ev = new EntityDismountVehicleEvent(mcore$lastVehicle, ent);
             Event.invoke(ev);
 
             if(ev.isCancelled() && !ev.getVehicle().isRemoved()) {
-                ent.startRiding(midnightcore_previous_vehicle, true);
+                ent.startRiding(mcore$lastVehicle, true);
             }
 
         }
-        midnightcore_previous_vehicle = null;
+        mcore$lastVehicle = null;
     }
 
     @ModifyVariable(method="saveWithoutId", at=@At("HEAD"), ordinal=0, argsOnly = true)

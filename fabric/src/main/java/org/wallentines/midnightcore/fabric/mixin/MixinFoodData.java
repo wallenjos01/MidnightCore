@@ -22,42 +22,42 @@ public abstract class MixinFoodData {
     @Shadow public abstract void eat(int food, float f);
     @Shadow private float saturationLevel;
 
-    private ServerPlayer midnight_core_player;
+    private ServerPlayer mcore$player;
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void onUpdate(Player ent, CallbackInfo info) {
-        if(midnight_core_player == null && ent instanceof ServerPlayer) {
-            midnight_core_player = (ServerPlayer) ent;
+        if(mcore$player == null && ent instanceof ServerPlayer) {
+            mcore$player = (ServerPlayer) ent;
         }
     }
 
     @Redirect(method = "eat(Lnet/minecraft/world/item/Item;Lnet/minecraft/world/item/ItemStack;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/food/FoodData;eat(IF)V"))
     private void onEat(FoodData hungerManager, int food, float f) {
 
-        if(midnight_core_player == null) return;
+        if(mcore$player == null) return;
 
         int oldFood = foodLevel;
         int newFood = Math.min(food + this.foodLevel, 20);
 
-        PlayerFoodLevelChangeEvent event = new PlayerFoodLevelChangeEvent(midnight_core_player, oldFood, newFood);
+        PlayerFoodLevelChangeEvent event = new PlayerFoodLevelChangeEvent(mcore$player, oldFood, newFood);
         Event.invoke(event);
 
         if(!event.isCancelled()) {
             eat(event.getNewFoodLevel() - oldFood, f);
         }
 
-        midnight_core_player.connection.send(new ClientboundSetHealthPacket(midnight_core_player.getHealth(), foodLevel, saturationLevel));
+        mcore$player.connection.send(new ClientboundSetHealthPacket(mcore$player.getHealth(), foodLevel, saturationLevel));
     }
 
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
     private void onChanged(FoodData hungerManager, int value) {
 
-        if (midnight_core_player == null) {
+        if (mcore$player == null) {
             hungerManager.setFoodLevel(value);
             return;
         }
 
-        PlayerFoodLevelChangeEvent event = new PlayerFoodLevelChangeEvent(midnight_core_player, lastFoodLevel, value);
+        PlayerFoodLevelChangeEvent event = new PlayerFoodLevelChangeEvent(mcore$player, lastFoodLevel, value);
         Event.invoke(event);
 
         if (!event.isCancelled()) {

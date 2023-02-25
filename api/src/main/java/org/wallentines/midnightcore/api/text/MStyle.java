@@ -7,7 +7,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 public class MStyle {
 
-    private TextColor color;
+    private Color color;
     private Boolean bold;
     private Boolean italic;
     private Boolean underlined;
@@ -18,7 +18,7 @@ public class MStyle {
     public MStyle() {
     }
 
-    public MStyle(TextColor color, Boolean bold, Boolean italic, Boolean underlined, Boolean strikethrough, Boolean obfuscated, Identifier font) {
+    public MStyle(Color color, Boolean bold, Boolean italic, Boolean underlined, Boolean strikethrough, Boolean obfuscated, Identifier font) {
         this.color = color;
         this.bold = bold;
         this.italic = italic;
@@ -28,7 +28,7 @@ public class MStyle {
         this.font = font;
     }
 
-    public TextColor getColor() {
+    public Color getColor() {
         return color;
     }
 
@@ -56,9 +56,7 @@ public class MStyle {
         return font;
     }
 
-    public MStyle withColor(TextColor value) { this.color = value; return this; }
-
-    public MStyle withColor(Color value) { this.color = new TextColor(value); return this; }
+    public MStyle withColor(Color value) { this.color = value; return this; }
 
     public MStyle withBold(Boolean value) { this.bold = value; return this; }
 
@@ -124,43 +122,6 @@ public class MStyle {
 
         return out.toString();
     }
-
-//    public static final ConfigSerializer<MStyle> LEGACY_SERIALIZER = new ConfigSerializer<>() {
-//        @Override
-//        public MStyle deserialize(ConfigSection section) {
-//
-//            MStyle out = new MStyle();
-//            if(section.has("color")) out.color = section.get("color", TextColor.class);
-//            if(section.has("bold")) out.bold = section.getBoolean("bold");
-//            if(section.has("italic")) out.italic = section.getBoolean("italic");
-//            if(section.has("underlined")) out.underlined = section.getBoolean("underlined");
-//            if(section.has("strikethrough")) out.strikethrough = section.getBoolean("strikethrough");
-//            if(section.has("obfuscated")) out.obfuscated = section.getBoolean("obfuscated");
-//            if(section.has("font")) out.font = section.get("font", Identifier.class);
-//
-//            return out;
-//        }
-//
-//        @Override
-//        public ConfigSection serialize(MStyle object) {
-//
-//            ConfigSection out = new ConfigSection();
-//
-//            if(MidnightCoreAPI.getInstance() == null || MidnightCoreAPI.getInstance().getGameVersion().getMinorVersion() >= 16) {
-//                out.set("color", object.color);
-//            } else if(object.color != null) {
-//                out.set("color", TextColor.LEGACY_SERIALIZER.serialize(object.color));
-//            }
-//            out.set("bold", object.bold);
-//            out.set("italic", object.italic);
-//            out.set("underlined", object.underlined);
-//            out.set("strikethrough", object.strikethrough);
-//            out.set("obfuscated", object.obfuscated);
-//            out.set("font", object.font);
-//
-//            return out;
-//        }
-//    };
 
 
     public static final Serializer<MStyle> SERIALIZER = ObjectSerializer.create(

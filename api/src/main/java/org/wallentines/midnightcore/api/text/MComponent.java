@@ -5,6 +5,7 @@ import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightlib.math.Color;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,6 +51,11 @@ public abstract class MComponent {
 
     public MComponent withStyle(MStyle style) {
         this.style = style;
+        return this;
+    }
+
+    public MComponent withColor(Color color) {
+        this.style.withColor(color);
         return this;
     }
 
@@ -116,7 +122,7 @@ public abstract class MComponent {
     public String toConfigText() {
 
         if(hasNonLegacyComponents()) {
-            return toString();
+            return toJSONString();
         }
 
         return toPlainText('&', getGameVersion() > 15 ? '#' : null);
@@ -154,20 +160,47 @@ public abstract class MComponent {
 
     public MComponent subComponent(int beginIndex, int endIndex) {
 
-        int length = getLength();
-        if(beginIndex < 0 || endIndex >= length) throw new IllegalStateException("Requested sub-component with bounds (" + beginIndex + "," + endIndex + ") exceeds component bounds!");
+        int fullLength = getLength();
+        if(beginIndex < 0 || endIndex > fullLength) throw new IllegalStateException("Requested sub-component with bounds (" + beginIndex + "," + endIndex + ") exceeds component bounds!");
 
-        int index = contentLength();
-
+        int length = contentLength();
         MComponent out = baseCopy().withStyle(style);
-        if(index > endIndex) {
 
-            out.content = out.content.substring(beginIndex, endIndex);
+        if (beginIndex > length) {
+            out = new MTextComponent("").withStyle(style);
+
+        } else if(length > 0) {
+
+            boolean ends = endIndex < out.content.length();
+            int end = Math.min(out.content.length(), endIndex);
+
+            if (beginIndex > 0 || ends) {
+                out.content = out.content.substring(beginIndex, end);
+            }
+
+            if (ends) { // Ends within this component
+                return out;
+            }
         }
 
+        int childEnd = endIndex - length; // Offset start and end
+        int childBegin = beginIndex - length;
         for(MComponent comp : children) {
 
-            out.addChild(comp.subComponent(Math.max(beginIndex - index, 0), endIndex - index));
+            int childLength = comp.getLength();
+
+            if(childEnd > childLength) {
+
+                if(childBegin < childLength) {
+                    out.addChild(comp);
+                }
+                childEnd -= childLength;
+                childBegin -= childLength;
+
+            } else {
+                out.addChild(comp.subComponent(Math.max(childBegin, 0), childEnd));
+                break;
+            }
         }
 
         return out;
@@ -190,7 +223,11 @@ public abstract class MComponent {
     protected abstract int contentLength();
 
     private boolean hasNonLegacyComponents() {
-        return style.getFont() != null || hoverEvent != null || clickEvent != null || insertion != null;
+        if(style.getFont() != null || hoverEvent != null || clickEvent != null || insertion != null) return true;
+        for(MComponent comp : children) {
+            if(comp.hasNonLegacyComponents()) return true;
+        }
+        return false;
     }
 
     public static MComponent parse(String s) {
@@ -248,7 +285,7 @@ public abstract class MComponent {
                     currentString = new StringBuilder();
 
                     i += 1;
-                    currentStyle = new MStyle().withColor(TextColor.fromRGBI(legacy));
+                    currentStyle = new MStyle().withColor(Color.fromRGBI(legacy));
 
                 } else if(next == 'r') {
 
@@ -282,7 +319,7 @@ public abstract class MComponent {
                 currentString = new StringBuilder();
 
                 i += 6;
-                currentStyle = new MStyle().withColor(new TextColor(hex));
+                currentStyle = new MStyle().withColor(new Color(hex));
 
             } else {
                 currentString.append(c);

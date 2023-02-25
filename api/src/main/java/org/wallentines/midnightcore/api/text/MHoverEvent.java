@@ -17,9 +17,9 @@ import java.util.UUID;
 public class MHoverEvent {
 
     private final HoverAction action;
-    private final ConfigSection data;
+    private final ConfigObject data;
 
-    public MHoverEvent(HoverAction action, ConfigSection data) {
+    public MHoverEvent(HoverAction action, ConfigObject data) {
 
         this.action = action;
         this.data = data;
@@ -29,14 +29,19 @@ public class MHoverEvent {
         return action;
     }
 
-    public ConfigSection getContents() {
+    public ConfigObject getContents() {
 
         return data;
     }
 
+    public MComponent getContentsAsText() {
+
+        return MComponent.SERIALIZER.deserialize(ConfigContext.INSTANCE, data).getOrThrow();
+    }
+
     public static MHoverEvent createTextHover(MComponent hover) {
 
-        return new MHoverEvent(HoverAction.SHOW_TEXT, MComponent.OBJECT_SERIALIZER.serialize(ConfigContext.INSTANCE, hover).getOrThrow().asSection());
+        return new MHoverEvent(HoverAction.SHOW_TEXT, MComponent.OBJECT_SERIALIZER.serialize(ConfigContext.INSTANCE, hover).getOrThrow());
     }
 
     public static MHoverEvent createItemHover(MItemStack stack) {
@@ -66,8 +71,7 @@ public class MHoverEvent {
     public static final Serializer<MHoverEvent> SERIALIZER = ObjectSerializer.create(
             InlineSerializer.of(HoverAction::getId, HoverAction::byId).entry("action", MHoverEvent::getAction),
             ConfigObject.SERIALIZER.entry("contents", ev -> ev.data),
-            (action, obj) -> new MHoverEvent(action, obj.asSection())
-    );
+            MHoverEvent::new);
 
     public enum HoverAction {
 
