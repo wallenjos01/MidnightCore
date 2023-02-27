@@ -9,6 +9,7 @@ subprojects {
 
     archivesBaseName = "${project.mod_id}-${project.name}"
 
+
     repositories {
         mavenCentral()
         mavenLocal()

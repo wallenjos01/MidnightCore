@@ -1,8 +1,6 @@
 package org.wallentines.midnightcore.spigot.adapter;
 
 import com.google.common.hash.Hashing;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.EmptyByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
@@ -27,6 +25,9 @@ public class SkinUpdater_v1_15_R1 implements SkinUpdater {
 
         MinecraftServer server = epl.server;
         if(server == null) return;
+
+        // Clients do not close their own inventories on respawn before 1.16
+        spl.closeInventory();
 
         // Create Packets
 

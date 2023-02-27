@@ -21,6 +21,7 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 public class SkinUpdater_v1_17_R1 implements SkinUpdater {
 
@@ -70,8 +71,8 @@ public class SkinUpdater_v1_17_R1 implements SkinUpdater {
                 world.getDimensionManager(),
                 world.getDimensionKey(),
                 BiomeManager.a(world.getSeed()),
-                epl.d.c(),
                 epl.d.getGameMode(),
+                epl.d.c(),
                 world.isDebugWorld(),
                 world.isFlatWorld(),
                 true
@@ -114,7 +115,7 @@ public class SkinUpdater_v1_17_R1 implements SkinUpdater {
 
         GameProfile profile = null;
         for(PacketPlayOutPlayerInfo.PlayerInfoData ent : entries) {
-            for(MPlayer u : MidnightCoreAPI.getInstance().getPlayerManager()) {
+            for(MPlayer u : Objects.requireNonNull(MidnightCoreAPI.getRunningServer()).getPlayerManager()) {
                 if(u.getUUID().equals(ent.a().getId())) {
                     profile = ent.a();
                     break;

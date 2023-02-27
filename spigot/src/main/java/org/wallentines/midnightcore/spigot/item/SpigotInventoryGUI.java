@@ -15,7 +15,12 @@ import org.wallentines.midnightcore.common.item.AbstractInventoryGUI;
 import org.wallentines.midnightcore.spigot.MidnightCore;
 import org.wallentines.midnightcore.spigot.player.SpigotPlayer;
 
+import java.util.HashMap;
+
 public class SpigotInventoryGUI extends AbstractInventoryGUI {
+
+
+    private final HashMap<MPlayer, Inventory> playerMenus = new HashMap<>();
 
     public SpigotInventoryGUI(MComponent title) {
         super(title);
@@ -26,8 +31,8 @@ public class SpigotInventoryGUI extends AbstractInventoryGUI {
 
         Player pl = ((SpigotPlayer) u).getInternal();
         if(pl == null || !pl.isOnline()) return;
-        pl.closeInventory();
 
+        pl.closeInventory();
     }
 
     @Override
@@ -38,49 +43,35 @@ public class SpigotInventoryGUI extends AbstractInventoryGUI {
 
         pl.closeInventory();
 
-        int offset;
-        int rows;
+        PageData pageData = getPageData(page);
 
-        if(pageSize == 0) {
+        Inventory inv = Bukkit.createInventory(null, pageData.size * 9, title.toLegacyText());
+        playerMenus.put(u, inv);
 
-            int max = 0;
-            offset = 54 * page;
+        onUpdate(u, page);
+        pl.openInventory(inv);
+    }
 
-            for (Entry ent : entries.values()) {
-                if (ent.slot > max) {
-                    max = ent.slot;
-                }
-                if (max > offset + 53) {
-                    max = offset + 53;
-                    break;
-                }
-            }
+    @Override
+    public void onUpdate(MPlayer u, int page) {
 
-            if (offset > max) {
-                return;
-            }
+        Inventory inv = playerMenus.get(u);
 
-            rows = ((max - offset) / 9) + 1;
-
-        } else {
-
-            offset = page * (pageSize * 9);
-            rows = pageSize;
+        if(inv == null) {
+            if(page > 0) onOpened(u, 0);
+            return;
         }
 
-        Inventory inv = Bukkit.createInventory(null, rows * 9, title.toLegacyText());
-
+        PageData pageData = getPageData(page);
         for(Entry ent : entries.values()) {
 
-            if(ent.slot < offset || ent.slot >= (offset + (rows * 9)) || ent.item == null) {
+            if(ent.slot < pageData.offset || ent.slot >= (pageData.offset + (pageData.size * 9)) || ent.item == null) {
                 continue;
             }
 
             ItemStack is = ItemHelper.getInternal(ent.item);
-            inv.setItem(ent.slot - offset, is);
+            inv.setItem(ent.slot - pageData.offset, is);
         }
-
-        pl.openInventory(inv);
     }
 
     private static class GUIListener implements Listener {
@@ -122,7 +113,6 @@ public class SpigotInventoryGUI extends AbstractInventoryGUI {
 
         @EventHandler
         private void onClose(InventoryCloseEvent event) {
-
             closeMenu(SpigotPlayer.wrap((Player) event.getPlayer()));
         }
 

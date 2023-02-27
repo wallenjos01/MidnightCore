@@ -161,7 +161,7 @@ public class Adapter_v1_13_R1 implements SpigotAdapter {
     @Override
     public void addTickable(Runnable runnable) {
         CraftServer server = (CraftServer) Bukkit.getServer();
-        server.getHandle().getServer().a((ITickable) runnable);
+        server.getHandle().getServer().a(runnable::run);
     }
 
 }

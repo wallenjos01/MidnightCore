@@ -19,16 +19,20 @@ import org.wallentines.midnightcore.fabric.player.FabricPlayer;
 import org.wallentines.midnightcore.fabric.util.ConversionUtil;
 import org.wallentines.midnightlib.event.Event;
 
+import java.util.HashMap;
+
 
 public class FabricInventoryGUI extends AbstractInventoryGUI {
 
     public FabricInventoryGUI(MComponent title) {
         super(title);
     }
+    private final HashMap<MPlayer, ChestMenu> playerMenus = new HashMap<>();
 
     @Override
     protected void onClosed(MPlayer u) {
         ServerPlayer pl = ((FabricPlayer) u).getInternal();
+        playerMenus.remove(u);
         if(pl != null && pl.containerMenu != pl.inventoryMenu) {
             pl.closeContainer();
         }
@@ -44,55 +48,42 @@ public class FabricInventoryGUI extends AbstractInventoryGUI {
             player.closeContainer();
         }
 
-        int offset;
-        int rows;
+        PageData offsets = getPageData(page);
 
-        if(pageSize == 0) {
+        SimpleContainer inv = new SimpleContainer(offsets.size * 9);
+        ChestMenu handler = createScreen(offsets.size, player, inv);
 
-            int max = 0;
-            offset = 54 * page;
-
-            for (Entry ent : entries.values()) {
-                if (ent.slot > max) {
-                    max = ent.slot;
-                }
-                if (max > offset + 53) {
-                    max = offset + 53;
-                    break;
-                }
-            }
-
-            if (offset > max) {
-                return;
-            }
-
-            rows = ((max - offset) / 9) + 1;
-
-        } else {
-
-            offset = page * (pageSize * 9);
-            rows = pageSize;
-        }
-
-        SimpleContainer inv = new SimpleContainer(rows * 9);
-
-        for(Entry ent : entries.values()) {
-
-            if(ent.slot < offset || ent.slot >= (offset + (rows * 9)) || ent.item == null) {
-                continue;
-            }
-
-            ItemStack is = ((FabricItem) ent.item).getInternal();
-
-            inv.setItem(ent.slot - offset, is);
-        }
-
-        ChestMenu handler = createScreen(rows, player, inv);
+        playerMenus.put(u, handler);
 
         player.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), ConversionUtil.toComponent(title)));
         player.containerMenu = handler;
 
         ((AccessorServerPlayer) player).callInitMenu(handler);
+    }
+
+    @Override
+    public void onUpdate(MPlayer u, int page) {
+
+        ChestMenu menu = playerMenus.get(u);
+        if(menu == null) {
+            if(page > 0) {
+                onOpened(u, page);
+                onUpdate(u, page);
+            }
+            return;
+        }
+
+        PageData data = getPageData(page);
+        for(Entry ent : entries.values()) {
+
+            if(ent.slot < data.offset || ent.slot >= (data.offset + (data.size * 9)) || ent.item == null) {
+                continue;
+            }
+
+            ItemStack is = ((FabricItem) ent.item).getInternal();
+            menu.getContainer().setItem(ent.slot - data.offset, is);
+        }
+
     }
 
     private static ClickType getActionType(int action, net.minecraft.world.inventory.ClickType type) {
@@ -135,7 +126,7 @@ public class FabricInventoryGUI extends AbstractInventoryGUI {
 
         event.setCancelled(true);
 
-        int offset = gui.getPage(pl) * (gui.getPageSize() * 9);
+        int offset = gui.getPageOffset(gui.getPage(pl));
         int slot = event.getSlot();
 
         server.submit(() -> gui.onClick(pl, getActionType(event.getClickType(), event.getAction()), offset + slot));

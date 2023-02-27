@@ -189,7 +189,7 @@ public interface MItemStack {
             }
 
             String s = keys.get(i);
-            Object o = section.get(s);
+            ConfigObject o = section.get(s);
 
             builder.append(s).append(":").append(toNBTString(o));
         }
@@ -198,26 +198,26 @@ public interface MItemStack {
         return builder.toString();
     }
 
-    private static String toNBTString(Object o) {
+    private static String toNBTString(ConfigObject o) {
 
         StringBuilder builder = new StringBuilder();
 
-        if(o instanceof ConfigSection) {
+        if(o.isSection()) {
 
             builder.append(toNBT((ConfigSection) o));
 
-        } else if(o instanceof List<?>) {
+        } else if(o.isList()) {
 
             builder.append("[");
 
             int ints = 0;
 
-            List<?> l = (List<?>) o;
-            for(Object obj : l) {
-                if(obj instanceof Number) ints++;
+            ConfigList l = o.asList();
+            for(ConfigObject obj : l.values()) {
+                if(obj.isNumber()) ints++;
             }
 
-            boolean intArray = ints == l.size() - 1 && "I".equals(l.get(0));
+            boolean intArray = ints == l.size() - 1 && l.get(0).isString() && "I".equals(l.get(0).asString());
 
             if(ints == l.size() || intArray) {
                 builder.append("I;");
@@ -233,27 +233,31 @@ public interface MItemStack {
 
             builder.append("]");
 
-        } else if(o instanceof String) {
+        } else if(o.isPrimitive()) {
 
-            builder.append("\"");
-            char prev = 0;
-            for(char c : ((String) o).toCharArray()) {
+            if(o.isString()) {
 
-                if(c == '"' && prev != '\\') {
+                builder.append("\"");
+                char prev = 0;
+                for (char c : o.asString().toCharArray()) {
 
-                    builder.append("\\\"");
+                    if (c == '"' && prev != '\\') {
 
-                } else {
+                        builder.append("\\\"");
 
-                    builder.append(c);
+                    } else {
+
+                        builder.append(c);
+                    }
+                    prev = c;
                 }
-                prev = c;
+                builder.append("\"");
+
+            } else {
+
+                builder.append(o.asPrimitive().getValue());
             }
-            builder.append("\"");
 
-        } else {
-
-            builder.append(o.toString());
         }
 
         return builder.toString();

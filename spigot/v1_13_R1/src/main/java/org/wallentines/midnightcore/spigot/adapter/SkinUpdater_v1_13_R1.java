@@ -25,6 +25,9 @@ public class SkinUpdater_v1_13_R1 implements SkinUpdater {
         MinecraftServer server = epl.server;
         if(server == null) return;
 
+        // Clients do not close their own inventories on respawn before 1.16
+        spl.closeInventory();
+
         // Create Packets
 
         PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, epl);

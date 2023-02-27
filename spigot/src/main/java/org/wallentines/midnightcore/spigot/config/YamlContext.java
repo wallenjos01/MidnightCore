@@ -31,18 +31,22 @@ public class YamlContext implements SerializeContext<Object> {
         return isList(object) ? (Collection<Object>) object : null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Map<String, Object> asMap(Object object) {
         if(!isMap(object)) return null;
+        if(object instanceof Map) return (Map<String, Object>) object;
 
         Map<String, Object> out = new HashMap<>();
         addMapEntries((ConfigurationSection) object, out);
         return out;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Map<String, Object> asOrderedMap(Object object) {
         if(!isMap(object)) return null;
+        if(object instanceof Map) return (Map<String, Object>) object;
 
         Map<String, Object> out = new LinkedHashMap<>();
         addMapEntries((ConfigurationSection) object, out);
@@ -78,19 +82,26 @@ public class YamlContext implements SerializeContext<Object> {
 
     @Override
     public boolean isMap(Object object) {
-        return object instanceof ConfigurationSection;
+        return object instanceof ConfigurationSection || object instanceof Map;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<String> getOrderedKeys(Object object) {
         if(!isMap(object)) return null;
-        return ((ConfigurationSection) object).getKeys(false);
+        return object instanceof ConfigurationSection ?
+                ((ConfigurationSection) object).getKeys(false) :
+                ((Map<String, ?>) object).keySet();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object get(String key, Object object) {
         if(!isMap(object)) return null;
-        return ((ConfigurationSection) object).get(key);
+
+        return object instanceof ConfigurationSection ?
+                ((ConfigurationSection) object).get(key) :
+                ((Map<String, ?>) object).get(key);
     }
 
     @Override
@@ -126,10 +137,15 @@ public class YamlContext implements SerializeContext<Object> {
         return sec;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object set(String key, Object value, Object object) {
         if(!isMap(object)) return null;
-        ((ConfigurationSection) object).set(key, value);
+        if(object instanceof ConfigurationSection) {
+            ((ConfigurationSection) object).set(key, value);
+        } else {
+            ((Map<String, Object>) object).put(key, value);
+        }
         return value;
     }
 

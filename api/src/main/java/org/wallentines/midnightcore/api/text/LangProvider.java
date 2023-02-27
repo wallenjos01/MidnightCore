@@ -37,10 +37,11 @@ public class LangProvider {
         this.serverLocale = serverLocale;
 
         FileConfig def = FileConfig.findOrCreate(serverLocale, folder, new ConfigSection());
-        def.getRoot().fill(defaults.save());
+        LangRegistry reg = LangRegistry.fromConfigSection(def.getRoot().asSection());
+        reg.fill(defaults);
+        def.setRoot(reg.save());
         def.save();
 
-        LangRegistry reg = LangRegistry.fromConfigSection(def.getRoot().asSection());
         registries.put(serverLocale, reg);
     }
 
@@ -90,10 +91,7 @@ public class LangProvider {
     public void loadEntries(String locale, LangRegistry reg) {
         registries.put(locale, reg);
 
-        FileWrapper<ConfigObject> conf = FileConfig.findOrCreate(locale, folder, new ConfigSection());
-
-
-        conf.load();
+        FileConfig conf = FileConfig.findOrCreate(locale, folder, new ConfigSection());
         conf.getRoot().asSection().fill(reg.save());
         conf.save();
     }
@@ -112,11 +110,12 @@ public class LangProvider {
 
         FileWrapper<ConfigObject> def = FileConfig.findOrCreate(serverLocale, folder, new ConfigSection());
 
-        def.load();
-        def.getRoot().asSection().fill(defaults.save());
+        LangRegistry reg = LangRegistry.fromConfigSection(def.getRoot().asSection());
+        reg.fill(defaults);
+
+        def.setRoot(reg.save());
         def.save();
 
-        LangRegistry reg = LangRegistry.fromConfigSection(def.getRoot().asSection());
         registries.put(serverLocale, reg);
     }
 

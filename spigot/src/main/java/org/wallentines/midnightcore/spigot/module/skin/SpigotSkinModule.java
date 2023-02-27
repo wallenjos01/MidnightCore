@@ -3,6 +3,7 @@ package org.wallentines.midnightcore.spigot.module.skin;
 import com.mojang.authlib.GameProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -28,6 +29,7 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
         if(!super.initialize(configuration, server)) return false;
 
         updater = AdapterManager.getAdapter().getSkinUpdater();
+        if(updater == null) return false;
 
         try {
             updater.init();
@@ -47,7 +49,7 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
         updater.updateSkin(((SpigotPlayer) mpl).getInternal(), skin);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     private void onLogin(PlayerJoinEvent event) {
 
         MPlayer player = SpigotPlayer.wrap(event.getPlayer());
@@ -62,7 +64,7 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     private void onLeave(PlayerQuitEvent event) {
         onLeave(SpigotPlayer.wrap(event.getPlayer()));
     }

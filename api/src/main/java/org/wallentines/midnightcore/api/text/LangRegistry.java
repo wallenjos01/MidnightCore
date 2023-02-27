@@ -3,34 +3,22 @@ package org.wallentines.midnightcore.api.text;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.registry.StringRegistry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.function.Supplier;
 
 public class LangRegistry {
 
-    protected final HashMap<String, Integer> indicesByKey = new HashMap<>();
-    protected final List<LangEntry> entries = new ArrayList<>();
+    protected final StringRegistry<String> entries = new StringRegistry<>();
 
     public void register(String key, String value) {
 
-        if(indicesByKey.containsKey(key)) throw new IllegalArgumentException("Attempt to overwrite lang entry with key " + key + "!");
-
-        int index = entries.size();
-
-        LangEntry ent = new LangEntry();
-        ent.key = key;
-        ent.value = value;
-
-        entries.add(ent);
-        indicesByKey.put(key, index);
+        entries.register(key, value);
     }
 
     public boolean hasKey(String key) {
 
-        return indicesByKey.containsKey(key);
+        return entries.hasKey(key);
     }
 
     @Nullable
@@ -41,10 +29,9 @@ public class LangRegistry {
 
     public String getMessage(String key, Supplier<String> def) {
 
-        Integer index = indicesByKey.get(key);
-        if(index == null) return def.get();
+        if(!entries.hasKey(key)) return def.get();
 
-        return entries.get(index).value;
+        return entries.get(key);
     }
 
     private void registerAll(ConfigSection sec, String prefix) {
@@ -57,7 +44,7 @@ public class LangRegistry {
 
             } else if(obj.isSection()) {
 
-                registerAll((ConfigSection) obj, prefix + key + ".");
+                registerAll(obj.asSection(), prefix + key + ".");
             }
         }
     }
@@ -65,11 +52,20 @@ public class LangRegistry {
     public ConfigSection save() {
 
         ConfigSection out = new ConfigSection();
-        for(LangEntry ent : entries) {
-            out.set(ent.key, ent.value);
+        for(String key : entries.getIds()) {
+            out.set(key, entries.get(key));
         }
 
         return out;
+    }
+
+    public void fill(LangRegistry other) {
+
+        for(String key : other.entries.getIds()) {
+            if(!hasKey(key)) {
+                register(key, other.getMessage(key));
+            }
+        }
     }
 
     public static LangRegistry fromConfigSection(ConfigSection sec) {
@@ -79,11 +75,4 @@ public class LangRegistry {
 
         return out;
     }
-
-    private static class LangEntry {
-
-        String key;
-        String value;
-    }
-
 }

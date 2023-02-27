@@ -29,6 +29,7 @@ include 'spigot:v1_10_R1'
 include 'spigot:v1_11_R1'
 include 'spigot:v1_12_R1'
 include 'spigot:v1_13_R1'
+include 'spigot:v1_13_R2_1131' // 1.13.1 Uses the same API version as 1.13.2, but has some different symbol names
 include 'spigot:v1_13_R2'
 include 'spigot:v1_14_R1'
 include 'spigot:v1_15_R1'
@@ -38,7 +39,9 @@ include 'spigot:v1_16_R3'
 include 'spigot:v1_17_R1'
 include 'spigot:v1_18_R1'
 include 'spigot:v1_18_R2'
+include 'spigot:v1_19_R1_1190' // 1.19 Uses the same API version as 1.19.1 and 1.19.2, but has some different symbol names
 include 'spigot:v1_19_R1'
+include 'spigot:v1_19_R2'
 
 include 'spigot:plugin'
 

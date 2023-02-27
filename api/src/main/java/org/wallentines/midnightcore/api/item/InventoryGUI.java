@@ -26,7 +26,13 @@ public interface InventoryGUI {
 
     void close(MPlayer player);
 
+    void update();
+
+    void update(MPlayer player);
+
     int getPage(MPlayer player);
+
+    int getPageOffset(int page);
 
     void addCloseCallback(Consumer<MPlayer> player);
 

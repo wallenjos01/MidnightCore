@@ -21,27 +21,12 @@ public class FileConfig extends FileWrapper<ConfigObject> {
     }
 
     public static FileConfig findOrCreate(String prefix, File folder) {
-        return findOrCreate(prefix, folder, null);
+        return findOrCreate(prefix, folder, new ConfigSection());
     }
 
     public static FileConfig findOrCreate(String prefix, File folder, ConfigSection defaults) {
 
-        FileWrapper<ConfigObject> out = REGISTRY.findOrCreate(ConfigContext.INSTANCE, prefix, folder);
-        try {
-            out.load();
-        } catch (DecodeException ex) {
-            out.setRoot(new ConfigSection());
-            out.save();
-        }
-        if(defaults != null) {
-            if(out.getRoot() == null) {
-                out.setRoot(defaults);
-            } else {
-                if(!out.getRoot().isSection()) out.setRoot(new ConfigSection());
-                out.getRoot().asSection().fill(defaults.asSection());
-            }
-        }
-
+        FileWrapper<ConfigObject> out = REGISTRY.findOrCreate(ConfigContext.INSTANCE, prefix, folder, defaults);
         return fromWrapper(out);
     }
 

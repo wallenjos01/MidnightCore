@@ -2,6 +2,7 @@ package org.wallentines.midnightcore.spigot.adapter;
 
 import org.bukkit.Bukkit;
 import org.wallentines.midnightcore.api.MidnightCoreAPI;
+import org.wallentines.midnightcore.spigot.MidnightCore;
 
 public class Adapters {
 
@@ -11,8 +12,17 @@ public class Adapters {
 
         SpigotAdapter adapter;
         switch(API_VERSION) {
+            case "v1_19_R2":
+                adapter = new Adapter_v1_19_R2();
+                break;
             case "v1_19_R1":
-                adapter = new Adapter_v1_19_R1();
+
+                // Determine if it is 1.19 or 1.19.1/1.19.2
+                if(MidnightCore.GAME_VERSION.getPatchVersion() == 0) {
+                    adapter = new Adapter_v1_19_R1_1190();
+                } else {
+                    adapter = new Adapter_v1_19_R1();
+                }
                 break;
             case "v1_18_R2":
                 adapter = new Adapter_v1_18_R2();
@@ -39,7 +49,13 @@ public class Adapters {
                 adapter = new Adapter_v1_14_R1();
                 break;
             case "v1_13_R2":
-                adapter = new Adapter_v1_13_R2();
+
+                // Determine if it is 1.13.1 or 1.13.2
+                if(MidnightCore.GAME_VERSION.getPatchVersion() == 1) {
+                    adapter = new Adapter_v1_13_R2_1131();
+                } else {
+                    adapter = new Adapter_v1_13_R2();
+                }
                 break;
             case "v1_13_R1":
                 adapter = new Adapter_v1_13_R1();

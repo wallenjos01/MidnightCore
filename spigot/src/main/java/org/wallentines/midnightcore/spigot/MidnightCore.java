@@ -21,7 +21,6 @@ import org.wallentines.midnightcore.spigot.module.skin.SpigotSkinModule;
 import org.wallentines.midnightcore.spigot.text.SpigotScoreboard;
 import org.wallentines.midnightcore.spigot.server.SpigotServer;
 import org.wallentines.midnightlib.Version;
-import org.wallentines.midnightlib.config.ConfigRegistry;
 import org.wallentines.mdcfg.ConfigSection;
 
 import java.io.File;
@@ -34,32 +33,29 @@ public class MidnightCore {
     public static void onLoad(Plugin instance) {
         INSTANCE = instance;
 
-        FileConfig.REGISTRY.registerFileCodec(YamlCodec.fileCodec());
+        FileConfig.REGISTRY.registerFileCodec(YamlCodec.fileCodec(), true);
         Constants.registerDefaults();
     }
+
+    public static final Version GAME_VERSION = Version.SERIALIZER.deserialize(Bukkit.getVersion().substring(Bukkit.getVersion().indexOf("MC: ") + 4, Bukkit.getVersion().length() - 1));
 
     public static void onEnable(File dataFolder, Server server, Plugin plugin) {
 
 
         Path dataDir = dataFolder.toPath();
 
-        String bkVer = Bukkit.getVersion();
-        String ver = bkVer.substring(bkVer.indexOf("MC: ") + 4, bkVer.length() - 1);
-
-        Version version = Version.SERIALIZER.deserialize(ver);
-
         ConfigSection langDefaults = YamlCodec.INSTANCE.decode(ConfigContext.INSTANCE, MidnightCore.class.getResourceAsStream("/lang/en_us.yml")).asSection();
 
         MidnightCoreImpl api = new MidnightCoreImpl(
                 dataDir,
-                version,
+                GAME_VERSION,
                 langDefaults,
-                ItemHelper.getItemConverter(version),
+                ItemHelper.getItemConverter(GAME_VERSION),
                 SpigotInventoryGUI::new,
                 SpigotScoreboard::new
         );
 
-        MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + version);
+        MidnightCoreAPI.getLogger().info("Starting MidnightCore with Game Version " + GAME_VERSION);
 
         // Register Spigot Modules
         Registries.MODULE_REGISTRY.register(AbstractSavepointModule.ID, SpigotSavepointModule.MODULE_INFO);

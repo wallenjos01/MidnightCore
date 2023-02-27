@@ -22,6 +22,7 @@ import org.wallentines.midnightcore.api.player.MPlayer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 public class SkinUpdater_v1_18_R2 implements SkinUpdater {
 
@@ -37,6 +38,8 @@ public class SkinUpdater_v1_18_R2 implements SkinUpdater {
 
         MinecraftServer server = epl.c;
         if(server == null) return;
+
+        spl.closeInventory();
 
         // Create Packets
 
@@ -117,7 +120,7 @@ public class SkinUpdater_v1_18_R2 implements SkinUpdater {
 
         GameProfile profile = null;
         for(PacketPlayOutPlayerInfo.PlayerInfoData ent : entries) {
-            for(MPlayer u : MidnightCoreAPI.getInstance().getPlayerManager()) {
+            for(MPlayer u : Objects.requireNonNull(MidnightCoreAPI.getRunningServer()).getPlayerManager()) {
                 if(u.getUUID().equals(ent.a().getId())) {
                     profile = ent.a();
                     break;

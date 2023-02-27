@@ -43,6 +43,7 @@ dependencies {
     compileOnly project(':spigot:v1_11_R1')
     compileOnly project(':spigot:v1_12_R1')
     compileOnly project(':spigot:v1_13_R1')
+    compileOnly project(':spigot:v1_13_R2_1131')
     compileOnly project(':spigot:v1_13_R2')
     compileOnly project(':spigot:v1_14_R1')
     compileOnly project(':spigot:v1_15_R1')
@@ -52,7 +53,9 @@ dependencies {
     compileOnly project(':spigot:v1_17_R1')
     compileOnly project(':spigot:v1_18_R1')
     compileOnly project(':spigot:v1_18_R2')
+    compileOnly project(':spigot:v1_19_R1_1190')
     compileOnly project(':spigot:v1_19_R1')
+    compileOnly project(':spigot:v1_19_R2')
 
     shade 'org.wallentines:midnightlib:1.0-SNAPSHOT'
 
@@ -69,6 +72,7 @@ dependencies {
     shade project(':spigot:v1_11_R1')
     shade project(':spigot:v1_12_R1')
     shade project(':spigot:v1_13_R1')
+    shade project(':spigot:v1_13_R2_1131')
     shade project(':spigot:v1_13_R2')
     shade project(':spigot:v1_14_R1')
     shade project(':spigot:v1_15_R1')
@@ -78,9 +82,34 @@ dependencies {
     shade project(':spigot:v1_17_R1')
     shade project(':spigot:v1_18_R1')
     shade project(':spigot:v1_18_R2')
+    shade project(':spigot:v1_19_R1_1190')
     shade project(':spigot:v1_19_R1')
+    shade project(':spigot:v1_19_R2')
+
+
+    testImplementation 'org.wallentines:midnightlib:1.0-SNAPSHOT'
+    testImplementation project(':api')
+    testImplementation project(':common')
+    testImplementation project(':spigot')
+    testImplementation('org.jetbrains:annotations:16.0.2')
+    testImplementation('com.mojang:authlib:2.1.28')
+    testImplementation('com.mojang:datafixerupper:4.0.26')
+    testImplementation('com.mojang:brigadier:1.0.17')
+    testImplementation('org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT')
+    testImplementation('org.spigotmc:spigot:1.19.3-R0.1-SNAPSHOT') {
+        transitive = false
+    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
 }
 
+test {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    useJUnitPlatform()
+}
 
 processResources {
 

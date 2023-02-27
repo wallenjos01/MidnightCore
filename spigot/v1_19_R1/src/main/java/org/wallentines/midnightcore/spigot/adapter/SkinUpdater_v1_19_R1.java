@@ -17,10 +17,7 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.api.module.skin.Skin;
 import org.wallentines.midnightcore.api.player.MPlayer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class SkinUpdater_v1_19_R1 implements SkinUpdater {
 
@@ -83,8 +80,6 @@ public class SkinUpdater_v1_19_R1 implements SkinUpdater {
         // Send Packets
         for(EntityPlayer obs : epl.c.ac().t()) {
 
-            MidnightCoreAPI.getLogger().warn("Sending Packets to " + obs.displayName);
-
             obs.b.a(remove);
             obs.b.a(add);
 
@@ -121,7 +116,7 @@ public class SkinUpdater_v1_19_R1 implements SkinUpdater {
         int index = 0;
         for(; index < entries.size() ; index++) {
             PacketPlayOutPlayerInfo.PlayerInfoData ent = entries.get(index);
-            for(MPlayer u : MidnightCoreAPI.getInstance().getPlayerManager()) {
+            for(MPlayer u : Objects.requireNonNull(MidnightCoreAPI.getRunningServer()).getPlayerManager()) {
                 if(u.getUUID().equals(ent.a().getId())) {
                     entry = ent;
                     break;

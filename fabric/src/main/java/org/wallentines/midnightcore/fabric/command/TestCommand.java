@@ -258,6 +258,18 @@ public class TestCommand {
             InventoryGUI gui = fpl.getServer().getMidnightCore().createGUI(new MTextComponent("Test GUI").withStyle(new MStyle().withColor(TextColor.RED)));
             gui.setItem(4, MItemStack.Builder.paneWithColor(TextColor.BLUE).withName(new MTextComponent("Hello").withStyle(new MStyle().withColor(TextColor.GOLD))).build(), (click, mpl) -> {
                 mpl.sendMessage(new MTextComponent("Hello"));
+                gui.open(mpl, 1);
+            });
+            gui.setItem(54, MItemStack.Builder.woolWithColor(TextColor.GOLD).withName(new MTextComponent("Page 2")).build(), (click, mpl) ->
+                mpl.sendMessage(new MTextComponent("Page 2"))
+            );
+            gui.setItem(107, MItemStack.Builder.paneWithColor(TextColor.GREEN).withName(new MTextComponent("To Page 3")).build(), (click, mpl) -> {
+                mpl.sendMessage(new MTextComponent("Test"));
+                gui.open(mpl, 2);
+            });
+            gui.setItem(115, MItemStack.Builder.woolWithColor(TextColor.RED).withName(new MTextComponent("Page 3")).build(), (click, mpl) -> {
+                mpl.sendMessage(new MTextComponent("Goodbye"));
+                gui.close(mpl);
             });
 
             gui.open(fpl, 0);
