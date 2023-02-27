@@ -89,7 +89,7 @@ public class SkinUpdater_v1_19_R2 implements SkinUpdater {
                 epl.d.c(),
                 world.af(),
                 world.A(),
-                (byte) 0,
+                (byte) 3, // Preserve Metadata
                 Optional.empty()
         );
 
@@ -114,9 +114,8 @@ public class SkinUpdater_v1_19_R2 implements SkinUpdater {
 
         epl.b.a(respawn);
         epl.b.a(position);
-        epl.b.a(abilities);
         epl.b.a(equip);
-        if(tracker != null) epl.b.a(tracker);
+        epl.b.a(abilities);
 
 
         server.g(() -> {

@@ -95,6 +95,7 @@ public abstract class AbstractSessionModule implements SessionModule {
     @Override
     public boolean initialize(ConfigSection section, MServer data) {
 
+        data.tickEvent().register(this, ev -> tickAll());
         return true;
     }
 

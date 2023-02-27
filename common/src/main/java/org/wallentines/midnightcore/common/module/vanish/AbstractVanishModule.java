@@ -122,6 +122,14 @@ public abstract class AbstractVanishModule implements VanishModule {
         return vanished.containsKey(observer) && vanished.get(observer).contains(player);
     }
 
+    protected void onJoin(MPlayer player) {
+        if(isVanished(player)) {
+            for(MPlayer pl : server.getPlayerManager()) {
+                doVanish(player, pl);
+            }
+        }
+    }
+
     protected static final ConfigSection DEFAULTS = new ConfigSection().with("hide_join_messages", true);
     public static final Identifier ID = new Identifier(MidnightCoreAPI.DEFAULT_NAMESPACE, "vanish");
 

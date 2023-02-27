@@ -65,9 +65,12 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
     }
 
     public void setActiveServer(AbstractServer server) {
-        this.currentServer = server;
 
-        if(server != null) {
+        if(server == null) {
+
+            if(this.currentServer != null) this.currentServer.getModuleManager().unloadAll();
+
+        } else {
 
             STARTUP_LISTENERS.forEach(ls -> ls.accept(server));
 
@@ -75,6 +78,7 @@ public class MidnightCoreImpl extends MidnightCoreAPI {
             server.loadModules(Registries.MODULE_REGISTRY);
             config.save();
         }
+        this.currentServer = server;
     }
 
     @Override

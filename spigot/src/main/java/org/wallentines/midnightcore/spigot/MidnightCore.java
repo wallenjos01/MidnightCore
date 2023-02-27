@@ -9,14 +9,20 @@ import org.wallentines.midnightcore.api.MidnightCoreAPI;
 import org.wallentines.midnightcore.common.Constants;
 import org.wallentines.midnightcore.common.MidnightCoreImpl;
 import org.wallentines.midnightcore.api.Registries;
+import org.wallentines.midnightcore.common.module.extension.ExtensionHelper;
+import org.wallentines.midnightcore.common.module.messaging.AbstractMessagingModule;
 import org.wallentines.midnightcore.common.module.savepoint.AbstractSavepointModule;
+import org.wallentines.midnightcore.common.module.session.AbstractSessionModule;
 import org.wallentines.midnightcore.common.module.skin.AbstractSkinModule;
 import org.wallentines.midnightcore.spigot.config.YamlCodec;
 import org.wallentines.midnightcore.spigot.event.MidnightCoreInitializeEvent;
 import org.wallentines.midnightcore.spigot.event.MidnightCoreLoadModulesEvent;
 import org.wallentines.midnightcore.spigot.item.ItemHelper;
 import org.wallentines.midnightcore.spigot.item.SpigotInventoryGUI;
+import org.wallentines.midnightcore.spigot.module.extension.SpigotExtensionModule;
+import org.wallentines.midnightcore.spigot.module.messaging.SpigotMessagingModule;
 import org.wallentines.midnightcore.spigot.module.savepoint.SpigotSavepointModule;
+import org.wallentines.midnightcore.spigot.module.session.SpigotSessionModule;
 import org.wallentines.midnightcore.spigot.module.skin.SpigotSkinModule;
 import org.wallentines.midnightcore.spigot.text.SpigotScoreboard;
 import org.wallentines.midnightcore.spigot.server.SpigotServer;
@@ -29,6 +35,7 @@ import java.nio.file.Path;
 public class MidnightCore {
 
     private static Plugin INSTANCE;
+    private static MidnightCoreImpl api;
 
     public static void onLoad(Plugin instance) {
         INSTANCE = instance;
@@ -46,7 +53,7 @@ public class MidnightCore {
 
         ConfigSection langDefaults = YamlCodec.INSTANCE.decode(ConfigContext.INSTANCE, MidnightCore.class.getResourceAsStream("/lang/en_us.yml")).asSection();
 
-        MidnightCoreImpl api = new MidnightCoreImpl(
+        api = new MidnightCoreImpl(
                 dataDir,
                 GAME_VERSION,
                 langDefaults,
@@ -60,11 +67,20 @@ public class MidnightCore {
         // Register Spigot Modules
         Registries.MODULE_REGISTRY.register(AbstractSavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
         Registries.MODULE_REGISTRY.register(AbstractSkinModule.ID, SpigotSkinModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(AbstractMessagingModule.ID, SpigotMessagingModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(ExtensionHelper.ID, SpigotExtensionModule.MODULE_INFO);
+        Registries.MODULE_REGISTRY.register(AbstractSessionModule.ID, SpigotSessionModule.MODULE_INFO);
         server.getPluginManager().callEvent(new MidnightCoreLoadModulesEvent(api, Registries.MODULE_REGISTRY));
 
         api.setActiveServer(new SpigotServer(api, server, plugin));
 
         server.getPluginManager().callEvent(new MidnightCoreInitializeEvent(api));
+    }
+
+    public static void onDisable() {
+
+        api.setActiveServer(null);
+
     }
 
     public static Plugin getInstance() {

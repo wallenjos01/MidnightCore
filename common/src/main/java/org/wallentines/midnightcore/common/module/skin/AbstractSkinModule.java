@@ -99,7 +99,7 @@ public abstract class AbstractSkinModule implements SkinModule {
         loadedSkins.put(uid, loginSkins.get(uid));
     }
 
-    protected void findOfflineSkin(MPlayer player, GameProfile prof) {
+    protected void findOfflineModeSkin(MPlayer player, GameProfile prof) {
 
         String name = prof.getName();
 
@@ -124,7 +124,7 @@ public abstract class AbstractSkinModule implements SkinModule {
     @Override
     public void updateSkin(MPlayer user) {
 
-        if(!loadedSkins.containsKey(user) && !activeSkins.containsKey(user)) return;
+        if(!loadedSkins.containsKey(user) && !activeSkins.containsKey(user) || user.isOffline()) return;
 
         Skin oldSkin = activeSkins.get(user);
         Skin newSkin = loadedSkins.get(user);

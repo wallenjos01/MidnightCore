@@ -23,14 +23,10 @@ import org.wallentines.midnightlib.registry.Identifier;
 public class FabricMessagingModule extends AbstractMessagingModule {
 
 
-    private FabricMessagingModule() {
-
-        Event.register(CustomMessageEvent.class, this, this::onMessage);
-    }
-
     @Override
     public boolean initialize(ConfigSection configuration, MServer server) {
 
+        Event.register(CustomMessageEvent.class, this, this::onMessage);
         Event.register(ServerBeginQueryEvent.class, this, ev ->
                 loginHandlers.forEach(l -> l.accept(ev.getNegotiator())));
 

@@ -91,7 +91,11 @@ public interface MItemStack {
         }
 
         public Builder withTag(ConfigSection sec) {
-            tag.fillOverwrite(sec);
+            if(sec == null) {
+                tag = null;
+            } else {
+                tag.fillOverwrite(sec);
+            }
             return this;
         }
 

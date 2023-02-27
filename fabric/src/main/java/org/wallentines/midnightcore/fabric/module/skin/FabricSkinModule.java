@@ -54,7 +54,7 @@ public class FabricSkinModule extends AbstractSkinModule {
             setLoginSkin(player, s);
             if(getOfflineModeSkins && !mc.usesAuthentication()) {
 
-                findOfflineSkin(player, event.getProfile());
+                findOfflineModeSkin(player, event.getProfile());
 
             } else {
 
@@ -118,7 +118,7 @@ public class FabricSkinModule extends AbstractSkinModule {
         List<SynchedEntityData.DataValue<?>> entityData = player.getEntityData().getNonDefaultValues();
         ClientboundSetEntityDataPacket tracker = null;
         if(entityData != null) {
-             tracker = new ClientboundSetEntityDataPacket(player.getId(), entityData);
+            tracker = new ClientboundSetEntityDataPacket(player.getId(), entityData);
         }
 
         float headRot = player.getYHeadRot();
@@ -136,12 +136,11 @@ public class FabricSkinModule extends AbstractSkinModule {
                 player.gameMode.getPreviousGameModeForPlayer(),
                 world.isDebug(),
                 world.isFlat(),
-                (byte) 0,
+                (byte) 3, // Preserve Metadata
                 Optional.empty()
         );
 
         ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(player.getX(), player.getY(), player.getZ(), player.getRotationVector().y, player.getRotationVector().x, new HashSet<>(), 0, false);
-        ClientboundPlayerAbilitiesPacket abilities = new ClientboundPlayerAbilitiesPacket(player.getAbilities());
 
         // Send Packets
 
@@ -161,13 +160,12 @@ public class FabricSkinModule extends AbstractSkinModule {
 
         player.connection.send(respawn);
         player.connection.send(position);
-        player.connection.send(abilities);
         player.connection.send(equip);
-        if(tracker != null) player.connection.send(tracker);
 
         server.getPlayerList().sendPlayerPermissionLevel(player);
         server.getPlayerList().sendAllPlayerInfo(player);
 
+        player.onUpdateAbilities();
         player.getInventory().tick();
 
         player.setDeltaMovement(velocity);

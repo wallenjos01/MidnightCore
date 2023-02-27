@@ -58,7 +58,7 @@ public class SpigotSkinModule extends AbstractSkinModule implements Listener {
         Skin s = MojangUtil.getSkinFromProfile(prof);
         setLoginSkin(player, s);
         if(getOfflineModeSkins && !Bukkit.getServer().getOnlineMode()) {
-            findOfflineSkin(player, prof);
+            findOfflineModeSkin(player, prof);
         } else {
             setActiveSkin(player, s);
         }

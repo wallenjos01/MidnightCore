@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.wallentines.midnightcore.api.server.MServer;
 import org.wallentines.midnightcore.common.player.AbstractPlayer;
@@ -35,7 +35,7 @@ public class SpigotPlayerManager extends AbstractPlayerManger<Player> implements
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    private void onJoin(PlayerJoinEvent event) {
+    private void onJoin(PlayerLoginEvent event) {
         cachePlayer(event.getPlayer().getUniqueId(), event.getPlayer());
     }
 

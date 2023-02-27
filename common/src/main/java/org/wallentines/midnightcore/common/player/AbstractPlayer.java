@@ -80,6 +80,7 @@ public abstract class AbstractPlayer<T> implements MPlayer {
 
     @Override
     public void setSkin(Skin skin) {
+        if(getInternal() == null) return;
         SkinModule mod = server.getModule(SkinModule.class);
         if(mod != null) {
             mod.setSkin(this, skin);
@@ -89,6 +90,7 @@ public abstract class AbstractPlayer<T> implements MPlayer {
 
     @Override
     public void resetSkin() {
+        if(getInternal() == null) return;
         SkinModule mod = server.getModule(SkinModule.class);
         if(mod != null) {
             mod.resetSkin(this);
@@ -98,7 +100,6 @@ public abstract class AbstractPlayer<T> implements MPlayer {
 
     @Override
     public Skin getSkin() {
-
         SkinModule mod = server.getModule(SkinModule.class);
         if(mod != null) {
             return mod.getSkin(this);

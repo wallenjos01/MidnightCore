@@ -58,6 +58,10 @@ public abstract class AbstractMessagingModule implements MessagingModule {
         handlers.remove(id);
     }
 
+    protected void handle(MPlayer sender, Identifier id, byte[] data) {
+        handle(sender, id, Unpooled.wrappedBuffer(data));
+    }
+
     protected void handle(MPlayer sender, Identifier id, ByteBuf res) {
 
         MessageHandler handler = handlers.get(id);

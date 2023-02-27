@@ -65,10 +65,8 @@ public class FabricVanishModule extends AbstractVanishModule {
             FabricPlayer fp = FabricPlayer.wrap(event.getPlayer());
             if(isVanished(fp)) {
                 if (hideMessages) event.setJoinMessage((Component) null);
-                for(MPlayer pl : server.getPlayerManager()) {
-                    doVanish(fp, pl);
-                }
             }
+            onJoin(fp);
         });
 
         Event.register(PlayerLeaveEvent.class, this, event -> {
