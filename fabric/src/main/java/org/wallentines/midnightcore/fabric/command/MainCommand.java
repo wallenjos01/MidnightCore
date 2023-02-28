@@ -74,12 +74,12 @@ public class MainCommand {
 
     private static int moduleLoadCommand(CommandContext<CommandSourceStack> context) {
 
-        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
-        if(api == null) {
-            throw new CommandRuntimeException(Component.literal("MidnightCoreAPI has not been created!"));
+        MServer server = MidnightCoreAPI.getRunningServer();
+        if(server == null) {
+            throw new CommandRuntimeException(Component.literal("There is no server running!"));
         }
 
-        LangProvider prov = api.getLangProvider();
+        LangProvider prov = server.getMidnightCore().getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
         ModuleInfo<MServer, ServerModule> info = Registries.MODULE_REGISTRY.get(id);
@@ -88,13 +88,12 @@ public class MainCommand {
             return 0;
         }
 
-
-        if(api.getModuleManager().isModuleLoaded(id)) {
+        if(server.getModuleManager().isModuleLoaded(id)) {
             CommandUtil.sendCommandFailure(context, prov, "command.error.module_loaded");
             return 0;
         }
 
-        api.getModuleManager().loadModule(info, api.getServer(), api.getConfig().getSection("modules").getOrCreateSection(id.toString()));
+        server.getModuleManager().loadModule(info, server, server.getModuleConfig().getRoot().getSection("modules").getOrCreateSection(id.toString()));
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.loaded", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -102,31 +101,31 @@ public class MainCommand {
 
     private static int moduleUnloadCommand(CommandContext<CommandSourceStack> context) {
 
-        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
-        LangProvider prov = getLangProvider();
+        MServer server = MidnightCoreAPI.getRunningServer();
+        if(server == null) return 0;
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        if(api == null || !api.getModuleManager().isModuleLoaded(id)) {
-            CommandUtil.sendCommandFailure(context, prov, "command.error.module_not_loaded");
+        if(!server.getModuleManager().isModuleLoaded(id)) {
+            CommandUtil.sendCommandFailure(context, getLangProvider(), "command.error.module_not_loaded");
             return 0;
         }
 
-        api.getModuleManager().unloadModule(id);
-        CommandUtil.sendCommandSuccess(context, prov, false, "command.module.unloaded", CustomPlaceholderInline.create("module_id", id.toString()));
+        server.getModuleManager().unloadModule(id);
+        CommandUtil.sendCommandSuccess(context, getLangProvider(), false, "command.module.unloaded", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
     }
 
     private static int moduleEnableCommand(CommandContext<CommandSourceStack> context) {
 
-        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
-        if(api == null) return 0;
+        MServer server = MidnightCoreAPI.getRunningServer();
+        if(server == null) return 0;
 
         LangProvider prov = getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        api.getServer().getModuleConfig().getRoot().getOrCreateSection(id.toString()).set("enabled", true);
-        api.getServer().getModuleConfig().save();
+        server.getModuleConfig().getRoot().getOrCreateSection(id.toString()).set("enabled", true);
+        server.getModuleConfig().save();
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.enabled", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -134,14 +133,14 @@ public class MainCommand {
 
     private static int moduleDisableCommand(CommandContext<CommandSourceStack> context) {
 
-        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
-        if(api == null) return 0;
+        MServer server = MidnightCoreAPI.getRunningServer();
+        if(server == null) return 0;
 
         LangProvider prov = getLangProvider();
 
         Identifier id = ConversionUtil.toIdentifier(context.getArgument("module", ResourceLocation.class));
-        api.getServer().getModuleConfig().getRoot().getOrCreateSection(id.toString()).set("enabled", false);
-        api.getServer().getModuleConfig().save();
+        server.getModuleConfig().getRoot().getOrCreateSection(id.toString()).set("enabled", false);
+        server.getModuleConfig().save();
         CommandUtil.sendCommandSuccess(context, prov, false, "command.module.disabled", CustomPlaceholderInline.create("module_id", id.toString()));
 
         return 1;
@@ -149,22 +148,22 @@ public class MainCommand {
 
     private static int moduleListCommand(CommandContext<CommandSourceStack> context) {
 
-        MidnightCoreAPI api = MidnightCoreAPI.getInstance();
-        if(api == null) return 0;
+        MServer server = MidnightCoreAPI.getRunningServer();
+        if(server == null) return 0;
 
         LangProvider prov = getLangProvider();
 
-        context.getSource().sendSuccess(ConversionUtil.toComponent(prov.getMessage("command.module.list.header", "en_us")), false);
+        CommandUtil.sendCommandSuccess(context, prov,false, "command.module.list.header");
 
-        ModuleManager<MServer, ServerModule> manager = api.getModuleManager();
+        ModuleManager<MServer, ServerModule> manager = server.getModuleManager();
         for (ModuleInfo<MServer, ServerModule> info : Registries.MODULE_REGISTRY) {
 
             CustomPlaceholderInline cp = CustomPlaceholderInline.create("module_id", info.getId().toString());
 
             if (manager.isModuleLoaded(info.getId())) {
-                context.getSource().sendSuccess(ConversionUtil.toComponent(prov.getMessage("command.module.list.enabled", "en_us", cp)), false);
+                CommandUtil.sendCommandSuccess(context, prov,false, "command.module.list.enabled", cp);
             } else {
-                context.getSource().sendSuccess(ConversionUtil.toComponent(prov.getMessage("command.module.list.disabled", "en_us", cp)), false);
+                CommandUtil.sendCommandSuccess(context, prov,false, "command.module.list.disabled", cp);
             }
         }
         return 1;
@@ -181,7 +180,7 @@ public class MainCommand {
 
         elapsed = System.currentTimeMillis() - elapsed;
 
-        CommandUtil.sendCommandSuccess(context, prov, false, Constants.makeNode("command.reload"), CustomPlaceholderInline.create("time", elapsed + ""));
+        CommandUtil.sendCommandSuccess(context, prov, false, "command.reload", CustomPlaceholderInline.create("time", elapsed + ""));
         return (int) elapsed;
     }
 
