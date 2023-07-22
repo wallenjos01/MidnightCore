@@ -1,0 +1,37 @@
+{
+    "schemaVersion": 1,
+    "id": "midnightcore",
+    "version": "0.1.0",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "org.wallentines.mcore.MidnightCore"
+        ]
+    },
+    "depends": {
+        "fabricloader": "*",
+        "fabric-api-base": "*"
+    },
+    "mixins": [
+        "midnightcore.mixins.json"
+    ],
+    "custom": {
+        "loom:injected_interfaces": {
+            "net/minecraft/server/MinecraftServer": [ "org/wallentines/mcore/Server" ],
+            "net/minecraft/class_3222": [ "org/wallentines/mcore/Player" ],
+            "net/minecraft/class_1297": [ "org/wallentines/mcore/Entity" ],
+            "net/minecraft/server/class_1799": [ "org/wallentines/mcore/ItemStack" ]
+        }
+    },
+    "name": "MidnightCore",
+    "description": "such wow.",
+    "contact": {
+        "homepage": "https://wallentines.org/"
+    },
+    "authors": [
+        {
+            "name": "M1dnight_Ninja"
+        }
+    ],
+    "license": "LGPL"
+}
