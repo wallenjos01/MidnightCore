@@ -1,8 +1,8 @@
 package org.wallentines.mcore.lang;
 
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.util.Either;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.midnightlib.types.Either;
 
 import java.io.BufferedReader;
 import java.io.IOException;

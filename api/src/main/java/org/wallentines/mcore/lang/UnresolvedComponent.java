@@ -1,12 +1,12 @@
 package org.wallentines.mcore.lang;
 
 import org.wallentines.mcore.text.*;
-import org.wallentines.mcore.util.Either;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.midnightlib.types.Either;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

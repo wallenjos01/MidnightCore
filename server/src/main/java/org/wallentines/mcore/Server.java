@@ -1,9 +1,9 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mcore.util.ResettableSingleton;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
+import org.wallentines.midnightlib.types.ResettableSingleton;
 
 import java.util.Collection;
 import java.util.UUID;
