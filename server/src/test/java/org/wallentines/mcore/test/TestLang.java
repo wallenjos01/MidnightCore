@@ -15,68 +15,60 @@ import java.util.UUID;
 
 public class TestLang {
 
-    private class DummyPlayer implements Player {
+    private static class DummyPlayer implements Player {
 
         @Override
         public UUID getUUID() {
             return null;
         }
-
+        @Override
+        public Component getDisplayName() {
+            return null;
+        }
         @Override
         public Identifier getDimensionId() {
             return null;
         }
-
         @Override
         public Vec3d getPosition() {
             return null;
         }
-
         @Override
         public float getYaw() {
             return 0;
         }
-
         @Override
         public float getPitch() {
             return 0;
         }
-
         @Override
         public void teleport(Location location) {
 
         }
-
         @Override
         public String getUsername() {
             return "dummy";
         }
-
         @Override
         public void sendMessage(Component component) {
 
         }
-
         @Override
         public void sendActionBar(Component component) {
 
         }
-
         @Override
         public ItemStack getHandItem() {
             return null;
         }
-
         @Override
         public ItemStack getOffhandItem() {
             return null;
         }
-
         @Override
         public void giveItem(ItemStack item) {
 
         }
-
         @Override
         public String getLanguage() {
             return "en_us";

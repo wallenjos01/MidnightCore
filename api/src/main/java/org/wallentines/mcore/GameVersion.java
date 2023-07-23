@@ -1,7 +1,7 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mcore.util.DefaultedSingleton;
-import org.wallentines.mcore.util.Singleton;
+import org.wallentines.midnightlib.types.DefaultedSingleton;
+import org.wallentines.midnightlib.types.Singleton;
 
 /**
  * A data type which stores basic information about a Minecraft version, including version ID (i.e. 1.20.1) and

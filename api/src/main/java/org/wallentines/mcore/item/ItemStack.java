@@ -5,7 +5,6 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.TextColor;
 import org.wallentines.mcore.util.ItemUtil;
-import org.wallentines.mcore.util.Singleton;
 import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigPrimitive;
@@ -15,6 +14,7 @@ import org.wallentines.mdcfg.serializer.ObjectSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
+import org.wallentines.midnightlib.types.Singleton;
 
 import java.util.Collection;
 import java.util.List;
