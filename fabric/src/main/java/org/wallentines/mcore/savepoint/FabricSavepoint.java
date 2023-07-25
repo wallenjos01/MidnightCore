@@ -1,6 +1,5 @@
 package org.wallentines.mcore.savepoint;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import org.wallentines.mcore.*;
@@ -37,7 +36,7 @@ public class FabricSavepoint extends Savepoint {
             player.teleport(location);
         }
         if(advancementData != null) {
-            ((AdvancementExtension) spl.getAdvancements()).loadFromMap(advancementData.advancements(), spl.server.getAdvancements());
+            advancementData.load(spl);
         }
     }
 
@@ -69,10 +68,7 @@ public class FabricSavepoint extends Savepoint {
         }
         if (flags.contains(SavepointModule.SaveFlag.ADVANCEMENTS)) {
 
-            data = new AdvancementData(
-                ((AdvancementExtension) spl.getAdvancements()).saveToMap(),
-                SharedConstants.getCurrentVersion().getDataVersion().getVersion()
-            );
+            data = AdvancementData.save(((ServerPlayer) player).getAdvancements());
         }
 
         return new FabricSavepoint(loc, mode, nbt, data);

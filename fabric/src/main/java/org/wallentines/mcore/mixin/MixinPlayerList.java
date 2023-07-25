@@ -23,7 +23,9 @@ public abstract class MixinPlayerList {
         Event.invoke(event);
 
         Component comp = event.getJoinMessage();
-        if(comp != null) broadcastSystemMessage(comp, b);
+        if(comp != null) {
+            broadcastSystemMessage(comp, b);
+        }
     }
 
 }

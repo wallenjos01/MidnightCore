@@ -97,20 +97,6 @@ public class FabricSkinModule extends SkinModule {
 
         ClientboundSetEquipmentPacket equip = new ClientboundSetEquipmentPacket(spl.getId(), items);
 
-        ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(spl.getId());
-        ClientboundAddPlayerPacket spawn = new ClientboundAddPlayerPacket(spl);
-
-        List<SynchedEntityData.DataValue<?>> entityData = spl.getEntityData().getNonDefaultValues();
-        ClientboundSetEntityDataPacket tracker = null;
-        if(entityData != null) {
-            tracker = new ClientboundSetEntityDataPacket(spl.getId(), entityData);
-        }
-
-        float headRot = spl.getYHeadRot();
-        int rot = (int) headRot;
-        if (headRot < (float) rot) rot -= 1;
-        ClientboundRotateHeadPacket head = new ClientboundRotateHeadPacket(spl, (byte) ((rot * 256.0F) / 360.0F));
-
         ServerLevel world = spl.serverLevel();
 
         ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(
@@ -128,21 +114,42 @@ public class FabricSkinModule extends SkinModule {
 
         ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getX(), spl.getY(), spl.getZ(), spl.getRotationVector().y, spl.getRotationVector().x, new HashSet<>(), 0);
 
-        // Send Packets
+        // Player information packets should be sent to everyone
         for(ServerPlayer obs : server.getPlayerList().getPlayers()) {
 
             obs.connection.send(remove);
             obs.connection.send(add);
-
-            if(obs == spl || !world.equals(obs.serverLevel())) continue;
-
-            obs.connection.send(destroy);
-            obs.connection.send(spawn);
-            obs.connection.send(head);
-            obs.connection.send(equip);
-            if(tracker != null) obs.connection.send(tracker);
         }
 
+        // Entity information packets should only be sent to observers in the same world
+        Collection<ServerPlayer> observers = world.getPlayers(pl -> pl != spl);
+        if(observers.size() > 0) {
+
+            ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(spl.getId());
+            ClientboundAddPlayerPacket spawn = new ClientboundAddPlayerPacket(spl);
+
+            List<SynchedEntityData.DataValue<?>> entityData = spl.getEntityData().getNonDefaultValues();
+            ClientboundSetEntityDataPacket tracker = null;
+            if (entityData != null) {
+                tracker = new ClientboundSetEntityDataPacket(spl.getId(), entityData);
+            }
+
+            float headRot = spl.getYHeadRot();
+            int rot = (int) headRot;
+            if (headRot < (float) rot) rot -= 1;
+            ClientboundRotateHeadPacket head = new ClientboundRotateHeadPacket(spl, (byte) ((rot * 256.0F) / 360.0F));
+
+            for (ServerPlayer obs : observers) {
+
+                obs.connection.send(destroy);
+                obs.connection.send(spawn);
+                obs.connection.send(head);
+                obs.connection.send(equip);
+                if(tracker != null) obs.connection.send(tracker);
+            }
+        }
+
+        // The remaining packets should only be sent to the player themselves
         spl.connection.send(respawn);
         spl.connection.send(position);
         spl.connection.send(equip);

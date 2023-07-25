@@ -13,6 +13,11 @@ import org.wallentines.mdcfg.serializer.*;
 
 import java.util.Map;
 
+/**
+ * A data type which stores serialized data about player advancements
+ * @param advancements The advancements
+ * @param dataVersion The data version by which the advancements were saved
+ */
 public record AdvancementData(Map<ResourceLocation, AdvancementProgress> advancements, Integer dataVersion) {
 
     public static final Serializer<AdvancementProgress> PROGRESS_SERIALIZER = new Serializer<>() {
@@ -33,19 +38,29 @@ public record AdvancementData(Map<ResourceLocation, AdvancementProgress> advance
     };
     public static final InlineSerializer<ResourceLocation> RESOURCE_LOCATION_SERIALIZER = InlineSerializer.of(ResourceLocation::toString, ResourceLocation::new);
 
+
     public AdvancementData(Map<ResourceLocation, AdvancementProgress> advancements, Integer dataVersion) {
         this.advancements = Map.copyOf(advancements);
         this.dataVersion = dataVersion;
     }
 
-    public void load(ServerPlayer player, PlayerAdvancements advancements) {
+    /**
+     * Restores a player's advancement data from this saved data
+     * @param player The player to restore
+     */
+    public void load(ServerPlayer player) {
 
         MinecraftServer server = player.getServer();
         if (server == null) return;
 
-        ((AdvancementExtension) advancements).loadFromMap(this.advancements, server.getAdvancements());
+        ((AdvancementExtension) player.getAdvancements()).loadFromMap(this.advancements, server.getAdvancements());
     }
 
+    /**
+     * Saves a player's advancement data
+     * @param advancements The advancements to save
+     * @return Saved advancement data
+     */
     public static AdvancementData save(PlayerAdvancements advancements) {
 
         return new AdvancementData(((AdvancementExtension) advancements).saveToMap(), SharedConstants.getCurrentVersion().getDataVersion().getVersion());

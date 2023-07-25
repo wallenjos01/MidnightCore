@@ -120,9 +120,9 @@ public abstract class ContentConverter<T extends Content, M extends ComponentCon
     }
 
     /**
-     * Converts a Component and all of its children to a Minecraft Component
-     * @param comp The Component to convert
-     * @return A converted MutableComponent
+     * Converts a Minecraft Component and all of its children to a MidnightCore Component
+     * @param comp The Minecraft Component to convert
+     * @return A converted MidnightCore Component
      */
     public static Component convertReverse(net.minecraft.network.chat.Component comp) {
 
@@ -164,6 +164,11 @@ public abstract class ContentConverter<T extends Content, M extends ComponentCon
         return out;
     }
 
+    /**
+     * Converts the given MidnightCore Content to a Minecraft ComponentContents object
+     * @param content The Content to convert
+     * @return A new ComponentContents
+     */
     public static ComponentContents convertContent(Content content) {
         ContentConverter<?, ?> converter = REGISTRY.get(content.type);
         if(converter == null) {
@@ -210,14 +215,11 @@ public abstract class ContentConverter<T extends Content, M extends ComponentCon
 
         register("nbt", Content.NBT.class, NbtContents.class,
                 (md) -> {
-                    DataSource source;
-                    if (md.type == Content.NBT.DataSourceType.BLOCK) {
-                        source = new BlockDataSource(md.data);
-                    } else if (md.type == Content.NBT.DataSourceType.ENTITY) {
-                        source = new EntityDataSource(md.data);
-                    } else {
-                        source = new StorageDataSource(new ResourceLocation(md.data));
-                    }
+                    DataSource source = switch (md.type) {
+                        case BLOCK -> new BlockDataSource(md.data);
+                        case ENTITY -> new EntityDataSource(md.data);
+                        default -> new StorageDataSource(new ResourceLocation(md.data));
+                    };
                     return new NbtContents(
                             md.path,
                             md.interpret,
@@ -226,10 +228,8 @@ public abstract class ContentConverter<T extends Content, M extends ComponentCon
                     );
                 },
                 (mc) -> {
-
                     String pattern;
                     Content.NBT.DataSourceType type;
-
                     if(mc.getDataSource() instanceof BlockDataSource) {
                         pattern = ((BlockDataSource) mc.getDataSource()).posPattern();
                         type = Content.NBT.DataSourceType.BLOCK;
@@ -242,7 +242,6 @@ public abstract class ContentConverter<T extends Content, M extends ComponentCon
                         pattern = ((StorageDataSource) mc.getDataSource()).id().toString();
                         type = Content.NBT.DataSourceType.STORAGE;
                     }
-
                     return new Content.NBT(mc.getNbtPath(), mc.isInterpreting(), mc.getSeparator().map(ContentConverter::convertReverse).orElse(null), type, pattern);
                 }
         );

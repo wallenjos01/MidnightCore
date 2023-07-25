@@ -35,6 +35,11 @@ public class AuthUtil {
         return profile;
     }
 
+    /**
+     * Makes an exact copy of an existing GameProfile
+     * @param other The GameProfile to copy
+     * @return A copy of the given profile
+     */
     public static GameProfile copyProfile(GameProfile other) {
 
         GameProfile profile = new GameProfile(other.getId(), other.getName());
@@ -46,6 +51,12 @@ public class AuthUtil {
         return profile;
     }
 
+    /**
+     * Creates a new game profile with the given player's name and UUID, and the given skin's texture
+     * @param spl The player to generate a profile for
+     * @param skin The skin texture to use
+     * @return A new game profile
+     */
     public static GameProfile forPlayer(ServerPlayer spl, Skin skin) {
 
         return setProfileSkin(copyProfile(spl.getGameProfile()), skin);
