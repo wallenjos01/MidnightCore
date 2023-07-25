@@ -1,10 +1,17 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.FileWrapper;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
+import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
+import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -59,6 +66,19 @@ public interface Server {
      * @return the server's module manager
      */
     ModuleManager<Server, ServerModule> getModuleManager();
+
+    default void loadModules(Registry<ModuleInfo<Server, ServerModule>> registry) {
+
+        ModuleManager<Server, ServerModule> manager = getModuleManager();
+        manager.unloadAll();
+
+        FileWrapper<ConfigObject> wrapper = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", getStorageDirectory().toFile(), new ConfigSection());
+        manager.loadAll(wrapper.getRoot().asSection(), this, registry);
+
+        wrapper.save();
+    }
+
+    Path getStorageDirectory();
 
     /**
      * Returns a reference to an event called every game tick

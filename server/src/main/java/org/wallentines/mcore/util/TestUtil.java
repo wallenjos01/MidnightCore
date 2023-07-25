@@ -16,6 +16,7 @@ import org.wallentines.mcore.text.TextColor;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.List;
+import java.util.UUID;
 
 public class TestUtil {
 
@@ -64,6 +65,23 @@ public class TestUtil {
 
             pl.teleport(new Location(new Identifier("minecraft", "the_nether"), 0, 100, 0, 0, 0));
             pl.giveItem(is);
+
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+
+    private static final UUID SKIN_UUID = UUID.fromString("ce784258-10ca-45fb-b787-8dde07375f2b");
+
+    public static void skinCmd(Player pl) {
+
+        try {
+
+            pl.sendMessage(org.wallentines.mcore.text.Component.text("Attempting to download skin...").withColor(TextColor.AQUA));
+            MojangUtil.getSkinAsync(SKIN_UUID).thenAccept(skin -> {
+                pl.sendMessage(org.wallentines.mcore.text.Component.text("Skin obtained!").withColor(TextColor.AQUA));
+                pl.setSkin(skin);
+            });
 
         } catch (Throwable th) {
             th.printStackTrace();

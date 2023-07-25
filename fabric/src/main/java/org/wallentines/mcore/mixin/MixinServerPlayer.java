@@ -1,20 +1,27 @@
 package org.wallentines.mcore.mixin;
 
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.GameType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.wallentines.mcore.GameMode;
+import org.wallentines.mcore.Server;
+import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ContentConverter;
-import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.text.WrappedComponent;
+import org.wallentines.mcore.util.AuthUtil;
 
 
 @Mixin(ServerPlayer.class)
@@ -24,7 +31,9 @@ public abstract class MixinServerPlayer implements Player {
     private String midnightcore$language = "en_us";
 
     @Shadow public abstract void sendSystemMessage(net.minecraft.network.chat.Component component, boolean bl);
+    @Shadow @Final public MinecraftServer server;
 
+    @Shadow @Final public ServerPlayerGameMode gameMode;
 
     @Unique
     @Override
@@ -34,8 +43,19 @@ public abstract class MixinServerPlayer implements Player {
 
     @Unique
     @Override
-    public Component getDisplayName() {
+    public Server getServer() {
+        return server;
+    }
 
+    @Unique
+    @Override
+    public Skin getSkin() {
+        return AuthUtil.getProfileSkin(((net.minecraft.world.entity.player.Player) (Object) this).getGameProfile());
+    }
+
+    @Unique
+    @Override
+    public Component getDisplayName() {
         ServerPlayer spl = (ServerPlayer) (Object) this;
         return ContentConverter.convertReverse(spl.getDisplayName());
     }
@@ -43,13 +63,13 @@ public abstract class MixinServerPlayer implements Player {
     @Override
     public void sendMessage(Component component) {
 
-        sendSystemMessage(new WrappedComponent(ComponentResolver.resolveComponent(component, this)), false);
+        sendSystemMessage(WrappedComponent.resolved(component, this), false);
     }
 
     @Override
     public void sendActionBar(Component component) {
 
-        sendSystemMessage(new WrappedComponent(ComponentResolver.resolveComponent(component, this)), true);
+        sendSystemMessage(WrappedComponent.resolved(component, this), true);
     }
 
     @Unique
@@ -79,6 +99,26 @@ public abstract class MixinServerPlayer implements Player {
     @Override
     public String getLanguage() {
         return midnightcore$language;
+    }
+
+    @Override
+    public GameMode getGameMode() {
+        return switch (gameMode.getGameModeForPlayer()) {
+            case SURVIVAL -> GameMode.SURVIVAL;
+            case CREATIVE -> GameMode.CREATIVE;
+            case ADVENTURE -> GameMode.ADVENTURE;
+            case SPECTATOR -> GameMode.SPECTATOR;
+        };
+    }
+
+    @Override
+    public void setGameMode(GameMode mode) {
+        gameMode.changeGameModeForPlayer(switch (mode) {
+            case SURVIVAL -> GameType.SURVIVAL;
+            case CREATIVE -> GameType.CREATIVE;
+            case ADVENTURE -> GameType.ADVENTURE;
+            case SPECTATOR -> GameType.SPECTATOR;
+        });
     }
 
     @Inject(method="updateOptions", at=@At("RETURN"))

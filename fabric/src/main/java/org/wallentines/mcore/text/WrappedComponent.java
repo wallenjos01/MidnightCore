@@ -6,6 +6,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
+import org.wallentines.mcore.Player;
 import org.wallentines.mcore.util.ConversionUtil;
 
 import java.util.List;
@@ -20,6 +21,10 @@ public class WrappedComponent implements Component {
 
     public WrappedComponent(org.wallentines.mcore.text.Component internal) {
         this.internal = internal;
+    }
+
+    public static Component resolved(org.wallentines.mcore.text.Component comp, Player player) {
+        return new WrappedComponent(ComponentResolver.resolveComponent(comp, player));
     }
 
     @Override

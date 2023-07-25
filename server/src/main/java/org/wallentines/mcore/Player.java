@@ -4,18 +4,26 @@ package org.wallentines.mcore;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
+import org.wallentines.mcore.skin.SkinModule;
+import org.wallentines.mcore.skin.Skinnable;
 import org.wallentines.mcore.text.Component;
 
 /**
  * An interface representing a Server-side player object
  */
-public interface Player extends Entity {
+public interface Player extends Entity, Skinnable {
 
     /**
      * Gets the player's username associated with the GameProfile they signed in with
      * @return The player's username
      */
     String getUsername();
+
+    /**
+     * Gets the server which created the player object
+     * @return The running server.
+     */
+    Server getServer();
 
 
     /**
@@ -53,6 +61,28 @@ public interface Player extends Entity {
      * @return The player's game language
      */
     String getLanguage();
+
+    /**
+     * Returns the player's game mode
+     * @return The player's game mode
+     */
+    GameMode getGameMode();
+
+    /**
+     * Changes the player's game mode
+     * @param mode The new game mode
+     */
+    void setGameMode(GameMode mode);
+
+    /**
+     * Changes a player's skin. Requires the skin module to be loaded!
+     * @param skin The player's new skin
+     */
+    @Override
+    default void setSkin(Skin skin) {
+
+        getServer().getModuleManager().getModule(SkinModule.class).setSkin(this, skin);
+    }
 
 
     static void registerPlaceholders(PlaceholderManager manager) {
