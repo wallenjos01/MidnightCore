@@ -60,12 +60,14 @@ public abstract class MixinServerPlayer implements Player {
         return ContentConverter.convertReverse(spl.getDisplayName());
     }
 
+    @Unique
     @Override
     public void sendMessage(Component component) {
 
         sendSystemMessage(WrappedComponent.resolved(component, this), false);
     }
 
+    @Unique
     @Override
     public void sendActionBar(Component component) {
 
@@ -101,6 +103,7 @@ public abstract class MixinServerPlayer implements Player {
         return midnightcore$language;
     }
 
+    @Unique
     @Override
     public GameMode getGameMode() {
         return switch (gameMode.getGameModeForPlayer()) {
@@ -111,6 +114,7 @@ public abstract class MixinServerPlayer implements Player {
         };
     }
 
+    @Unique
     @Override
     public void setGameMode(GameMode mode) {
         gameMode.changeGameModeForPlayer(switch (mode) {

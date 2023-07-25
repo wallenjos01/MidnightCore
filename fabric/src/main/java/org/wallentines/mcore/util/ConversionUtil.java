@@ -105,6 +105,11 @@ public class ConversionUtil {
         return new Color(color.getValue());
     }
 
+    /**
+     * Creates a Minecraft Style from a MidnightCore component
+     * @param component The component to read
+     * @return A new Style
+     */
     public static Style getStyle(Component component) {
 
         return Style.EMPTY

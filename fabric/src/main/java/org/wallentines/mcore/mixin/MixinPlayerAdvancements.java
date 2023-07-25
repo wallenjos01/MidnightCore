@@ -89,7 +89,7 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
 
         Map<ResourceLocation, AdvancementProgress> map = new HashMap<>();
         progress.forEach((adv, prog) -> {
-            FriendlyByteBuf copyBuf = new FriendlyByteBuf(Unpooled.buffer(256)); // Save and load for easy copying
+            FriendlyByteBuf copyBuf = new FriendlyByteBuf(Unpooled.buffer(1024));
             prog.serializeToNetwork(copyBuf);
             map.put(adv.getId(), AdvancementProgress.fromNetwork(copyBuf));
         });
@@ -98,7 +98,7 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
 
     @Unique
     @Override
-    public void revokeAll(ServerAdvancementManager serverAdvancementManager) {
+    public void revokeAll() {
 
         stopListening();
         progress.clear();
@@ -107,9 +107,6 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
         progressChanged.clear();
         isFirstPacket = true;
         lastSelectedTab = null;
-
-        checkForAutomaticTriggers(serverAdvancementManager);
-        registerListeners(serverAdvancementManager);
 
         flushDirty(player);
     }
