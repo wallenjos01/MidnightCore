@@ -4,18 +4,19 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.storage.LevelResource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
-import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.*;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
@@ -38,6 +39,8 @@ public abstract class MixinMinecraftServer implements Server {
 
     @Shadow public abstract boolean isDedicatedServer();
 
+
+    @Shadow public abstract Path getWorldPath(LevelResource levelResource);
 
     @Unique
     @Override
@@ -71,6 +74,15 @@ public abstract class MixinMinecraftServer implements Server {
         return midnightcore$moduleManager;
     }
 
+    @Override
+    public Path getStorageDirectory() {
+        if(isDedicatedServer()) {
+            return MidnightCore.DATA_FOLDER;
+        } else {
+            return getWorldPath(LevelResource.ROOT);
+        }
+    }
+
     @Unique
     @Override
     public HandlerList<Server> tickEvent() {
@@ -87,5 +99,10 @@ public abstract class MixinMinecraftServer implements Server {
     @Inject(method = "tickServer", at = @At("TAIL"))
     private void onTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         midnightcore$tickEvent.invoke(this);
+    }
+
+    @Inject(method = "runServer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/MinecraftServer;initServer()Z", shift = At.Shift.AFTER))
+    private void afterInit(CallbackInfo ci) {
+        loadModules(ServerModule.REGISTRY);
     }
 }

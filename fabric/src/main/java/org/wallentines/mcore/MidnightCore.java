@@ -9,19 +9,30 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.skin.FabricSkinModule;
+import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.TestUtil;
+import org.wallentines.mdcfg.codec.JSONCodec;
+
+import java.nio.file.Path;
 
 public class MidnightCore implements ModInitializer {
 
+
+    public static final Path DATA_FOLDER = Path.of("config", MidnightCoreAPI.MOD_ID);
+
     @Override
     public void onInitialize() {
+
+        MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
 
         ServerLifecycleEvents.SERVER_STARTING.register(Server.RUNNING_SERVER::set);
         ServerLifecycleEvents.SERVER_STARTED.register(Server.START_EVENT::invoke);
         ServerLifecycleEvents.SERVER_STOPPING.register(Server.STOP_EVENT::invoke);
         ServerLifecycleEvents.SERVER_STOPPED.register(srv -> Server.RUNNING_SERVER.reset());
 
+        ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(Commands.literal("mcoretest")
@@ -32,6 +43,14 @@ public class MidnightCore implements ModInitializer {
 
                     return 1;
                 })
+                .then(Commands.literal("skin")
+                    .executes(ctx -> {
+
+                        Player pl = ctx.getSource().getPlayerOrException();
+                        TestUtil.skinCmd(pl);
+                        return 1;
+                    })
+                )
             );
         });
 

@@ -104,6 +104,10 @@ public class MojangUtil {
         return CompletableFuture.supplyAsync(() -> getSkin(playerId));
     }
 
+    public static CompletableFuture<Skin> getSkinByNameAsync(String name) {
+
+        return CompletableFuture.supplyAsync(() -> getSkin(getUUID(name)));
+    }
 
     private static ConfigSection makeHttpRequest(URL url) throws IOException {
 
