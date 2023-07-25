@@ -39,9 +39,7 @@ public abstract class Savepoint {
 
     public abstract void load(Player player);
 
-
     public interface Factory {
-
         Savepoint create(Player player, EnumSet<SavepointModule.SaveFlag> flags);
     }
 

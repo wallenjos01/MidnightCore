@@ -15,6 +15,7 @@ import org.wallentines.mcore.*;
 import org.wallentines.mcore.event.PlayerJoinEvent;
 import org.wallentines.mcore.mixin.AccessorPlayer;
 import org.wallentines.mcore.util.AuthUtil;
+import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.MojangUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
@@ -31,7 +32,7 @@ public class FabricSkinModule extends SkinModule {
     @Override
     public void setSkin(Player player, Skin skin) {
 
-        updateProfile(player, AuthUtil.forPlayer(cast(player), skin));
+        updateProfile(player, AuthUtil.forPlayer(ConversionUtil.ensureValid(player), skin));
     }
 
     @Override
@@ -62,16 +63,9 @@ public class FabricSkinModule extends SkinModule {
         return true;
     }
 
-    private ServerPlayer cast(Player player) {
-        if(!(player instanceof ServerPlayer spl)) {
-            throw new IllegalArgumentException("Attempt to set skin of a non-ServerPlayer!");
-        }
-        return spl;
-    }
-
     private void updateProfile(Player player, GameProfile gameProfile) {
 
-        ServerPlayer spl = cast(player);
+        ServerPlayer spl = ConversionUtil.ensureValid(player);
         ((AccessorPlayer) spl).setGameProfile(gameProfile);
 
         // Update

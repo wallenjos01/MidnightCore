@@ -6,6 +6,8 @@ import org.wallentines.mcore.*;
 import org.wallentines.mcore.util.NBTContext;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.util.EnumSet;
@@ -47,7 +49,6 @@ public class FabricSavepoint extends Savepoint {
             throw new IllegalArgumentException("Attempt to load savepoint for non-ServerPlayer!");
         }
 
-
         Location loc = null;
         GameMode mode = null;
         ConfigSection nbt = null;
@@ -74,7 +75,20 @@ public class FabricSavepoint extends Savepoint {
         return new FabricSavepoint(loc, mode, nbt, data);
     }
 
-    public static final Savepoint.Factory FACTORY = FabricSavepoint::create;
-    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(() -> new SavepointModule(FACTORY), SavepointModule.ID, new ConfigSection());
+
+    public static final Serializer<FabricSavepoint> SERIALIZER = ObjectSerializer.create(
+            Location.SERIALIZER.<FabricSavepoint>entry("location", Savepoint::getLocation).optional(),
+            GameMode.SERIALIZER.<FabricSavepoint>entry("game_mode", Savepoint::getGameMode).optional(),
+            ConfigSection.SERIALIZER.<FabricSavepoint>entry("nbt", Savepoint::getNBT).optional(),
+            AdvancementData.SERIALIZER.<FabricSavepoint>entry("advancements", fsp -> fsp.advancementData).optional(),
+            ConfigSection.SERIALIZER.<FabricSavepoint>entry("extra", Savepoint::getExtraData).optional(),
+            (loc, mode, nbt, adv, extra) -> {
+                FabricSavepoint out = new FabricSavepoint(loc, mode, nbt, adv);
+                out.getExtraData().fillOverwrite(extra);
+                return out;
+            }
+    );
+
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricSavepointModule::new, SavepointModule.ID, new ConfigSection());
 
 }

@@ -12,6 +12,7 @@
     "MixinMinecraftServer",
     "MixinPlayerAdvancements",
     "MixinPlayerList",
+    "MixinServerPacketListener",
     "MixinServerPlayer"
   ],
   "client": [],

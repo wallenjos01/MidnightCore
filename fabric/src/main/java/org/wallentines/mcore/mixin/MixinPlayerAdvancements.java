@@ -98,7 +98,7 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
 
     @Unique
     @Override
-    public void revokeAll() {
+    public void revokeAll(ServerAdvancementManager manager) {
 
         stopListening();
         progress.clear();
@@ -108,6 +108,7 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
         isFirstPacket = true;
         lastSelectedTab = null;
 
+        checkForAutomaticTriggers(manager);
         flushDirty(player);
     }
 }

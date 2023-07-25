@@ -2,7 +2,9 @@ package org.wallentines.mcore.mixin;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.LevelResource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,10 +14,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wallentines.mcore.*;
+import org.wallentines.mcore.event.PlayerLeaveEvent;
+import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.UUID;
@@ -104,5 +107,12 @@ public abstract class MixinMinecraftServer implements Server {
     @Inject(method = "runServer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/MinecraftServer;initServer()Z", shift = At.Shift.AFTER))
     private void afterInit(CallbackInfo ci) {
         loadModules(ServerModule.REGISTRY);
+    }
+
+    @Inject(method="stopServer", at=@At(value="INVOKE", target="Lnet/minecraft/server/players/PlayerList;saveAll()V"))
+    private void onSavePlayers(CallbackInfo ci) {
+        for(ServerPlayer spl : playerList.getPlayers()) {
+            Event.invoke(new PlayerLeaveEvent(spl, Component.empty()));
+        }
     }
 }

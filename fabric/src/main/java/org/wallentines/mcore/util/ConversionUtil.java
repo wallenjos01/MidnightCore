@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.ClickEvent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.HoverEvent;
@@ -123,6 +125,14 @@ public class ConversionUtil {
                 .withHoverEvent(component.hoverEvent == null ? null : ConversionUtil.toMCHoverEvent(component.hoverEvent))
                 .withClickEvent(component.clickEvent == null ? null : ConversionUtil.toMCClickEvent(component.clickEvent))
                 .withColor(component.color == null ? null : ConversionUtil.toTextColor(component.color));
+    }
+
+    public static ServerPlayer ensureValid(Player player) {
+
+        if(!(player instanceof ServerPlayer spl)) {
+            throw new IllegalArgumentException("Attempt to access non-ServerPlayer!");
+        }
+        return spl;
     }
 
 }
