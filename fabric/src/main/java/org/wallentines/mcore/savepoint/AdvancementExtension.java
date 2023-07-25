@@ -27,6 +27,6 @@ public interface AdvancementExtension {
     /**
      * Revokes all advancements granted to the player
      */
-    void revokeAll();
+    void revokeAll(ServerAdvancementManager manager);
 
 }

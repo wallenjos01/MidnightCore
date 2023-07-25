@@ -2,29 +2,35 @@ package org.wallentines.mcore.savepoint;
 
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
-import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.EnumSet;
 import java.util.HashMap;
 
-public class SavepointModule implements ServerModule {
+public abstract class SavepointModule implements ServerModule {
 
     private final HashMap<Player, HashMap<String, Savepoint>> savepoints = new HashMap<>();
-    private final Savepoint.Factory factory;
 
-    public SavepointModule(Savepoint.Factory factory) {
-        this.factory = factory;
-    }
-
+    /**
+     * Creates a Savepoint for the given player and associates it with the given name
+     * @param player The player to save
+     * @param name The name of the created savepoint
+     * @param flags The flags defining which things to save
+     * @return The created Savepoint
+     */
     public Savepoint savePlayer(Player player, String name, EnumSet<SaveFlag> flags) {
         Savepoint out = createSavepoint(player, flags);
         savepoints.computeIfAbsent(player, k -> new HashMap<>()).put(name, out);
         return out;
     }
 
+    /**
+     * Restores a player from the given named Savepoint
+     * @param player The player to restore
+     * @param name The name of the Savepoint to restore from
+     */
     public void loadPlayer(Player player, String name) {
         HashMap<String, Savepoint> sps = savepoints.get(player);
         if(sps == null) return;
@@ -35,6 +41,12 @@ public class SavepointModule implements ServerModule {
         sp.load(player);
     }
 
+    /**
+     * Finds a player's savepoint with the given name
+     * @param player The player to look up Savepoints for
+     * @param name The name to lookup
+     * @return The savepoint for the given player with the given name, or null
+     */
     public Savepoint getSavepoint(Player player, String name) {
 
         HashMap<String, Savepoint> sps = savepoints.get(player);
@@ -43,10 +55,19 @@ public class SavepointModule implements ServerModule {
         return sps.get(name);
     }
 
+    /**
+     * Clears all Savepoints for the given player
+     * @param player The player to clear Savepoints for
+     */
     public void clearSavepoints(Player player) {
         savepoints.remove(player);
     }
 
+    /**
+     * Removes the Savepoint with the given name for the given player
+     * @param player The player to remove a Savepoint for
+     * @param name The name of the Savepoint
+     */
     public void removeSavepoint(Player player, String name) {
 
         HashMap<String, Savepoint> sps = savepoints.get(player);
@@ -55,21 +76,26 @@ public class SavepointModule implements ServerModule {
         sps.remove(name);
     }
 
+    /**
+     * Resets the given player according to the given flags
+     * @param player The player to reset
+     * @param flags The fields to reset
+     */
+    public abstract void resetPlayer(Player player, EnumSet<SaveFlag> flags);
 
-    protected Savepoint createSavepoint(Player player, EnumSet<SaveFlag> flags) {
-        return factory.create(player, flags);
-    }
+    /**
+     * Gets the Savepoint factory
+     * @return The Savepoint factory
+     */
+    public abstract Savepoint.Factory getFactory();
 
-    @Override
-    public boolean initialize(ConfigSection section, Server data) {
+    /**
+     * Gets the Savepoint serializer
+     * @return The Savepoint serializer
+     */
+    public abstract Serializer<Savepoint> getSerializer();
 
-        if(factory == null) {
-            MidnightCoreAPI.LOGGER.warn("Unable to initialize Savepoint Module! Invalid Factory!");
-            return false;
-        }
-
-        return true;
-    }
+    protected abstract Savepoint createSavepoint(Player player, EnumSet<SaveFlag> flags);
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "savepoint");
 
