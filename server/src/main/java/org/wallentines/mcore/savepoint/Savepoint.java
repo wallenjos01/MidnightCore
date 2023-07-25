@@ -5,6 +5,8 @@ import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Player;
 import org.wallentines.mdcfg.ConfigSection;
 
+import java.util.EnumSet;
+
 public abstract class Savepoint {
 
     protected final ConfigSection extraData = new ConfigSection();
@@ -36,5 +38,11 @@ public abstract class Savepoint {
 
 
     public abstract void load(Player player);
+
+
+    public interface Factory {
+
+        Savepoint create(Player player, EnumSet<SavepointModule.SaveFlag> flags);
+    }
 
 }

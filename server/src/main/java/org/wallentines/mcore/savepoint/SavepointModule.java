@@ -1,14 +1,23 @@
 package org.wallentines.mcore.savepoint;
 
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Player;
+import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.EnumSet;
 import java.util.HashMap;
 
-public abstract class SavepointModule implements ServerModule {
+public class SavepointModule implements ServerModule {
 
     private final HashMap<Player, HashMap<String, Savepoint>> savepoints = new HashMap<>();
+    private final Savepoint.Factory factory;
+
+    public SavepointModule(Savepoint.Factory factory) {
+        this.factory = factory;
+    }
 
     public Savepoint savePlayer(Player player, String name, EnumSet<SaveFlag> flags) {
         Savepoint out = createSavepoint(player, flags);
@@ -47,7 +56,22 @@ public abstract class SavepointModule implements ServerModule {
     }
 
 
-    protected abstract Savepoint createSavepoint(Player player, EnumSet<SaveFlag> flags);
+    protected Savepoint createSavepoint(Player player, EnumSet<SaveFlag> flags) {
+        return factory.create(player, flags);
+    }
+
+    @Override
+    public boolean initialize(ConfigSection section, Server data) {
+
+        if(factory == null) {
+            MidnightCoreAPI.LOGGER.warn("Unable to initialize Savepoint Module! Invalid Factory!");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "savepoint");
 
     public enum SaveFlag {
         LOCATION,
