@@ -43,6 +43,8 @@ public class FabricSkinModule extends SkinModule {
     @Override
     public boolean initialize(ConfigSection section, Server data) {
 
+        super.initialize(section, data);
+
         boolean offlineModeSkins = section.getBoolean("get_skins_in_offline_mode");
 
         Event.register(PlayerJoinEvent.class, this, ev -> {

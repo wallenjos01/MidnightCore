@@ -9,6 +9,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.savepoint.FabricSavepoint;
+import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -33,6 +35,7 @@ public class MidnightCore implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register(srv -> Server.RUNNING_SERVER.reset());
 
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepoint.MODULE_INFO);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(Commands.literal("mcoretest")
