@@ -48,6 +48,12 @@ public interface Entity {
     float getPitch();
 
     /**
+     * Determines if the entity object is still valid in the current context. Will be false after it dies or despawns.
+     * @return Whether the entity object is still valid
+     */
+    boolean isRemoved();
+
+    /**
      * Gets the entity's Location
      * @return The entity's location
      */

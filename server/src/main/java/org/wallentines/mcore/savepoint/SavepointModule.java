@@ -8,10 +8,11 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.UUID;
 
 public abstract class SavepointModule implements ServerModule {
 
-    private final HashMap<Player, HashMap<String, Savepoint>> savepoints = new HashMap<>();
+    private final HashMap<UUID, HashMap<String, Savepoint>> savepoints = new HashMap<>();
 
     /**
      * Creates a Savepoint for the given player and associates it with the given name
@@ -22,7 +23,7 @@ public abstract class SavepointModule implements ServerModule {
      */
     public Savepoint savePlayer(Player player, String name, EnumSet<SaveFlag> flags) {
         Savepoint out = createSavepoint(player, flags);
-        savepoints.computeIfAbsent(player, k -> new HashMap<>()).put(name, out);
+        savepoints.computeIfAbsent(player.getUUID(), k -> new HashMap<>()).put(name, out);
         return out;
     }
 
@@ -32,7 +33,7 @@ public abstract class SavepointModule implements ServerModule {
      * @param name The name of the Savepoint to restore from
      */
     public void loadPlayer(Player player, String name) {
-        HashMap<String, Savepoint> sps = savepoints.get(player);
+        HashMap<String, Savepoint> sps = savepoints.get(player.getUUID());
         if(sps == null) return;
 
         Savepoint sp = sps.get(name);
@@ -49,7 +50,7 @@ public abstract class SavepointModule implements ServerModule {
      */
     public Savepoint getSavepoint(Player player, String name) {
 
-        HashMap<String, Savepoint> sps = savepoints.get(player);
+        HashMap<String, Savepoint> sps = savepoints.get(player.getUUID());
         if(sps == null) return null;
 
         return sps.get(name);
@@ -60,7 +61,7 @@ public abstract class SavepointModule implements ServerModule {
      * @param player The player to clear Savepoints for
      */
     public void clearSavepoints(Player player) {
-        savepoints.remove(player);
+        savepoints.remove(player.getUUID());
     }
 
     /**
@@ -70,7 +71,7 @@ public abstract class SavepointModule implements ServerModule {
      */
     public void removeSavepoint(Player player, String name) {
 
-        HashMap<String, Savepoint> sps = savepoints.get(player);
+        HashMap<String, Savepoint> sps = savepoints.get(player.getUUID());
         if(sps == null) return;
 
         sps.remove(name);
