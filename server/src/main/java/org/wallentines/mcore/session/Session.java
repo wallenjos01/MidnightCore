@@ -17,7 +17,7 @@ public abstract class Session {
     protected final UUID uuid;
     protected final Server server;
     protected final String namespace;
-    protected final HashMap<UUID, WrappedPlayer> players = new HashMap<>();
+    protected final HashSet<WrappedPlayer> players = new HashSet<>();
     public final HandlerList<Session> shutdownEvent = new SingletonHandlerList<>();
     private boolean running = true;
 
@@ -39,16 +39,16 @@ public abstract class Session {
         return server;
     }
 
-    public Collection<UUID> getPlayerIds() {
-        return players.keySet();
+    public Stream<UUID> getPlayerIds() {
+        return players.stream().map(WrappedPlayer::getUUID);
     }
 
     public Stream<Player> getPlayers() {
-        return players.values().stream().map(WrappedPlayer::get);
+        return players.stream().map(WrappedPlayer::get);
     }
 
     public boolean contains(Player player) {
-        return players.containsKey(player.getUUID());
+        return players.contains(player.wrap());
     }
 
     public void broadcastMessage(Component message) {
@@ -68,7 +68,7 @@ public abstract class Session {
             server.getModuleManager().getModule(SavepointModule.class).savePlayer(player, uuid.toString(), flags);
         }
 
-        players.put(player.getUUID(), player.wrap());
+        players.add(player.wrap());
 
         try {
             onAddPlayer(player);
@@ -95,7 +95,11 @@ public abstract class Session {
             ex.printStackTrace();
         }
 
-        players.remove(player.getUUID());
+        players.remove(player.wrap());
+
+        if(players.isEmpty()) {
+            shutdown();
+        }
     }
 
     public boolean isRunning() {
@@ -104,8 +108,17 @@ public abstract class Session {
 
     public void shutdown() {
 
-        getPlayers().forEach(this::removePlayer);
+        if(!running) return;
+
+        try {
+            onShutdown();
+        } catch (Exception ex) {
+            MidnightCoreAPI.LOGGER.warn("An exception occurred while shutting down a session!");
+            ex.printStackTrace();
+        }
+
         running = false;
+        getPlayers().forEach(this::removePlayer);
 
         shutdownEvent.invoke(this);
     }
@@ -114,6 +127,7 @@ public abstract class Session {
     protected abstract EnumSet<SavepointModule.SaveFlag> getSavepointFlags();
     protected abstract void onAddPlayer(Player player);
     protected abstract void onRemovePlayer(Player player);
+    protected abstract void onShutdown();
 
     public interface Factory<T extends Session> {
         T create(SessionModule module, Server server, String namespace);
