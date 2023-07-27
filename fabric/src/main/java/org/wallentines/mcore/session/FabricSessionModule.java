@@ -1,0 +1,26 @@
+package org.wallentines.mcore.session;
+
+import org.wallentines.mcore.Server;
+import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.event.PlayerLeaveEvent;
+import org.wallentines.mcore.savepoint.SavepointModule;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.module.ModuleInfo;
+
+public class FabricSessionModule extends SessionModule {
+
+    @Override
+    public boolean initialize(ConfigSection section, Server data) {
+        if(!super.initialize(section, data)) return false;
+
+        Event.register(PlayerLeaveEvent.class, this, 10, ev -> {
+            Session sess = getPlayerSession(ev.getPlayer());
+            if(sess != null) sess.removePlayer(ev.getPlayer());
+        });
+
+        return true;
+    }
+
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<Server, ServerModule>(FabricSessionModule::new, ID, new ConfigSection()).dependsOn(SavepointModule.ID);
+}

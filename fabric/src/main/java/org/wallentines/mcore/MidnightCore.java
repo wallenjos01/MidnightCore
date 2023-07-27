@@ -11,6 +11,8 @@ import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.savepoint.FabricSavepoint;
 import org.wallentines.mcore.savepoint.SavepointModule;
+import org.wallentines.mcore.session.FabricSessionModule;
+import org.wallentines.mcore.session.SessionModule;
 import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -36,6 +38,7 @@ public class MidnightCore implements ModInitializer {
 
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepoint.MODULE_INFO);
+        ServerModule.REGISTRY.register(SessionModule.ID, FabricSessionModule.MODULE_INFO);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(Commands.literal("mcoretest")

@@ -1,8 +1,11 @@
 package org.wallentines.mcore.session;
 
+import org.wallentines.mcore.MidnightCoreAPI;
+import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.util.Collection;
@@ -42,6 +45,13 @@ public abstract class SessionModule implements ServerModule {
         return runningSessions.values().stream().filter(predicate);
     }
 
+    public Session getPlayerSession(Player player) {
+        for(Session sess : runningSessions.values()) {
+            if(sess.contains(player)) return sess;
+        }
+        return null;
+    }
+
     public void shutdownAll() {
 
         List.copyOf(runningSessions.values()).forEach(Session::shutdown);
@@ -51,5 +61,7 @@ public abstract class SessionModule implements ServerModule {
 
         runningSessions.values().stream().filter(predicate).toList().forEach(Session::shutdown);
     }
+
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "session");
 
 }
