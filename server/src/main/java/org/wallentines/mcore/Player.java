@@ -9,7 +9,11 @@ import org.wallentines.mcore.skin.Skinnable;
 import org.wallentines.mcore.text.Component;
 
 /**
- * An interface representing a Server-side player object
+ * An interface representing a Server-side player object.
+ * <br/>
+ * Warning: You cannot take for granted that a Player will remain valid for the duration of the time they are on the
+ * server. Player objects are recreated by the server whenever the player dies and respawns. When persistence is
+ * required, store by UUID or look into {@link WrappedPlayer WrappedPlayer}
  */
 public interface Player extends Entity, Skinnable {
 
@@ -75,6 +79,20 @@ public interface Player extends Entity, Skinnable {
     void setGameMode(GameMode mode);
 
     /**
+     * Determines if the player is still connected to the server
+     * @return Whether the player is online
+     */
+    boolean isOnline();
+
+    /**
+     * Creates a new WrappedPlayer from this Player
+     * @return A new WrappedPlayer
+     */
+    default WrappedPlayer wrap() {
+        return new WrappedPlayer(this);
+    }
+
+    /**
      * Changes a player's skin. Requires the skin module to be loaded!
      * @param skin The player's new skin
      */
@@ -84,12 +102,11 @@ public interface Player extends Entity, Skinnable {
         getServer().getModuleManager().getModule(SkinModule.class).setSkin(this, skin);
     }
 
-
     static void registerPlaceholders(PlaceholderManager manager) {
 
         manager.registerSupplier("player_uuid", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Player.class, pl -> pl.getUUID().toString(), "")));
         manager.registerSupplier("player_username", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Player.class, Player::getUsername, "")));
-        manager.registerSupplier("player_name", PlaceholderSupplier.of(ctx -> ctx.onValueOr(Player.class, Player::getDisplayName, Component.empty())));
+        manager.registerSupplier("player_name", PlaceholderSupplier.of(ctx -> ctx.onValueOr(Player.class, Entity::getDisplayName, Component.empty())));
 
     }
 

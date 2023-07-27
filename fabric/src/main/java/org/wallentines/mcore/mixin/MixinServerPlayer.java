@@ -35,6 +35,8 @@ public abstract class MixinServerPlayer implements Player {
 
     @Shadow @Final public ServerPlayerGameMode gameMode;
 
+    @Shadow public abstract boolean hasDisconnected();
+
     @Unique
     @Override
     public String getUsername() {
@@ -58,6 +60,12 @@ public abstract class MixinServerPlayer implements Player {
     public Component getDisplayName() {
         ServerPlayer spl = (ServerPlayer) (Object) this;
         return ContentConverter.convertReverse(spl.getDisplayName());
+    }
+
+    @Unique
+    @Override
+    public boolean isOnline() {
+        return !hasDisconnected();
     }
 
     @Unique
