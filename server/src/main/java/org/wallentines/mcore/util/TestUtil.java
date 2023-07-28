@@ -9,12 +9,14 @@ import org.wallentines.mcore.lang.LangManager;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.UnresolvedComponent;
+import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.ClickEvent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.HoverEvent;
 import org.wallentines.mcore.text.TextColor;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,6 +85,24 @@ public class TestUtil {
                 pl.setSkin(skin);
             });
 
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+
+    public static void saveCmd(Player pl) {
+        try {
+            pl.getServer().getModuleManager().getModule(SavepointModule.class).savePlayer(pl, "test", EnumSet.allOf(SavepointModule.SaveFlag.class));
+            pl.sendMessage(org.wallentines.mcore.text.Component.text("Saved!").withColor(TextColor.AQUA));
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+
+    public static void loadCmd(Player pl) {
+        try {
+            pl.getServer().getModuleManager().getModule(SavepointModule.class).loadPlayer(pl, "test");
+            pl.sendMessage(org.wallentines.mcore.text.Component.text("Loaded!").withColor(TextColor.AQUA));
         } catch (Throwable th) {
             th.printStackTrace();
         }

@@ -37,6 +37,8 @@ public abstract class MixinServerPlayer implements Player {
 
     @Shadow public abstract boolean hasDisconnected();
 
+    @Shadow public abstract boolean setGameMode(GameType gameType);
+
     @Unique
     @Override
     public String getUsername() {
@@ -125,7 +127,7 @@ public abstract class MixinServerPlayer implements Player {
     @Unique
     @Override
     public void setGameMode(GameMode mode) {
-        gameMode.changeGameModeForPlayer(switch (mode) {
+        setGameMode(switch (mode) {
             case SURVIVAL -> GameType.SURVIVAL;
             case CREATIVE -> GameType.CREATIVE;
             case ADVENTURE -> GameType.ADVENTURE;

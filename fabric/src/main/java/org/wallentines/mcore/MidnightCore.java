@@ -57,6 +57,22 @@ public class MidnightCore implements ModInitializer {
                         return 1;
                     })
                 )
+                .then(Commands.literal("save")
+                        .executes(ctx -> {
+
+                            Player pl = ctx.getSource().getPlayerOrException();
+                            TestUtil.saveCmd(pl);
+                            return 1;
+                        })
+                )
+                .then(Commands.literal("load")
+                        .executes(ctx -> {
+
+                            Player pl = ctx.getSource().getPlayerOrException();
+                            TestUtil.loadCmd(pl);
+                            return 1;
+                        })
+                )
             );
         });
 

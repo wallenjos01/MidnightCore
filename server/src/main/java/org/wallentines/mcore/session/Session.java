@@ -4,11 +4,17 @@ import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.WrappedPlayer;
+import org.wallentines.mcore.savepoint.Savepoint;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.util.FileExecutor;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -65,7 +71,17 @@ public abstract class Session {
 
         EnumSet<SavepointModule.SaveFlag> flags = getSavepointFlags();
         if(flags != null && flags.size() > 0) {
-            server.getModuleManager().getModule(SavepointModule.class).savePlayer(player, uuid.toString(), flags);
+            SavepointModule spm = server.getModuleManager().getModule(SavepointModule.class);
+            Savepoint sp = spm.savePlayer(player, uuid.toString(), flags);
+
+            File lookup = server.getStorageDirectory().resolve(MidnightCoreAPI.MOD_ID + "-session-recovery-" + player.getUUID().toString() + ".json").toFile();
+            new FileExecutor(lookup, (file) ->
+                    JSONCodec.fileCodec().saveToFile(
+                            ConfigContext.INSTANCE,
+                            spm.getSerializer().serialize(ConfigContext.INSTANCE, sp).getOrThrow(),
+                            file,
+                            StandardCharsets.UTF_8)
+            ).start();
         }
 
         players.add(player.wrap());

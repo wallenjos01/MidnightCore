@@ -2,6 +2,7 @@ package org.wallentines.mcore.session;
 
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.event.PlayerJoinEvent;
 import org.wallentines.mcore.event.PlayerLeaveEvent;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mdcfg.ConfigSection;
@@ -17,6 +18,9 @@ public class FabricSessionModule extends SessionModule {
         Event.register(PlayerLeaveEvent.class, this, 10, ev -> {
             Session sess = getPlayerSession(ev.getPlayer());
             if(sess != null) sess.removePlayer(ev.getPlayer());
+        });
+        Event.register(PlayerJoinEvent.class, this, 20, ev -> {
+            attemptRecovery(ev.getPlayer());
         });
 
         return true;

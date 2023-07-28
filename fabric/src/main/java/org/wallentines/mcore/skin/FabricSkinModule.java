@@ -47,8 +47,7 @@ public class FabricSkinModule extends SkinModule {
         super.initialize(section, data);
 
         boolean offlineModeSkins = section.getBoolean("get_skins_in_offline_mode");
-
-        Event.register(PlayerJoinEvent.class, this, ev -> {
+        Event.register(PlayerJoinEvent.class, this, 10, ev -> {
 
             loginProfiles.put(ev.getPlayer().getUUID(), ev.getPlayer().getGameProfile());
             if(offlineModeSkins) {
