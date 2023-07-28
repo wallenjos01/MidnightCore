@@ -1,7 +1,9 @@
 package org.wallentines.mcore.savepoint;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.util.NBTContext;
 import org.wallentines.mdcfg.ConfigSection;
@@ -29,7 +31,12 @@ public class FabricSavepoint extends Savepoint {
         }
 
         if(nbt != null) {
+
+            spl.removeAllEffects();
             spl.load((CompoundTag) ConfigContext.INSTANCE.convert(NBTContext.INSTANCE, nbt));
+            for(MobEffectInstance inst : spl.getActiveEffects()) {
+                spl.connection.send(new ClientboundUpdateMobEffectPacket(spl.getId(), inst));
+            }
         }
         if(gameMode != null) {
             player.setGameMode(gameMode);

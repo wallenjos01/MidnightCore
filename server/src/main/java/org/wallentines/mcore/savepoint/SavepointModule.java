@@ -98,6 +98,7 @@ public abstract class SavepointModule implements ServerModule {
 
     protected abstract Savepoint createSavepoint(Player player, EnumSet<SaveFlag> flags);
 
+
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "savepoint");
 
     public enum SaveFlag {
