@@ -30,6 +30,7 @@ subprojects.forEach { sp ->
         api("org.wallentines:midnightlib:1.2.0")
 
         implementation("org.slf4j:slf4j-api:2.0.7")
+        implementation("io.netty:netty-buffer:4.1.94.Final")
         implementation("org.jetbrains:annotations:24.0.1")
 
         testImplementation(platform(libs.junit.bom))

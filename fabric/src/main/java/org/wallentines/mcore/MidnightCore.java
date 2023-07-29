@@ -9,6 +9,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.messaging.FabricServerMessagingModule;
+import org.wallentines.mcore.messaging.ServerMessagingModule;
 import org.wallentines.mcore.savepoint.FabricSavepoint;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.session.FabricSessionModule;
@@ -39,19 +41,17 @@ public class MidnightCore implements ModInitializer {
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepoint.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, FabricSessionModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(ServerMessagingModule.ID, FabricServerMessagingModule.MODULE_INFO);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(Commands.literal("mcoretest")
                 .executes(ctx -> {
-
                     Player pl = ctx.getSource().getPlayerOrException();
                     TestUtil.cmd(pl);
-
                     return 1;
                 })
                 .then(Commands.literal("skin")
                     .executes(ctx -> {
-
                         Player pl = ctx.getSource().getPlayerOrException();
                         TestUtil.skinCmd(pl);
                         return 1;
@@ -59,7 +59,6 @@ public class MidnightCore implements ModInitializer {
                 )
                 .then(Commands.literal("save")
                         .executes(ctx -> {
-
                             Player pl = ctx.getSource().getPlayerOrException();
                             TestUtil.saveCmd(pl);
                             return 1;
@@ -67,7 +66,6 @@ public class MidnightCore implements ModInitializer {
                 )
                 .then(Commands.literal("load")
                         .executes(ctx -> {
-
                             Player pl = ctx.getSource().getPlayerOrException();
                             TestUtil.loadCmd(pl);
                             return 1;
