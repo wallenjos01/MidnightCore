@@ -15,6 +15,7 @@
     "mixins": [
         "midnightcore.mixins.json"
     ],
+    "accessWidener": "midnightcore.accesswidener",
     "custom": {
         "loom:injected_interfaces": {
             "net/minecraft/server/MinecraftServer": [ "org/wallentines/mcore/Server" ],

@@ -18,7 +18,7 @@ import org.wallentines.mcore.event.PlayerLeaveEvent;
 import org.wallentines.midnightlib.event.Event;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public class MixinServerPacketListener {
+public class MixinServerGamePacketListener {
 
     @Shadow public ServerPlayer player;
 

@@ -17,6 +17,7 @@ loom {
             server()
         }
     }
+    accessWidenerPath = File("src/main/resources/midnightcore.accesswidener")
 }
 
 repositories {
