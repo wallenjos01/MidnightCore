@@ -7,6 +7,7 @@ import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
 import org.wallentines.mcore.event.CustomPayloadEvent;
+import org.wallentines.mcore.event.LoginQueryEvent;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.Event;
@@ -18,14 +19,19 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
 
     @Override
     public void sendPacket(Player player, Identifier packetId, ByteBuf data) {
-        ConversionUtil.ensureValid(player).connection.send(new ClientboundCustomPayloadPacket(ConversionUtil.toResourceLocation(packetId), new FriendlyByteBuf(data)));
+        ConversionUtil.ensureValid(player).connection.send(
+                new ClientboundCustomPayloadPacket(
+                        ConversionUtil.toResourceLocation(packetId),
+                        new FriendlyByteBuf(data)
+                )
+        );
     }
 
     @Override
     public boolean initialize(ConfigSection section, Server data) {
 
-        Event.register(CustomPayloadEvent.class, this, ev ->
-                handlePacket(ev.getSender(), ConversionUtil.toIdentifier(ev.getPacketId()), ev.getData()));
+        Event.register(CustomPayloadEvent.class, this, ev -> handlePacket(ev.sender(), ConversionUtil.toIdentifier(ev.packetId()), ev.data()));
+        Event.register(LoginQueryEvent.class, this, ev -> onLogin.invoke(ev.negotiator()));
 
         return true;
     }

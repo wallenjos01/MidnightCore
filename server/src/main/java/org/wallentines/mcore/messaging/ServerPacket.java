@@ -3,8 +3,10 @@ package org.wallentines.mcore.messaging;
 import io.netty.buffer.ByteBuf;
 import org.wallentines.mcore.Player;
 
-public interface ServerboundPacketHandler {
+public interface ServerPacket {
 
-    void handle(Player sender, ByteBuf packet);
+    void write(ByteBuf buffer);
+
+    void handle(Player player);
 
 }
