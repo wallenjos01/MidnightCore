@@ -10,70 +10,48 @@ import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
-import java.util.function.Function;
-
+/**
+ * Allows mods to implement and send custom packet types to clients
+ */
 public abstract class ServerMessagingModule implements ServerModule {
 
-    private final Registry<Type<?>> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    private final Registry<ServerPacketHandler> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
 
+    /**
+     * An event fired when a Player begins connecting to the server, during the "Negotiating" phase. This event can
+     * be used to implement custom negotiation on login
+     */
     public final HandlerList<ServerLoginNegotiator> onLogin = new HandlerList<>();
 
+    /**
+     * Sends a custom Packet to a player
+     * @param player The player to send the data to
+     * @param packet The packet to send
+     */
     public void sendPacket(Player player, ServerPacket packet) {
-
-        Type<?> type = getPacketType(packet);
-        if(type == null) {
-
-            MidnightCoreAPI.LOGGER.warn("Could not find packet type for packet with class " + packet.getClass());
-            return;
-        }
 
         ByteBuf out = Unpooled.buffer();
         packet.write(out);
 
-        sendPacket(player, handlers.getId(type), out);
+        sendPacket(player, packet.getId(), out);
     }
 
-    public <T extends ServerPacket> void registerPacketType(Identifier packetId, Class<T> packetType, Function<ByteBuf, T> reader) {
+    /**
+     * Registers a custom Packet handler. The ID must be unique.
+     * @param packetId The packet type's ID
+     * @param handler The function which should handle the packet
+     */
+    public void registerPacketHandler(Identifier packetId, ServerPacketHandler handler) {
 
-        handlers.register(packetId, new Type<>(packetType, reader));
+        handlers.register(packetId, handler);
     }
 
     protected abstract void sendPacket(Player player, Identifier packetId, ByteBuf data);
 
     protected void handlePacket(Player sender, Identifier packetId, ByteBuf data) {
-
         if(!handlers.contains(packetId)) return;
-        handlers.get(packetId).read(data).handle(sender);
+        handlers.get(packetId).handle(sender, data);
     }
-
-    private Type<?> getPacketType(ServerPacket packet) {
-        for(Type<?> type : handlers) {
-            if(type.getPacketClass().isAssignableFrom(packet.getClass())) {
-                return type;
-            }
-        }
-        return null;
-    }
-
-    private static class Type<T extends ServerPacket> {
-
-        private final Class<T> packetType;
-        private final Function<ByteBuf, T> reader;
-
-        public Type(Class<T> packetType, Function<ByteBuf, T> reader) {
-            this.packetType = packetType;
-            this.reader = reader;
-        }
-
-        public Class<T> getPacketClass() {
-            return packetType;
-        }
-
-        public T read(ByteBuf buffer) {
-            return reader.apply(buffer);
-        }
-    }
-
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "messaging");
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
