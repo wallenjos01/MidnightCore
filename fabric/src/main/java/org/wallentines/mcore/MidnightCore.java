@@ -23,12 +23,8 @@ import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.TestUtil;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
-import java.nio.file.Path;
-
 public class MidnightCore implements ModInitializer {
 
-
-    public static final Path DATA_FOLDER = Path.of("config", MidnightCoreAPI.MOD_ID);
 
     @Override
     public void onInitialize() {

@@ -78,11 +78,11 @@ public abstract class MixinMinecraftServer implements Server {
     }
 
     @Override
-    public Path getStorageDirectory() {
+    public Path getConfigDirectory() {
         if(isDedicatedServer()) {
-            return MidnightCore.DATA_FOLDER;
+            return Path.of("config");
         } else {
-            return getWorldPath(LevelResource.ROOT);
+            return getWorldPath(LevelResource.ROOT).resolve("config");
         }
     }
 

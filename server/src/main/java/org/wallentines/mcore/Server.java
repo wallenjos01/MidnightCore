@@ -11,6 +11,7 @@ import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.UUID;
@@ -73,10 +74,16 @@ public interface Server {
      */
     default void loadModules(Registry<ModuleInfo<Server, ServerModule>> registry) {
 
+        File moduleStorage = getConfigDirectory().resolve("MidnightCore").toFile();
+
+        if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {
+            MidnightCoreAPI.LOGGER.warn("Unable to create server storage directory!");
+        }
+
         ModuleManager<Server, ServerModule> manager = getModuleManager();
         manager.unloadAll();
 
-        FileWrapper<ConfigObject> wrapper = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", getStorageDirectory().toFile(), new ConfigSection());
+        FileWrapper<ConfigObject> wrapper = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());
         manager.loadAll(wrapper.getRoot().asSection(), this, registry);
 
         wrapper.save();
@@ -84,10 +91,10 @@ public interface Server {
 
     /**
      * Gets the directory where the server stores files. Will be in the plugins directory for spigot servers, the
-     * config directory for other servers, and the world directory for integrated servers
+     * config directory for dedicated servers, and a config folder in the world directory for integrated servers.
      * @return The directory where the server stores files
      */
-    Path getStorageDirectory();
+    Path getConfigDirectory();
 
     /**
      * Returns a reference to an event called every game tick
