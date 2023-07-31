@@ -7,6 +7,8 @@ import net.minecraft.SharedConstants;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
+import org.wallentines.mcore.extension.FabricServerExtensionModule;
+import org.wallentines.mcore.extension.ServerExtensionModule;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.messaging.FabricServerMessagingModule;
@@ -33,15 +35,19 @@ public class MidnightCore implements ModInitializer {
 
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
 
+
         ServerLifecycleEvents.SERVER_STARTING.register(Server.RUNNING_SERVER::set);
         ServerLifecycleEvents.SERVER_STARTED.register(Server.START_EVENT::invoke);
         ServerLifecycleEvents.SERVER_STOPPING.register(Server.STOP_EVENT::invoke);
         ServerLifecycleEvents.SERVER_STOPPED.register(srv -> Server.RUNNING_SERVER.reset());
 
+
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepoint.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, FabricSessionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerMessagingModule.ID, FabricServerMessagingModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(ServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
+
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(Commands.literal("mcoretest")
@@ -73,7 +79,6 @@ public class MidnightCore implements ModInitializer {
                 )
             );
         });
-
     }
 
     static {

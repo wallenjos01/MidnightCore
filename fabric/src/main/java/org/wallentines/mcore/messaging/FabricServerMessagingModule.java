@@ -28,6 +28,11 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
     }
 
     @Override
+    public boolean supportsLoginQuery() {
+        return true;
+    }
+
+    @Override
     public boolean initialize(ConfigSection section, Server data) {
 
         Event.register(CustomPayloadEvent.class, this, ev -> handlePacket(ev.sender(), ConversionUtil.toIdentifier(ev.packetId()), ev.data()));

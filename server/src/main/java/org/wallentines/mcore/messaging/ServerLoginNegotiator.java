@@ -1,6 +1,7 @@
 package org.wallentines.mcore.messaging;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.UUID;
@@ -28,6 +29,17 @@ public abstract class ServerLoginNegotiator {
      * @return The Player's username
      */
     public String getPlayerName() { return name; }
+
+    /**
+     * Sends the given packet to the player, and registers a handler for response
+     * @param packet The packet to send
+     * @param response The function to call when the player responds
+     */
+    public void sendPacket(ServerPacket packet, ServerLoginPacketHandler response) {
+        ByteBuf out = Unpooled.buffer();
+        packet.write(out);
+        sendPacket(packet.getId(), out, response);
+    }
 
     /**
      * Sends a packet with the given ID and data to the player, and registers a handler for response
