@@ -90,6 +90,7 @@ public abstract class ServerExtensionModule implements ServerModule {
             }
 
             enabledExtensions.put(playerId, versions);
+            MidnightCoreAPI.LOGGER.warn("Player " + username + " logged in with " + versions.size() + " enabled extensions");
 
         } catch (DecoderException ex) {
             MidnightCoreAPI.LOGGER.warn("Player " + username + " sent invalid extension packet! " + ex.getMessage());

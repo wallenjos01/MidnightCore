@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 public abstract class SessionModule implements ServerModule {
 
-    protected Singleton<Server> server;
+    protected final Singleton<Server> server = new Singleton<>();
     private final HashMap<UUID, Session> runningSessions = new HashMap<>();
 
     @Override

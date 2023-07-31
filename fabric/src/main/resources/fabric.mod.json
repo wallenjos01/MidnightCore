@@ -6,6 +6,9 @@
     "entrypoints": {
         "main": [
             "org.wallentines.mcore.MidnightCore"
+        ],
+        "client": [
+            "org.wallentines.mcore.MidnightCoreClient"
         ]
     },
     "depends": {
