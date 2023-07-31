@@ -30,7 +30,10 @@ public class FabricClientMessagingModule extends ClientMessagingModule {
         });
         Event.register(ClientLoginQueryEvent.class, this, ev -> {
             ByteBuf response = handleLoginPacket(ConversionUtil.toIdentifier(ev.getPacketId()), ev.getData());
-            if(response != null) ev.setResponse(new FriendlyByteBuf(response));
+            if(response != null) {
+                response.resetReaderIndex();
+                ev.setResponse(new FriendlyByteBuf(response));
+            }
         });
 
         return true;
@@ -47,8 +50,10 @@ public class FabricClientMessagingModule extends ClientMessagingModule {
 
         ByteBuf out = Unpooled.buffer();
         packet.write(out);
+        out.resetReaderIndex();
+
         listener.send(new ServerboundCustomPayloadPacket(ConversionUtil.toResourceLocation(packet.getId()), new FriendlyByteBuf(out)));
     }
 
-    public static final ModuleInfo<Client, ClientModule> MODULE_INFO = new ModuleInfo<>(FabricClientMessagingModule::new, ServerMessagingModule.ID, new ConfigSection());
+    public static final ModuleInfo<Client, ClientModule> MODULE_INFO = new ModuleInfo<>(FabricClientMessagingModule::new, ClientMessagingModule.ID, new ConfigSection());
 }
