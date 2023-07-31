@@ -57,4 +57,6 @@ public abstract class ClientMessagingModule implements ClientModule {
         return out;
     }
 
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "messaging");
+
 }
