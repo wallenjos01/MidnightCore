@@ -46,6 +46,12 @@ public abstract class ServerMessagingModule implements ServerModule {
         handlers.register(packetId, handler);
     }
 
+    /**
+     * Determines whether this module supports sending messages during the login phase. Will be false on Spigot servers
+     * @return Whether this module supports sending custom login packets
+     */
+    public abstract boolean supportsLoginQuery();
+
     protected abstract void sendPacket(Player player, Identifier packetId, ByteBuf data);
 
     protected void handlePacket(Player sender, Identifier packetId, ByteBuf data) {
