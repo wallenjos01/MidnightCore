@@ -16,10 +16,14 @@ import org.wallentines.midnightlib.registry.Identifier;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A client module for loading extensions and communicating with servers who support the extensions
+ */
 public class ClientExtensionModule implements ClientModule {
 
     private final ModuleManager<ClientExtensionModule, ClientExtension> manager = new ModuleManager<>();
     private ClientMessagingModule cmm;
+
     @Override
     public boolean initialize(ConfigSection section, Client data) {
 

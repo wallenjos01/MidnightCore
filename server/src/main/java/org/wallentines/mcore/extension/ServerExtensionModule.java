@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+/**
+ * A module for loading optional extensions and declaring them to clients who join the server
+ */
 public abstract class ServerExtensionModule implements ServerModule {
 
     private final ModuleManager<ServerExtensionModule, ServerExtension> manager = new ModuleManager<>();
@@ -46,6 +49,8 @@ public abstract class ServerExtensionModule implements ServerModule {
 
         mod.registerPacketHandler(ClientboundExtensionPacket.ID, (player, buffer) -> handleResponse(player.getUUID(), player.getUsername(), buffer));
 
+        // If the server does not support login query or the delay option is enabled, packets will be sent during the
+        // play state, right when a player joins the game
         if(!mod.supportsLoginQuery() || section.getBoolean("delay_send")) {
             registerJoinListener(pl -> smm.sendPacket(pl, cachedPacket));
         } else {
@@ -55,12 +60,22 @@ public abstract class ServerExtensionModule implements ServerModule {
         return true;
     }
 
-
+    /**
+     * Checks if a player has the given extension
+     * @param player The player to query
+     * @param id The extension ID
+     * @return Whether the player has that extension
+     */
     public boolean hasExtension(Player player, Identifier id) {
         return enabledExtensions.containsKey(player.getUUID()) && enabledExtensions.get(player.getUUID()).containsKey(id);
     }
 
-
+    /**
+     * Gets the version of an extension the player has
+     * @param player The player to query
+     * @param id The extension ID
+     * @return The version of the specified extension, or null
+     */
     public Version getExtensionVersion(Player player, Identifier id) {
         if(!hasExtension(player, id)) return null;
         return enabledExtensions.get(player.getUUID()).get(id);
@@ -97,10 +112,17 @@ public abstract class ServerExtensionModule implements ServerModule {
         }
     }
 
-
+    /**
+     * Registers an event which calls the given consumer when a player joins the server and their connection has
+     * transitioned into the play state
+     * @param player The function to call when a player joins
+     */
     protected abstract void registerJoinListener(Consumer<Player> player);
 
-
+    /**
+     * Returns the server which loaded this extension
+     * @return The running server
+     */
     public Server getServer() {
         return server;
     }

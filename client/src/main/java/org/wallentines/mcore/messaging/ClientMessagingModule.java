@@ -6,21 +6,39 @@ import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
+/**
+ * A module for sending custom packets to servers and handling custom packets sent from servers.
+ */
 public abstract class ClientMessagingModule implements ClientModule {
 
     private final Registry<ClientPacketHandler> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
     private final Registry<ClientLoginPacketHandler> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
 
+    /**
+     * Sends a custom packet to the server
+     * @param packet The packet to send
+     */
 
     public abstract void sendMessage(ClientPacket packet);
 
+    /**
+     * Registers a packet handler for packets with the given ID send during the play state
+     * @param id The packet ID
+     * @param handler The packet handler
+     */
     public void registerPacketHandler(Identifier id, ClientPacketHandler handler) {
         handlers.register(id, handler);
     }
 
+    /**
+     * Registers a packet handler for packets with the given ID send during the login state
+     * @param id The packet ID
+     * @param handler The packet handler
+     */
     public void registerLoginPacketHandler(Identifier id, ClientLoginPacketHandler handler) {
         loginHandlers.register(id, handler);
     }
+
 
     protected boolean handlePacket(Identifier id, ByteBuf buf) {
 
