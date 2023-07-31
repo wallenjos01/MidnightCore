@@ -23,10 +23,7 @@ public class MixinMinecraft implements Client {
     @Inject(method="<init>", at=@At("RETURN"))
     private void onInit(GameConfig gameConfig, CallbackInfo ci) {
 
-        if(!getStorageDirectory().toFile().mkdirs()) {
-            MidnightCoreAPI.LOGGER.warn("Unable to create client storage directory!");
-        }
-
+        MidnightCoreAPI.LOGGER.warn("Client created!");
         Client.RUNNING_CLIENT.set(this);
 
         loadModules(ClientModule.REGISTRY);
@@ -40,7 +37,7 @@ public class MixinMinecraft implements Client {
 
     @Unique
     @Override
-    public Path getStorageDirectory() {
-        return Path.of("config", "MidnightCore", "client");
+    public Path getConfigDirectory() {
+        return Path.of("config");
     }
 }

@@ -9,6 +9,7 @@ import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.types.Singleton;
 
+import java.io.File;
 import java.nio.file.Path;
 
 public interface Client {
@@ -26,20 +27,26 @@ public interface Client {
      */
     default void loadModules(Registry<ModuleInfo<Client, ClientModule>> registry) {
 
+        File moduleStorage = getConfigDirectory().resolve("MidnightCore").resolve("client").toFile();
+
+        if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {
+            MidnightCoreAPI.LOGGER.warn("Unable to create client storage directory!");
+        }
+
         ModuleManager<Client, ClientModule> manager = getModuleManager();
         manager.unloadAll();
 
-        FileWrapper<ConfigObject> wrapper = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", getStorageDirectory().toFile(), new ConfigSection());
+        FileWrapper<ConfigObject> wrapper = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());
         manager.loadAll(wrapper.getRoot().asSection(), this, registry);
 
         wrapper.save();
     }
 
     /**
-     * Gets the directory where the client stores files
-     * @return The directory where the client stores files
+     * Gets the directory where the client stores configuration files
+     * @return The directory where the client stores config files
      */
-    Path getStorageDirectory();
+    Path getConfigDirectory();
 
 
     /**

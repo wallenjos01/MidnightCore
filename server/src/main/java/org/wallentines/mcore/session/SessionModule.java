@@ -135,7 +135,7 @@ public abstract class SessionModule implements ServerModule {
     public static File getRecoveryFile(Player player) {
 
         String name = MidnightCoreAPI.MOD_ID + "-recovery-" + player.getUUID().toString() + ".tmp";
-        return player.getServer().getStorageDirectory().resolve(name).toFile();
+        return player.getServer().getConfigDirectory().resolve(name).toFile();
     }
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "session");
