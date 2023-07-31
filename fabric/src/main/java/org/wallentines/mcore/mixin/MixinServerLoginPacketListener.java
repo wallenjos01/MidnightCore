@@ -19,6 +19,8 @@ import org.wallentines.mcore.event.LoginQueryEvent;
 import org.wallentines.mcore.messaging.FabricServerLoginNegotiator;
 import org.wallentines.midnightlib.event.Event;
 
+import java.util.UUID;
+
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class MixinServerLoginPacketListener {
 
@@ -31,8 +33,6 @@ public abstract class MixinServerLoginPacketListener {
     @Shadow @Nullable
     GameProfile gameProfile;
     @Shadow ServerLoginPacketListenerImpl.State state;
-
-    @Shadow public abstract String getUserName();
 
     @Unique
     private FabricServerLoginNegotiator mcore$negotiator;
@@ -51,7 +51,14 @@ public abstract class MixinServerLoginPacketListener {
         // Check to see if negotiating has begun already
         if(mcore$negotiator == null) {
 
-            mcore$negotiator = new FabricServerLoginNegotiator(gameProfile == null ? null : gameProfile.getId(), getUserName(), connection);
+            UUID uid = null;
+            String name = null;
+            if(gameProfile != null) {
+                uid = gameProfile.getId();
+                name = gameProfile.getName();
+            }
+
+            mcore$negotiator = new FabricServerLoginNegotiator(uid, name, connection);
             state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
 
             // Send "Negotiating" packets

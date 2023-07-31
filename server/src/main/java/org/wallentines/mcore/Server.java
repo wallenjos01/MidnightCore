@@ -67,6 +67,10 @@ public interface Server {
      */
     ModuleManager<Server, ServerModule> getModuleManager();
 
+    /**
+     * Loads all modules from the given registry using the server's module config
+     * @param registry The registry to find modules in
+     */
     default void loadModules(Registry<ModuleInfo<Server, ServerModule>> registry) {
 
         ModuleManager<Server, ServerModule> manager = getModuleManager();
@@ -78,6 +82,11 @@ public interface Server {
         wrapper.save();
     }
 
+    /**
+     * Gets the directory where the server stores files. Will be in the plugins directory for spigot servers, the
+     * config directory for other servers, and the world directory for integrated servers
+     * @return The directory where the server stores files
+     */
     Path getStorageDirectory();
 
     /**

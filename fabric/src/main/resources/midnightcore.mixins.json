@@ -6,6 +6,7 @@
   "mixins": [
     "AccessorPlayer",
     "AccessorPlayerAdvancements",
+    "MixinClientLoginPacketListener",
     "MixinEntity",
     "MixinFriendlyByteBuf",
     "MixinItemStack",
@@ -16,7 +17,10 @@
     "MixinServerLoginPacketListener",
     "MixinServerPlayer"
   ],
-  "client": [],
+  "client": [
+    "MixinClientPacketListener",
+    "MixinMinecraft"
+  ],
   "priority": 1010,
   "injectors": {
     "defaultRequire": 1
