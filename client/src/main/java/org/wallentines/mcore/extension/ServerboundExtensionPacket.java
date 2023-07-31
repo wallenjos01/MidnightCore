@@ -11,12 +11,19 @@ import org.wallentines.midnightlib.registry.Identifier;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A packet which declares the loaded client extensions to the server. Should only be sent as a response when the server
+ * queries for extensions.
+ */
 public class ServerboundExtensionPacket implements ClientPacket {
-
-    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "extensions");
 
     private final Map<Identifier, Version> extensions;
 
+    /**
+     * Constructs a new packet by reading the given module manager and filtering based on the given server modules
+     * @param manager The extension module manager to read
+     * @param serverModules The modules available on the server
+     */
     public ServerboundExtensionPacket(ModuleManager<ClientExtensionModule, ClientExtension> manager, Map<Identifier, Version> serverModules) {
 
         HashMap<Identifier, Version> out = new HashMap<>();
@@ -43,4 +50,6 @@ public class ServerboundExtensionPacket implements ClientPacket {
             PacketBufferUtil.writeUtf(buffer, ent.getValue().toString());
         }
     }
+
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "extensions");
 }

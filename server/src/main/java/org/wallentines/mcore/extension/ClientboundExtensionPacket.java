@@ -11,12 +11,17 @@ import org.wallentines.midnightlib.registry.Identifier;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A packet sent to the client which declares supported extensions to clients
+ */
 public class ClientboundExtensionPacket implements ServerPacket {
-
-    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "extensions");
 
     private final Map<Identifier, Version> extensions;
 
+    /**
+     * Creates an extension packet by reading a loaded module manager
+     * @param manager The module manager to read
+     */
     public ClientboundExtensionPacket(ModuleManager<ServerExtensionModule, ServerExtension> manager) {
 
         HashMap<Identifier, Version> map = new HashMap<>();
@@ -42,4 +47,6 @@ public class ClientboundExtensionPacket implements ServerPacket {
             PacketBufferUtil.writeUtf(buffer, ent.getValue().toString());
         }
     }
+
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "extensions");
 }
