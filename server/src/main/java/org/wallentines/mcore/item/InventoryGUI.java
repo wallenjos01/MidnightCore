@@ -1,5 +1,6 @@
 package org.wallentines.mcore.item;
 
+import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.types.Either;
@@ -29,11 +30,11 @@ public abstract class InventoryGUI {
         this.title = title;
     }
 
-    public void setItem(int index, ItemStack itemStack, ClickEvent event) {
+    public void setItem(int index, @NotNull ItemStack itemStack, ClickEvent event) {
         this.items[index] = new Entry(itemStack, event);
     }
 
-    public void setItem(int index, UnresolvedItemStack itemStack, ClickEvent event) {
+    public void setItem(int index, @NotNull UnresolvedItemStack itemStack, ClickEvent event) {
         this.items[index] = new Entry(itemStack, event);
     }
 
@@ -91,17 +92,17 @@ public abstract class InventoryGUI {
         private final ClickEvent event;
 
         public Entry(ItemStack item, ClickEvent event) {
-            this.item = item == null ? null : Either.left(item);
+            this.item = Either.left(item);
             this.event = event;
         }
 
         public Entry(UnresolvedItemStack item, ClickEvent event) {
-            this.item = item == null ? null : Either.right(item);
+            this.item = Either.right(item);
             this.event = event;
         }
 
         public ItemStack getItem(Player player) {
-            return item == null ? null : item.leftOrGet(r -> r.resolve(player));
+            return item.leftOrGet(r -> r.resolve(player));
         }
 
         public ClickEvent getEvent() {

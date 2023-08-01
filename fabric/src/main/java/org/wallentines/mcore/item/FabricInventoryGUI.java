@@ -67,25 +67,20 @@ public class FabricInventoryGUI extends InventoryGUI {
         ServerPlayer spl = ConversionUtil.validate(player);
         if(spl.hasDisconnected()) return;
 
-        players.computeIfAbsent(player.wrap(), uid -> {
+        if(spl.containerMenu != spl.inventoryMenu) {
+            spl.closeContainer();
+        }
 
-            if(spl.containerMenu != spl.inventoryMenu) {
-                spl.closeContainer();
-            }
+        SimpleContainer inv = new SimpleContainer(size);
+        ChestMenu handler = createScreen(size / 9, spl, inv);
 
-            SimpleContainer inv = new SimpleContainer(size);
-            ChestMenu handler = createScreen(size / 9, spl, inv);
+        spl.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), WrappedComponent.resolved(title, spl)));
+        spl.containerMenu = handler;
 
-            spl.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), WrappedComponent.resolved(title, spl)));
-            spl.containerMenu = handler;
+        players.put(player.wrap(), handler);
+        doUpdate(spl);
 
-            doUpdate(spl);
-
-            ((AccessorServerPlayer) player).callInitMenu(handler);
-
-            return handler;
-        });
-
+        ((AccessorServerPlayer) player).callInitMenu(handler);
     }
 
     @Override
@@ -109,6 +104,8 @@ public class FabricInventoryGUI extends InventoryGUI {
         }
 
         for(int i = 0 ; i < items.length ; i++) {
+
+            if(items[i] == null) continue;
 
             org.wallentines.mcore.item.ItemStack is = items[i].getItem(player);
             if(is == null) {

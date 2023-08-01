@@ -4,7 +4,9 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
+import org.wallentines.mcore.item.InventoryGUI;
 import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.item.UnresolvedItemStack;
 import org.wallentines.mcore.lang.LangManager;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
@@ -103,6 +105,30 @@ public class TestUtil {
         try {
             pl.getServer().getModuleManager().getModule(SavepointModule.class).loadPlayer(pl, "test");
             pl.sendMessage(org.wallentines.mcore.text.Component.text("Loaded!").withColor(TextColor.AQUA));
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+
+    public static void guiCmd(Player pl) {
+
+        try {
+
+            InventoryGUI gui = InventoryGUI.FACTORY.get().build(Component.text("Hello"), 3);
+
+            LangRegistry defaults = new LangRegistry();
+            defaults.register("test", UnresolvedComponent.parse("%player_name%", PlaceholderManager.INSTANCE).getOrThrow());
+            LangManager manager = new LangManager(defaults, null);
+
+            gui.setItem(0, ItemStack.Builder.concreteWithColor(TextColor.RED).withName(Component.text("Hello, World").withColor(TextColor.AQUA)).build(), null);
+            gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.concreteWithColor(TextColor.GREEN), manager.component("test"), null), (cpl, cl) -> {
+                cpl.sendMessage(Component.text(cl.name()));
+                gui.close(cpl);
+            });gui.setItem(8, ItemStack.empty(), (cpl, cl) -> {
+                cpl.sendMessage(Component.text("Hello, " + cpl.getUsername()));
+            });
+
+            gui.open(pl);
         } catch (Throwable th) {
             th.printStackTrace();
         }

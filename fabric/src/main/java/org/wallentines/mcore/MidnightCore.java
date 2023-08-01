@@ -77,6 +77,13 @@ public class MidnightCore implements ModInitializer {
                             return 1;
                         })
                 )
+                .then(Commands.literal("gui")
+                        .executes(ctx -> {
+                            Player pl = ctx.getSource().getPlayerOrException();
+                            TestUtil.guiCmd(pl);
+                            return 1;
+                        })
+                )
             );
         });
     }
