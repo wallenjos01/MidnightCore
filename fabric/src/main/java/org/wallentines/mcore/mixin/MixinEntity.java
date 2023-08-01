@@ -13,7 +13,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.wallentines.mcore.Entity;
@@ -21,6 +20,7 @@ import org.wallentines.mcore.Location;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.util.ConversionUtil;
+import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -54,6 +54,17 @@ public abstract class MixinEntity implements Entity {
     @Shadow @Nullable public abstract net.minecraft.network.chat.Component getCustomName();
 
     @Shadow public abstract String getStringUUID();
+
+    @Override
+    public Identifier getType() {
+
+        net.minecraft.world.entity.Entity ent = (net.minecraft.world.entity.Entity) (Object) this;
+
+        return RegistryUtil.registry(Registries.ENTITY_TYPE)
+                .map(reg -> reg.getKey(ent.getType()))
+                .map(ConversionUtil::toIdentifier)
+                .orElseGet(() -> new Identifier("minecraft", "pig"));
+    }
 
     @Unique
     @Override

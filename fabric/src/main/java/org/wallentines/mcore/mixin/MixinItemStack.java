@@ -1,6 +1,6 @@
 package org.wallentines.mcore.mixin;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
@@ -10,9 +10,12 @@ import org.spongepowered.asm.mixin.Unique;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.util.NBTContext;
 import org.wallentines.mcore.util.ConversionUtil;
+import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.registry.Identifier;
+
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
 public abstract class MixinItemStack implements ItemStack {
@@ -31,7 +34,10 @@ public abstract class MixinItemStack implements ItemStack {
     @Unique
     @Override
     public Identifier getType() {
-        return ConversionUtil.toIdentifier(BuiltInRegistries.ITEM.getKey(getItem()));
+        return RegistryUtil.registry(Registries.ITEM)
+                .flatMap(res -> Optional.ofNullable(res.getKey(getItem())))
+                .map(ConversionUtil::toIdentifier)
+                .orElse(new Identifier("minecraft", "air"));
     }
 
     @Unique

@@ -33,6 +33,7 @@ public abstract class MixinMinecraftServer implements Server {
 
     @Unique
     private final HandlerList<Server> midnightcore$tickEvent = new HandlerList<>();
+    private final HandlerList<Server> midnightcore$stopEvent = new HandlerList<>();
 
     @Shadow private PlayerList playerList;
 
@@ -94,6 +95,12 @@ public abstract class MixinMinecraftServer implements Server {
 
     @Unique
     @Override
+    public HandlerList<Server> shutdownEvent() {
+        return midnightcore$stopEvent;
+    }
+
+    @Unique
+    @Override
     public void submit(Runnable runnable) {
         MinecraftServer server = (MinecraftServer) (Object) this;
         server.submit(runnable);
@@ -114,5 +121,6 @@ public abstract class MixinMinecraftServer implements Server {
         for(ServerPlayer spl : playerList.getPlayers()) {
             Event.invoke(new PlayerLeaveEvent(spl, Component.empty()));
         }
+        midnightcore$stopEvent.invoke(this);
     }
 }

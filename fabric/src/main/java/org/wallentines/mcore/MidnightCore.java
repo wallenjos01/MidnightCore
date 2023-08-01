@@ -5,7 +5,8 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.DefaultedRegistry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
@@ -20,6 +21,7 @@ import org.wallentines.mcore.session.SessionModule;
 import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.util.ConversionUtil;
+import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.mcore.util.TestUtil;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
@@ -87,7 +89,8 @@ public class MidnightCore implements ModInitializer {
                 throw new IllegalStateException("ItemStack data value requested for an unsupported version!");
             }
 
-            Item it = BuiltInRegistries.ITEM.get(ConversionUtil.toResourceLocation(id));
+            Item it = ((DefaultedRegistry<Item>) RegistryUtil.registryOrThrow(Registries.ITEM)).get(ConversionUtil.toResourceLocation(id));
+
             ItemStack out = (ItemStack) (Object) new net.minecraft.world.item.ItemStack(it, count);
             out.setTag(tag);
             return out;

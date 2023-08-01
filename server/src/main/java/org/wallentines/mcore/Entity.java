@@ -18,6 +18,12 @@ public interface Entity {
     UUID getUUID();
 
     /**
+     * Gets the entity's type ID
+     * @return the entity's type
+     */
+    Identifier getType();
+
+    /**
      * Gets the entity's display name
      * @return The entity's display name
      */
