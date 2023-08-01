@@ -1,4 +1,4 @@
-package org.wallentines.mcore;
+package org.wallentines.mcore.item;
 
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -7,6 +7,8 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import org.wallentines.mcore.Player;
+import org.wallentines.mcore.WrappedPlayer;
 import org.wallentines.mcore.event.ContainerClickEvent;
 import org.wallentines.mcore.event.ContainerCloseEvent;
 import org.wallentines.mcore.event.PlayerLeaveEvent;
@@ -22,7 +24,7 @@ public class FabricInventoryGUI extends InventoryGUI {
 
     private final HashMap<WrappedPlayer, ChestMenu> players = new HashMap<>();
 
-    protected FabricInventoryGUI(Component title, int rows) {
+    public FabricInventoryGUI(Component title, int rows) {
         super(title, rows);
 
         Event.register(ContainerClickEvent.class, this, ev -> {
@@ -108,12 +110,13 @@ public class FabricInventoryGUI extends InventoryGUI {
 
         for(int i = 0 ; i < items.length ; i++) {
 
-            if(items[i].getItem() == null) {
+            org.wallentines.mcore.item.ItemStack is = items[i].getItem(player);
+            if(is == null) {
                 continue;
             }
 
-            ItemStack is = ConversionUtil.validate(items[i].getItem());
-            menu.getContainer().setItem(i, is);
+            ItemStack mis = ConversionUtil.validate(is);
+            menu.getContainer().setItem(i, mis);
         }
     }
 

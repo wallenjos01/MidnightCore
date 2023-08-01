@@ -1,7 +1,8 @@
-package org.wallentines.mcore;
+package org.wallentines.mcore.item;
 
-import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.midnightlib.types.Either;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.util.HashMap;
@@ -29,6 +30,10 @@ public abstract class InventoryGUI {
     }
 
     public void setItem(int index, ItemStack itemStack, ClickEvent event) {
+        this.items[index] = new Entry(itemStack, event);
+    }
+
+    public void setItem(int index, UnresolvedItemStack itemStack, ClickEvent event) {
         this.items[index] = new Entry(itemStack, event);
     }
 
@@ -82,16 +87,21 @@ public abstract class InventoryGUI {
 
     public static class Entry {
 
-        private final ItemStack item;
+        private final Either<ItemStack, UnresolvedItemStack> item;
         private final ClickEvent event;
 
         public Entry(ItemStack item, ClickEvent event) {
-            this.item = item;
+            this.item = item == null ? null : Either.left(item);
             this.event = event;
         }
 
-        public ItemStack getItem() {
-            return item;
+        public Entry(UnresolvedItemStack item, ClickEvent event) {
+            this.item = item == null ? null : Either.right(item);
+            this.event = event;
+        }
+
+        public ItemStack getItem(Player player) {
+            return item == null ? null : item.leftOrGet(r -> r.resolve(player));
         }
 
         public ClickEvent getEvent() {
