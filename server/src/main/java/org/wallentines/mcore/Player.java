@@ -43,6 +43,36 @@ public interface Player extends Entity, Skinnable {
     void sendActionBar(Component component);
 
     /**
+     * Sends a title to the player
+     * @param title The title to send
+     */
+    void sendTitle(Component title);
+
+    /**
+     * Sends a subtitle to the player
+     * @param title The title to send
+     */
+    void sendSubtitle(Component title);
+
+    /**
+     * Clears the titles for the player
+     */
+    void clearTitles();
+
+    /**
+     * Changes the title timings for the player
+     * @param fadeIn How many ticks it should take for a title to fade in
+     * @param stay How many ticks the title should stay on screen
+     * @param fadeOut How many ticks it should take for a title to fade out
+     */
+    void setTitleTimes(int fadeIn, int stay, int fadeOut);
+
+    /**
+     * Clears the titles for the player and resets timings to default
+     */
+    void resetTitles();
+
+    /**
      * Retrieves the item in the player's main hand
      * @return The item in the player's main hand
      */

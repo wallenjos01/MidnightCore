@@ -83,6 +83,8 @@ public interface Server {
         ModuleManager<Server, ServerModule> manager = getModuleManager();
         manager.unloadAll();
 
+        shutdownEvent().register(this, ev -> manager.unloadAll());
+
         FileWrapper<ConfigObject> wrapper = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());
         manager.loadAll(wrapper.getRoot().asSection(), this, registry);
 
@@ -97,10 +99,16 @@ public interface Server {
     Path getConfigDirectory();
 
     /**
-     * Returns a reference to an event called every game tick
+     * An event called every game tick
      * @return the server's tick event
      */
     HandlerList<Server> tickEvent();
+
+    /**
+     * An event called when the server shuts down
+     * @return The server's shutdown event
+     */
+    HandlerList<Server> shutdownEvent();
 
     /**
      * Submits some code to be run on synchronously on the server thread

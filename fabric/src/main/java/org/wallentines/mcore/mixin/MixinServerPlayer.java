@@ -1,9 +1,10 @@
 package org.wallentines.mcore.mixin;
 
-import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Final;
@@ -38,6 +39,8 @@ public abstract class MixinServerPlayer implements Player {
     @Shadow public abstract boolean hasDisconnected();
 
     @Shadow public abstract boolean setGameMode(GameType gameType);
+
+    @Shadow public ServerGamePacketListenerImpl connection;
 
     @Unique
     @Override
@@ -82,6 +85,36 @@ public abstract class MixinServerPlayer implements Player {
     public void sendActionBar(Component component) {
 
         sendSystemMessage(WrappedComponent.resolved(component, this), true);
+    }
+
+    @Unique
+    @Override
+    public void sendTitle(Component title) {
+        connection.send(new ClientboundSetTitleTextPacket(WrappedComponent.resolved(title, this)));
+    }
+
+    @Unique
+    @Override
+    public void sendSubtitle(Component title) {
+        connection.send(new ClientboundSetSubtitleTextPacket(WrappedComponent.resolved(title, this)));
+    }
+
+    @Unique
+    @Override
+    public void clearTitles() {
+        connection.send(new ClientboundClearTitlesPacket(false));
+    }
+
+    @Unique
+    @Override
+    public void setTitleTimes(int fadeIn, int stay, int fadeOut) {
+        connection.send(new ClientboundSetTitlesAnimationPacket(fadeIn, stay, fadeOut));
+    }
+
+    @Unique
+    @Override
+    public void resetTitles() {
+        connection.send(new ClientboundClearTitlesPacket(true));
     }
 
     @Unique
