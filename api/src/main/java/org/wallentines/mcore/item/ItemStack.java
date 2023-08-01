@@ -198,6 +198,14 @@ public interface ItemStack {
             return this;
         }
 
+        /**
+         * Makes an exact copy of this Builder
+         * @return An exact copy of the Builder
+         */
+        public Builder copy() {
+            return new Builder(id).withCount(count).withTag(tag).withDataValue(dataValue);
+        }
+
 
         /**
          * Changes the item's lore to the given value

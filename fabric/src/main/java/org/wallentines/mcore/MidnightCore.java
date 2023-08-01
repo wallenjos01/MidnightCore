@@ -10,6 +10,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
+import org.wallentines.mcore.item.FabricInventoryGUI;
+import org.wallentines.mcore.item.InventoryGUI;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.messaging.FabricServerMessagingModule;
