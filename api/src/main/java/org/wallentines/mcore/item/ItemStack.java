@@ -87,6 +87,10 @@ public interface ItemStack {
         setTag(tag);
     }
 
+    static ItemStack empty() {
+        return Builder.of(new Identifier("minecraft", "air")).build();
+    }
+
 
     /**
      * Will contain an item factory by the time the game loads
@@ -203,7 +207,11 @@ public interface ItemStack {
          * @return An exact copy of the Builder
          */
         public Builder copy() {
-            return new Builder(id).withCount(count).withTag(tag).withDataValue(dataValue);
+            Builder out = new Builder(id);
+            out.count = count;
+            out.tag = tag;
+            out.dataValue = dataValue;
+            return out;
         }
 
 
