@@ -19,7 +19,7 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
 
     @Override
     public void sendPacket(Player player, Identifier packetId, ByteBuf data) {
-        ConversionUtil.ensureValid(player).connection.send(
+        ConversionUtil.validate(player).connection.send(
                 new ClientboundCustomPayloadPacket(
                         ConversionUtil.toResourceLocation(packetId),
                         new FriendlyByteBuf(data)

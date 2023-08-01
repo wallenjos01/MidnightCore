@@ -8,6 +8,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.WrappedComponent;
+import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mcore.util.NBTContext;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.RegistryUtil;
@@ -31,6 +34,8 @@ public abstract class MixinItemStack implements ItemStack {
 
     @Shadow public abstract void setTag(@Nullable CompoundTag compoundTag);
 
+    @Shadow public abstract net.minecraft.world.item.ItemStack setHoverName(net.minecraft.network.chat.@Nullable Component component);
+
     @Unique
     @Override
     public Identifier getType() {
@@ -52,4 +57,8 @@ public abstract class MixinItemStack implements ItemStack {
         setTag(nbt == null ? null : (CompoundTag) ConfigContext.INSTANCE.convert(NBTContext.INSTANCE, nbt));
     }
 
+    @Override
+    public void setName(Component component) {
+        setHoverName(new WrappedComponent(ItemUtil.applyItemNameBaseStyle(component)));
+    }
 }
