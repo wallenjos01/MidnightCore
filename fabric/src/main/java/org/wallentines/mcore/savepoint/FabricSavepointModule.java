@@ -19,7 +19,7 @@ public class FabricSavepointModule extends SavepointModule {
     @Override
     public void resetPlayer(Player player, EnumSet<SaveFlag> flags) {
 
-        ServerPlayer spl = ConversionUtil.ensureValid(player);
+        ServerPlayer spl = ConversionUtil.validate(player);
 
         if(flags.contains(SaveFlag.ADVANCEMENTS)) {
             ((AdvancementExtension) spl.getAdvancements()).revokeAll(spl.server.getAdvancements());

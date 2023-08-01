@@ -72,6 +72,21 @@ public interface ItemStack {
      */
     void shrink(int amount);
 
+    /**
+     * Changes the display name of the item
+     * @param component The new display name
+     */
+    default void setName(Component component) {
+        component = ItemUtil.applyItemNameBaseStyle(component);
+        String strName = GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
+                component.toJSONString() :
+                component.toLegacyText();
+
+        ConfigSection tag = getTag();
+        tag.getOrCreateSection("display").set("Name", strName);
+        setTag(tag);
+    }
+
 
     /**
      * Will contain an item factory by the time the game loads

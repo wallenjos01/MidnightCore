@@ -6,6 +6,8 @@
   "mixins": [
     "AccessorPlayer",
     "AccessorPlayerAdvancements",
+    "AccessorServerPlayer",
+    "MixinAbstractContainerMenu",
     "MixinClientLoginPacketListener",
     "MixinEntity",
     "MixinFriendlyByteBuf",

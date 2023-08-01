@@ -32,7 +32,7 @@ public class FabricSkinModule extends SkinModule {
     @Override
     public void setSkin(Player player, Skin skin) {
 
-        updateProfile(player, AuthUtil.forPlayer(ConversionUtil.ensureValid(player), skin));
+        updateProfile(player, AuthUtil.forPlayer(ConversionUtil.validate(player), skin));
     }
 
     @Override
@@ -64,7 +64,7 @@ public class FabricSkinModule extends SkinModule {
 
     private void updateProfile(Player player, GameProfile gameProfile) {
 
-        ServerPlayer spl = ConversionUtil.ensureValid(player);
+        ServerPlayer spl = ConversionUtil.validate(player);
         ((AccessorPlayer) spl).setGameProfile(gameProfile);
 
         // Update

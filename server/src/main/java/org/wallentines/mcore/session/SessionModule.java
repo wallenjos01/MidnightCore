@@ -139,5 +139,7 @@ public abstract class SessionModule implements ServerModule {
     }
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "session");
+    public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
+            .with("enabled", false);
 
 }

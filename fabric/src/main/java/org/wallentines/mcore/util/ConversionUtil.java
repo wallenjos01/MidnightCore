@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.ClickEvent;
 import org.wallentines.mcore.text.Component;
@@ -127,12 +128,20 @@ public class ConversionUtil {
                 .withColor(component.color == null ? null : ConversionUtil.toTextColor(component.color));
     }
 
-    public static ServerPlayer ensureValid(Player player) {
+    public static ServerPlayer validate(Player player) {
 
         if(!(player instanceof ServerPlayer spl)) {
             throw new IllegalArgumentException("Attempt to access non-ServerPlayer!");
         }
         return spl;
+    }
+
+    public static ItemStack validate(org.wallentines.mcore.item.ItemStack is) {
+
+        if(!((Object) is instanceof ItemStack mis)) {
+            throw new IllegalArgumentException("Attempt to access non-Minecraft ItemStack!");
+        }
+        return mis;
     }
 
 }

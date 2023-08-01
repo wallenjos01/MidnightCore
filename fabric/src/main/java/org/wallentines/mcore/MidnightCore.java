@@ -96,6 +96,8 @@ public class MidnightCore implements ModInitializer {
             return out;
         });
 
+        InventoryGUI.FACTORY.set(FabricInventoryGUI::new);
+
         Player.registerPlaceholders(PlaceholderManager.INSTANCE);
 
     }
