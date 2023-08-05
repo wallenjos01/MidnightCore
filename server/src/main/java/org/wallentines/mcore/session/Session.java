@@ -122,7 +122,7 @@ public abstract class Session {
         try {
             if(!shouldAddPlayer(player)) return false;
         } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.trace("An exception occurred while adding a player to a session!", ex);
+            MidnightCoreAPI.LOGGER.error("An exception occurred while adding a player to a session!", ex);
             return false;
         }
 
@@ -130,7 +130,7 @@ public abstract class Session {
         try {
             flags = getSavepointFlags();
         } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.trace("An exception occurred while obtaining session savepoint slags!", ex);
+            MidnightCoreAPI.LOGGER.error("An exception occurred while obtaining session savepoint slags!", ex);
         }
         if(flags != null && !flags.isEmpty()) {
             SavepointModule spm = server.getModuleManager().getModule(SavepointModule.class);
@@ -153,7 +153,7 @@ public abstract class Session {
         try {
             onAddPlayer(player);
         } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.trace("An exception occurred while adding a player to a session!", ex);
+            MidnightCoreAPI.LOGGER.error("An exception occurred while adding a player to a session!", ex);
             removePlayer(player);
             return false;
         }
@@ -187,7 +187,7 @@ public abstract class Session {
         try {
             onRemovePlayer(player);
         } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.trace("An exception occurred while removing a player from a session!", ex);
+            MidnightCoreAPI.LOGGER.error("An exception occurred while removing a player from a session!", ex);
         }
 
         players.remove(player.wrap());
@@ -216,7 +216,7 @@ public abstract class Session {
         try {
             onShutdown();
         } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.trace("An exception occurred while shutting down a session!", ex);
+            MidnightCoreAPI.LOGGER.error("An exception occurred while shutting down a session!", ex);
         }
 
         running = false;

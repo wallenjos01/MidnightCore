@@ -33,7 +33,7 @@ public class ClientExtensionModule implements ClientModule {
             return false;
         }
 
-        cmm.registerPacketHandler(ServerboundExtensionPacket.ID, byteBuf -> cmm.sendMessage(new ServerboundExtensionPacket(manager, readServerPacket(byteBuf))));
+        cmm.registerPacketHandler(ServerboundExtensionPacket.ID, (client, byteBuf) -> cmm.sendMessage(new ServerboundExtensionPacket(manager, readServerPacket(byteBuf))));
 
         cmm.registerLoginPacketHandler(ServerboundExtensionPacket.ID, byteBuf -> {
 
