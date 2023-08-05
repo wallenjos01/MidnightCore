@@ -1,8 +1,10 @@
 package org.wallentines.mcore.messaging;
 
 import io.netty.buffer.ByteBuf;
+import org.wallentines.mcore.Client;
 import org.wallentines.mcore.ClientModule;
 import org.wallentines.mcore.MidnightCoreAPI;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
@@ -11,22 +13,29 @@ import org.wallentines.midnightlib.registry.Registry;
  */
 public abstract class ClientMessagingModule implements ClientModule {
 
-    private final Registry<ClientPacketHandler> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    private final Registry<PacketHandler<Client>> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
     private final Registry<ClientLoginPacketHandler> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+
+    protected Client client;
+
+    @Override
+    public boolean initialize(ConfigSection section, Client data) {
+        this.client = data;
+        return true;
+    }
 
     /**
      * Sends a custom packet to the server
      * @param packet The packet to send
      */
-
-    public abstract void sendMessage(ClientPacket packet);
+    public abstract void sendMessage(Packet packet);
 
     /**
      * Registers a packet handler for packets with the given ID send during the play state
      * @param id The packet ID
      * @param handler The packet handler
      */
-    public void registerPacketHandler(Identifier id, ClientPacketHandler handler) {
+    public void registerPacketHandler(Identifier id, PacketHandler<Client> handler) {
         handlers.register(id, handler);
     }
 
@@ -42,13 +51,13 @@ public abstract class ClientMessagingModule implements ClientModule {
 
     protected boolean handlePacket(Identifier id, ByteBuf buf) {
 
-        ClientPacketHandler handler = handlers.get(id);
+        PacketHandler<Client> handler = handlers.get(id);
         if(handler == null) {
             return false;
         }
 
         try {
-            handler.handle(buf);
+            handler.handle(client, buf);
         } catch (Exception ex) {
             MidnightCoreAPI.LOGGER.warn("An error occurred while handling a custom packet!");
             ex.printStackTrace();

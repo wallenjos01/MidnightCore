@@ -22,6 +22,9 @@ public class FabricClientMessagingModule extends ClientMessagingModule {
     @Override
     public boolean initialize(ConfigSection section, Client data) {
 
+        if(!super.initialize(section, data)) return false;
+
+
         Event.register(ClientCustomPayloadEvent.class, this, 30, ev -> {
             if(ev.isHandled()) return;
             if(handlePacket(ConversionUtil.toIdentifier(ev.getPacketId()), ev.getData())) {
@@ -40,7 +43,7 @@ public class FabricClientMessagingModule extends ClientMessagingModule {
     }
 
     @Override
-    public void sendMessage(ClientPacket packet) {
+    public void sendMessage(Packet packet) {
 
         ClientPacketListener listener = Minecraft.getInstance().getConnection();
         if(listener == null) {
