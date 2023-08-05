@@ -15,7 +15,7 @@ public class FabricServerLoginNegotiator extends ServerLoginNegotiator {
 
     private int currentTransactionId = 32768;
     private final Connection connection;
-    private final HashMap<Integer, ServerLoginPacketHandler> currentTransactions = new HashMap<>();
+    private final HashMap<Integer, PacketHandler<ServerLoginNegotiator>> currentTransactions = new HashMap<>();
 
     /**
      * Creates a new login negotiator for the player with the given UUID, username, and Connection
@@ -29,7 +29,7 @@ public class FabricServerLoginNegotiator extends ServerLoginNegotiator {
     }
 
     @Override
-    public void sendPacket(Identifier id, ByteBuf data, ServerLoginPacketHandler response) {
+    public void sendPacket(Identifier id, ByteBuf data, PacketHandler<ServerLoginNegotiator> response) {
 
         int transactionId = currentTransactionId++;
 
@@ -44,13 +44,13 @@ public class FabricServerLoginNegotiator extends ServerLoginNegotiator {
      */
     public void handlePacket(int transactionId, FriendlyByteBuf data) {
 
-        ServerLoginPacketHandler handler = currentTransactions.get(transactionId);
+        PacketHandler<ServerLoginNegotiator> handler = currentTransactions.get(transactionId);
         if(handler == null) {
             MidnightCoreAPI.LOGGER.warn("Received unsolicited login query packet from " + name + "!");
             return;
         }
 
-        handler.handle(uuid, name, data);
+        handler.handle(this, data);
         currentTransactions.remove(transactionId);
     }
 

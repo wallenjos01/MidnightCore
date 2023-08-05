@@ -2,7 +2,7 @@ package org.wallentines.mcore.extension;
 
 import io.netty.buffer.ByteBuf;
 import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.messaging.ClientPacket;
+import org.wallentines.mcore.messaging.Packet;
 import org.wallentines.mcore.util.PacketBufferUtil;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.module.ModuleManager;
@@ -15,7 +15,7 @@ import java.util.Map;
  * A packet which declares the loaded client extensions to the server. Should only be sent as a response when the server
  * queries for extensions.
  */
-public class ServerboundExtensionPacket implements ClientPacket {
+public class ServerboundExtensionPacket implements Packet {
 
     private final Map<Identifier, Version> extensions;
 

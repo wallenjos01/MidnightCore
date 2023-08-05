@@ -12,5 +12,7 @@ include("api")
 
 include("server")
 include("client")
+include("proxy")
 
 include("fabric")
+include("velocity")

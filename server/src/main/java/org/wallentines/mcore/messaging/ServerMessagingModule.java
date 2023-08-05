@@ -15,7 +15,7 @@ import org.wallentines.midnightlib.registry.Registry;
  */
 public abstract class ServerMessagingModule implements ServerModule {
 
-    private final Registry<ServerPacketHandler> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    private final Registry<PacketHandler<Player>> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
 
     /**
      * An event fired when a Player begins connecting to the server, during the "Negotiating" phase. This event can
@@ -28,7 +28,7 @@ public abstract class ServerMessagingModule implements ServerModule {
      * @param player The player to send the data to
      * @param packet The packet to send
      */
-    public void sendPacket(Player player, ServerPacket packet) {
+    public void sendPacket(Player player, Packet packet) {
 
         ByteBuf out = Unpooled.buffer();
         packet.write(out);
@@ -41,7 +41,7 @@ public abstract class ServerMessagingModule implements ServerModule {
      * @param packetId The packet type's ID
      * @param handler The function which should handle the packet
      */
-    public void registerPacketHandler(Identifier packetId, ServerPacketHandler handler) {
+    public void registerPacketHandler(Identifier packetId, PacketHandler<Player> handler) {
 
         handlers.register(packetId, handler);
     }
