@@ -2,8 +2,7 @@ package org.wallentines.mcore.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.wallentines.mcore.Location;
-import org.wallentines.mcore.Player;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.text.Component;
@@ -21,6 +20,8 @@ public class TestLang {
         public UUID getUUID() {
             return null;
         }
+        @Override
+        public Identifier getType() { return null; }
         @Override
         public Component getDisplayName() {
             return null;
@@ -42,21 +43,29 @@ public class TestLang {
             return 0;
         }
         @Override
-        public void teleport(Location location) {
-
-        }
+        public boolean isRemoved() { return false; }
+        @Override
+        public void teleport(Location location) { }
         @Override
         public String getUsername() {
             return "dummy";
         }
         @Override
-        public void sendMessage(Component component) {
-
-        }
+        public Server getServer() { return null; }
         @Override
-        public void sendActionBar(Component component) {
-
-        }
+        public void sendMessage(Component component) { }
+        @Override
+        public void sendActionBar(Component component) { }
+        @Override
+        public void sendTitle(Component title) { }
+        @Override
+        public void sendSubtitle(Component title) { }
+        @Override
+        public void clearTitles() { }
+        @Override
+        public void setTitleTimes(int fadeIn, int stay, int fadeOut) { }
+        @Override
+        public void resetTitles() { }
         @Override
         public ItemStack getHandItem() {
             return null;
@@ -66,13 +75,19 @@ public class TestLang {
             return null;
         }
         @Override
-        public void giveItem(ItemStack item) {
-
-        }
+        public void giveItem(ItemStack item) { }
         @Override
         public String getLanguage() {
             return "en_us";
         }
+        @Override
+        public GameMode getGameMode() { return null; }
+        @Override
+        public void setGameMode(GameMode mode) { }
+        @Override
+        public boolean isOnline() { return false; }
+        @Override
+        public Skin getSkin() { return null; }
     }
 
     @Test

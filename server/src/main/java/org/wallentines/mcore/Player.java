@@ -24,13 +24,6 @@ public interface Player extends Entity, Skinnable {
     String getUsername();
 
     /**
-     * Gets the server which created the player object
-     * @return The running server.
-     */
-    Server getServer();
-
-
-    /**
      * Sends the user a system message
      * @param component The message to send
      */

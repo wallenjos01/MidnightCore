@@ -4,9 +4,11 @@ import com.google.gson.JsonObject;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.wallentines.mcore.Player;
+import org.wallentines.mcore.Server;
 import org.wallentines.mcore.text.ClickEvent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.HoverEvent;
@@ -128,20 +130,43 @@ public class ConversionUtil {
                 .withColor(component.color == null ? null : ConversionUtil.toTextColor(component.color));
     }
 
+    /**
+     * Validates that the given player is actually a Minecraft ServerPlayer
+     * @param player The player to check
+     * @return The player casted to a ServerPlayer
+     */
     public static ServerPlayer validate(Player player) {
 
         if(!(player instanceof ServerPlayer spl)) {
-            throw new IllegalArgumentException("Attempt to access non-ServerPlayer!");
+            throw new IllegalArgumentException("Attempt to access non-Minecraft Player!");
         }
         return spl;
     }
 
+    /**
+     * Validates that the given ItemStack is actually a Minecraft ItemStack
+     * @param is The ItemStack to check
+     * @return The ItemStack casted to a Minecraft ItemStack
+     */
     public static ItemStack validate(org.wallentines.mcore.item.ItemStack is) {
 
-        if(!((Object) is instanceof ItemStack mis)) {
+        if(!(is instanceof ItemStack mis)) {
             throw new IllegalArgumentException("Attempt to access non-Minecraft ItemStack!");
         }
         return mis;
+    }
+
+    /**
+     * Validates that the given Server is actually a Minecraft Server
+     * @param srv The Server to check
+     * @return The server casted to a Minecraft Server
+     */
+    public static MinecraftServer validate(Server srv) {
+
+        if(!(srv instanceof MinecraftServer msv)) {
+            throw new IllegalArgumentException("Attempt to access non-Minecraft Server!");
+        }
+        return msv;
     }
 
 }

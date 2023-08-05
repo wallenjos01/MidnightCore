@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.wallentines.mcore.Entity;
 import org.wallentines.mcore.Location;
+import org.wallentines.mcore.Server;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -32,8 +33,6 @@ import java.util.UUID;
 public abstract class MixinEntity implements Entity {
 
     @Shadow public abstract UUID getUUID();
-
-    @Shadow @Nullable public abstract MinecraftServer getServer();
 
     @Shadow private Level level;
 
@@ -64,6 +63,11 @@ public abstract class MixinEntity implements Entity {
                 .map(reg -> reg.getKey(ent.getType()))
                 .map(ConversionUtil::toIdentifier)
                 .orElseGet(() -> new Identifier("minecraft", "pig"));
+    }
+
+    @Override
+    public Server getServer() {
+        return ((net.minecraft.world.entity.Entity) (Object) this).getServer();
     }
 
     @Unique
@@ -110,7 +114,7 @@ public abstract class MixinEntity implements Entity {
 
         net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
 
-        MinecraftServer server = getServer();
+        MinecraftServer server = ConversionUtil.validate(getServer());
         ServerLevel level = server.getLevel(ResourceKey.create(Registries.DIMENSION, ConversionUtil.toResourceLocation(location.dimension)));
 
         double x = location.position.getX();
