@@ -59,8 +59,7 @@ public abstract class ClientMessagingModule implements ClientModule {
         try {
             handler.handle(client, buf);
         } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.warn("An error occurred while handling a custom packet!");
-            ex.printStackTrace();
+            MidnightCoreAPI.LOGGER.trace("An error occurred while handling a custom packet!", ex);
         }
         return true;
     }
@@ -77,8 +76,7 @@ public abstract class ClientMessagingModule implements ClientModule {
         try {
             out = handler.respond(buf);
         } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.warn("An error occurred while handling a login packet!");
-            ex.printStackTrace();
+            MidnightCoreAPI.LOGGER.trace("An error occurred while handling a login packet!", ex);
         }
 
         return out;
