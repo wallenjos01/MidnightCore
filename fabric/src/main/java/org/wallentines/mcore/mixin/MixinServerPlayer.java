@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wallentines.mcore.GameMode;
-import org.wallentines.mcore.Server;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.event.ContainerCloseEvent;
 import org.wallentines.mcore.item.ItemStack;
@@ -49,12 +48,6 @@ public abstract class MixinServerPlayer implements Player {
     @Override
     public String getUsername() {
         return ((net.minecraft.world.entity.player.Player) (Object) this).getGameProfile().getName();
-    }
-
-    @Unique
-    @Override
-    public Server getServer() {
-        return server;
     }
 
     @Unique

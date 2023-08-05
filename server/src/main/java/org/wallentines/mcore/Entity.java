@@ -24,6 +24,12 @@ public interface Entity {
     Identifier getType();
 
     /**
+     * Gets the server which created this entity
+     * @return The entity's server
+     */
+    Server getServer();
+
+    /**
      * Gets the entity's display name
      * @return The entity's display name
      */

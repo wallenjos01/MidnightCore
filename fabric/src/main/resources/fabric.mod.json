@@ -24,7 +24,7 @@
             "net/minecraft/server/MinecraftServer": [ "org/wallentines/mcore/Server" ],
             "net/minecraft/class_3222": [ "org/wallentines/mcore/Player" ],
             "net/minecraft/class_1297": [ "org/wallentines/mcore/Entity" ],
-            "net/minecraft/server/class_1799": [ "org/wallentines/mcore/ItemStack" ]
+            "net/minecraft/class_1799": [ "org/wallentines/mcore/item/ItemStack" ]
         }
     },
     "name": "MidnightCore",

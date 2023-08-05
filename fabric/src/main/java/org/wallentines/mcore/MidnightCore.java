@@ -23,6 +23,7 @@ import org.wallentines.mcore.session.SessionModule;
 import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.util.ConversionUtil;
+import org.wallentines.mcore.util.MappingUtil;
 import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.mcore.util.TestUtil;
 import org.wallentines.mdcfg.codec.JSONCodec;
@@ -32,6 +33,8 @@ public class MidnightCore implements ModInitializer {
 
     @Override
     public void onInitialize() {
+
+        MappingUtil.printIntermediary(net.minecraft.world.item.ItemStack.class);
 
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
 
