@@ -41,7 +41,7 @@ public class MojangUtil {
             return UUID.fromString(id);
 
         } catch(IOException | IllegalArgumentException ex) {
-            MidnightCoreAPI.LOGGER.trace("An exception occurred while looking a player's UUID!", ex);
+            MidnightCoreAPI.LOGGER.error("An exception occurred while looking a player's UUID!", ex);
         }
 
         return null;
@@ -88,7 +88,7 @@ public class MojangUtil {
             }
 
         } catch (IOException ex) {
-            MidnightCoreAPI.LOGGER.trace("An exception occurred while looking a player's Skin!", ex);
+            MidnightCoreAPI.LOGGER.error("An exception occurred while looking a player's Skin!", ex);
         }
 
         return null;

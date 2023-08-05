@@ -1,9 +1,6 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mdcfg.ConfigObject;
-import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.codec.FileWrapper;
-import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mcore.util.ModuleUtil;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -75,20 +72,9 @@ public interface Server {
     default void loadModules(Registry<ModuleInfo<Server, ServerModule>> registry) {
 
         File moduleStorage = getConfigDirectory().resolve("MidnightCore").toFile();
+        ModuleUtil.loadModules(getModuleManager(), registry, this, moduleStorage);
 
-        if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {
-            MidnightCoreAPI.LOGGER.warn("Unable to create server storage directory!");
-        }
-
-        ModuleManager<Server, ServerModule> manager = getModuleManager();
-        manager.unloadAll();
-
-        shutdownEvent().register(this, ev -> manager.unloadAll());
-
-        FileWrapper<ConfigObject> wrapper = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());
-        manager.loadAll(wrapper.getRoot().asSection(), this, registry);
-
-        wrapper.save();
+        shutdownEvent().register(this, ev -> getModuleManager().unloadAll());
     }
 
     /**
