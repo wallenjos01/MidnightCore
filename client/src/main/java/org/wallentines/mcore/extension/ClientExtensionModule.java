@@ -6,7 +6,6 @@ import org.wallentines.mcore.Client;
 import org.wallentines.mcore.ClientModule;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.messaging.ClientMessagingModule;
-import org.wallentines.mcore.util.PacketBufferUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -14,7 +13,7 @@ import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * A client module for loading extensions and communicating with servers who support the extensions
@@ -33,36 +32,43 @@ public class ClientExtensionModule implements ClientModule {
             return false;
         }
 
-        cmm.registerPacketHandler(ServerboundExtensionPacket.ID, (client, byteBuf) -> cmm.sendMessage(new ServerboundExtensionPacket(manager, readServerPacket(byteBuf))));
+        cmm.registerPacketHandler(ServerboundExtensionPacket.ID, (client, byteBuf) -> {
+            try {
+                ClientboundExtensionPacket pck = ClientboundExtensionPacket.read(byteBuf);
+                cmm.sendMessage(createPacket(manager, pck.getExtensions()));
+            } catch (Exception ex) {
+                MidnightCoreAPI.LOGGER.warn("Received malformed extension packet from server!");
+            }
+
+        });
 
         cmm.registerLoginPacketHandler(ServerboundExtensionPacket.ID, byteBuf -> {
 
-            ByteBuf out = Unpooled.buffer();
-            new ServerboundExtensionPacket(manager, readServerPacket(byteBuf)).write(out);
+            try {
+                ClientboundExtensionPacket pck = ClientboundExtensionPacket.read(byteBuf);
+                ByteBuf out = Unpooled.buffer();
+                createPacket(manager, pck.getExtensions()).write(out);
+                return out;
 
-            return out;
+            } catch (Exception ex) {
+                MidnightCoreAPI.LOGGER.warn("Received malformed extension packet from server!");
+                return null;
+            }
+
         });
 
         return true;
     }
 
-    private Map<Identifier, Version> readServerPacket(ByteBuf buf) {
+    private ServerboundExtensionPacket createPacket(ModuleManager<ClientExtensionModule, ClientExtension> manager, List<Identifier> serverModules) {
 
-        int extensions = PacketBufferUtil.readVarInt(buf);
-
-        HashMap<Identifier, Version> versions = new HashMap<>();
-        for (int i = 0; i < extensions; i++) {
-
-            Identifier id = Identifier.parseOrDefault(PacketBufferUtil.readUtf(buf), MidnightCoreAPI.MOD_ID);
-            if(!manager.isModuleLoaded(id)) {
-                continue;
+        HashMap<Identifier, Version> out = new HashMap<>();
+        for(Identifier id : serverModules) {
+            if(manager.isModuleLoaded(id)) {
+                out.put(id, manager.getModuleById(id).getVersion());
             }
-
-            Version version = Version.fromString(PacketBufferUtil.readUtf(buf));
-            versions.put(id, version);
         }
-
-        return versions;
+        return new ServerboundExtensionPacket(out);
     }
 
 

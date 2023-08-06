@@ -4,19 +4,17 @@ import io.netty.buffer.ByteBuf;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.messaging.Packet;
 import org.wallentines.mcore.util.PacketBufferUtil;
-import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * A packet sent to the client which declares supported extensions to clients
  */
 public class ClientboundExtensionPacket implements Packet {
 
-    private final Map<Identifier, Version> extensions;
+    private final List<Identifier> extensions;
 
     /**
      * Creates an extension packet by reading a loaded module manager
@@ -24,12 +22,7 @@ public class ClientboundExtensionPacket implements Packet {
      */
     public ClientboundExtensionPacket(ModuleManager<ServerExtensionModule, ServerExtension> manager) {
 
-        HashMap<Identifier, Version> map = new HashMap<>();
-        for(Identifier id : manager.getLoadedModuleIds()) {
-            map.put(id, manager.getModuleById(id).getVersion());
-        }
-
-        this.extensions = Map.copyOf(map);
+        this.extensions = List.copyOf(manager.getLoadedModuleIds());
     }
 
 
@@ -42,9 +35,8 @@ public class ClientboundExtensionPacket implements Packet {
     public void write(ByteBuf buffer) {
 
         PacketBufferUtil.writeVarInt(buffer, extensions.size());
-        for(Map.Entry<Identifier, Version> ent : extensions.entrySet()) {
-            PacketBufferUtil.writeUtf(buffer, ent.getKey().toString());
-            PacketBufferUtil.writeUtf(buffer, ent.getValue().toString());
+        for(Identifier ent : extensions) {
+            PacketBufferUtil.writeUtf(buffer, ent.toString());
         }
     }
 

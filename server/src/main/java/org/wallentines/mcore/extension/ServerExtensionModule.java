@@ -7,7 +7,6 @@ import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
-import org.wallentines.mcore.util.PacketBufferUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.module.ModuleManager;
@@ -17,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * A module for loading optional extensions and declaring them to clients who join the server
@@ -54,7 +54,9 @@ public abstract class ServerExtensionModule implements ServerModule {
         if(!mod.supportsLoginQuery() || section.getBoolean("delay_send")) {
             registerJoinListener(pl -> smm.sendPacket(pl, cachedPacket));
         } else {
-            mod.onLogin.register(this, ln -> ln.sendPacket(cachedPacket, this::handleResponse));
+            mod.onLogin.register(this, ln -> ln.sendPacket(cachedPacket, (negotiator, buffer) -> {
+
+            }));
         }
 
         return true;
@@ -90,24 +92,16 @@ public abstract class ServerExtensionModule implements ServerModule {
         }
 
         try {
-            int extensions = PacketBufferUtil.readVarInt(response);
 
-            HashMap<Identifier, Version> versions = new HashMap<>();
-            for (int i = 0; i < extensions; i++) {
+            ServerboundExtensionPacket packet = ServerboundExtensionPacket.read(response);
 
-                Identifier id = Identifier.parseOrDefault(PacketBufferUtil.readUtf(response), MidnightCoreAPI.MOD_ID);
-                if(!manager.isModuleLoaded(id)) {
-                    continue;
-                }
-
-                Version version = Version.fromString(PacketBufferUtil.readUtf(response));
-                versions.put(id, version);
-            }
-
+            Map<Identifier, Version> versions = packet.getExtensions().entrySet().stream().filter(e -> manager.isModuleLoaded(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             enabledExtensions.put(playerId, versions);
+
             MidnightCoreAPI.LOGGER.warn("Player " + username + " logged in with " + versions.size() + " enabled extensions");
 
         } catch (DecoderException ex) {
+
             MidnightCoreAPI.LOGGER.warn("Player " + username + " sent invalid extension packet! " + ex.getMessage());
         }
     }
