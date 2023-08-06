@@ -46,12 +46,12 @@ public class VelocityProxy implements Proxy {
 
     @Override
     public VelocityPlayer getPlayer(UUID uuid) {
-        return playerCache.compute(uuid, (k,v) -> server.getPlayer(uuid).map(player -> v == null ? new VelocityPlayer(player) : v).orElse(null));
+        return playerCache.compute(uuid, (k,v) -> server.getPlayer(uuid).map(player -> v == null ? new VelocityPlayer(player, this) : v).orElse(null));
     }
 
     @Override
     public VelocityServer getServer(String name) {
-        return serverCache.compute(name, (k,v) -> server.getServer(name).map(server -> v == null ? new VelocityServer(server) : v).orElse(null));
+        return serverCache.compute(name, (k,v) -> server.getServer(name).map(server -> v == null ? new VelocityServer(server, this) : v).orElse(null));
     }
 
     public ProxyServer getInternal() {

@@ -1,6 +1,7 @@
 package org.wallentines.mcore;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
 
 /**
  * Represents a backend server registered on the proxy
@@ -18,5 +19,11 @@ public interface ProxyServer {
      * @return The server's name
      */
     String getName();
+
+    /**
+     * Gets a list of players connected to this server
+     * @return A list of online players
+     */
+    Collection<ProxyPlayer> getPlayers();
 
 }
