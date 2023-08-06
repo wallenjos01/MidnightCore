@@ -1,21 +1,17 @@
 package org.wallentines.mcore;
 
+import java.net.InetSocketAddress;
+
 /**
  * Represents a backend server registered on the proxy
  */
 public interface ProxyServer {
 
     /**
-     * Gets the IP or hostname of the server
+     * Gets the server's socket address, including the hostname/IP and port.
      * @return The server's address
      */
-    String getAddress();
-
-    /**
-     * Gets the port on which the proxied server is running
-     * @return The server's port
-     */
-    String getPort();
+    InetSocketAddress getAddress();
 
     /**
      * Gets the server's registered name

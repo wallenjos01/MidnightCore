@@ -2,6 +2,8 @@ package org.wallentines.mcore;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
+import java.net.InetSocketAddress;
+
 public class VelocityServer implements ProxyServer {
 
     private final RegisteredServer server;
@@ -11,18 +13,13 @@ public class VelocityServer implements ProxyServer {
     }
 
     @Override
-    public String getAddress() {
-        return null;
-    }
-
-    @Override
-    public String getPort() {
-        return null;
+    public InetSocketAddress getAddress() {
+        return server.getServerInfo().getAddress();
     }
 
     @Override
     public String getName() {
-        return null;
+        return server.getServerInfo().getName();
     }
 
     public RegisteredServer getInternal() {

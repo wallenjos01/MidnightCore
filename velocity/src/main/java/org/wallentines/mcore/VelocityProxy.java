@@ -2,9 +2,7 @@ package org.wallentines.mcore;
 
 import com.google.common.eventbus.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
@@ -12,7 +10,6 @@ import org.wallentines.midnightlib.module.ModuleManager;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class VelocityProxy implements Proxy {
@@ -49,18 +46,12 @@ public class VelocityProxy implements Proxy {
 
     @Override
     public VelocityPlayer getPlayer(UUID uuid) {
-        return playerCache.compute(uuid, (k,v) -> {
-            Optional<Player> pl = server.getPlayer(uuid);
-            return pl.map(player -> v == null ? new VelocityPlayer(player) : v).orElse(null);
-        });
+        return playerCache.compute(uuid, (k,v) -> server.getPlayer(uuid).map(player -> v == null ? new VelocityPlayer(player) : v).orElse(null));
     }
 
     @Override
     public VelocityServer getServer(String name) {
-        return serverCache.compute(name, (k,v) -> {
-            Optional<RegisteredServer> srv = server.getServer(name);
-            return srv.map(server -> v == null ? new VelocityServer(server) : v).orElse(null);
-        });
+        return serverCache.compute(name, (k,v) -> server.getServer(name).map(server -> v == null ? new VelocityServer(server) : v).orElse(null));
     }
 
     public ProxyServer getInternal() {
@@ -71,8 +62,12 @@ public class VelocityProxy implements Proxy {
         return plugin;
     }
 
+    /**
+     * Fired when the proxy shuts down. Propagates the event to the Proxy interface
+     * @param ignoredEvent The fired event.
+     */
     @Subscribe
-    private void onShutdown(ProxyShutdownEvent event) {
+    private void onShutdown(ProxyShutdownEvent ignoredEvent) {
         onShutdown.invoke(this);
     }
 
