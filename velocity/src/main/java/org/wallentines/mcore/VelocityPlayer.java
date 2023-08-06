@@ -13,9 +13,11 @@ import java.util.UUID;
 public class VelocityPlayer implements ProxyPlayer {
 
     private final Player player;
+    private final Proxy proxy;
 
-    public VelocityPlayer(Player player) {
+    public VelocityPlayer(Player player, Proxy proxy) {
         this.player = player;
+        this.proxy = proxy;
     }
 
     @Override
@@ -45,6 +47,6 @@ public class VelocityPlayer implements ProxyPlayer {
 
     @Override
     public ProxyServer getServer() {
-        return null;
+        return player.getCurrentServer().map(srv -> proxy.getServer(srv.getServerInfo().getName())).orElse(null);
     }
 }
