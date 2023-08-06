@@ -21,6 +21,12 @@ public interface ProxyServer {
     String getName();
 
     /**
+     * Gets the proxy instance which created the server object
+     * @return The proxy
+     */
+    Proxy getProxy();
+
+    /**
      * Gets a list of players connected to this server
      * @return A list of online players
      */

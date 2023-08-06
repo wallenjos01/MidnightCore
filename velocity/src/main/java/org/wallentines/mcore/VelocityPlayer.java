@@ -8,6 +8,7 @@ import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mcore.util.GsonContext;
 
+import java.util.Locale;
 import java.util.UUID;
 
 public class VelocityPlayer implements ProxyPlayer {
@@ -28,6 +29,20 @@ public class VelocityPlayer implements ProxyPlayer {
     @Override
     public String getUsername() {
         return player.getUsername();
+    }
+
+    @Override
+    public Proxy getProxy() {
+        return proxy;
+    }
+
+    @Override
+    public String getLocale() {
+        Locale loc = player.getEffectiveLocale();
+        if(loc == null) {
+            return null;
+        }
+        return loc.toString().toLowerCase();
     }
 
     @Override

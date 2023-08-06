@@ -22,6 +22,18 @@ public interface ProxyPlayer {
     String getUsername();
 
     /**
+     * Gets the proxy instance which created the player object
+     * @return The proxy
+     */
+    Proxy getProxy();
+
+    /**
+     * Gets the locale for a player
+     * @return The player's locale
+     */
+    String getLocale();
+
+    /**
      * Sends a component message to the player
      * @param message The message to send
      */
