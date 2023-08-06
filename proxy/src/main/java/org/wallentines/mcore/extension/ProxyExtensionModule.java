@@ -77,7 +77,10 @@ public abstract class ProxyExtensionModule implements ProxyModule {
         return playerExtensions.get(player.getUUID()).get(id);
     }
 
-
+    /**
+     * Should be called by the proxy as soon as a player object is available.
+     * @param player The player who just logged in
+     */
     protected void onFinishLogin(ProxyPlayer player) {
         String username = player.getUsername();
         if(unmappedPlayerExtensions.containsKey(username)) {

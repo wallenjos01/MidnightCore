@@ -26,7 +26,7 @@ public class VelocityPlayer implements ProxyPlayer {
 
     @Override
     public void sendMessage(Component message) {
-
+        // TODO: Converting components to adventure components
     }
 
     @Override

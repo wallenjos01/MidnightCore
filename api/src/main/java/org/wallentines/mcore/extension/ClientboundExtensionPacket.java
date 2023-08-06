@@ -7,6 +7,7 @@ import org.wallentines.mcore.util.PacketBufferUtil;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ClientboundExtensionPacket implements Packet {
@@ -14,8 +15,8 @@ public class ClientboundExtensionPacket implements Packet {
     private final List<Identifier> extensions;
 
 
-    public ClientboundExtensionPacket(List<Identifier> extensions) {
-        this.extensions = extensions;
+    public ClientboundExtensionPacket(Collection<Identifier> extensions) {
+        this.extensions = List.copyOf(extensions);
     }
 
     @Override

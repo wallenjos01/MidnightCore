@@ -17,6 +17,7 @@ public class MidnightCore {
         VelocityProxy proxy = new VelocityProxy(this, server);
         Proxy.RUNNING_PROXY.set(proxy);
 
+        // Register default modules.
         ProxyModule.tryRegister(VelocityMessagingModule.ID, VelocityMessagingModule.MODULE_INFO);
         ProxyModule.tryRegister(VelocityExtensionModule.ID, VelocityExtensionModule.MODULE_INFO);
 

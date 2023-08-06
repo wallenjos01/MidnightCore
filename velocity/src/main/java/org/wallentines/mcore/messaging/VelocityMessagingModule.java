@@ -15,6 +15,7 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
+
 public class VelocityMessagingModule extends ProxyMessagingModule {
 
     private VelocityProxy proxy;
@@ -62,12 +63,23 @@ public class VelocityMessagingModule extends ProxyMessagingModule {
         }
     }
 
+    /**
+     * Fired when a player logs in. At this stage, the username must be used. 1.19+ clients send the UUID at the same
+     * time as the username, but older clients do not. Additionally, this UUID is not entirely reliable as it may change
+     * depending on the forwarding type the proxy uses.
+     * @param event The pre login event.
+     */
     @Subscribe
     private void onPreLogin(PreLoginEvent event) {
 
         onLogin.invoke(new VelocityLoginNegotiator(event.getUsername(), (LoginPhaseConnection) event.getConnection()));
     }
 
+    /**
+     * Fired when a server sends a login plugin message to the client. This will always be intercepted by the proxy, as
+     * the player will only ever log in once. However, the proxy can still respond on the player's behalf.
+     * @param event The message received
+     */
     @Subscribe
     private void onLoginMessage(ServerLoginPluginMessageEvent event) {
 

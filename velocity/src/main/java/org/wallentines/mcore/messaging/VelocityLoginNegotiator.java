@@ -10,6 +10,11 @@ public class VelocityLoginNegotiator extends ProxyLoginNegotiator {
 
     private final LoginPhaseConnection connection;
 
+    /**
+     * Constructs a new login negotiator with the given username and connection
+     * @param username The username the player logged in with
+     * @param connection The player's connection
+     */
     public VelocityLoginNegotiator(String username, LoginPhaseConnection connection) {
         super(username);
         this.connection = connection;
