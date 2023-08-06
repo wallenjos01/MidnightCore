@@ -26,6 +26,11 @@ public class VelocityServer implements ProxyServer {
     }
 
     @Override
+    public Proxy getProxy() {
+        return proxy;
+    }
+
+    @Override
     public Collection<ProxyPlayer> getPlayers() {
         return server.getPlayersConnected().stream().map(pl -> proxy.getPlayer(pl.getUniqueId())).toList();
     }
