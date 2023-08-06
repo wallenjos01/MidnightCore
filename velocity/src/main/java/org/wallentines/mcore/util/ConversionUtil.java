@@ -9,8 +9,16 @@ import org.wallentines.mcore.ProxyPlayer;
 import org.wallentines.mcore.ProxyServer;
 import org.wallentines.midnightlib.registry.Identifier;
 
+/**
+ * A utility for converting various MidnightCore types to Velocity types and vice-versa
+ */
 public class ConversionUtil {
 
+    /**
+     * Converts a velocity ChannelIdentifier into an Identifier
+     * @param id The ChannelIdentifier to convert
+     * @return A converted Identifier
+     */
     public static Identifier toIdentifier(ChannelIdentifier id) {
 
         if((id instanceof MinecraftChannelIdentifier mci)) {
@@ -20,12 +28,22 @@ public class ConversionUtil {
         return Identifier.parseOrDefault(id.getId(), MidnightCoreAPI.MOD_ID);
     }
 
+    /**
+     * Converts an Identifier into a velocity ChannelIdentifier
+     * @param id The Identifier to convert
+     * @return A converted ChannelIdentifier
+     */
     public static ChannelIdentifier toChannelIdentifier(Identifier id) {
 
         return MinecraftChannelIdentifier.create(id.getNamespace(), id.getPath());
     }
 
 
+    /**
+     * Ensures the given ProxyPlayer is actually a velocity Player
+     * @param player The ProxyPlayer to validate
+     * @return The ProxyPlayer casted to a Player
+     */
     public static Player validate(ProxyPlayer player) {
 
         if(!(player instanceof Player)) {
@@ -36,6 +54,11 @@ public class ConversionUtil {
     }
 
 
+    /**
+     * Ensures the given ProxyServer is actually a velocity RegisteredServer
+     * @param server The ProxyServer to validate
+     * @return The ProxyServer casted to a RegisteredServer
+     */
     public static RegisteredServer validate(ProxyServer server) {
 
         if(!(server instanceof RegisteredServer)) {

@@ -23,6 +23,11 @@ public class VelocityExtensionModule extends ProxyExtensionModule {
         return true;
     }
 
+    /**
+     * Fired when the player logs in. This is the earliest event when the Player object has been created, giving us
+     * access to the UUID. This is propagated up to the parent to deal with finalizing player extensions
+     * @param event The login event
+     */
     @Subscribe
     public void onLogin(LoginEvent event) {
         onFinishLogin(proxy.getPlayer(event.getPlayer().getUniqueId()));

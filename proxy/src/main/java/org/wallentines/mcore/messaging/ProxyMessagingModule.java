@@ -7,20 +7,36 @@ import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
+/**
+ * A module for sending custom packets to players and servers.
+ */
 public abstract class ProxyMessagingModule implements ProxyModule {
 
     protected final Registry<PacketHandler<ProxyPlayer>> playerHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
     protected final Registry<PacketHandler<ProxyPlayer>> serverHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
     protected final Registry<PacketHandler<ProxyPlayer>> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
 
+    /**
+     * An event called when a player logs into the proxy. (Not individual servers)
+     */
     public final HandlerList<ProxyLoginNegotiator> onLogin = new HandlerList<>();
 
+    /**
+     * Sends a custom packet to a player
+     * @param player The player to send the packet
+     * @param packet The packet to send
+     */
     public void sendPlayerMessage(ProxyPlayer player, Packet packet) {
         ByteBuf out = Unpooled.buffer();
         packet.write(out);
         sendPlayerMessage(player, packet.getId(), out);
     }
 
+    /**
+     * Sends a custom packet to a server. This will not work if the server has no player connected to it.
+     * @param server The server to send a packet to
+     * @param packet The packet to send
+     */
     public void sendServerMessage(ProxyServer server, Packet packet) {
         ByteBuf out = Unpooled.buffer();
         packet.write(out);
@@ -31,14 +47,30 @@ public abstract class ProxyMessagingModule implements ProxyModule {
     protected abstract void sendPlayerMessage(ProxyPlayer player, Identifier id, ByteBuf out);
     protected abstract void sendServerMessage(ProxyServer server, Identifier id, ByteBuf out);
 
-    public void registerPlayerHandler(Identifier id, PacketHandler<ProxyPlayer> player) {
-        this.playerHandlers.register(id, player);
+    /**
+     * Registers a handler for custom packets sent from clients
+     * @param id The ID of the packet to handle
+     * @param handler The packet handler
+     */
+    public void registerPlayerHandler(Identifier id, PacketHandler<ProxyPlayer> handler) {
+        this.playerHandlers.register(id, handler);
     }
 
-    public void registerServerHandler(Identifier id, PacketHandler<ProxyPlayer> player) {
-        this.serverHandlers.register(id, player);
+    /**
+     * Registers a handler for custom packets sent from servers during the play phase
+     * @param id The ID of the packet to handle
+     * @param handler The packet handler
+     */
+    public void registerServerHandler(Identifier id, PacketHandler<ProxyPlayer> handler) {
+        this.serverHandlers.register(id, handler);
     }
 
+    /**
+     * Registers a handler for custom packets sent from servers during the server's login phase. Unhandled packets will
+     * not be sent to players, as they have already left the login phase.
+     * @param id The ID of the packet to handle
+     * @param handler The packet handler
+     */
     public void registerLoginHandler(Identifier id, PacketHandler<ProxyPlayer> handler) {
         this.loginHandlers.register(id, handler);
     }

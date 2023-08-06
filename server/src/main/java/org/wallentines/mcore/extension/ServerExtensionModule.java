@@ -45,9 +45,9 @@ public abstract class ServerExtensionModule implements ServerModule {
         this.smm = mod;
 
         manager.loadAll(section.getSection("extensions"), this, ServerExtension.REGISTRY);
-        this.cachedPacket = new ClientboundExtensionPacket(manager);
+        this.cachedPacket = new ClientboundExtensionPacket(manager.getLoadedModuleIds());
 
-        mod.registerPacketHandler(ClientboundExtensionPacket.ID, (player, buffer) -> handleResponse(player.getUUID(), player.getUsername(), buffer));
+        mod.registerPacketHandler(ServerboundExtensionPacket.ID, (player, buffer) -> handleResponse(player.getUUID(), player.getUsername(), buffer));
 
         // If the server does not support login query or the delay option is enabled, packets will be sent during the
         // play state, right when a player joins the game
