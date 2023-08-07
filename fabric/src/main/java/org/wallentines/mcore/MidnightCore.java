@@ -22,6 +22,8 @@ import org.wallentines.mcore.session.FabricSessionModule;
 import org.wallentines.mcore.session.SessionModule;
 import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
+import org.wallentines.mcore.text.CustomScoreboard;
+import org.wallentines.mcore.text.FabricScoreboard;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.MappingUtil;
 import org.wallentines.mcore.util.RegistryUtil;
@@ -103,12 +105,13 @@ public class MidnightCore implements ModInitializer {
 
             Item it = ((DefaultedRegistry<Item>) RegistryUtil.registryOrThrow(Registries.ITEM)).get(ConversionUtil.toResourceLocation(id));
 
-            ItemStack out = (ItemStack) (Object) new net.minecraft.world.item.ItemStack(it, count);
+            ItemStack out = new net.minecraft.world.item.ItemStack(it, count);
             out.setTag(tag);
             return out;
         });
 
         InventoryGUI.FACTORY.set(FabricInventoryGUI::new);
+        CustomScoreboard.FACTORY.set(FabricScoreboard::new);
 
         Player.registerPlaceholders(PlaceholderManager.INSTANCE);
 
