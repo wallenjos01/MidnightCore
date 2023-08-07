@@ -6,7 +6,7 @@ dependencies {
 
     implementation("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
 
+    api(project(":common"))
     api(project(":proxy"))
-    api(project(":api"))
 
 }
