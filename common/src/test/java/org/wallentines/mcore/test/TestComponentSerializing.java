@@ -2,7 +2,6 @@ package org.wallentines.mcore.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.text.*;
 import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigPrimitive;
