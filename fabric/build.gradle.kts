@@ -39,10 +39,14 @@ dependencies {
 
     modImplementation("net.fabricmc:fabric-loader:0.14.21")
 
-    val apiModules = listOf("fabric-command-api-v2", "fabric-lifecycle-events-v1")
+    val apiModules = listOf(
+            "fabric-command-api-v2",
+            "fabric-lifecycle-events-v1",
+            "fabric-networking-api-v1"
+    )
 
     for(mod in apiModules) {
-        modImplementation(include(fabricApi.module(mod, "0.85.0+1.20.1"))!!)
+        modApi(include(fabricApi.module(mod, "0.86.1+1.20.1"))!!)
     }
 
 }

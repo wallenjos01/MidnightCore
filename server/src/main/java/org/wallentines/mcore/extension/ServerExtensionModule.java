@@ -2,10 +2,7 @@ package org.wallentines.mcore.extension;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
-import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
-import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
@@ -51,12 +48,11 @@ public abstract class ServerExtensionModule implements ServerModule {
 
         // If the server does not support login query or the delay option is enabled, packets will be sent during the
         // play state, right when a player joins the game
-        if(!mod.supportsLoginQuery() || section.getBoolean("delay_send")) {
+        if (!mod.supportsLoginQuery() || section.getBoolean("delay_send")) {
             registerJoinListener(pl -> smm.sendPacket(pl, cachedPacket));
         } else {
-            mod.onLogin.register(this, ln -> ln.sendPacket(cachedPacket, (negotiator, buffer) -> {
-
-            }));
+            mod.registerLoginPacketHandler(ServerboundExtensionPacket.ID, (negotiator, buffer) -> handleResponse(negotiator.getPlayerUUID(), negotiator.getPlayerName(), buffer));
+            mod.onLogin.register(this, ln -> ln.sendPacket(cachedPacket));
         }
 
         return true;
@@ -98,7 +94,7 @@ public abstract class ServerExtensionModule implements ServerModule {
             Map<Identifier, Version> versions = packet.getExtensions().entrySet().stream().filter(e -> manager.isModuleLoaded(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             enabledExtensions.put(playerId, versions);
 
-            MidnightCoreAPI.LOGGER.warn("Player " + username + " logged in with " + versions.size() + " enabled extensions");
+            MidnightCoreAPI.LOGGER.info("Player " + username + " logged in with " + versions.size() + " enabled extensions");
 
         } catch (DecoderException ex) {
 
