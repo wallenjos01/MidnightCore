@@ -103,7 +103,7 @@ public class TestLang {
         Player pl = new DummyPlayer();
 
         Component got = manager.getMessage("test", pl.getLanguage(), new PlaceholderContext(pl));
-        Component cmp = manager.component("test");
+        Component cmp = LangContent.component(manager, "test");
 
         cmp = ComponentResolver.resolveComponent(cmp, pl);
 
