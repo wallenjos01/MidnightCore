@@ -60,11 +60,4 @@ public class LangContent extends Content {
     public boolean requiresResolution() {
         return true;
     }
-
-    static {
-        LangManager.CONTENT_FACTORY.set((man, key, args) -> {
-            List<Object> lst = List.of(args);
-            return new LangContent(man, key, pl -> lst);
-        });
-    }
 }

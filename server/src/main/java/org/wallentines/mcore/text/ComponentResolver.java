@@ -6,6 +6,7 @@ import org.wallentines.mcore.lang.LangContent;
 import org.wallentines.mcore.lang.PlaceholderContent;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
+
 /**
  * An interface for resolving custom component types before sent to Players. Custom content types will need to be
  * resolved into a component type the server has the ability to interpret before they can be sent to players.
@@ -71,7 +72,6 @@ public interface ComponentResolver {
         LangContent lng = (LangContent) cnt;
         return lng.resolve(player);
     });
-
     ComponentResolver PLACEHOLDER = REGISTRY.register("placeholder", (cnt, player) -> {
         PlaceholderContent plc = (PlaceholderContent) cnt;
         return plc.resolve(player);

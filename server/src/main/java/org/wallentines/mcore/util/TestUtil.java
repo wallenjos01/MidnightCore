@@ -37,7 +37,7 @@ public class TestUtil {
 
 
             pl.sendMessage(org.wallentines.mcore.text.Component.text("Hello").withColor(TextColor.RED));
-            pl.sendMessage(manager.component("test"));
+            pl.sendMessage(LangContent.component(manager, "test"));
 
             ItemStack is = ItemStack.Builder.woolWithColor(TextColor.RED)
                     .withCount(13)
@@ -110,12 +110,8 @@ public class TestUtil {
 
             InventoryGUI gui = InventoryGUI.FACTORY.get().build(Component.text("Hello"), 3);
 
-            LangRegistry defaults = new LangRegistry();
-            defaults.register("test", UnresolvedComponent.parse("%player_name%", PlaceholderManager.INSTANCE).getOrThrow());
-            LangManager manager = new LangManager(defaults, null);
-
             gui.setItem(0, ItemStack.Builder.concreteWithColor(TextColor.RED).withName(Component.text("Hello, World").withColor(TextColor.AQUA)).build(), null);
-            gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.concreteWithColor(TextColor.GREEN), manager.component("test"), null), (cpl, cl) -> {
+            gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.concreteWithColor(TextColor.GREEN), PlaceholderContent.component("%player_name%"), null), (cpl, cl) -> {
                 cpl.sendMessage(Component.text(cl.name()));
                 gui.close(cpl);
             });gui.setItem(8, ItemStack.empty(), (cpl, cl) -> {
