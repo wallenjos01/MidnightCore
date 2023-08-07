@@ -25,6 +25,9 @@ public abstract class CustomScoreboard {
 
 
     public void setLine(int line, Component component) {
+        if(line < 0 || line > 14) {
+            throw new IndexOutOfBoundsException("Line " + line + " is out of the range 0 to 14!");
+        }
         if(component == null) {
             entries[line] = null;
         }
