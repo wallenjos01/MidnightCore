@@ -89,6 +89,13 @@ public class MidnightCore implements ModInitializer {
                             return 1;
                         })
                 )
+                .then(Commands.literal("scoreboard")
+                        .executes(ctx -> {
+                            Player pl = ctx.getSource().getPlayerOrException();
+                            TestUtil.scoreboardCmd(pl);
+                            return 1;
+                        })
+                )
             );
         });
     }

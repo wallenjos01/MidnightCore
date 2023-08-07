@@ -46,8 +46,7 @@ public class FabricScoreboard extends CustomScoreboard {
         spl.connection.send(updateObjectivePacket(objectiveId, WrappedComponent.resolved(title, player), true));
 
         for(int i = 0 ; i < 15 ; i++) {
-            teams[i].prefix(WrappedComponent.resolved(entries[i], player));
-            spl.connection.send(teams[i].addPacket());
+            updateLine(i, player, true);
         }
 
         spl.connection.send(displayObjectivePacket(objectiveId));
@@ -68,6 +67,10 @@ public class FabricScoreboard extends CustomScoreboard {
 
     @Override
     protected void updateLine(int line, Player player) {
+        updateLine(line, player, false);
+    }
+
+    private void updateLine(int line, Player player, boolean add) {
 
         ServerPlayer spl = ConversionUtil.validate(player);
         String playerName = teams[line].getMembers().iterator().next();
@@ -76,15 +79,15 @@ public class FabricScoreboard extends CustomScoreboard {
 
         if(entries[line] == null) {
             teams[line].prefix(null);
-            score = 0;
+            score = -1;
         } else {
             teams[line].prefix(WrappedComponent.resolved(entries[line], player));
         }
 
-        spl.connection.send(teams[line].updatePacket());
+        spl.connection.send(add ? teams[line].addPacket() : teams[line].updatePacket());
         spl.connection.send(scorePacket(objectiveId, playerName, score));
-    }
 
+    }
 
     private static ClientboundSetObjectivePacket updateObjectivePacket(String id, net.minecraft.network.chat.Component title, boolean add) {
 
@@ -119,7 +122,7 @@ public class FabricScoreboard extends CustomScoreboard {
     private ClientboundSetScorePacket scorePacket(String objectiveId, String user, int score) {
 
         ServerScoreboard.Method method = ServerScoreboard.Method.CHANGE;
-        if(score == 0) {
+        if(score == -1) {
             method = ServerScoreboard.Method.REMOVE;
         }
         return new ClientboundSetScorePacket(method, objectiveId, user, score);

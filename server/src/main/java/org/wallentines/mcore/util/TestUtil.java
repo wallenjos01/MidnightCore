@@ -12,10 +12,7 @@ import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.savepoint.SavepointModule;
-import org.wallentines.mcore.text.ClickEvent;
-import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.HoverEvent;
-import org.wallentines.mcore.text.TextColor;
+import org.wallentines.mcore.text.*;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.EnumSet;
@@ -129,6 +126,26 @@ public class TestUtil {
             });
 
             gui.open(pl);
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+    }
+
+    public static void scoreboardCmd(Player pl) {
+        try {
+
+            CustomScoreboard board = CustomScoreboard.FACTORY.get().create(Component.text("Test").withColor(TextColor.RED).withBold(true));
+
+            LangRegistry defaults = new LangRegistry();
+            defaults.register("test", UnresolvedComponent.parse("%player_name%", PlaceholderManager.INSTANCE).getOrThrow());
+            LangManager manager = new LangManager(defaults, null);
+
+            board.setLine(13, Component.text("Hello"));
+            board.setLine(1, manager.component("test"));
+            board.setLine(0, Component.text("Zero").withColor(TextColor.AQUA).withItalic(true));
+
+            board.addViewer(pl);
+
         } catch (Throwable th) {
             th.printStackTrace();
         }
