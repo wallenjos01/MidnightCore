@@ -7,10 +7,7 @@ import org.wallentines.mcore.Server;
 import org.wallentines.mcore.item.InventoryGUI;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.item.UnresolvedItemStack;
-import org.wallentines.mcore.lang.LangManager;
-import org.wallentines.mcore.lang.LangRegistry;
-import org.wallentines.mcore.lang.PlaceholderManager;
-import org.wallentines.mcore.lang.UnresolvedComponent;
+import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.*;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -136,12 +133,8 @@ public class TestUtil {
 
             CustomScoreboard board = CustomScoreboard.FACTORY.get().create(Component.text("Test").withColor(TextColor.RED).withBold(true));
 
-            LangRegistry defaults = new LangRegistry();
-            defaults.register("test", UnresolvedComponent.parse("%player_name%", PlaceholderManager.INSTANCE).getOrThrow());
-            LangManager manager = new LangManager(defaults, null);
-
             board.setLine(13, Component.text("Hello"));
-            board.setLine(1, manager.component("test"));
+            board.setLine(1, PlaceholderContent.component("%player_name%"));
             board.setLine(0, Component.text("Zero").withColor(TextColor.AQUA).withItalic(true));
 
             board.addViewer(pl);
