@@ -2,12 +2,14 @@ package org.wallentines.mcore.lang;
 
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.Content;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.FileCodec;
 import org.wallentines.mdcfg.codec.FileCodecRegistry;
 import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.midnightlib.types.Singleton;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -114,15 +116,14 @@ public class LangManager {
     }
 
     /**
-     * Constructs a Lang component based on the given key and values
-     * @param key The key to lookup
-     * @param ctx The values to use to resolve the component
-     * @return A new component
+     * Creates a new unresolved lang component with the given key and arguments
+     * @param key They key to lookup
+     * @param args The arguments to pass when resolving the entry
+     * @return A new lang component
      */
-    public Component component(String key, Object... ctx) {
-        return new Component(new LangContent(this, key, ctx));
+    public Component component(String key, Object... args) {
+        return new Component(CONTENT_FACTORY.get().create(this, key, args));
     }
-
 
     private void scanDirectory() {
 
@@ -182,7 +183,12 @@ public class LangManager {
             }
             return l;
         });
+    }
 
+    public static final Singleton<ContentFactory> CONTENT_FACTORY = new Singleton<>();
+
+    public interface ContentFactory {
+        Content create(LangManager manager, String key, Object... args);
     }
 
 

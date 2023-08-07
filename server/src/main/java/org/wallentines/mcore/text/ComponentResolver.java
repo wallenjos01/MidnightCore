@@ -2,8 +2,8 @@ package org.wallentines.mcore.text;
 
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Player;
-import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.LangContent;
+import org.wallentines.mcore.lang.PlaceholderContent;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
 /**
@@ -68,12 +68,13 @@ public interface ComponentResolver {
     }
 
     ComponentResolver LANG = REGISTRY.register("lang", (cnt, player) -> {
+        LangContent lng = (LangContent) cnt;
+        return lng.resolve(player);
+    });
 
-        LangContent lang = (LangContent) cnt;
-        PlaceholderContext ctx = lang.getContext().copy();
-        ctx.values.add(player);
-
-        return lang.getLangManager().getMessage(lang.getKey(), player.getLanguage(), ctx);
+    ComponentResolver PLACEHOLDER = REGISTRY.register("placeholder", (cnt, player) -> {
+        PlaceholderContent plc = (PlaceholderContent) cnt;
+        return plc.resolve(player);
     });
 
 }
