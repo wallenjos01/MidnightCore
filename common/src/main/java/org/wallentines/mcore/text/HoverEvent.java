@@ -8,9 +8,6 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.InlineSerializer;
 import org.wallentines.mdcfg.serializer.ObjectSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;
-import org.wallentines.midnightlib.registry.Identifier;
-
-import java.util.UUID;
 
 /**
  * A data type representing a chat component HoverEvent

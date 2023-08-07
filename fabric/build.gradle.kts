@@ -30,7 +30,7 @@ repositories {
 
 dependencies {
 
-    api(project(":api"))
+    api(project(":common"))
     api(project(":server"))
     api(project(":client"))
 

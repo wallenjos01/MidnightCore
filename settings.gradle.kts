@@ -8,7 +8,7 @@ pluginManagement {
 
 rootProject.name = "midnightcore"
 
-include("api")
+include("common")
 
 include("server")
 include("client")

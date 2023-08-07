@@ -166,7 +166,7 @@ public class UnresolvedComponent {
             }
         }).toList();
 
-        if(unparsed.size() == 0) {
+        if(unparsed.isEmpty()) {
             return Component.empty();
         }
 
