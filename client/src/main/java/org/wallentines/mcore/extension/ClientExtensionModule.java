@@ -37,7 +37,7 @@ public class ClientExtensionModule implements ClientModule {
                 ClientboundExtensionPacket pck = ClientboundExtensionPacket.read(byteBuf);
                 cmm.sendMessage(createPacket(manager, pck.getExtensions()));
             } catch (Exception ex) {
-                MidnightCoreAPI.LOGGER.warn("Received malformed extension packet from server!");
+                MidnightCoreAPI.LOGGER.warn("An exception occurred while processing an extension packet!", ex);
             }
 
         });
@@ -51,7 +51,7 @@ public class ClientExtensionModule implements ClientModule {
                 return out;
 
             } catch (Exception ex) {
-                MidnightCoreAPI.LOGGER.warn("Received malformed extension packet from server!");
+                MidnightCoreAPI.LOGGER.warn("An exception occurred while processing an extension packet!", ex);
                 return null;
             }
 

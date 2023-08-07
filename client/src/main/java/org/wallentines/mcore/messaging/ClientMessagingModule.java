@@ -13,8 +13,8 @@ import org.wallentines.midnightlib.registry.Registry;
  */
 public abstract class ClientMessagingModule implements ClientModule {
 
-    private final Registry<PacketHandler<Client>> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
-    private final Registry<ClientLoginPacketHandler> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    protected final Registry<PacketHandler<Client>> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    protected final Registry<ClientLoginPacketHandler> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
 
     protected Client client;
 
@@ -49,11 +49,11 @@ public abstract class ClientMessagingModule implements ClientModule {
     }
 
 
-    protected boolean handlePacket(Identifier id, ByteBuf buf) {
+    protected void handlePacket(Identifier id, ByteBuf buf) {
 
         PacketHandler<Client> handler = handlers.get(id);
         if(handler == null) {
-            return false;
+            return;
         }
 
         try {
@@ -61,7 +61,6 @@ public abstract class ClientMessagingModule implements ClientModule {
         } catch (Exception ex) {
             MidnightCoreAPI.LOGGER.error("An error occurred while handling a custom packet!", ex);
         }
-        return true;
     }
 
 

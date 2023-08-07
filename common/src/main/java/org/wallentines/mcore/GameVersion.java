@@ -96,7 +96,12 @@ public class GameVersion {
         /**
          * In 1.12, The show_achievement action in Hover events was removed
          */
-        HOVER_SHOW_ACHIEVEMENT(0, 316);
+        HOVER_SHOW_ACHIEVEMENT(0, 316),
+
+        /**
+         * In 1.20.2, A new network protocol state called "Configuration" was added.
+         */
+        CONFIGURATION_PROTOCOL(764, -1, 144);
 
 
         public final int minVersion;
@@ -105,22 +110,22 @@ public class GameVersion {
         public final int maxSnapshotVersion;
 
         Feature(int minVersion) {
-            this(minVersion, RELEASE_MAX_VERSION, RELEASE_MAX_VERSION + 1, Integer.MAX_VALUE);
+            this(minVersion, -1, 1, -1);
         }
 
         Feature(int minVersion, int maxVersion) {
-            this(minVersion, maxVersion, maxVersion < RELEASE_MAX_VERSION ? Integer.MAX_VALUE : RELEASE_MAX_VERSION + 1, Integer.MAX_VALUE);
+            this(minVersion, maxVersion, maxVersion >= 0 ? -1 : 1, -1);
         }
 
         Feature(int minVersion, int maxVersion, int minSnapshotVersion) {
-            this(minVersion, maxVersion, minSnapshotVersion, Integer.MAX_VALUE);
+            this(minVersion, maxVersion, minSnapshotVersion, -1);
         }
 
         Feature(int minVersion, int maxVersion, int minSnapshotVersion, int maxSnapshotVersion) {
             this.minVersion = minVersion;
-            this.maxVersion = maxVersion;
-            this.minSnapshotVersion = minSnapshotVersion;
-            this.maxSnapshotVersion = maxSnapshotVersion;
+            this.maxVersion = maxVersion >= 0 ? maxVersion : RELEASE_MAX_VERSION;
+            this.minSnapshotVersion = minSnapshotVersion >= 0 ? RELEASE_MAX_VERSION + minSnapshotVersion : Integer.MAX_VALUE;
+            this.maxSnapshotVersion = maxSnapshotVersion >= 0 ? RELEASE_MAX_VERSION + maxSnapshotVersion : Integer.MAX_VALUE;
         }
 
         /**

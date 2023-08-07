@@ -4,11 +4,11 @@
   "package": "org.wallentines.mcore.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AccessorLoginPacketHandler",
     "AccessorPlayer",
     "AccessorPlayerAdvancements",
     "AccessorServerPlayer",
     "MixinAbstractContainerMenu",
-    "MixinClientLoginPacketListener",
     "MixinEntity",
     "MixinFriendlyByteBuf",
     "MixinItemStack",
@@ -16,11 +16,9 @@
     "MixinPlayerAdvancements",
     "MixinPlayerList",
     "MixinServerGamePacketListener",
-    "MixinServerLoginPacketListener",
     "MixinServerPlayer"
   ],
   "client": [
-    "MixinClientPacketListener",
     "MixinMinecraft"
   ],
   "priority": 1010,

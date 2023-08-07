@@ -33,20 +33,18 @@ public abstract class ServerLoginNegotiator {
     /**
      * Sends the given packet to the player, and registers a handler for response
      * @param packet The packet to send
-     * @param response The function to call when the player responds
      */
-    public void sendPacket(Packet packet, PacketHandler<ServerLoginNegotiator> response) {
+    public void sendPacket(Packet packet) {
         ByteBuf out = Unpooled.buffer();
         packet.write(out);
-        sendPacket(packet.getId(), out, response);
+        sendPacket(packet.getId(), out);
     }
 
     /**
      * Sends a packet with the given ID and data to the player, and registers a handler for response
      * @param id The ID of the packet to send
      * @param data The data to send
-     * @param response The function to call when the player responds
      */
-    public abstract void sendPacket(Identifier id, ByteBuf data, PacketHandler<ServerLoginNegotiator> response);
+    public abstract void sendPacket(Identifier id, ByteBuf data);
 
 }
