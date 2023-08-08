@@ -8,14 +8,11 @@
     "AccessorPlayer",
     "AccessorPlayerAdvancements",
     "AccessorServerPlayer",
-    "MixinAbstractContainerMenu",
     "MixinEntity",
     "MixinFriendlyByteBuf",
     "MixinItemStack",
     "MixinMinecraftServer",
     "MixinPlayerAdvancements",
-    "MixinPlayerList",
-    "MixinServerGamePacketListener",
     "MixinServerPlayer"
   ],
   "client": [

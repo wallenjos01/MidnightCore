@@ -1,9 +1,9 @@
 package org.wallentines.mcore.extension;
 
+import org.wallentines.fbev.player.PlayerJoinEvent;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
-import org.wallentines.mcore.event.PlayerJoinEvent;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
 import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;

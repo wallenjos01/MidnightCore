@@ -16,7 +16,14 @@ subprojects.forEach { sp ->
     sp.apply(plugin="java-library")
     sp.apply(plugin="maven-publish")
 
-    sp.java.withSourcesJar()
+    sp.tasks.withType(Jar::class) {
+        val id = project.properties["id"]
+        archiveBaseName = "${id}-${project.name}"
+    }
+
+    sp.java {
+        withSourcesJar()
+    }
 
     sp.repositories {
         mavenCentral()
@@ -27,12 +34,12 @@ subprojects.forEach { sp ->
     sp.dependencies {
 
         api("org.wallentines:midnightcfg:1.0.1")
-        api("org.wallentines:midnightlib:1.2.0")
+        api("org.wallentines:midnightlib:1.2.1")
 
         implementation("org.slf4j:slf4j-api:2.0.7")
-        implementation("io.netty:netty-buffer:4.1.94.Final")
-        implementation("io.netty:netty-codec:4.1.94.Final")
-        implementation("org.jetbrains:annotations:24.0.1")
+        compileOnly("io.netty:netty-buffer:4.1.94.Final")
+        compileOnly("io.netty:netty-codec:4.1.94.Final")
+        compileOnly("org.jetbrains:annotations:24.0.1")
 
         testImplementation(platform(libs.junit.bom))
         testImplementation(libs.junit.jupiter)

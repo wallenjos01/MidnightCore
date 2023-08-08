@@ -1,7 +1,6 @@
 plugins {
-
-    id("fabric-loom") version "1.3.8"
-
+    alias(libs.plugins.loom)
+    alias(libs.plugins.shadow)
 }
 
 loom {
@@ -17,7 +16,31 @@ loom {
             server()
         }
     }
-    accessWidenerPath = File("src/main/resources/midnightcore.accesswidener")
+}
+
+tasks {
+    build {
+        dependsOn(shadowJar)
+    }
+    shadowJar {
+        archiveClassifier = "dev"
+        configurations = listOf(project.configurations.shadow.get())
+        minimize {
+            exclude("org.wallentines.*")
+        }
+    }
+    remapJar {
+        dependsOn(shadowJar)
+        inputFile.set(shadowJar.get().archiveFile)
+
+        val id = project.properties["id"]
+        archiveBaseName = "${id}-${project.name}"
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -26,6 +49,8 @@ repositories {
         mavenContent { snapshotsOnly() }
     }
     mavenCentral()
+    maven("https://oss.sonatype.org/content/repositories/snapshots")
+    mavenLocal()
 }
 
 dependencies {
@@ -33,6 +58,16 @@ dependencies {
     api(project(":common"))
     api(project(":server"))
     api(project(":client"))
+
+    include("org.wallentines:midnightcfg:1.0.1")
+    include("org.wallentines:midnightlib:1.2.1")
+
+    shadow(project(":common").setTransitive(false))
+    shadow(project(":server").setTransitive(false))
+    shadow(project(":client").setTransitive(false))
+
+    modApi(include("org.wallentines:fabric-events:0.1.0-SNAPSHOT")!!)
+    modApi(include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")!!)
 
     minecraft("com.mojang:minecraft:1.20.1")
     mappings(loom.officialMojangMappings())
