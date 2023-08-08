@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wallentines.mcore.GameMode;
 import org.wallentines.mcore.Skin;
-import org.wallentines.mcore.event.ContainerCloseEvent;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
@@ -24,7 +23,6 @@ import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.AuthUtil;
 import org.wallentines.mcore.util.ConversionUtil;
-import org.wallentines.midnightlib.event.Event;
 
 
 @Mixin(ServerPlayer.class)
@@ -163,12 +161,6 @@ public abstract class MixinServerPlayer implements Player {
     @Inject(method="updateOptions", at=@At("RETURN"))
     private void onUpdateOptions(ServerboundClientInformationPacket packet, CallbackInfo ci) {
         midnightcore$language = packet.language();
-    }
-
-    @Inject(method="doCloseContainer", at=@At("HEAD"))
-    private void onCloseContainer(CallbackInfo ci) {
-        ServerPlayer pl = (ServerPlayer) (Object) this;
-        Event.invoke(new ContainerCloseEvent(pl, pl.containerMenu));
     }
 
 }

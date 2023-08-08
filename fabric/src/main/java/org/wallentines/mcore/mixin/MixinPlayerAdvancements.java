@@ -13,12 +13,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.wallentines.mcore.event.AdvancementEvent;
 import org.wallentines.mcore.savepoint.AdvancementExtension;
-import org.wallentines.midnightlib.event.Event;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,14 +46,6 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
 
     @Shadow public abstract void flushDirty(ServerPlayer serverPlayer);
 
-
-    @Inject(method="award", at=@At("RETURN"))
-    private void onAward(Advancement advancement, String string, CallbackInfoReturnable<Boolean> cir) {
-
-        AdvancementEvent event = new AdvancementEvent(player, advancement);
-        Event.invoke(event);
-
-    }
 
     @Unique
     @Override
