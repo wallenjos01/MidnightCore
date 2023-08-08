@@ -4,9 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.DefaultedRegistry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.Item;
 import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
 import org.wallentines.mcore.item.FabricInventoryGUI;
@@ -23,9 +20,6 @@ import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.text.CustomScoreboard;
 import org.wallentines.mcore.text.FabricScoreboard;
-import org.wallentines.mcore.util.ConversionUtil;
-import org.wallentines.mcore.util.MappingUtil;
-import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
 public class MidnightCore implements ModInitializer {
@@ -34,49 +28,40 @@ public class MidnightCore implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        MappingUtil.printIntermediary(net.minecraft.world.item.ItemStack.class);
-
-        MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
-
-
-        ServerLifecycleEvents.SERVER_STARTING.register(Server.RUNNING_SERVER::set);
-        ServerLifecycleEvents.SERVER_STARTED.register(Server.START_EVENT::invoke);
-        ServerLifecycleEvents.SERVER_STOPPING.register(Server.STOP_EVENT::invoke);
-        ServerLifecycleEvents.SERVER_STOPPED.register(srv -> Server.RUNNING_SERVER.reset());
-
-
+        // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepoint.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, FabricSessionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerMessagingModule.ID, FabricServerMessagingModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
 
-
+        // Commands
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 TestCommand.register(dispatcher));
     }
 
     static {
 
+        // File Codecs
+        MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
+
+        // Version
         GameVersion.CURRENT_VERSION.set(new GameVersion(SharedConstants.getCurrentVersion().getId(), SharedConstants.getProtocolVersion()));
 
-        ItemStack.FACTORY.set((id, count, tag, data) -> {
-
-            if(data != -1) {
-                throw new IllegalStateException("ItemStack data value requested for an unsupported version!");
-            }
-
-            Item it = ((DefaultedRegistry<Item>) RegistryUtil.registryOrThrow(Registries.ITEM)).get(ConversionUtil.toResourceLocation(id));
-
-            ItemStack out = new net.minecraft.world.item.ItemStack(it, count);
-            out.setTag(tag);
-            return out;
-        });
-
+        // Factories
+        ItemStack.FACTORY.set(new ItemFactory());
         InventoryGUI.FACTORY.set(FabricInventoryGUI::new);
         CustomScoreboard.FACTORY.set(FabricScoreboard::new);
 
+        // Placeholders
         Player.registerPlaceholders(PlaceholderManager.INSTANCE);
+
+        // Lifecycle
+        ServerLifecycleEvents.SERVER_STARTING.register(Server.RUNNING_SERVER::set);
+        ServerLifecycleEvents.SERVER_STARTED.register(Server.START_EVENT::invoke);
+        ServerLifecycleEvents.SERVER_STOPPING.register(Server.STOP_EVENT::invoke);
+        ServerLifecycleEvents.SERVER_STOPPED.register(srv -> Server.RUNNING_SERVER.reset());
+
 
     }
 }
