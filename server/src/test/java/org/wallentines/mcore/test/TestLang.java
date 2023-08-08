@@ -87,6 +87,10 @@ public class TestLang {
         @Override
         public boolean isOnline() { return false; }
         @Override
+        public boolean hasPermission(String permission) { return false; }
+        @Override
+        public boolean hasPermission(String permission, int defaultOpLevel) { return false; }
+        @Override
         public Skin getSkin() { return null; }
     }
 

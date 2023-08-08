@@ -51,4 +51,10 @@ public interface ProxyPlayer {
      */
     ProxyServer getServer();
 
+    /**
+     * Checks if the player has the given permission
+     * @param permission The permission to check
+     * @return Whether the player has the permission
+     */
+    boolean hasPermission(String permission);
 }

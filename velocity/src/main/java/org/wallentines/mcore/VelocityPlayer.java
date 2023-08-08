@@ -64,4 +64,9 @@ public class VelocityPlayer implements ProxyPlayer {
     public ProxyServer getServer() {
         return player.getCurrentServer().map(srv -> proxy.getServer(srv.getServerInfo().getName())).orElse(null);
     }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return player.hasPermission(permission);
+    }
 }
