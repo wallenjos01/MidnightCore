@@ -4,7 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.SharedConstants;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
@@ -27,7 +26,6 @@ import org.wallentines.mcore.text.FabricScoreboard;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.MappingUtil;
 import org.wallentines.mcore.util.RegistryUtil;
-import org.wallentines.mcore.util.TestUtil;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
 public class MidnightCore implements ModInitializer {
@@ -54,50 +52,8 @@ public class MidnightCore implements ModInitializer {
         ServerModule.REGISTRY.register(ServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
 
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            dispatcher.register(Commands.literal("mcoretest")
-                .executes(ctx -> {
-                    Player pl = ctx.getSource().getPlayerOrException();
-                    TestUtil.cmd(pl);
-                    return 1;
-                })
-                .then(Commands.literal("skin")
-                    .executes(ctx -> {
-                        Player pl = ctx.getSource().getPlayerOrException();
-                        TestUtil.skinCmd(pl);
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("save")
-                        .executes(ctx -> {
-                            Player pl = ctx.getSource().getPlayerOrException();
-                            TestUtil.saveCmd(pl);
-                            return 1;
-                        })
-                )
-                .then(Commands.literal("load")
-                        .executes(ctx -> {
-                            Player pl = ctx.getSource().getPlayerOrException();
-                            TestUtil.loadCmd(pl);
-                            return 1;
-                        })
-                )
-                .then(Commands.literal("gui")
-                        .executes(ctx -> {
-                            Player pl = ctx.getSource().getPlayerOrException();
-                            TestUtil.guiCmd(pl);
-                            return 1;
-                        })
-                )
-                .then(Commands.literal("scoreboard")
-                        .executes(ctx -> {
-                            Player pl = ctx.getSource().getPlayerOrException();
-                            TestUtil.scoreboardCmd(pl);
-                            return 1;
-                        })
-                )
-            );
-        });
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+                TestCommand.register(dispatcher));
     }
 
     static {

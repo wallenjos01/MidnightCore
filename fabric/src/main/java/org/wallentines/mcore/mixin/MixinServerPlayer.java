@@ -1,5 +1,6 @@
 package org.wallentines.mcore.mixin;
 
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -65,6 +66,16 @@ public abstract class MixinServerPlayer implements Player {
     @Override
     public boolean isOnline() {
         return !hasDisconnected();
+    }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return Permissions.check((ServerPlayer) (Object) this, permission);
+    }
+
+    @Override
+    public boolean hasPermission(String permission, int defaultOpLevel) {
+        return Permissions.check((ServerPlayer) (Object) this, permission, defaultOpLevel);
     }
 
     @Unique
