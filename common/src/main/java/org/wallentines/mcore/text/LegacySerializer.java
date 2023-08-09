@@ -126,7 +126,7 @@ public class LegacySerializer extends ComponentSerializer {
                 else if ((next >= '0' && next <= '9') || (next >= 'a' && next <= 'f')) {
 
                     int legacy = Integer.parseInt(String.valueOf(next), 16);
-                    if(currentString.length() > 0) {
+                    if(!currentString.isEmpty()) {
                         out.add(currentComponent.withContent(new Content.Text(currentString.toString())));
                     }
                     currentString = new StringBuilder();
@@ -136,7 +136,7 @@ public class LegacySerializer extends ComponentSerializer {
 
                 } else if(next == 'r') {
 
-                    if(currentString.length() > 0) {
+                    if(!currentString.isEmpty()) {
                         out.add(currentComponent.withContent(new Content.Text(currentString.toString())));
                     }
                     currentString = new StringBuilder();
@@ -152,7 +152,7 @@ public class LegacySerializer extends ComponentSerializer {
                     currentString = new StringBuilder();
 
                     i += 7;
-                    currentComponent = Component.empty().withColor(new Color(hex));
+                    currentComponent = Component.empty().withColor(Color.parse(hex).getOrThrow());
 
                 } else {
                     switch (next) {
