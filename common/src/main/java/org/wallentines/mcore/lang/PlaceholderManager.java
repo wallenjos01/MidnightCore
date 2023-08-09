@@ -4,17 +4,35 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
+/**
+ * A class for registering and applying placeholders to strings and components
+ */
 public class PlaceholderManager {
 
+    /**
+     * The global placeholder manager instance. Use this rather than creating your own unless you need to isolate your
+     * placeholders from other programs.
+     */
     public static final PlaceholderManager INSTANCE = new PlaceholderManager();
 
     private final StringRegistry<PlaceholderSupplier> registeredPlaceholders = new StringRegistry<>();
 
+    /**
+     * Gets the placeholder supplier for the placeholder with the given name
+     * @param name The name to lookup
+     * @return The placeholder supplier, or null if none is registered with that name
+     */
     @Nullable
     public PlaceholderSupplier getPlaceholderSupplier(String name) {
         return registeredPlaceholders.get(name);
     }
 
+    /**
+     * Registers a new placeholder supplier with the given name
+     * @param name The name of the new placeholder supplier
+     * @param supplier The new placeholder supplier
+     * @throws IllegalArgumentException If a placeholder supplier with the given name is already registered.
+     */
     public void registerSupplier(String name, PlaceholderSupplier supplier) {
 
         if(registeredPlaceholders.hasKey(name)) {
@@ -24,14 +42,31 @@ public class PlaceholderManager {
         registeredPlaceholders.register(name, supplier);
     }
 
+    /**
+     * Parses a string, locating all placeholders, but does not resolve the placeholders yet.
+     * @param str The string to parse
+     * @return An unresolved component representing the string and all its placeholders
+     */
     public UnresolvedComponent parse(String str) {
         return UnresolvedComponent.parse(str, this).getOrThrow();
     }
 
+    /**
+     * Parses a string, locating all placeholders, then resolves the placeholders according to the given context.
+     * Will not attempt to parse strings as JSON
+     * @param str The string to parse
+     * @return A new component
+     */
     public Component parseAndResolve(String str, PlaceholderContext ctx) {
         return parseAndResolve(str, ctx, false);
     }
 
+    /**
+     * Parses a string, locating all placeholders, then resolves the placeholders according to the given context.
+     * Optionally, attempts to parse strings as JSON components.
+     * @param str The string to parse
+     * @return A new component
+     */
     public Component parseAndResolve(String str, PlaceholderContext ctx, boolean tryParseJSON) {
         return UnresolvedComponent.parse(str, this, tryParseJSON).getOrThrow().resolve(ctx);
     }

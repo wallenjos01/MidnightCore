@@ -6,6 +6,7 @@ import org.wallentines.midnightlib.types.Either;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * A data type which represents a placeholder which has been parsed but not resolved
@@ -81,6 +82,24 @@ public class UnresolvedPlaceholder {
 
         if(argument != null) ctx.parameter = argument.resolve(ctx);
         return supplier.get(ctx);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UnresolvedPlaceholder that = (UnresolvedPlaceholder) o;
+        return Objects.equals(supplier, that.supplier) && Objects.equals(id, that.id) && Objects.equals(argument, that.argument);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(supplier, id, argument);
+    }
+
+    @Override
+    public String toString() {
+        return toRawPlaceholder();
     }
 
     static SerializeResult<UnresolvedPlaceholder> parse(BufferedReader reader, PlaceholderManager manager, boolean tryParseJSON) {

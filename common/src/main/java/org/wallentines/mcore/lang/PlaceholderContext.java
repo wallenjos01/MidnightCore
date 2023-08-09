@@ -16,6 +16,7 @@ public class PlaceholderContext {
     public final List<Object> values = new ArrayList<>();
     private final HashMap<Class<?>, Object> cache = new HashMap<>();
 
+
     /**
      * Constructs a new placeholder context with the given values
      * @param values The values which will be passed to placeholder suppliers
