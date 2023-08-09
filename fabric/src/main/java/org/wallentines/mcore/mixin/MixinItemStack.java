@@ -4,9 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
@@ -21,6 +19,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 import java.util.Optional;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
+@Implements(@Interface(iface= ItemStack.class, prefix = "mcore$"))
 public abstract class MixinItemStack implements ItemStack {
 
     @Shadow public abstract Item getItem();
@@ -36,29 +35,22 @@ public abstract class MixinItemStack implements ItemStack {
 
     @Shadow public abstract net.minecraft.world.item.ItemStack setHoverName(net.minecraft.network.chat.@Nullable Component component);
 
-    @Unique
-    @Override
-    public Identifier getType() {
+    public Identifier mcore$getType() {
         return RegistryUtil.registry(Registries.ITEM)
                 .flatMap(res -> Optional.ofNullable(res.getKey(getItem())))
                 .map(ConversionUtil::toIdentifier)
                 .orElse(new Identifier("minecraft", "air"));
     }
 
-    @Unique
-    @Override
-    public ConfigSection getTag() {
+    public ConfigSection mcore$getTag() {
         return tag == null ? null : NBTContext.INSTANCE.convert(ConfigContext.INSTANCE, tag).asSection();
     }
 
-    @Unique
-    @Override
-    public void setTag(ConfigSection nbt) {
+    public void mcore$setTag(ConfigSection nbt) {
         setTag(nbt == null ? null : (CompoundTag) ConfigContext.INSTANCE.convert(NBTContext.INSTANCE, nbt));
     }
 
-    @Override
-    public void setName(Component component) {
+    public void mcore$setName(Component component) {
         setHoverName(new WrappedComponent(ItemUtil.applyItemNameBaseStyle(component)));
     }
 }

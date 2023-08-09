@@ -5,9 +5,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.LevelResource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,62 +19,46 @@ import java.util.UUID;
 import java.util.function.BooleanSupplier;
 
 @Mixin(MinecraftServer.class)
+@Implements(@Interface(iface=Server.class, prefix = "mcore$"))
 public abstract class MixinMinecraftServer implements Server {
 
-
     @Unique
-    private final ModuleManager<Server, ServerModule> midnightcore$moduleManager = new ModuleManager<>();
-
+    private final ModuleManager<Server, ServerModule> mcore$moduleManager = new ModuleManager<>();
     @Unique
-    private final HandlerList<Server> midnightcore$tickEvent = new HandlerList<>();
+    private final HandlerList<Server> mcore$tickEvent = new HandlerList<>();
     @Unique
-    private final HandlerList<Server> midnightcore$stopEvent = new HandlerList<>();
+    private final HandlerList<Server> mcore$stopEvent = new HandlerList<>();
 
     @Shadow private PlayerList playerList;
 
     @Shadow public abstract Commands getCommands();
-
     @Shadow public abstract CommandSourceStack createCommandSourceStack();
-
     @Shadow public abstract boolean isDedicatedServer();
-
-
     @Shadow public abstract Path getWorldPath(LevelResource levelResource);
 
-    @Unique
-    @Override
-    public Player getPlayer(UUID uuid) {
+    public Player mcore$getPlayer(UUID uuid) {
         return playerList.getPlayer(uuid);
     }
 
-    @Unique
-    @Override
-    public Player findPlayer(String name) {
+    public Player mcore$findPlayer(String name) {
         return playerList.getPlayerByName(name);
     }
 
-    @Unique
-    @Override
-    public Collection<Player> getPlayers() {
+    public Collection<Player> mcore$getPlayers() {
         return playerList.getPlayers().stream().map(pl -> (Player) pl).toList();
     }
 
-    @Unique
-    @Override
-    public void runCommand(String command, boolean quiet) {
+    public void mcore$runCommand(String command, boolean quiet) {
         CommandSourceStack stack = createCommandSourceStack();
         if(quiet) stack.withSuppressedOutput();
         getCommands().performPrefixedCommand(stack, command);
     }
 
-    @Unique
-    @Override
-    public ModuleManager<Server, ServerModule> getModuleManager() {
-        return midnightcore$moduleManager;
+    public ModuleManager<Server, ServerModule> mcore$getModuleManager() {
+        return mcore$moduleManager;
     }
 
-    @Override
-    public Path getConfigDirectory() {
+    public Path mcore$getConfigDirectory() {
         if(isDedicatedServer()) {
             return Path.of("config");
         } else {
@@ -84,28 +66,22 @@ public abstract class MixinMinecraftServer implements Server {
         }
     }
 
-    @Unique
-    @Override
-    public HandlerList<Server> tickEvent() {
-        return midnightcore$tickEvent;
+    public HandlerList<Server> mcore$tickEvent() {
+        return mcore$tickEvent;
     }
 
-    @Unique
-    @Override
-    public HandlerList<Server> shutdownEvent() {
-        return midnightcore$stopEvent;
+    public HandlerList<Server> mcore$shutdownEvent() {
+        return mcore$stopEvent;
     }
 
-    @Unique
-    @Override
-    public void submit(Runnable runnable) {
+    public void mcore$submit(Runnable runnable) {
         MinecraftServer server = (MinecraftServer) (Object) this;
         server.submit(runnable);
     }
 
     @Inject(method = "tickServer", at = @At("TAIL"))
     private void onTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-        midnightcore$tickEvent.invoke(this);
+        mcore$tickEvent.invoke(this);
     }
 
     @Inject(method = "runServer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/MinecraftServer;initServer()Z", shift = At.Shift.AFTER))
@@ -115,7 +91,7 @@ public abstract class MixinMinecraftServer implements Server {
 
     @Inject(method="stopServer", at=@At(value="INVOKE", target="Lnet/minecraft/server/players/PlayerList;saveAll()V"))
     private void onSavePlayers(CallbackInfo ci) {
-        midnightcore$stopEvent.invoke(this);
+        mcore$stopEvent.invoke(this);
     }
 
 }
