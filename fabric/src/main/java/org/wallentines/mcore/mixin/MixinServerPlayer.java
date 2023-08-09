@@ -33,7 +33,7 @@ import java.util.List;
 
 @Mixin(ServerPlayer.class)
 @Implements({@Interface(iface = Player.class, prefix = "mcore$"), @Interface(iface = ScoreboardHolder.class, prefix = "mcore_sb$")})
-public abstract class MixinServerPlayer implements Player {
+public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
 
     @Unique
     private ServerScoreboard mcore$scoreboard = null;

@@ -86,8 +86,6 @@ public class FabricScoreboard extends CustomScoreboard {
 
         public void init() {
 
-            ((ScoreboardHolder) player).setScoreboard(board);
-
             Objective obj = board.addObjective(
                     objectiveId,
                     ObjectiveCriteria.DUMMY,
@@ -100,6 +98,8 @@ public class FabricScoreboard extends CustomScoreboard {
             for(int i = 0 ; i < 15 ; i++) {
                 updateLine(i);
             }
+
+            ((ScoreboardHolder) player).setScoreboard(board);
         }
 
         public void clear() {

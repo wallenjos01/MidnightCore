@@ -12,9 +12,7 @@ import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.Entity;
 import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Server;
@@ -30,6 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Mixin(net.minecraft.world.entity.Entity.class)
+@Implements(@Interface(iface=Entity.class, prefix = "mcore$"))
 public abstract class MixinEntity implements Entity {
 
     @Shadow public abstract UUID getUUID();
@@ -54,8 +53,12 @@ public abstract class MixinEntity implements Entity {
 
     @Shadow public abstract String getStringUUID();
 
-    @Override
-    public Identifier getType() {
+    @Intrinsic(displace = true)
+    public UUID mcore$getUUID() {
+        return getUUID();
+    }
+
+    public Identifier mcore$getType() {
 
         net.minecraft.world.entity.Entity ent = (net.minecraft.world.entity.Entity) (Object) this;
 
@@ -65,14 +68,11 @@ public abstract class MixinEntity implements Entity {
                 .orElseGet(() -> new Identifier("minecraft", "pig"));
     }
 
-    @Override
-    public Server getServer() {
+    public Server mcore$getServer() {
         return ((net.minecraft.world.entity.Entity) (Object) this).getServer();
     }
 
-    @Unique
-    @Override
-    public Component getDisplayName() {
+    public Component mcore$getDisplayName() {
 
         net.minecraft.network.chat.Component comp = getCustomName();
         if(comp == null) return Component.text(getStringUUID());
@@ -80,33 +80,23 @@ public abstract class MixinEntity implements Entity {
         return ContentConverter.convertReverse(comp);
     }
 
-    @Unique
-    @Override
-    public Identifier getDimensionId() {
+    public Identifier mcore$getDimensionId() {
         return ConversionUtil.toIdentifier(level.dimension().location());
     }
 
-    @Unique
-    @Override
-    public Vec3d getPosition() {
+    public Vec3d mcore$getPosition() {
         return new Vec3d(position.x, position.y, position.z);
     }
 
-    @Unique
-    @Override
-    public float getYaw() {
+    public float mcore$getYaw() {
         return yRot;
     }
 
-    @Unique
-    @Override
-    public float getPitch() {
+    public float mcore$getPitch() {
         return xRot;
     }
 
-    @Unique
-    @Override
-    public void teleport(Location location) {
+    public void mcore$teleport(Location location) {
 
         if(level.isClientSide) {
             throw new IllegalStateException("Attempt to teleport a client-side entity!");

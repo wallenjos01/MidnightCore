@@ -2,6 +2,8 @@ package org.wallentines.mcore.mixin;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,10 +17,11 @@ import org.wallentines.midnightlib.module.ModuleManager;
 import java.nio.file.Path;
 
 @Mixin(Minecraft.class)
-public class MixinMinecraft implements Client {
+@Implements(@Interface(iface=Client.class, prefix = "mcore$"))
+public abstract class MixinMinecraft implements Client {
 
     @Unique
-    private final ModuleManager<Client, ClientModule> midnightcore$modules = new ModuleManager<>();
+    private final ModuleManager<Client, ClientModule> mcore$modules = new ModuleManager<>();
 
     @Inject(method="<init>", at=@At("RETURN"))
     private void onInit(GameConfig gameConfig, CallbackInfo ci) {
@@ -29,15 +32,11 @@ public class MixinMinecraft implements Client {
         loadModules(ClientModule.REGISTRY);
     }
 
-    @Unique
-    @Override
-    public ModuleManager<Client, ClientModule> getModuleManager() {
-        return midnightcore$modules;
+    public ModuleManager<Client, ClientModule> mcore$getModuleManager() {
+        return mcore$modules;
     }
 
-    @Unique
-    @Override
-    public Path getConfigDirectory() {
+    public Path mcore$getConfigDirectory() {
         return Path.of("config");
     }
 }
