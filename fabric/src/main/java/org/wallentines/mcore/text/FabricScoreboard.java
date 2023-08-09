@@ -1,131 +1,146 @@
 package org.wallentines.mcore.text;
 
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
-import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
-import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Player;
+import org.wallentines.mcore.ScoreboardHolder;
 import org.wallentines.mcore.util.ConversionUtil;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public class FabricScoreboard extends CustomScoreboard {
 
-    private final String objectiveId;
-    private final TeamBuilder[] teams;
+    private final Map<UUID, BoardInfo> boards = new HashMap<>();
 
     public FabricScoreboard(Component title) {
         super(title);
-
-        this.teams = new TeamBuilder[15];
-        this.objectiveId = generateRandomId();
-
-        for(int i = 0 ; i < 15 ; i++) {
-            String hexIndex = Integer.toHexString(i);
-            teams[i] = new TeamBuilder(objectiveId.substring(0, 14) + hexIndex);
-            teams[i].addMember("§" + hexIndex);
-        }
-
     }
+
 
     @Override
     protected void updateTitle(Player player) {
 
-        ServerPlayer spl = ConversionUtil.validate(player);
-        spl.connection.send(updateObjectivePacket(objectiveId, WrappedComponent.resolved(title, player), false));
+        BoardInfo info = boards.get(player.getUUID());
+        if(info == null) {
+            MidnightCoreAPI.LOGGER.warn("Could not update scoreboard title! Scoreboard has not been created!");
+            return;
+        }
+
+        info.updateTitle();
     }
 
     @Override
     protected void sendToPlayer(Player player) {
 
-        ServerPlayer spl = ConversionUtil.validate(player);
-        spl.connection.send(updateObjectivePacket(objectiveId, WrappedComponent.resolved(title, player), true));
-
-        for(int i = 0 ; i < 15 ; i++) {
-            updateLine(i, player, true);
+        if(boards.containsKey(player.getUUID())) {
+            return;
         }
 
-        spl.connection.send(displayObjectivePacket(objectiveId));
+        ServerPlayer spl = ConversionUtil.validate(player);
+        BoardInfo info = new BoardInfo(generateRandomId(), spl);
 
+        boards.put(spl.getUUID(), info);
+        info.init();
     }
 
     @Override
     protected void clearForPlayer(Player player) {
 
-        ServerPlayer spl = ConversionUtil.validate(player);
-
-        for(int i = 0 ; i < 15 ; i++) {
-            spl.connection.send(teams[i].removePacket());
+        if(!boards.containsKey(player.getUUID())) {
+            return;
         }
 
-        spl.connection.send(removeObjectivePacket(objectiveId));
+        boards.get(player.getUUID()).clear();
     }
 
     @Override
     protected void updateLine(int line, Player player) {
-        updateLine(line, player, false);
+        if(!boards.containsKey(player.getUUID())) {
+            MidnightCoreAPI.LOGGER.warn("Could not update scoreboard line! Scoreboard has not been created!");
+            return;
+        }
+        boards.get(player.getUUID()).updateLine(line);
     }
 
-    private void updateLine(int line, Player player, boolean add) {
+    private class BoardInfo {
 
-        ServerPlayer spl = ConversionUtil.validate(player);
-        String playerName = teams[line].getMembers().iterator().next();
+        String objectiveId;
+        PlayerTeam[] teams;
+        ServerScoreboard board;
+        ServerPlayer player;
 
-        int score = line;
-
-        if(entries[line] == null) {
-            teams[line].prefix(null);
-            score = -1;
-        } else {
-            teams[line].prefix(WrappedComponent.resolved(entries[line], player));
+        public BoardInfo(String objectiveId, ServerPlayer spl) {
+            this.objectiveId = objectiveId;
+            this.teams = new PlayerTeam[15];
+            this.board = new ServerScoreboard(spl.server);
+            this.player = spl;
         }
 
-        spl.connection.send(add ? teams[line].addPacket() : teams[line].updatePacket());
-        spl.connection.send(scorePacket(objectiveId, playerName, score));
+        public void init() {
 
-    }
+            ((ScoreboardHolder) player).setScoreboard(board);
 
-    private static ClientboundSetObjectivePacket updateObjectivePacket(String id, net.minecraft.network.chat.Component title, boolean add) {
+            Objective obj = board.addObjective(
+                    objectiveId,
+                    ObjectiveCriteria.DUMMY,
+                    WrappedComponent.resolved(title, player),
+                    ObjectiveCriteria.RenderType.INTEGER);
 
-        FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
-        fakeBuf.writeUtf(id); // Objective ID
-        fakeBuf.writeByte(add ? 0 : 2); // Action (0 = ADD, 2 = UPDATE)
+            board.startTrackingObjective(obj);
+            board.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, obj);
 
-        fakeBuf.writeComponent(title);
-        fakeBuf.writeEnum(ObjectiveCriteria.RenderType.INTEGER);
-
-        return new ClientboundSetObjectivePacket(fakeBuf);
-    }
-
-    private static ClientboundSetObjectivePacket removeObjectivePacket(String id) {
-
-        FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
-        fakeBuf.writeUtf(id); // Objective ID
-        fakeBuf.writeByte(1); // Action (1 = REMOVE)
-
-        return new ClientboundSetObjectivePacket(fakeBuf);
-    }
-
-    private static ClientboundSetDisplayObjectivePacket displayObjectivePacket(String id) {
-
-        FriendlyByteBuf fakeBuf = new FriendlyByteBuf(Unpooled.buffer());
-        fakeBuf.writeByte(1); // Position (1 = SIDEBAR)
-        fakeBuf.writeUtf(id == null ? "" : id); // Objective ID
-
-        return new ClientboundSetDisplayObjectivePacket(fakeBuf);
-    }
-
-    private ClientboundSetScorePacket scorePacket(String objectiveId, String user, int score) {
-
-        ServerScoreboard.Method method = ServerScoreboard.Method.CHANGE;
-        if(score == -1) {
-            method = ServerScoreboard.Method.REMOVE;
+            for(int i = 0 ; i < 15 ; i++) {
+                updateLine(i);
+            }
         }
-        return new ClientboundSetScorePacket(method, objectiveId, user, score);
+
+        public void clear() {
+
+            ((ScoreboardHolder) player).setScoreboard(null);
+        }
+
+        public void updateTitle() {
+
+            Objective obj = board.getObjective(objectiveId);
+            if(obj == null) {
+                throw new IllegalStateException("Attempt to update scoreboard before initialization!");
+            }
+
+            obj.setDisplayName(WrappedComponent.resolved(title, player));
+        }
+
+        public void updateLine(int line) {
+
+            Objective obj = board.getObjective(objectiveId);
+            if(obj == null) {
+                throw new IllegalStateException("Attempt to update scoreboard before initialization!");
+            }
+
+            String hexIndex = Integer.toHexString(line);
+            String teamName = objectiveId.substring(0, 14) + hexIndex;
+            String playerName = "§" + hexIndex;
+
+            PlayerTeam team = board.getPlayersTeam(teamName);
+            if(team == null) {
+                team = board.addPlayerTeam(teamName);
+                board.addPlayerToTeam(playerName, team);
+            }
+
+            if(entries[line] == null) {
+                board.resetPlayerScore(playerName, obj);
+            } else {
+                team.setPlayerPrefix(WrappedComponent.resolved(entries[line], player));
+                board.getOrCreatePlayerScore(playerName, obj).setScore(line);
+            }
+        }
     }
 
     private static String generateRandomId() {

@@ -21,6 +21,10 @@ public abstract class CustomScoreboard {
 
     public void setTitle(Component title) {
         this.title = title;
+        for(WrappedPlayer p : viewers) {
+            Player pl = p.get();
+            if(pl != null) updateTitle(pl);
+        }
     }
 
 
@@ -46,8 +50,9 @@ public abstract class CustomScoreboard {
     }
 
     protected void updateLine(int i) {
-        for(WrappedPlayer pl : viewers) {
-            updateLine(i, pl.get());
+        for(WrappedPlayer p : viewers) {
+            Player pl = p.get();
+            if(pl != null) updateLine(i, pl);
         }
     }
 
