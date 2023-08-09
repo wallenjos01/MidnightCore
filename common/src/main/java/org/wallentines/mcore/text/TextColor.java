@@ -73,7 +73,7 @@ public final class TextColor {
      */
     public static Color parse(String value) {
 
-        if (value.startsWith("#")) return new Color(value);
+        if (value.startsWith("#")) return Color.parse(value).getOrThrow();
         return fromLegacyName(value);
     }
 
@@ -104,7 +104,7 @@ public final class TextColor {
         return GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.RGB_TEXT) ? color.toHex() : toLegacyColor(color);
     }
 
-    public static final Serializer<Color> SERIALIZER = InlineSerializer.of(TextColor::serialize, Color::parse);
+    public static final Serializer<Color> SERIALIZER = InlineSerializer.of(TextColor::serialize, TextColor::parse);
 
     private TextColor() { }
 }

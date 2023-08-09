@@ -104,6 +104,11 @@ public class MojangUtil {
         return CompletableFuture.supplyAsync(() -> getSkin(playerId));
     }
 
+    /**
+     * Retrieves a player Skin by their username, asynchronously
+     * @param name The username to look up.
+     * @return The Skin of the player, or null
+     */
     public static CompletableFuture<Skin> getSkinByNameAsync(String name) {
 
         return CompletableFuture.supplyAsync(() -> getSkin(getUUID(name)));

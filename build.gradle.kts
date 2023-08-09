@@ -34,7 +34,7 @@ subprojects.forEach { sp ->
     sp.dependencies {
 
         api("org.wallentines:midnightcfg:1.0.1")
-        api("org.wallentines:midnightlib:1.2.2-SNAPSHOT")
+        api("org.wallentines:midnightlib:1.3.0")
 
         implementation("org.slf4j:slf4j-api:2.0.7")
         compileOnly(libs.netty.buffer)
