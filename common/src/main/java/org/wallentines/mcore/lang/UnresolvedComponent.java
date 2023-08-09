@@ -12,6 +12,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class UnresolvedComponent {
@@ -96,6 +97,34 @@ public class UnresolvedComponent {
         return parts.stream().map(e -> e.leftOrGet(UnresolvedPlaceholder::toRawPlaceholder)).collect(Collectors.joining());
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UnresolvedComponent that = (UnresolvedComponent) o;
+        if(completed != null) {
+            return that.completed != null;
+        }
+        return tryParseJSON == that.tryParseJSON && Objects.equals(parts, that.parts);
+    }
+
+
+    @Override
+    public int hashCode() {
+        if(completed != null) {
+            return completed.hashCode();
+        }
+        return Objects.hash(tryParseJSON, parts);
+    }
+
+    @Override
+    public String toString() {
+        if(completed != null) {
+            return completed.toString();
+        }
+        return "UnresolvedComponent{tryParseJSON=" + tryParseJSON + ",parts=" + parts + "}";
+    }
 
     // Resolve all inline placeholders (placeholders which return a String)
     private List<Either<String, UnresolvedPlaceholder>> resolveInline(PlaceholderContext ctx) {

@@ -34,19 +34,22 @@ subprojects.forEach { sp ->
     sp.dependencies {
 
         api("org.wallentines:midnightcfg:1.0.1")
-        api("org.wallentines:midnightlib:1.2.1")
+        api("org.wallentines:midnightlib:1.2.2-SNAPSHOT")
 
         implementation("org.slf4j:slf4j-api:2.0.7")
-        compileOnly("io.netty:netty-buffer:4.1.94.Final")
-        compileOnly("io.netty:netty-codec:4.1.94.Final")
+        compileOnly(libs.netty.buffer)
+        compileOnly(libs.netty.codec)
         compileOnly("org.jetbrains:annotations:24.0.1")
 
         testImplementation(platform(libs.junit.bom))
         testImplementation(libs.junit.jupiter)
+        testImplementation(libs.netty.buffer)
+        testImplementation(libs.netty.codec)
     }
 
     sp.tasks.test {
         useJUnitPlatform()
+        workingDir = File("run", "test")
     }
 
     sp.publishing {

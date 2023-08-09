@@ -14,6 +14,16 @@ import java.io.File;
 
 public class ModuleUtil {
 
+    /**
+     * Loads all modules from the given registry into the given manager, while passing in the given data. Then saves
+     * all module data to a file in the given directory called "modules"
+     * @param manager The module manager to load modules into
+     * @param registry The module registry to read
+     * @param data The data to pass into module initializers
+     * @param moduleStorage The module storage directory to save module data to
+     * @param <T> The type of data to pass
+     * @param <M> The type of module to load
+     */
     public static <T,M extends Module<T>> void loadModules(ModuleManager<T, M> manager, Registry<ModuleInfo<T, M>> registry, T data, File moduleStorage) {
 
         if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {

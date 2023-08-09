@@ -83,6 +83,7 @@ public class DataManager {
         return openFiles.computeIfAbsent(key, k -> {
 
             FileWrapper<ConfigObject> wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, k, searchDirectory);
+            wrapper.load();
             if(wrapper.getRoot() == null || !wrapper.getRoot().isSection()) {
                 wrapper.setRoot(new ConfigSection());
             }
