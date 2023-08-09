@@ -7,13 +7,15 @@
     "AccessorLoginPacketHandler",
     "AccessorPlayer",
     "AccessorPlayerAdvancements",
+    "AccessorPlayerList",
     "AccessorServerPlayer",
     "MixinEntity",
     "MixinFriendlyByteBuf",
     "MixinItemStack",
     "MixinMinecraftServer",
     "MixinPlayerAdvancements",
-    "MixinServerPlayer"
+    "MixinServerPlayer",
+    "MixinServerScoreboard"
   ],
   "client": [
     "MixinMinecraft"
