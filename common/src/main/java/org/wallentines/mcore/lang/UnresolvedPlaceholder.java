@@ -1,5 +1,6 @@
 package org.wallentines.mcore.lang;
 
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.types.Either;
@@ -30,9 +31,10 @@ public class UnresolvedPlaceholder {
     }
 
     /**
-     * Returns the parsed placeholder supplier
+     * Gets the parsed placeholder supplier
      * @return The placeholder supplier
      */
+    @Nullable
     public PlaceholderSupplier getSupplier() {
         return supplier;
     }
@@ -61,12 +63,8 @@ public class UnresolvedPlaceholder {
 
         StringBuilder out = new StringBuilder("%");
         out.append(id);
-        if(supplier.acceptsArgument()) {
-            out.append("<");
-            if(argument != null) {
-                out.append(argument);
-            }
-            out.append(">");
+        if(argument != null) {
+            out.append("<").append(argument).append(">");
         }
         out.append("%");
 
@@ -81,7 +79,23 @@ public class UnresolvedPlaceholder {
     public Either<String, Component> resolve(PlaceholderContext ctx) {
 
         if(argument != null) ctx.parameter = argument.resolve(ctx);
+        if(supplier == null) {
+            Either<String, Component> cpl = ctx.getCustomPlaceholder(id);
+            if(cpl == null) {
+                return Either.left(toRawPlaceholder());
+            }
+            return cpl;
+        }
+
         return supplier.get(ctx);
+    }
+
+    public boolean isInline(PlaceholderContext ctx) {
+        if(supplier != null) {
+            return supplier.isInline(ctx);
+        }
+
+        return resolve(ctx).hasLeft();
     }
 
     @Override
@@ -119,16 +133,10 @@ public class UnresolvedPlaceholder {
                     String finalId = id.toString();
                     PlaceholderSupplier supp = manager.getPlaceholderSupplier(finalId);
 
-                    if(supp == null) {
-                        return SerializeResult.failure("Unable to parse placeholder! Unable to find PlaceholderSupplier with name " + finalId + "!");
-                    }
 
                     if(chara == '%') {
                         return SerializeResult.success(new UnresolvedPlaceholder(supp, finalId, null));
                     } else {
-                        if(!supp.acceptsArgument()) {
-                            return SerializeResult.failure("Unable to parse placeholder! Argument supplied for PlaceholderSupplier which does not accept one!");
-                        }
 
                         SerializeResult<UnresolvedComponent> entry = UnresolvedComponent.parse(reader, '>', manager, tryParseJSON);
                         if(!entry.isComplete()) {

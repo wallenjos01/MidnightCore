@@ -2,10 +2,12 @@ package org.wallentines.mcore.lang;
 
 
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.Functions;
+import org.wallentines.mdcfg.serializer.SerializeResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -115,10 +117,16 @@ public class LangRegistry {
 
         for(String key : section.getKeys()) {
             ConfigObject obj = section.get(key);
+            String finalKey = prefix + key;
             if(obj.isString()) {
-                registry.entries.put(prefix + key, UnresolvedComponent.parse(obj.asString(), manager, tryParseJSON).getOrThrow());
+                SerializeResult<UnresolvedComponent> result = UnresolvedComponent.parse(obj.asString(), manager, tryParseJSON);
+                if(result.isComplete()) {
+                    registry.entries.put(finalKey, result.getOrThrow());
+                } else {
+                    MidnightCoreAPI.LOGGER.warn("An error occurred while parsing a language entry! (" + finalKey + ") " + result.getError());
+                }
             } else if(obj.isSection()) {
-                addAll(obj.asSection(), registry, prefix + key + ".", manager, tryParseJSON);
+                addAll(obj.asSection(), registry, finalKey + ".", manager, tryParseJSON);
             }
         }
     }

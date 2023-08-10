@@ -36,7 +36,7 @@ public class WrappedComponent implements Component {
      * @param player The player to resolve the component for
      * @return A new WrappedComponent
      */
-    public static Component resolved(org.wallentines.mcore.text.Component comp, Player player) {
+    public static WrappedComponent resolved(org.wallentines.mcore.text.Component comp, Player player) {
         return new WrappedComponent(ComponentResolver.resolveComponent(comp, player));
     }
 

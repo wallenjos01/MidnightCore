@@ -2,8 +2,10 @@ package org.wallentines.mcore.lang;
 
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.midnightlib.types.Either;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -16,13 +18,14 @@ public class PlaceholderContext {
     public final List<Object> values = new ArrayList<>();
     private final HashMap<Class<?>, Object> cache = new HashMap<>();
 
+    public PlaceholderContext() { }
 
     /**
      * Constructs a new placeholder context with the given values
      * @param values The values which will be passed to placeholder suppliers
      */
-    public PlaceholderContext(Object... values) {
-        this.values.addAll(List.of(values));
+    public PlaceholderContext(Collection<Object> values) {
+        this.values.addAll(values);
     }
 
     /**
@@ -53,6 +56,18 @@ public class PlaceholderContext {
             }
             return null;
         }));
+    }
+
+    public Either<String, Component> getCustomPlaceholder(String key) {
+        for(Object value : values) {
+            if(value instanceof CustomPlaceholder) {
+                CustomPlaceholder cpl = (CustomPlaceholder) value;
+                if(key.equals(cpl.getId())) {
+                    return cpl.getValue();
+                }
+            }
+        }
+        return null;
     }
 
 

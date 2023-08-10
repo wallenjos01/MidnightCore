@@ -5,10 +5,10 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-            "org.wallentines.mcore.MidnightCore"
+          "org.wallentines.mcore.Init"
         ],
         "client": [
-            "org.wallentines.mcore.MidnightCoreClient"
+            "org.wallentines.mcore.InitClient"
         ]
     },
     "depends": {

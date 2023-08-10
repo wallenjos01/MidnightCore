@@ -53,7 +53,7 @@ public class PlaceholderContent extends Content {
         if(args == null) {
             ctx = new PlaceholderContext();
         } else {
-            ctx = new PlaceholderContext(args.apply(player).toArray());
+            ctx = new PlaceholderContext(args.apply(player));
         }
         ctx.values.add(player);
 

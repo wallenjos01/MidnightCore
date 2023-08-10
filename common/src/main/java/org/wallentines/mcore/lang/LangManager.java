@@ -12,6 +12,7 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Loads language entries for all files in a given folder
@@ -78,6 +79,19 @@ public class LangManager {
     }
 
     /**
+     * Gets a message with the given key and language, resolved using the given context
+     * @param key The key to lookup
+     * @param language The language to search in
+     * @param args The context by which to resolve placeholders
+     * @return A resolved message component
+     */
+    public Component getMessage(String key, String language, Object... args) {
+
+        LangRegistry reg = languages.getOrDefault(findClosestLanguage(language), defaults);
+        return reg.resolveOr(key, new PlaceholderContext(List.of(args)), defaults::resolve);
+    }
+
+    /**
      * Sets the entries for the given language
      * @param language The language to override
      * @param registry The registry to set
@@ -102,6 +116,10 @@ public class LangManager {
      * @param registry The entries to save
      */
     public void saveLanguageDefaults(String language, LangRegistry registry) {
+
+        if(!searchDirectory.isDirectory() && !searchDirectory.mkdirs()) {
+            throw new IllegalStateException("Unable to create lang directory!");
+        }
 
         FileWrapper<ConfigObject> wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, language, searchDirectory);
         if(wrapper.getRoot() != null && wrapper.getRoot().isSection()) {
@@ -151,6 +169,10 @@ public class LangManager {
     }
 
     private String findClosestLanguage(String language) {
+
+        if(language == null) {
+            return null;
+        }
 
         if(languages.containsKey(language) || !language.contains("_")) {
             return language;

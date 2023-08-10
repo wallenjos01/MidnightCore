@@ -1,6 +1,10 @@
 package org.wallentines.mcore;
 
 import org.wallentines.mcore.util.ModuleUtil;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.FileWrapper;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Registry;
@@ -24,8 +28,22 @@ public interface Client {
      */
     default void loadModules(Registry<ModuleInfo<Client, ClientModule>> registry) {
 
+        ModuleUtil.loadModules(getModuleManager(), registry, this, getModuleConfig());
+    }
+
+    /**
+     * Gets the configuration file for modules
+     * @return The module config
+     */
+    default FileWrapper<ConfigObject> getModuleConfig() {
+
         File moduleStorage = getConfigDirectory().resolve("MidnightCore").resolve("client").toFile();
-        ModuleUtil.loadModules(getModuleManager(), registry, this, moduleStorage);
+
+        if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {
+            throw new IllegalStateException("Unable to create module storage directory!");
+        }
+
+        return MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());
     }
 
     /**

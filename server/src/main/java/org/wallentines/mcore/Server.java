@@ -1,6 +1,12 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.util.ModuleUtil;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.FileWrapper;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -71,8 +77,7 @@ public interface Server {
      */
     default void loadModules(Registry<ModuleInfo<Server, ServerModule>> registry) {
 
-        File moduleStorage = getConfigDirectory().resolve("MidnightCore").toFile();
-        ModuleUtil.loadModules(getModuleManager(), registry, this, moduleStorage);
+        ModuleUtil.loadModules(getModuleManager(), registry, this, getModuleConfig());
 
         shutdownEvent().register(this, ev -> getModuleManager().unloadAll());
     }
@@ -83,6 +88,21 @@ public interface Server {
      * @return The directory where the server stores files
      */
     Path getConfigDirectory();
+
+    /**
+     * Gets the configuration file for modules
+     * @return The module config
+     */
+    default FileWrapper<ConfigObject> getModuleConfig() {
+
+        File moduleStorage = getConfigDirectory().resolve("MidnightCore").toFile();
+
+        if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {
+            throw new IllegalStateException("Unable to create module storage directory!");
+        }
+
+        return MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());
+    }
 
     /**
      * An event called every game tick
@@ -118,5 +138,13 @@ public interface Server {
      */
     HandlerList<Server> STOP_EVENT = new SingletonHandlerList<>();
 
+
+    static void registerPlaceholders(PlaceholderManager manager) {
+
+        manager.registerSupplier("server_modules_loaded", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getModuleManager().getCount() + "", "0")));
+        manager.registerSupplier("server_player_count", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getPlayers().size() + "", "0")));
+        manager.registerSupplier("server_modules_registered", PlaceholderSupplier.inline(ctx -> ServerModule.REGISTRY.getSize() + ""));
+
+    }
 
 }
