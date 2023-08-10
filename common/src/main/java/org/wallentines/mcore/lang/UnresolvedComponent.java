@@ -27,6 +27,7 @@ public class UnresolvedComponent {
         this.tryParseJSON = tryParseJSON;
     }
 
+
     /**
      * Resolves this component while flattening all components to a single string
      * @param ctx The context by which to resolve placeholders
@@ -138,7 +139,7 @@ public class UnresolvedComponent {
             if(e.hasRight()) {
 
                 // If the placeholder can be resolved to a string
-                if (e.rightOrThrow().getSupplier().isInline(ctx)) {
+                if (e.rightOrThrow().isInline(ctx)) {
 
                     current.append(e.rightOrThrow().resolve(ctx).left());
 
@@ -217,7 +218,10 @@ public class UnresolvedComponent {
 
         PlaceholderManager manager = new PlaceholderManager();
         for(UnresolvedPlaceholder pl : unresolved) {
-            manager.registerSupplier(pl.getId(), pl.getSupplier());
+            PlaceholderSupplier supp = pl.getSupplier();
+            if(supp != null) {
+                manager.registerSupplier(pl.getId(), supp);
+            }
         }
 
         return resolveContent(ctx, base, manager);

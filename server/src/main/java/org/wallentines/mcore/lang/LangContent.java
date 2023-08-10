@@ -51,9 +51,14 @@ public class LangContent extends Content {
         } else {
             ctx = new PlaceholderContext(args.apply(player));
         }
-        ctx.values.add(player);
 
-        return manager.getMessage(key, player.getLanguage(), ctx);
+        String language = null;
+        if(player != null) {
+            ctx.values.add(player);
+            language = player.getLanguage();
+        }
+
+        return manager.getMessage(key, language, ctx);
     }
 
     @Override

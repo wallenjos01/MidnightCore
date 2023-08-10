@@ -8,7 +8,7 @@ import org.wallentines.mcore.messaging.ClientMessagingModule;
 import org.wallentines.mcore.messaging.FabricClientMessagingModule;
 
 @Environment(EnvType.CLIENT)
-public class MidnightCoreClient implements ClientModInitializer {
+public class InitClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {

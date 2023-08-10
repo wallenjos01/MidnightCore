@@ -1,0 +1,9 @@
+{
+  "command.main": "&bMidnightCore version &f%midnightcore_version%",
+  "command.module.already_loaded": "&fModule %module_id% is already loaded",
+  "command.module.already_unloaded": "&fThat module is already unloaded",
+  "command.module.loaded": "&fLoaded module %module_id%",
+  "command.module.unloaded": "&fUnloaded module %module_id%",
+  "error.module_not_found": "A module with ID %module_id% was not found",
+  "error.module_load_failed": "Could not initialize module %module_id%"
+}
