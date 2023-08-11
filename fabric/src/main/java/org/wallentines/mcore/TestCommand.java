@@ -52,6 +52,13 @@ public class TestCommand {
                         return 1;
                     })
             )
+            .then(Commands.literal("equip")
+                    .executes(ctx -> {
+                        Player pl = ctx.getSource().getPlayerOrException();
+                        TestUtil.equipCmd(pl);
+                        return 1;
+                    })
+            )
         );
 
     }

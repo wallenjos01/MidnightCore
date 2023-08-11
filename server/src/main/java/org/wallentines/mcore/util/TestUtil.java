@@ -1,15 +1,13 @@
 package org.wallentines.mcore.util;
 
-import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.Location;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.item.InventoryGUI;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.item.UnresolvedItemStack;
 import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.*;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.EnumSet;
@@ -65,7 +63,7 @@ public class TestUtil {
             pl.giveItem(is);
 
         } catch (Throwable th) {
-            th.printStackTrace();
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
         }
     }
 
@@ -82,7 +80,7 @@ public class TestUtil {
             });
 
         } catch (Throwable th) {
-            th.printStackTrace();
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
         }
     }
 
@@ -91,7 +89,7 @@ public class TestUtil {
             pl.getServer().getModuleManager().getModule(SavepointModule.class).savePlayer(pl, "test", EnumSet.allOf(SavepointModule.SaveFlag.class));
             pl.sendMessage(org.wallentines.mcore.text.Component.text("Saved!").withColor(TextColor.AQUA));
         } catch (Throwable th) {
-            th.printStackTrace();
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
         }
     }
 
@@ -100,7 +98,7 @@ public class TestUtil {
             pl.getServer().getModuleManager().getModule(SavepointModule.class).loadPlayer(pl, "test");
             pl.sendMessage(org.wallentines.mcore.text.Component.text("Loaded!").withColor(TextColor.AQUA));
         } catch (Throwable th) {
-            th.printStackTrace();
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
         }
     }
 
@@ -120,7 +118,7 @@ public class TestUtil {
 
             gui.open(pl);
         } catch (Throwable th) {
-            th.printStackTrace();
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
         }
     }
 
@@ -136,7 +134,46 @@ public class TestUtil {
             board.addViewer(pl);
 
         } catch (Throwable th) {
-            th.printStackTrace();
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
+        }
+    }
+
+    public static void equipCmd(Player pl) {
+        try {
+
+            ItemStack hat = ItemStack.Builder
+                    .of(new Identifier("minecraft", "turtle_helmet"))
+                    .withEnchantment(new Identifier("minecraft", "respiration"), 3)
+                    .build();
+
+            ItemStack shirt = ItemStack.Builder
+                    .of(new Identifier("minecraft", "iron_chestplate"))
+                    .withEnchantment(new Identifier("minecraft", "protection"), 5)
+                    .build();
+
+            ItemStack legs = ItemStack.Builder
+                    .of(new Identifier("minecraft", "golden_leggings"))
+                    .withEnchantment(new Identifier("minecraft", "unbreaking"), 3)
+                    .build();
+
+            ItemStack feet = ItemStack.Builder
+                    .of(new Identifier("minecraft", "netherite_boots"))
+                    .withEnchantment(new Identifier("minecraft", "feather_falling"), 4)
+                    .build();
+
+            ItemStack cmd = ItemStack.Builder
+                    .of(new Identifier("minecraft", "command_block"))
+                    .withName(Component.text("Hello").withColor(new Color(0x398F3C)))
+                    .build();
+
+            pl.setItem(Entity.EquipmentSlot.HEAD, hat);
+            pl.setItem(Entity.EquipmentSlot.CHEST, shirt);
+            pl.setItem(Entity.EquipmentSlot.LEGS, legs);
+            pl.setItem(Entity.EquipmentSlot.FEET, feet);
+            pl.setItem(Entity.EquipmentSlot.OFFHAND, cmd);
+
+        } catch (Throwable th) {
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
         }
     }
 

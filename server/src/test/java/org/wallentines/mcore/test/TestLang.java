@@ -46,6 +46,15 @@ public class TestLang {
         public boolean isRemoved() { return false; }
         @Override
         public void teleport(Location location) { }
+
+        @Override
+        public void setItem(EquipmentSlot slot, ItemStack item) { }
+
+        @Override
+        public ItemStack getItem(EquipmentSlot slot) {
+            return null;
+        }
+
         @Override
         public String getUsername() {
             return "dummy";

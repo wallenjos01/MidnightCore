@@ -53,16 +53,20 @@ public interface ComponentResolver {
         if(!canBeResolved(comp)) return comp;
 
         Component out;
-        ComponentResolver resolver = REGISTRY.get(comp.content.type);
-        if(resolver == null) {
-            out = Component.empty();
-            MidnightCoreAPI.LOGGER.warn("Component with type " + comp.content.type + " requires resolution but no resolver was found!");
+        if(comp.content.requiresResolution()) {
+            ComponentResolver resolver = REGISTRY.get(comp.content.type);
+            if (resolver == null) {
+                out = Component.empty();
+                MidnightCoreAPI.LOGGER.warn("Component with type " + comp.content.type + " requires resolution but no resolver was found!");
+            } else {
+                out = resolver.resolve(comp.content, player);
+            }
         } else {
-            out = resolver.resolve(comp.content, player);
+            out = comp.baseCopy();
         }
 
         for(Component child : comp.children) {
-            out.addChild(resolveComponent(child, player));
+            out = out.addChild(resolveComponent(child, player));
         }
 
         return out;

@@ -1,6 +1,9 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mdcfg.serializer.InlineSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -78,5 +81,50 @@ public interface Entity {
      * @param location The location to teleport to
      */
     void teleport(Location location);
+
+    /**
+     * Changes the item in the given equipment slot. For entities that cannot hold items, this will do nothing.
+     * @param slot The slot to update
+     * @param item The item to put there
+     */
+    void setItem(EquipmentSlot slot, ItemStack item);
+
+    /**
+     * Gets the item in the given equipment slot.
+     * @param slot The slot to look up
+     * @return The item in that slot
+     */
+    ItemStack getItem(EquipmentSlot slot);
+
+    enum EquipmentSlot {
+
+        MAINHAND("mainhand"),
+        OFFHAND("offhand"),
+        FEET("feet"),
+        LEGS("legs"),
+        CHEST("chest"),
+        HEAD("head");
+
+        private final String id;
+
+        EquipmentSlot(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public static EquipmentSlot byId(String id) {
+            for(EquipmentSlot slot : values()) {
+                if(slot.id.equals(id)) {
+                    return slot;
+                }
+            }
+            return null;
+        }
+
+        public static final Serializer<EquipmentSlot> SERIALIZER = InlineSerializer.of(EquipmentSlot::getId, EquipmentSlot::byId);
+    }
 
 }

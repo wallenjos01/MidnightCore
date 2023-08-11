@@ -6,7 +6,9 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import org.wallentines.mcore.Entity;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.text.ClickEvent;
@@ -88,7 +90,17 @@ public class ConversionUtil {
                 ClickEvent.Action.byId(event.getAction().getName()),
                 event.getValue()
         );
+    }
 
+    public static EquipmentSlot toMCEquipmentSlot(Entity.EquipmentSlot slot) {
+        return switch(slot) {
+            case MAINHAND -> net.minecraft.world.entity.EquipmentSlot.MAINHAND;
+            case OFFHAND -> net.minecraft.world.entity.EquipmentSlot.OFFHAND;
+            case FEET -> net.minecraft.world.entity.EquipmentSlot.FEET;
+            case LEGS -> net.minecraft.world.entity.EquipmentSlot.LEGS;
+            case CHEST -> net.minecraft.world.entity.EquipmentSlot.CHEST;
+            case HEAD -> net.minecraft.world.entity.EquipmentSlot.HEAD;
+        };
     }
 
     /**
