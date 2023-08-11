@@ -2,6 +2,7 @@ package org.wallentines.mcore.lang;
 
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.text.Content;
 
 import java.util.Collection;
@@ -58,11 +59,31 @@ public class LangContent extends Content {
             language = player.getLanguage();
         }
 
-        return manager.getMessage(key, language, ctx);
+        return ComponentResolver.resolveComponent(manager.getMessage(key, language, ctx), player);
     }
 
     @Override
     public boolean requiresResolution() {
         return true;
+    }
+
+    public static void registerPlaceholders(PlaceholderManager manager) {
+
+        manager.registerSupplier("lang", PlaceholderSupplier.of(ctx -> {
+
+            if(ctx.parameter == null) {
+                return null;
+            }
+
+            String param = ctx.parameter.allText();
+            LangManager langManager = ctx.getValue(LangManager.class);
+
+            if(param == null || langManager == null) {
+                return null;
+            }
+
+            return component(langManager, param);
+        }));
+
     }
 }

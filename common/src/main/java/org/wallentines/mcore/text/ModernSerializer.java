@@ -71,7 +71,7 @@ public class ModernSerializer extends ComponentSerializer {
         }
 
         // Children
-        if(value.children.size() > 0) {
+        if(!value.children.isEmpty()) {
 
             List<O> children = new ArrayList<>();
             for(Component cmp : value.children) {

@@ -1,6 +1,10 @@
 package org.wallentines.mcore;
 
 import org.wallentines.mcore.util.ModuleUtil;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.FileWrapper;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
@@ -48,13 +52,26 @@ public interface Proxy {
      */
     default void loadModules(Registry<ModuleInfo<Proxy, ProxyModule>> registry) {
 
-        File moduleStorage = getConfigDirectory().resolve("MidnightCore").toFile();
-
-        ModuleUtil.loadModules(getModuleManager(), registry, this, moduleStorage);
-
+        ModuleUtil.loadModules(getModuleManager(), registry, this, getModuleConfig());
         shutdownEvent().register(this, ev -> getModuleManager().unloadAll());
 
     }
+
+    /**
+     * Gets the configuration file for modules
+     * @return The module config
+     */
+    default FileWrapper<ConfigObject> getModuleConfig() {
+
+        File moduleStorage = getConfigDirectory().resolve("MidnightCore").toFile();
+
+        if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {
+            throw new IllegalStateException("Unable to create module storage directory!");
+        }
+
+        return MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());
+    }
+
 
     /**
      * An event fired when the proxy shuts down

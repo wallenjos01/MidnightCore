@@ -170,30 +170,29 @@ public class LangManager {
 
     private String findClosestLanguage(String language) {
 
-        if(language == null) {
+        if (language == null) {
             return null;
         }
 
-        if(languages.containsKey(language) || !language.contains("_")) {
+        if (languages.containsKey(language) || !language.contains("_")) {
             return language;
         }
 
         return languageMappings.computeIfAbsent(language, l -> {
 
             String lang = l.split("_")[0];
-            for(String key : languages.keySet()) {
-                if(!key.contains("_")) {
+            for (String key : languages.keySet()) {
+                if (!key.contains("_")) {
                     continue;
                 }
 
                 String targetLang = key.split("_")[0];
-                if(lang.equals(targetLang)) {
+                if (lang.equals(targetLang)) {
                     return key;
                 }
             }
             return l;
         });
     }
-
 
 }

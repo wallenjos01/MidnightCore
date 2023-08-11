@@ -27,16 +27,16 @@ public class MainCommand {
                 .then(Commands.literal("module")
                     .then(Commands.literal("load")
                         .then(Commands.argument("module", ResourceLocationArgument.id())
-                            .suggests((ctx, builder) -> (SharedSuggestionProvider.suggestResource(ServerModule.REGISTRY.getIds().stream().map(ConversionUtil::toResourceLocation), builder)))
+                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ServerModule.REGISTRY.getIds().stream().map(ConversionUtil::toResourceLocation), builder))
                             .executes(MainCommand::moduleLoadCommand)
                         )
                     )
-//                    .then(Commands.literal("unload")
-//                        .then(Commands.argument("module", ResourceLocationArgument.id())
-//                            .suggests((ctx, builder) -> (SharedSuggestionProvider.suggestResource(Registries.MODULE_REGISTRY.getIds().stream().map(ConversionUtil::toResourceLocation), builder)))
-//                            .executes(MainCommand::moduleUnloadCommand)
-//                        )
-//                    )
+                    .then(Commands.literal("unload")
+                        .then(Commands.argument("module", ResourceLocationArgument.id())
+                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ctx.getSource().getServer().getModuleManager().getLoadedModuleIds().stream().map(ConversionUtil::toResourceLocation), builder))
+                            .executes(MainCommand::moduleUnloadCommand)
+                        )
+                    )
 //                    .then(Commands.literal("enable")
 //                        .then(Commands.argument("module", ResourceLocationArgument.id())
 //                            .suggests((ctx, builder) -> (SharedSuggestionProvider.suggestResource(Registries.MODULE_REGISTRY.getIds().stream().map(ConversionUtil::toResourceLocation), builder)))
@@ -49,9 +49,9 @@ public class MainCommand {
 //                            .executes(MainCommand::moduleDisableCommand)
 //                        )
 //                    )
-//                    .then(Commands.literal("list")
-//                        .executes(MainCommand::moduleListCommand)
-//                    )
+                    .then(Commands.literal("list")
+                        .executes(MainCommand::moduleListCommand)
+                    )
 //                )
 //                .then(Commands.literal("reload")
 //                        .executes(MainCommand::reloadCommand)
@@ -89,11 +89,54 @@ public class MainCommand {
 
         if(ModuleUtil.loadModule(server.getModuleManager(), info, server, server.getModuleConfig())) {
             sendSuccess(ctx.getSource(), LangContent.component(mcore.getLangManager(), "command.module.loaded", new CustomPlaceholder("module_id", id.toString())));
-            return 1;
+            return 2;
         }
 
         sendFailure(ctx.getSource(), LangContent.component(mcore.getLangManager(), "error.module_load_failed", new CustomPlaceholder("module_id", id.toString())));
         return 0;
+    }
+
+    private static int moduleUnloadCommand(CommandContext<CommandSourceStack> ctx) {
+
+        Server server = ctx.getSource().getServer();
+        Identifier id = ConversionUtil.toIdentifier(ctx.getArgument("module", ResourceLocation.class));
+
+        MidnightCoreServer mcore = MidnightCoreServer.INSTANCE.get();
+
+        if(!server.getModuleManager().isModuleLoaded(id)) {
+            sendSuccess(ctx.getSource(), LangContent.component(mcore.getLangManager(), "command.module.already_unloaded", new CustomPlaceholder("module_id", id.toString())));
+            return 1;
+        }
+
+        server.getModuleManager().unloadModule(id);
+        sendSuccess(ctx.getSource(), LangContent.component(mcore.getLangManager(), "command.module.unloaded", new CustomPlaceholder("module_id", id.toString())));
+        return 2;
+    }
+
+    private static int moduleListCommand(CommandContext<CommandSourceStack> ctx) {
+
+        Server server = ctx.getSource().getServer();
+
+        MidnightCoreServer mcore = MidnightCoreServer.INSTANCE.get();
+        sendSuccess(ctx.getSource(), LangContent.component(mcore.getLangManager(), "command.module.list.header"));
+
+        for(Identifier id : server.getModuleManager().getLoadedModuleIds()) {
+
+            String state = server.getModuleManager().isModuleLoaded(id) ? "loaded" : "unloaded";
+            sendSuccess(
+                    ctx.getSource(),
+                    LangContent.component(
+                            mcore.getLangManager(),
+                            "command.module.list.entry",
+                            new CustomPlaceholder("module_id", id.toString()),
+                            new CustomPlaceholder("state", LangContent.component(
+                                    mcore.getLangManager(),
+                                    "module.state." + state))
+                    )
+            );
+        }
+
+        return 1;
     }
 
     private static void sendSuccess(CommandSourceStack stack, Component component) {

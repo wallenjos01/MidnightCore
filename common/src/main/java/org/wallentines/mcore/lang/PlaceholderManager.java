@@ -4,6 +4,8 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
+import java.util.regex.Pattern;
+
 /**
  * A class for registering and applying placeholders to strings and components
  */
@@ -14,6 +16,8 @@ public class PlaceholderManager {
      * placeholders from other programs.
      */
     public static final PlaceholderManager INSTANCE = new PlaceholderManager();
+
+    public static final Pattern VALID_PLACEHOLDER_ID = Pattern.compile("[A-Za-z0-9-_]+");
 
     private final StringRegistry<PlaceholderSupplier> registeredPlaceholders = new StringRegistry<>();
 
@@ -31,9 +35,14 @@ public class PlaceholderManager {
      * Registers a new placeholder supplier with the given name
      * @param name The name of the new placeholder supplier
      * @param supplier The new placeholder supplier
-     * @throws IllegalArgumentException If a placeholder supplier with the given name is already registered.
+     * @throws IllegalArgumentException If a placeholder supplier with the given name is already registered, or the name
+     * does not match the pattern {@link PlaceholderManager#VALID_PLACEHOLDER_ID here}
      */
     public void registerSupplier(String name, PlaceholderSupplier supplier) {
+
+        if(!VALID_PLACEHOLDER_ID.matcher(name).matches()) {
+            throw new IllegalArgumentException("Placeholder name " + name + " does not match the pattern " + VALID_PLACEHOLDER_ID.pattern());
+        }
 
         if(registeredPlaceholders.hasKey(name)) {
             throw new IllegalArgumentException("Attempt to overwrite existing PlaceholderSupplier " + name + "!");
