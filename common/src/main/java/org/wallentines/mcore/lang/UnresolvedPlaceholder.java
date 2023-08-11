@@ -24,7 +24,7 @@ public class UnresolvedPlaceholder {
      * @param id The ID of the placeholder
      * @param argument The argument for the placeholder, if applicable
      */
-    public UnresolvedPlaceholder(PlaceholderSupplier supplier, String id, UnresolvedComponent argument) {
+    public UnresolvedPlaceholder(@Nullable PlaceholderSupplier supplier, String id, UnresolvedComponent argument) {
         this.supplier = supplier;
         this.id = id;
         this.argument = argument;
@@ -78,7 +78,7 @@ public class UnresolvedPlaceholder {
      */
     public Either<String, Component> resolve(PlaceholderContext ctx) {
 
-        if(argument != null) ctx.parameter = argument.resolve(ctx);
+        if(argument != null) ctx = ctx.copy(argument.resolve(ctx));
         if(supplier == null) {
             Either<String, Component> cpl = ctx.getCustomPlaceholder(id);
             if(cpl == null) {

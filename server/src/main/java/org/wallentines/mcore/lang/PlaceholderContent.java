@@ -55,7 +55,7 @@ public class PlaceholderContent extends Content {
         } else {
             ctx = new PlaceholderContext(args.apply(player));
         }
-        ctx.values.add(player);
+        ctx.addValue(player);
 
         return component.resolve(ctx);
     }

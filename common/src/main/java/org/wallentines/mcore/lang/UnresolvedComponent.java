@@ -80,7 +80,7 @@ public class UnresolvedComponent {
                     // Components to insert should be put in place as a pseudo-placeholder in the format %~:INDEX%
                     String id = "~:" + (index++);
                     toParse.append('%').append(id).append('%');
-                    finalContext.values.add(new CustomPlaceholder(id, e.rightOrThrow()));
+                    finalContext.addValue(new CustomPlaceholder(id, e.rightOrThrow()));
                 }
             }
 

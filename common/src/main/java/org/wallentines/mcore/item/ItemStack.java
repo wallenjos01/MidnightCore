@@ -202,18 +202,6 @@ public interface ItemStack {
             return this;
         }
 
-        /**
-         * Makes an exact copy of this Builder
-         * @return An exact copy of the Builder
-         */
-        public Builder copy() {
-            Builder out = new Builder(id);
-            out.count = count;
-            out.tag = tag;
-            out.dataValue = dataValue;
-            return out;
-        }
-
 
         /**
          * Changes the item's lore to the given value
@@ -231,6 +219,30 @@ public interface ItemStack {
 
             getOrCreateTag().getOrCreateSection("display").set("Lore", ConfigList.of(loreList));
             return this;
+        }
+
+
+        public Builder withEnchantment(Identifier id, int level) {
+
+            ConfigSection tag = getOrCreateTag();
+            if(!tag.hasList("Enchantments")) {
+                tag.set("Enchantments", new ConfigList());
+            }
+
+            tag.getList("Enchantments").add(new ConfigSection().with("id", id.toString()).with("lvl", level));
+            return this;
+        }
+
+        /**
+         * Makes an exact copy of this Builder
+         * @return An exact copy of the Builder
+         */
+        public Builder copy() {
+            Builder out = new Builder(id);
+            out.count = count;
+            out.tag = tag;
+            out.dataValue = dataValue;
+            return out;
         }
 
         /**

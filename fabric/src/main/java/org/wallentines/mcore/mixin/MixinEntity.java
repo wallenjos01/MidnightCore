@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.Entity;
 import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Server;
+import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -52,6 +53,8 @@ public abstract class MixinEntity implements Entity {
     @Shadow @Nullable public abstract net.minecraft.network.chat.Component getCustomName();
 
     @Shadow public abstract String getStringUUID();
+
+    @Shadow public abstract void setItemSlot(net.minecraft.world.entity.EquipmentSlot par1, net.minecraft.world.item.ItemStack par2);
 
     @Intrinsic(displace = true)
     public UUID mcore$getUUID() {
@@ -136,5 +139,22 @@ public abstract class MixinEntity implements Entity {
                 }
             }
         }
+    }
+
+    public ItemStack mcore$getItem(EquipmentSlot slot) {
+
+        net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
+        if(self instanceof LivingEntity le) {
+            return le.getItemBySlot(ConversionUtil.toMCEquipmentSlot(slot));
+        }
+
+        return null;
+    }
+
+    public void mcore$setItem(EquipmentSlot slot, ItemStack item) {
+
+        net.minecraft.world.item.ItemStack is = ConversionUtil.validate(item);
+        setItemSlot(ConversionUtil.toMCEquipmentSlot(slot), is);
+
     }
 }

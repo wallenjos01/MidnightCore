@@ -55,7 +55,7 @@ public class LangContent extends Content {
 
         String language = null;
         if(player != null) {
-            ctx.values.add(player);
+            ctx.addValue(player);
             language = player.getLanguage();
         }
 
@@ -71,11 +71,11 @@ public class LangContent extends Content {
 
         manager.registerSupplier("lang", PlaceholderSupplier.of(ctx -> {
 
-            if(ctx.parameter == null) {
+            if(ctx.getParameter() == null) {
                 return null;
             }
 
-            String param = ctx.parameter.allText();
+            String param = ctx.getParameter().allText();
             LangManager langManager = ctx.getValue(LangManager.class);
 
             if(param == null || langManager == null) {
