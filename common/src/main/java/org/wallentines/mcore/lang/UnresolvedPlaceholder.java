@@ -87,15 +87,11 @@ public class UnresolvedPlaceholder {
             return cpl;
         }
 
-        return supplier.get(ctx);
-    }
-
-    public boolean isInline(PlaceholderContext ctx) {
-        if(supplier != null) {
-            return supplier.isInline(ctx);
+        Either<String,Component> out = supplier.get(ctx);
+        if(out == null) {
+            return Either.left(toRawPlaceholder());
         }
-
-        return resolve(ctx).hasLeft();
+        return out;
     }
 
     @Override

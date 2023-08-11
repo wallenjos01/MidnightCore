@@ -4,6 +4,10 @@
   "command.module.already_unloaded": "&fThat module is already unloaded",
   "command.module.loaded": "&fLoaded module %module_id%",
   "command.module.unloaded": "&fUnloaded module %module_id%",
+  "command.module.list.header": "&fModules:",
+  "command.module.list.entry": " &7- &f%module_id%&7: %state%",
+  "module.state.loaded": "&a&lLOADED",
+  "module.state.unloaded": "&c&lUNLOADED",
   "error.module_not_found": "A module with ID %module_id% was not found",
   "error.module_load_failed": "Could not initialize module %module_id%"
 }

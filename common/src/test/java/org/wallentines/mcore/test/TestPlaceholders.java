@@ -51,7 +51,7 @@ public class TestPlaceholders {
 
         PlaceholderManager manager = new PlaceholderManager();
         manager.registerSupplier("username", PlaceholderSupplier.inline(ctx -> "Name"));
-        manager.registerSupplier("arg", PlaceholderSupplier.withParameter(ctx -> ctx.parameter.withColor(TextColor.RED)));
+        manager.registerSupplier("arg", PlaceholderSupplier.of(ctx -> ctx.parameter.withColor(TextColor.RED)));
 
         Component parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
 

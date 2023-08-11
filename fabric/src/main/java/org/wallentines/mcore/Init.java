@@ -60,8 +60,7 @@ public class Init implements ModInitializer {
         CustomScoreboard.FACTORY.set(FabricScoreboard::new);
 
         // Placeholders
-        Player.registerPlaceholders(PlaceholderManager.INSTANCE);
-        Server.registerPlaceholders(PlaceholderManager.INSTANCE);
+        MidnightCoreServer.registerPlaceholders(PlaceholderManager.INSTANCE);
 
         PlaceholderManager.INSTANCE.registerSupplier("midnightcore_version", PlaceholderSupplier.inline(ctx ->
                 FabricLoader.getInstance().getModContainer("midnightcore")

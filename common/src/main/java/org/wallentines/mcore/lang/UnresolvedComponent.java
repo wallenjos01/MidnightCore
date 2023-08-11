@@ -59,31 +59,42 @@ public class UnresolvedComponent {
             return completed;
         }
 
-        List<Either<String, UnresolvedPlaceholder>> inlined = resolveInline(ctx);
+        List<Either<String, Component>> inlined = resolvePlaceholders(ctx);
 
         // Do not attempt to parse JSON if not requested
         if(!tryParseJSON) {
-            return resolveConfigText(inlined, ctx);
+            return resolveConfigText(inlined);
         }
 
         // Only attempt to parse as JSON if the component could be JSON
         if (couldBeJson(inlined)) {
 
-            // Make a list of all remaining unresolved placeholders
-            List<UnresolvedPlaceholder> unresolved = inlined.stream().filter(Either::hasRight).map(Either::rightOrThrow).toList();
-            String toParse = inlined.stream().map(e -> e.leftOrGet(UnresolvedPlaceholder::toRawPlaceholder)).collect(Collectors.joining());
+            StringBuilder toParse = new StringBuilder();
+
+            PlaceholderContext finalContext = new PlaceholderContext();
+            int index = 0;
+            for(Either<String, Component> e : inlined) {
+                if(e.hasLeft()) {
+                    toParse.append(e.leftOrThrow());
+                } else {
+                    // Components to insert should be put in place as a pseudo-placeholder in the format %~:INDEX%
+                    String id = "~:" + (index++);
+                    toParse.append('%').append(id).append('%');
+                    finalContext.values.add(new CustomPlaceholder(id, e.rightOrThrow()));
+                }
+            }
 
             try {
-                SerializeResult<Component> base = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.loadConfig(toParse));
+                SerializeResult<Component> base = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.loadConfig(toParse.toString()));
                 if (base.isComplete()) {
-                    return resolveJSONText(ctx, base.getOrThrow(), unresolved);
+                    return finalizeJSON(finalContext, base.getOrThrow());
                 }
             } catch (DecodeException ex) {
                 // Component is not JSON, default to config text
             }
         }
 
-        return resolveConfigText(inlined, ctx);
+        return resolveConfigText(inlined);
     }
 
     /**
@@ -127,157 +138,6 @@ public class UnresolvedComponent {
         return "UnresolvedComponent{tryParseJSON=" + tryParseJSON + ",parts=" + parts + "}";
     }
 
-    // Resolve all inline placeholders (placeholders which return a String)
-    private List<Either<String, UnresolvedPlaceholder>> resolveInline(PlaceholderContext ctx) {
-
-        List<Either<String, UnresolvedPlaceholder>> out = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
-
-        for(Either<String, UnresolvedPlaceholder> e : parts) {
-
-            // If the part is a Placeholder
-            if(e.hasRight()) {
-
-                // If the placeholder can be resolved to a string
-                if (e.rightOrThrow().isInline(ctx)) {
-
-                    current.append(e.rightOrThrow().resolve(ctx).left());
-
-                } else {
-
-                    if (!current.isEmpty()) {
-                        out.add(Either.left(current.toString()));
-                        current.setLength(0);
-                    }
-
-                    out.add(Either.right(e.rightOrThrow()));
-                }
-
-            // If the part is a String
-            } else {
-                current.append(e.left());
-            }
-        }
-
-        if(!current.isEmpty()) {
-            out.add(Either.left(current.toString()));
-        }
-
-        return out;
-    }
-
-    private boolean couldBeJson(List<Either<String, UnresolvedPlaceholder>> list) {
-
-        int length = list.size();
-        if(length == 0) {
-            return false;
-        }
-
-        // It cannot be JSON if it starts or ends with a placeholder
-        if(list.get(0).hasRight() || list.get(length - 1).hasRight()) {
-            return false;
-        }
-
-        return list.get(0).leftOrThrow().stripLeading().startsWith("{") &&
-                list.get(length - 1).leftOrThrow().stripTrailing().endsWith("}");
-    }
-
-    private Component resolveConfigText(List<Either<String, UnresolvedPlaceholder>> inlined, PlaceholderContext ctx) {
-
-        List<Either<Component, UnresolvedPlaceholder>> unparsed = inlined.stream().map(e -> {
-            if(e.hasLeft()) {
-                return Either.<Component, UnresolvedPlaceholder>left(
-                        ConfigSerializer.INSTANCE.deserialize(
-                                ConfigContext.INSTANCE,
-                                new ConfigPrimitive(e.leftOrThrow())
-                        ).getOrThrow());
-            } else {
-                return Either.<Component, UnresolvedPlaceholder>right(e.right());
-            }
-        }).toList();
-
-        if(unparsed.isEmpty()) {
-            return Component.empty();
-        }
-
-        int i = 0;
-
-        Component out = unparsed.get(0).leftOrGet(r -> Component.empty());
-        if(out == unparsed.get(0).left()) i++;
-
-        for(; i < unparsed.size() ; i++) {
-            Either<Component, UnresolvedPlaceholder> pl = unparsed.get(i);
-            out = out.addChild(pl.leftOrGet(r -> r.resolve(ctx).rightOrThrow()));
-        }
-
-        return out;
-    }
-
-
-    private Component resolveJSONText(PlaceholderContext ctx, Component base, List<UnresolvedPlaceholder> unresolved) throws DecodeException {
-
-        PlaceholderManager manager = new PlaceholderManager();
-        for(UnresolvedPlaceholder pl : unresolved) {
-            PlaceholderSupplier supp = pl.getSupplier();
-            if(supp != null) {
-                manager.registerSupplier(pl.getId(), supp);
-            }
-        }
-
-        return resolveContent(ctx, base, manager);
-    }
-
-    private Component resolveContent(PlaceholderContext ctx, Component base, PlaceholderManager manager) {
-
-        Component out = base.baseCopy();
-
-        if(base.content instanceof Content.Text) {
-
-            String text = ((Content.Text) base.content).text;
-
-            UnresolvedComponent ent = parse(text, manager).getOrThrow();
-            if(!ent.parts.isEmpty()) {
-
-                int start = 0;
-                if(ent.parts.get(0).hasLeft()) {
-                    start++;
-                    out = out.withContent(new Content.Text(ent.parts.get(0).left()));
-                } else {
-                    out = out.withContent(new Content.Text(""));
-                }
-
-                for(int i = start ; i < ent.parts.size() ; i++) {
-
-                    Either<String, UnresolvedPlaceholder> part = ent.parts.get(i);
-                    if(part.hasLeft()) {
-                        out = out.addChild(Component.text(part.left()));
-                    } else {
-                        out = out.addChild(part.rightOrThrow().resolve(ctx).rightOrGet(Component::text));
-                    }
-                }
-            }
-        }
-
-        for(Component child : base.children) {
-            out = out.addChild(resolveContent(ctx, child, manager));
-        }
-
-        return out;
-    }
-
-    private SerializeResult<UnresolvedComponent> finish() {
-
-        // Check if there are any placeholders to resolve
-        if(parts.stream().noneMatch(Either::hasRight)) {
-
-            // No placeholders found; resolve immediately and remove unresolved parts
-            completed = resolve(new PlaceholderContext());
-            parts.clear();
-        }
-
-        return SerializeResult.success(this);
-    }
-
     /**
      * Parses a String into an unresolved component that will not attempt to parse JSON strings.
      * @param str The String to parse
@@ -288,6 +148,7 @@ public class UnresolvedComponent {
 
         return parse(str, manager, false);
     }
+
 
     /**
      * Parses a String into an unresolved component
@@ -364,5 +225,135 @@ public class UnresolvedComponent {
         }
     }
 
+    // Resolve all inline placeholders (placeholders which return a String)
+    private List<Either<String, Component>> resolvePlaceholders(PlaceholderContext ctx) {
+
+        List<Either<String, Component>> out = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+
+        for(Either<String, UnresolvedPlaceholder> e : parts) {
+
+            // If the part is a Placeholder
+            if(e.hasRight()) {
+
+                Either<String, Component> resolved = e.rightOrThrow().resolve(ctx);
+
+                // If the placeholder was resolved to a string
+                if(resolved.hasLeft()) {
+                    current.append(resolved.leftOrThrow());
+                } else {
+                    if (!current.isEmpty()) {
+                        out.add(Either.left(current.toString()));
+                        current.setLength(0);
+                    }
+
+                    out.add(Either.right(resolved.rightOrThrow()));
+                }
+
+                // If the part is a String
+            } else {
+                current.append(e.left());
+            }
+        }
+
+        if(!current.isEmpty()) {
+            out.add(Either.left(current.toString()));
+        }
+
+        return out;
+    }
+
+
+    private boolean couldBeJson(List<Either<String, Component>> list) {
+
+        int length = list.size();
+        if(length == 0) {
+            return false;
+        }
+
+        // It cannot be JSON if it starts or ends with a placeholder
+        if(list.get(0).hasRight() || list.get(length - 1).hasRight()) {
+            return false;
+        }
+
+        return list.get(0).leftOrThrow().stripLeading().startsWith("{") &&
+                list.get(length - 1).leftOrThrow().stripTrailing().endsWith("}");
+    }
+
+
+    private Component resolveConfigText(List<Either<String, Component>> inlined) {
+
+        List<Component> parsed = inlined.stream().map(e -> {
+            if(e.hasLeft()) {
+                return ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(e.leftOrThrow())).getOrThrow();
+            } else {
+                return e.right();
+            }
+        }).toList();
+
+        if(parsed.isEmpty()) {
+            return Component.empty();
+        }
+
+        Component out = parsed.get(0);
+
+        for(int i = 1; i < parsed.size() ; i++) {
+            out = out.addChild(parsed.get(i));
+        }
+
+        return out;
+    }
+
+
+    private Component finalizeJSON(PlaceholderContext ctx, Component base) throws DecodeException {
+
+        Component out = base.baseCopy();
+
+        if(base.content instanceof Content.Text) {
+
+            String text = ((Content.Text) base.content).text;
+            UnresolvedComponent ent = parse(text, new PlaceholderManager()).getOrThrow();
+            if(!ent.parts.isEmpty()) {
+
+                int start = 0;
+                if(ent.parts.get(0).hasLeft()) {
+                    start++;
+                    out = out.withContent(new Content.Text(ent.parts.get(0).left()));
+                } else {
+                    out = out.withContent(new Content.Text(""));
+                }
+
+                for(int i = start ; i < ent.parts.size() ; i++) {
+
+                    Either<String, UnresolvedPlaceholder> part = ent.parts.get(i);
+                    if(part.hasLeft()) {
+                        out = out.addChild(Component.text(part.left()));
+                    } else {
+                        out = out.addChild(part.rightOrThrow().resolve(ctx).rightOrGet(Component::text));
+                    }
+                }
+            }
+        }
+
+        for(Component child : base.children) {
+            out = out.addChild(finalizeJSON(ctx, child));
+        }
+
+        return out;
+    }
+
+
+    private SerializeResult<UnresolvedComponent> finish() {
+
+        // Check if there are any placeholders to resolve
+        if(parts.stream().noneMatch(Either::hasRight)) {
+
+            // No placeholders found; resolve immediately and remove unresolved parts
+            completed = resolve(new PlaceholderContext());
+            parts.clear();
+        }
+
+        return SerializeResult.success(this);
+    }
 
 }
