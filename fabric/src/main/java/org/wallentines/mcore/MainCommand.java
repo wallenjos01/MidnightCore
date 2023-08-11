@@ -83,22 +83,22 @@ public class MainCommand {
 
         if(server.getModuleManager().isModuleLoaded(id)) {
 
-            sendSuccess(ctx.getSource(), "command.module.already_loaded", new CustomPlaceholder("module_id", id.toString()));
+            sendSuccess(ctx.getSource(), "command.module.already_loaded", CustomPlaceholder.inline("module_id", id));
             return 1;
         }
 
         ModuleInfo<Server, ServerModule> info = ServerModule.REGISTRY.get(id);
         if(info == null) {
-            sendFailure(ctx.getSource(), "error.module_not_found", new CustomPlaceholder("module_id", id.toString()));
+            sendFailure(ctx.getSource(), "error.module_not_found", CustomPlaceholder.inline("module_id", id));
             return 0;
         }
 
         if(ModuleUtil.loadModule(server.getModuleManager(), info, server, server.getModuleConfig())) {
-            sendSuccess(ctx.getSource(), "command.module.loaded", new CustomPlaceholder("module_id", id.toString()));
+            sendSuccess(ctx.getSource(), "command.module.loaded", CustomPlaceholder.inline("module_id", id));
             return 2;
         }
 
-        sendFailure(ctx.getSource(), "error.module_load_failed", new CustomPlaceholder("module_id", id.toString()));
+        sendFailure(ctx.getSource(), "error.module_load_failed", CustomPlaceholder.inline("module_id", id));
         return 0;
     }
 
@@ -108,12 +108,12 @@ public class MainCommand {
         Identifier id = ConversionUtil.toIdentifier(ctx.getArgument("module", ResourceLocation.class));
 
         if(!server.getModuleManager().isModuleLoaded(id)) {
-            sendSuccess(ctx.getSource(), "command.module.already_unloaded", new CustomPlaceholder("module_id", id.toString()));
+            sendSuccess(ctx.getSource(), "command.module.already_unloaded", CustomPlaceholder.inline("module_id", id));
             return 1;
         }
 
         server.getModuleManager().unloadModule(id);
-        sendSuccess(ctx.getSource(), "command.module.unloaded", new CustomPlaceholder("module_id", id.toString()));
+        sendSuccess(ctx.getSource(), "command.module.unloaded", CustomPlaceholder.inline("module_id", id));
         return 2;
     }
 
@@ -126,7 +126,7 @@ public class MainCommand {
             server.getModuleManager().reloadAll(server.getModuleConfig().getRoot().asSection(), server, ServerModule.REGISTRY);
             int loaded = server.getModuleManager().getCount();
 
-            sendSuccess(ctx.getSource(), "command.module.reload.all", new CustomPlaceholder("count", loaded + ""));
+            sendSuccess(ctx.getSource(), "command.module.reload.all", CustomPlaceholder.inline("count", loaded));
             return loaded;
 
         } else {
@@ -134,16 +134,16 @@ public class MainCommand {
             Identifier id = ConversionUtil.toIdentifier(ctx.getArgument("module", ResourceLocation.class));
             ModuleInfo<Server, ServerModule> info = ServerModule.REGISTRY.get(id);
             if(info == null) {
-                sendFailure(ctx.getSource(), "error.module_not_found", new CustomPlaceholder("module_id", id.toString()));
+                sendFailure(ctx.getSource(), "error.module_not_found", CustomPlaceholder.inline("module_id", id.toString()));
                 return 0;
             }
 
             if(ModuleUtil.reloadModule(server.getModuleManager(), info, server, server.getModuleConfig())) {
-                sendSuccess(ctx.getSource(), "command.module.reload", new CustomPlaceholder("module_id", id.toString()));
+                sendSuccess(ctx.getSource(), "command.module.reload", CustomPlaceholder.inline("module_id", id.toString()));
                 return 1;
             }
 
-            sendFailure(ctx.getSource(), "error.module_load_failed", new CustomPlaceholder("module_id", id.toString()));
+            sendFailure(ctx.getSource(), "error.module_load_failed", CustomPlaceholder.inline("module_id", id.toString()));
             return 0;
         }
     }
@@ -162,8 +162,8 @@ public class MainCommand {
                 ctx.getSource(),
                     "command.module.list.entry",
                     server,
-                    new CustomPlaceholder("module_id", id.toString()),
-                    new CustomPlaceholder("state", LangContent.component(
+                    CustomPlaceholder.inline("module_id", id),
+                    CustomPlaceholder.of("state", () -> LangContent.component(
                         mcore.getLangManager(),
                         "module.state." + state))
             );
@@ -179,14 +179,14 @@ public class MainCommand {
 
         ModuleInfo<Server, ServerModule> info = ServerModule.REGISTRY.get(id);
         if(info == null) {
-            sendFailure(ctx.getSource(), "error.module_not_found", new CustomPlaceholder("module_id", id.toString()));
+            sendFailure(ctx.getSource(), "error.module_not_found", CustomPlaceholder.inline("module_id", id));
             return 0;
         }
 
         FileWrapper<ConfigObject> obj = server.getModuleConfig();
         obj.getRoot().asSection().getOrCreateSection(id.toString()).set("enabled", true);
 
-        sendSuccess(ctx.getSource(), "command.module.enabled", new CustomPlaceholder("module_id", id.toString()));
+        sendSuccess(ctx.getSource(), "command.module.enabled", CustomPlaceholder.inline("module_id", id));
 
         return 1;
     }
@@ -198,14 +198,14 @@ public class MainCommand {
 
         ModuleInfo<Server, ServerModule> info = ServerModule.REGISTRY.get(id);
         if(info == null) {
-            sendFailure(ctx.getSource(), "error.module_not_found", new CustomPlaceholder("module_id", id.toString()));
+            sendFailure(ctx.getSource(), "error.module_not_found", CustomPlaceholder.inline("module_id", id));
             return 0;
         }
 
         FileWrapper<ConfigObject> obj = server.getModuleConfig();
         obj.getRoot().asSection().getOrCreateSection(id.toString()).set("enabled", false);
 
-        sendSuccess(ctx.getSource(), "command.module.disabled", new CustomPlaceholder("module_id", id.toString()));
+        sendSuccess(ctx.getSource(), "command.module.disabled", CustomPlaceholder.inline("module_id", id));
 
         return 1;
     }
@@ -218,7 +218,7 @@ public class MainCommand {
         mcore.getLangManager().reload();
 
         long elapsed = System.currentTimeMillis() - start;
-        sendSuccess(ctx.getSource(), "command.reload", new CustomPlaceholder("time", elapsed + ""));
+        sendSuccess(ctx.getSource(), "command.reload", CustomPlaceholder.inline("time", elapsed));
 
         return 1;
     }

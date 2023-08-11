@@ -3,15 +3,17 @@ package org.wallentines.mcore.extension;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import org.wallentines.mcore.*;
+import org.wallentines.mcore.lang.CustomPlaceholder;
+import org.wallentines.mcore.lang.LangContent;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
+import org.wallentines.mcore.text.Component;
+import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -22,7 +24,7 @@ public abstract class ServerExtensionModule implements ServerModule {
 
     private final ModuleManager<ServerExtensionModule, ServerExtension> manager = new ModuleManager<>();
     private final HashMap<UUID, Map<Identifier, Version>> enabledExtensions = new HashMap<>();
-
+    private List<Identifier> requiredExtensions = List.of();
     private ServerMessagingModule smm;
     private ClientboundExtensionPacket cachedPacket;
     private Server server;
@@ -40,18 +42,27 @@ public abstract class ServerExtensionModule implements ServerModule {
         }
 
         this.smm = mod;
+        requiredExtensions = section.getListFiltered("required_extensions", Identifier.serializer(MidnightCoreAPI.MOD_ID));
 
         manager.loadAll(section.getSection("extensions"), this, ServerExtension.REGISTRY);
         this.cachedPacket = new ClientboundExtensionPacket(manager.getLoadedModuleIds());
 
-        mod.registerPacketHandler(ServerboundExtensionPacket.ID, (player, buffer) -> handleResponse(player.getUUID(), player.getUsername(), buffer));
+        mod.registerPacketHandler(ServerboundExtensionPacket.ID, (player, buffer) -> {
+            if(!handleResponse(player.getUUID(), player.getUsername(), buffer)) {
+                player.kick(getKickMessage());
+            }
+        });
 
         // If the server does not support login query or the delay option is enabled, packets will be sent during the
         // play state, right when a player joins the game
         if (!mod.supportsLoginQuery() || section.getBoolean("delay_send")) {
             registerJoinListener(pl -> smm.sendPacket(pl, cachedPacket));
         } else {
-            mod.registerLoginPacketHandler(ServerboundExtensionPacket.ID, (negotiator, buffer) -> handleResponse(negotiator.getPlayerUUID(), negotiator.getPlayerName(), buffer));
+            mod.registerLoginPacketHandler(ServerboundExtensionPacket.ID, (negotiator, buffer) -> {
+                if(!handleResponse(negotiator.getPlayerUUID(), negotiator.getPlayerName(), buffer)) {
+                    negotiator.kick(getKickMessage());
+                }
+            });
             mod.onLogin.register(this, ln -> ln.sendPacket(cachedPacket));
         }
 
@@ -80,11 +91,23 @@ public abstract class ServerExtensionModule implements ServerModule {
     }
 
 
-    private void handleResponse(UUID playerId, String username, ByteBuf response) {
+    private Component getKickMessage() {
+        MidnightCoreServer mcore = MidnightCoreServer.INSTANCE.get();
+        return LangContent.component(mcore.getLangManager(), "kick.missing_extensions", CustomPlaceholder.of("entries", () -> {
+            List<Component> entries = requiredExtensions.stream().map(id -> LangContent.component(mcore.getLangManager(), "kick.missing_extensions.entry", CustomPlaceholder.inline("extension_id", id.toString()))).toList();
+            if(entries.isEmpty()) return Component.empty();
+            Component out = entries.get(0);
+            out = out.addChildren(entries.subList(1, entries.size()));
+
+            return out;
+        }));
+    }
+
+    private boolean handleResponse(UUID playerId, String username, ByteBuf response) {
 
         if(response == null) {
             MidnightCoreAPI.LOGGER.info("Player " + username + " ignored extension packet");
-            return;
+            return true;
         }
 
         try {
@@ -92,13 +115,19 @@ public abstract class ServerExtensionModule implements ServerModule {
             ServerboundExtensionPacket packet = ServerboundExtensionPacket.read(response);
 
             Map<Identifier, Version> versions = packet.getExtensions().entrySet().stream().filter(e -> manager.isModuleLoaded(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            if(!versions.keySet().containsAll(requiredExtensions)) {
+                return false;
+            }
+
             enabledExtensions.put(playerId, versions);
 
             MidnightCoreAPI.LOGGER.info("Player " + username + " logged in with " + versions.size() + " enabled extensions");
+            return true;
 
         } catch (DecoderException ex) {
 
             MidnightCoreAPI.LOGGER.warn("Player " + username + " sent invalid extension packet! " + ex.getMessage());
+            return false;
         }
     }
 
@@ -121,7 +150,8 @@ public abstract class ServerExtensionModule implements ServerModule {
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "extension");
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
             .with("delay_send", false)
-            .with("extensions", new ConfigSection());
+            .with("extensions", new ConfigSection())
+            .with("required_extensions", new ConfigList());
 
 
 }
