@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.networking.v1.*;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
-import org.wallentines.mcore.mixin.AccessorLoginPacketHandler;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -17,7 +16,7 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
     public boolean initialize(ConfigSection section, Server data) {
 
         ServerLoginConnectionEvents.QUERY_START.register((handler, server, sender, synchronizer) ->
-                onLogin.invoke(new FabricServerLoginNegotiator(((AccessorLoginPacketHandler) handler).getGameProfile(), sender)));
+                onLogin.invoke(new FabricServerLoginNegotiator(handler, sender)));
 
         return true;
     }
@@ -42,7 +41,7 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
     @Override
     protected void doRegisterLogin(Identifier packetId) {
         ServerLoginNetworking.registerGlobalReceiver(ConversionUtil.toResourceLocation(packetId), (server, listener, understood, buf, synchronizer, responseSender) ->
-                handleLoginPacket(new FabricServerLoginNegotiator(((AccessorLoginPacketHandler) listener).getGameProfile(), responseSender), packetId, buf));
+                handleLoginPacket(new FabricServerLoginNegotiator(listener, responseSender), packetId, buf));
     }
 
     @Override

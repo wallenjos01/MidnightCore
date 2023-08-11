@@ -166,11 +166,18 @@ public class TestUtil {
                     .withName(Component.text("Hello").withColor(new Color(0x398F3C)))
                     .build();
 
+            ItemStack sword = ItemStack.Builder
+                    .of(new Identifier("minecraft", "netherite_sword"))
+                    .withEnchantment(new Identifier("minecraft", "sharpness"), 100)
+                    .withName(Component.text("Test Sword").withColor(new Color(0xAF4EBE)))
+                    .build();
+
             pl.setItem(Entity.EquipmentSlot.HEAD, hat);
             pl.setItem(Entity.EquipmentSlot.CHEST, shirt);
             pl.setItem(Entity.EquipmentSlot.LEGS, legs);
             pl.setItem(Entity.EquipmentSlot.FEET, feet);
             pl.setItem(Entity.EquipmentSlot.OFFHAND, cmd);
+            pl.setItem(Entity.EquipmentSlot.MAINHAND, sword);
 
         } catch (Throwable th) {
             MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);

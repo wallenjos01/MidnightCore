@@ -66,18 +66,6 @@ public interface Player extends Entity, Skinnable {
     void resetTitles();
 
     /**
-     * Retrieves the item in the player's main hand
-     * @return The item in the player's main hand
-     */
-    ItemStack getHandItem();
-
-    /**
-     * Retrieves the item in the player's offhand
-     * @return The item in the player's offhand
-     */
-    ItemStack getOffhandItem();
-
-    /**
      * Gives an item to the player
      * @param item The item to give
      */
@@ -139,6 +127,12 @@ public interface Player extends Entity, Skinnable {
 
         getServer().getModuleManager().getModule(SkinModule.class).setSkin(this, skin);
     }
+
+    /**
+     * Kicks the player from the server with the given message
+     * @param message The kick message to send
+     */
+    void kick(Component message);
 
     static void registerPlaceholders(PlaceholderManager manager) {
 

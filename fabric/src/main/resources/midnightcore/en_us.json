@@ -14,5 +14,7 @@
   "module.state.loaded": "&a&lLOADED",
   "module.state.unloaded": "&c&lUNLOADED",
   "error.module_not_found": "A module with ID %module_id% was not found",
-  "error.module_load_failed": "Could not initialize module %module_id%"
+  "error.module_load_failed": "Could not initialize module %module_id%",
+  "kick.missing_extensions": "&cThis server requires you use the following extensions:\n%entries%\n&cVisit &fhttps://github.com/M1dnightNinja/MidnightCore &cfor more information",
+  "kick.missing_extensions.entry": "&f%extension_id%\n"
 }

@@ -76,14 +76,6 @@ public class TestLang {
         @Override
         public void resetTitles() { }
         @Override
-        public ItemStack getHandItem() {
-            return null;
-        }
-        @Override
-        public ItemStack getOffhandItem() {
-            return null;
-        }
-        @Override
         public void giveItem(ItemStack item) { }
         @Override
         public String getLanguage() {
@@ -101,6 +93,8 @@ public class TestLang {
         public boolean hasPermission(String permission, int defaultOpLevel) { return false; }
         @Override
         public Skin getSkin() { return null; }
+        @Override
+        public void kick(Component message) { }
     }
 
     @Test

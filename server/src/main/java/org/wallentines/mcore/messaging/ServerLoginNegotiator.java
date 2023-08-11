@@ -2,6 +2,7 @@ package org.wallentines.mcore.messaging;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.UUID;
@@ -39,6 +40,12 @@ public abstract class ServerLoginNegotiator {
         packet.write(out);
         sendPacket(packet.getId(), out);
     }
+
+    /**
+     * Kicks the player from the server with the given message
+     * @param message The kick message
+     */
+    public abstract void kick(Component message);
 
     /**
      * Sends a packet with the given ID and data to the player, and registers a handler for response

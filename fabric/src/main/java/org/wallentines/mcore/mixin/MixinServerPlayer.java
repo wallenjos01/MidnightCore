@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
@@ -110,14 +109,6 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
         connection.send(new ClientboundClearTitlesPacket(true));
     }
 
-    public ItemStack mcore$getHandItem() {
-        return ((net.minecraft.world.entity.player.Player) (Object) this).getItemInHand(InteractionHand.MAIN_HAND);
-    }
-
-    public ItemStack mcore$getOffhandItem() {
-        return ((net.minecraft.world.entity.player.Player) (Object) this).getItemInHand(InteractionHand.OFF_HAND);
-    }
-
     public void mcore$giveItem(ItemStack item) {
 
         ((net.minecraft.world.entity.player.Player) (Object) this).getInventory().add(ConversionUtil.validate(item));
@@ -183,6 +174,10 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
         if(scoreboard != null) {
             ((AccessorPlayerList) spl.server.getPlayerList()).callUpdateScoreboard(scoreboard, spl);
         }
+    }
 
+    public void mcore$kick(Component message) {
+
+        connection.disconnect(WrappedComponent.resolved(message, (ServerPlayer) (Object) this));
     }
 }
