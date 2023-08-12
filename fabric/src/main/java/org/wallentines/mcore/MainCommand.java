@@ -185,6 +185,7 @@ public class MainCommand {
 
         FileWrapper<ConfigObject> obj = server.getModuleConfig();
         obj.getRoot().asSection().getOrCreateSection(id.toString()).set("enabled", true);
+        obj.save();
 
         sendSuccess(ctx.getSource(), "command.module.enabled", CustomPlaceholder.inline("module_id", id));
 
@@ -204,6 +205,7 @@ public class MainCommand {
 
         FileWrapper<ConfigObject> obj = server.getModuleConfig();
         obj.getRoot().asSection().getOrCreateSection(id.toString()).set("enabled", false);
+        obj.save();
 
         sendSuccess(ctx.getSource(), "command.module.disabled", CustomPlaceholder.inline("module_id", id));
 

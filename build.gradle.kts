@@ -34,7 +34,7 @@ subprojects.forEach { sp ->
     sp.dependencies {
 
         api("org.wallentines:midnightcfg:1.0.1")
-        api("org.wallentines:midnightlib:1.3.0")
+        api("org.wallentines:midnightlib:1.3.1-SNAPSHOT")
 
         implementation("org.slf4j:slf4j-api:2.0.7")
         compileOnly("org.jetbrains:annotations:24.0.1")

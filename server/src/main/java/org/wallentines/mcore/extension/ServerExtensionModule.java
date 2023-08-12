@@ -24,7 +24,7 @@ public abstract class ServerExtensionModule implements ServerModule {
 
     private final ModuleManager<ServerExtensionModule, ServerExtension> manager = new ModuleManager<>();
     private final HashMap<UUID, Map<Identifier, Version>> enabledExtensions = new HashMap<>();
-    private List<Identifier> requiredExtensions = List.of();
+    private Set<Identifier> requiredExtensions = Set.of();
     private ServerMessagingModule smm;
     private ClientboundExtensionPacket cachedPacket;
     private Server server;
@@ -42,13 +42,14 @@ public abstract class ServerExtensionModule implements ServerModule {
         }
 
         this.smm = mod;
-        requiredExtensions = section.getListFiltered("required_extensions", Identifier.serializer(MidnightCoreAPI.MOD_ID));
+        requiredExtensions = Set.copyOf(section.getListFiltered("required_extensions", Identifier.serializer(MidnightCoreAPI.MOD_ID)));
 
         manager.loadAll(section.getSection("extensions"), this, ServerExtension.REGISTRY);
         this.cachedPacket = new ClientboundExtensionPacket(manager.getLoadedModuleIds());
 
         mod.registerPacketHandler(ServerboundExtensionPacket.ID, (player, buffer) -> {
-            if(!handleResponse(player.getUUID(), player.getUsername(), buffer)) {
+            Component kick = handleResponse(player.getUUID(), player.getUsername(), buffer);
+            if(kick != null) {
                 player.kick(getKickMessage());
             }
         });
@@ -59,11 +60,17 @@ public abstract class ServerExtensionModule implements ServerModule {
             registerJoinListener(pl -> smm.sendPacket(pl, cachedPacket));
         } else {
             mod.registerLoginPacketHandler(ServerboundExtensionPacket.ID, (negotiator, buffer) -> {
-                if(!handleResponse(negotiator.getPlayerUUID(), negotiator.getPlayerName(), buffer)) {
+                Component kick = handleResponse(negotiator.getPlayerUUID(), negotiator.getPlayerName(), buffer);
+                if(kick != null) {
                     negotiator.kick(getKickMessage());
                 }
             });
             mod.onLogin.register(this, ln -> ln.sendPacket(cachedPacket));
+        }
+
+        // Since modules can be loaded after startup, all online players (if any) should be queried as soon as the module loads
+        for(Player pl : server.getPlayers()) {
+            smm.sendPacket(pl, cachedPacket);
         }
 
         return true;
@@ -103,11 +110,11 @@ public abstract class ServerExtensionModule implements ServerModule {
         }));
     }
 
-    private boolean handleResponse(UUID playerId, String username, ByteBuf response) {
+    private Component handleResponse(UUID playerId, String username, ByteBuf response) {
 
         if(response == null) {
             MidnightCoreAPI.LOGGER.info("Player " + username + " ignored extension packet");
-            return true;
+            return null;
         }
 
         try {
@@ -116,18 +123,20 @@ public abstract class ServerExtensionModule implements ServerModule {
 
             Map<Identifier, Version> versions = packet.getExtensions().entrySet().stream().filter(e -> manager.isModuleLoaded(e.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             if(!versions.keySet().containsAll(requiredExtensions)) {
-                return false;
+                return getKickMessage();
             }
 
             enabledExtensions.put(playerId, versions);
 
             MidnightCoreAPI.LOGGER.info("Player " + username + " logged in with " + versions.size() + " enabled extensions");
-            return true;
+            return null;
 
         } catch (DecoderException ex) {
 
             MidnightCoreAPI.LOGGER.warn("Player " + username + " sent invalid extension packet! " + ex.getMessage());
-            return false;
+
+            MidnightCoreServer mcore = MidnightCoreServer.INSTANCE.get();
+            return LangContent.component(mcore.getLangManager(), "kick.invalid_extensions");
         }
     }
 

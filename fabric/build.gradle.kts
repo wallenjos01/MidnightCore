@@ -60,7 +60,7 @@ dependencies {
     api(project(":client"))
 
     include("org.wallentines:midnightcfg:1.0.1")
-    include("org.wallentines:midnightlib:1.2.1")
+    include("org.wallentines:midnightlib:1.3.1-SNAPSHOT")
 
     shadow(project(":common").setTransitive(false))
     shadow(project(":server").setTransitive(false))
