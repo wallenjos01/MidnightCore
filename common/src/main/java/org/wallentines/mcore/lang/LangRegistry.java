@@ -8,9 +8,8 @@ import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.Functions;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.midnightlib.registry.StringRegistry;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -18,7 +17,7 @@ import java.util.function.Function;
  */
 public class LangRegistry {
 
-    private final HashMap<String, UnresolvedComponent> entries = new HashMap<>();
+    private final StringRegistry<UnresolvedComponent> entries = new StringRegistry<>();
 
     /**
      * Gets the entry with the given name, or null
@@ -70,7 +69,7 @@ public class LangRegistry {
     }
 
     public void register(String entry, UnresolvedComponent component) {
-        entries.put(entry, component);
+        entries.register(entry, component);
     }
 
     /**
@@ -80,8 +79,8 @@ public class LangRegistry {
     public ConfigSection save() {
 
         ConfigSection out = new ConfigSection();
-        for(Map.Entry<String, UnresolvedComponent> ent : entries.entrySet()) {
-            out.set(ent.getKey(), ent.getValue().toRaw());
+        for(UnresolvedComponent cmp : entries) {
+            out.set(entries.getId(cmp), cmp.toRaw());
         }
 
         return out;
@@ -121,7 +120,7 @@ public class LangRegistry {
             if(obj.isString()) {
                 SerializeResult<UnresolvedComponent> result = UnresolvedComponent.parse(obj.asString(), manager, tryParseJSON);
                 if(result.isComplete()) {
-                    registry.entries.put(finalKey, result.getOrThrow());
+                    registry.entries.register(finalKey, result.getOrThrow());
                 } else {
                     MidnightCoreAPI.LOGGER.warn("An error occurred while parsing a language entry! (" + finalKey + ") " + result.getError());
                 }
