@@ -18,6 +18,7 @@ import org.wallentines.midnightlib.types.Singleton;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A data type representing a Minecraft item-stack
@@ -215,7 +216,7 @@ public interface ItemStack {
                 .map(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
                         Component::toJSONString :
                         Component::toLegacyText
-                    ).toList();
+                    ).collect(Collectors.toList());
 
             getOrCreateTag().getOrCreateSection("display").set("Lore", ConfigList.of(loreList));
             return this;
@@ -264,7 +265,7 @@ public interface ItemStack {
 
             Builder out;
             if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-                out = new Builder(new Identifier(base.getNamespace(), "%s_%s".formatted(TextColor.toDyeColor(color), base.getPath())));
+                out = new Builder(new Identifier(base.getNamespace(), TextColor.toDyeColor(color) + "_" + base.getPath()));
             } else {
                 out = new Builder(base).withDataValue(TextColor.getLegacyDataValue(color));
             }

@@ -27,6 +27,8 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
+import java.io.IOException;
+
 public class Init implements ModInitializer {
 
     @Override
@@ -71,8 +73,12 @@ public class Init implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
             Server.RUNNING_SERVER.set(server);
 
-            ConfigSection defaults = JSONCodec.loadConfig(Init.class.getResourceAsStream("/midnightcore/en_us.json")).asSection();
-
+            ConfigSection defaults = new ConfigSection();
+            try {
+                defaults = JSONCodec.loadConfig(Init.class.getResourceAsStream("/midnightcore/en_us.json")).asSection();
+            } catch (IOException ex) {
+                MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
+            }
             ((ResettableSingleton<MidnightCoreServer>) MidnightCoreServer.INSTANCE).reset();
             MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(server, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE)));
         });

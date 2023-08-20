@@ -1,4 +1,5 @@
 plugins {
+    id("midnightcore-build")
     alias(libs.plugins.loom)
     alias(libs.plugins.shadow)
 }
@@ -50,6 +51,7 @@ repositories {
     }
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
+    maven("https://maven.wallentines.org/")
     mavenLocal()
 }
 
@@ -59,8 +61,10 @@ dependencies {
     api(project(":server"))
     api(project(":client"))
 
-    include("org.wallentines:midnightcfg:1.0.1")
-    include("org.wallentines:midnightlib:1.3.1-SNAPSHOT")
+    include(libs.midnight.cfg)
+    include(libs.midnight.cfg.json)
+    include(libs.midnight.cfg.gson)
+    include(libs.midnight.lib)
 
     shadow(project(":common").setTransitive(false))
     shadow(project(":server").setTransitive(false))

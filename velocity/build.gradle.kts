@@ -1,3 +1,7 @@
+plugins {
+    id("midnightcore-build")
+}
+
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
 }
