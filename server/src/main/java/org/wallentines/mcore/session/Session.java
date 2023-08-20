@@ -8,12 +8,9 @@ import org.wallentines.mcore.savepoint.Savepoint;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.FileExecutor;
-import org.wallentines.mdcfg.codec.JSONCodec;
-import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -134,16 +131,14 @@ public abstract class Session {
         }
         if(flags != null && !flags.isEmpty()) {
             SavepointModule spm = server.getModuleManager().getModule(SavepointModule.class);
-            Savepoint sp = spm.savePlayer(player, uuid.toString(), flags);
+            if(spm == null) {
+                MidnightCoreAPI.LOGGER.error("Unable to save player info! Savepoint module is missing!");
+            } else {
 
-            if(isRegistered) {
-                new FileExecutor(SessionModule.getRecoveryFile(player), (file) ->
-                        JSONCodec.fileCodec().saveToFile(
-                                ConfigContext.INSTANCE,
-                                spm.getSerializer().serialize(ConfigContext.INSTANCE, sp).getOrThrow(),
-                                file,
-                                StandardCharsets.UTF_8)
-                ).start();
+                Savepoint sp = spm.savePlayer(player, uuid.toString(), flags);
+                if (isRegistered) {
+                    module.saveRecovery(player, spm, sp);
+                }
             }
         }
 

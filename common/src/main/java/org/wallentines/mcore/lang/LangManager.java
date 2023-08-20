@@ -10,6 +10,7 @@ import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -151,7 +152,7 @@ public class LangManager {
             ConfigObject obj;
             try {
                 obj = codec.loadFromFile(ConfigContext.INSTANCE, f, StandardCharsets.UTF_8);
-            } catch (DecodeException ex) {
+            } catch (DecodeException | IOException ex) {
                 MidnightCoreAPI.LOGGER.warn("An error occurred while decoding lang file " + f.getAbsolutePath() + "! " + ex.getMessage());
                 continue;
             }

@@ -8,13 +8,15 @@ import org.wallentines.mcore.savepoint.Savepoint;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.util.FileExecutor;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.codec.BinaryCodec;
+import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
@@ -111,20 +113,45 @@ public abstract class SessionModule implements ServerModule {
         new FileExecutor(lookup, (file) -> {
 
             SavepointModule module = server.get().getModuleManager().getModule(SavepointModule.class);
-            SerializeResult<Savepoint> savepoint = module.getSerializer().deserialize(
-                    ConfigContext.INSTANCE,
-                    JSONCodec.fileCodec().loadFromFile(ConfigContext.INSTANCE, file, StandardCharsets.UTF_8));
+            if(module == null) {
+                throw new IllegalStateException("Savepoint module must be loaded!");
+            }
 
-            if(savepoint.isComplete()) {
-                savepoint.getOrThrow().load(player);
-                if(!file.delete()) {
-                    MidnightCoreAPI.LOGGER.warn("Failed to delete session recovery file " + file.getAbsolutePath() + "! Please delete it manually, or else the session module may attempt to restore it again!");
+            try {
+                SerializeResult<Savepoint> savepoint = module.getSerializer().deserialize(
+                        ConfigContext.INSTANCE,
+                        BinaryCodec.fileCodec().loadFromFile(ConfigContext.INSTANCE, file, StandardCharsets.UTF_8));
+
+                if (savepoint.isComplete()) {
+                    savepoint.getOrThrow().load(player);
+                    if (!file.delete()) {
+                        MidnightCoreAPI.LOGGER.warn("Failed to delete session recovery file " + file.getAbsolutePath() + "! Please delete it manually, or else the session module may attempt to restore it again!");
+                    }
+                } else {
+                    MidnightCoreAPI.LOGGER.warn("Failed to recover session data for " + player.getUsername() + "!");
                 }
-            } else {
-                MidnightCoreAPI.LOGGER.warn("Failed to recover session data for " + player.getUsername() + "!");
+            } catch (IOException | DecodeException ex) {
+                MidnightCoreAPI.LOGGER.warn("Failed to recover session data for " + player.getUsername() + "! " + ex.getMessage());
             }
         }).start();
 
+    }
+
+    protected void saveRecovery(Player player, SavepointModule spm, Savepoint sp) {
+        new FileExecutor(SessionModule.getRecoveryFile(player), (file) -> {
+            try {
+                BinaryCodec.fileCodec().saveToFile(
+                        ConfigContext.INSTANCE,
+                        spm.getSerializer().serialize(ConfigContext.INSTANCE, sp).getOrThrow(),
+                        file,
+                        StandardCharsets.UTF_8);
+
+            } catch (IOException | DecodeException ex) {
+
+                MidnightCoreAPI.LOGGER.error("Unable to save player info! " + ex.getMessage());
+            }
+        }
+        ).start();
     }
 
     /**
