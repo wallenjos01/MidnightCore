@@ -1,0 +1,14 @@
+[
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "List.copyOf(",
+    "replace": "new java.util.ArrayList<>("
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": ".toList()",
+    "replace": ".collect(java.util.stream.Collectors.toList())"
+  }
+]

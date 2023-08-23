@@ -10,6 +10,7 @@ import org.wallentines.mcore.text.*;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +41,7 @@ public class TestUtil {
             ItemStack is = ItemStack.Builder.woolWithColor(TextColor.RED)
                     .withCount(13)
                     .withName(org.wallentines.mcore.text.Component.text("Test").withColor(TextColor.GREEN))
-                    .withLore(List.of(org.wallentines.mcore.text.Component.text("Bruh")))
+                    .withLore(Arrays.asList(org.wallentines.mcore.text.Component.text("Bruh")))
                     .build();
 
             Server srv = Server.RUNNING_SERVER.get();

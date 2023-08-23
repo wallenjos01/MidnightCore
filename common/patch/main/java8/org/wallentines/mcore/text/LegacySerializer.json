@@ -1,0 +1,8 @@
+[
+  {
+    "lines": [ "all" ],
+    "type": "replace_regex",
+    "find": "!([A-Za-z-_]+).isEmpty\\(\\)",
+    "replace": "$1.length() > 0"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "Set.of()",
+    "replace": "new HashSet<>()"
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "Set.copyOf(",
+    "replace": "new HashSet<>("
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": ".toList()",
+    "replace": ".collect(java.util.stream.Collectors.toList())"
+  }
+]
