@@ -1,0 +1,26 @@
+[
+  {
+    "lines": [ "all" ],
+    "type": "replace_regex",
+    "find": "!([A-Za-z-_]+).isEmpty\\(\\)",
+    "replace": "$1.length() > 0"
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": ".stripLeading()",
+    "replace": ".replaceAll(\"^/+\", \"\")"
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": ".stripTrailing()",
+    "replace": ".replaceAll(\"/+$\", \"\")"
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": ".toList()",
+    "replace": ".collect(Collectors.toList())"
+  }
+]

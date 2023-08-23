@@ -25,7 +25,7 @@ tasks.withType<Jar>() {
     archiveBaseName = "${id}-${project.name}"
 }
 
-tasks.test {
+tasks.withType<Test>() {
     useJUnitPlatform()
     workingDir("run/test")
 }

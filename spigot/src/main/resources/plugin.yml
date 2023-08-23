@@ -1,0 +1,4 @@
+name: MidnightCore
+main: org.wallentines.mcore.Plugin
+version: 0.1.0
+api-version: 1.13

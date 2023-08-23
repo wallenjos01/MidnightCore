@@ -10,7 +10,7 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.math.Color;
 
-import java.util.List;
+import java.util.Arrays;
 
 public class TestComponentSerializing {
 
@@ -188,7 +188,7 @@ public class TestComponentSerializing {
         // Set the current protocol version to match Minecraft 1.20.1's
         Common.VERSION.setProtocolVersion(763);
 
-        Component created = Component.text("Hello").withColor(TextColor.RED).withChildren(List.of(Component.text(", World")));
+        Component created = Component.text("Hello").withColor(TextColor.RED).withChildren(Arrays.asList(Component.text(", World")));
 
         String plain = created.allText();
         Assertions.assertEquals("Hello, World", plain);

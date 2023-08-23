@@ -1,0 +1,8 @@
+[
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "Map.copyOf(",
+    "replace": "new java.util.HashMap<>("
+  }
+]

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
+
 loom {
     runs {
         getByName("client") {
@@ -19,12 +20,13 @@ loom {
     }
 }
 
+
 tasks {
     build {
         dependsOn(shadowJar)
     }
     shadowJar {
-        archiveClassifier = "dev"
+        archiveClassifier.set("dev")
         configurations = listOf(project.configurations.shadow.get())
         minimize {
             exclude("org.wallentines.*")
@@ -35,57 +37,56 @@ tasks {
         inputFile.set(shadowJar.get().archiveFile)
 
         val id = project.properties["id"]
-        archiveBaseName = "${id}-${project.name}"
+        archiveBaseName.set("${id}-${project.name}")
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
 
 repositories {
     maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
         name = "sonatype-oss-snapshots1"
         mavenContent { snapshotsOnly() }
     }
-    mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots")
-    maven("https://maven.wallentines.org/")
-    mavenLocal()
 }
+
 
 dependencies {
 
+    // MidnightCore
     api(project(":common"))
     api(project(":server"))
     api(project(":client"))
-
-    include(libs.midnight.cfg)
-    include(libs.midnight.cfg.json)
-    include(libs.midnight.cfg.gson)
-    include(libs.midnight.lib)
 
     shadow(project(":common").setTransitive(false))
     shadow(project(":server").setTransitive(false))
     shadow(project(":client").setTransitive(false))
 
-    modApi(include("org.wallentines:fabric-events:0.1.0-SNAPSHOT")!!)
-    modApi(include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")!!)
-
+    // Minecraft
     minecraft("com.mojang:minecraft:1.20.1")
     mappings(loom.officialMojangMappings())
 
+    // Fabric Loader
     modImplementation("net.fabricmc:fabric-loader:0.14.21")
 
+    // Fabric API
     val apiModules = listOf(
             "fabric-command-api-v2",
             "fabric-lifecycle-events-v1",
             "fabric-networking-api-v1"
     )
-
     for(mod in apiModules) {
         modApi(include(fabricApi.module(mod, "0.86.1+1.20.1"))!!)
     }
 
+    // Included Library Dependencies
+    include(libs.midnight.cfg)
+    include(libs.midnight.cfg.json)
+    include(libs.midnight.cfg.binary)
+    include(libs.midnight.cfg.gson)
+    include(libs.midnight.lib)
+
+    // Included Mod Dependencies
+    modApi(include("org.wallentines:fabric-events:0.1.0-SNAPSHOT")!!)
+    modApi(include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")!!)
 }

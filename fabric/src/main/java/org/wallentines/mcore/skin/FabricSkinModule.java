@@ -79,14 +79,7 @@ public class FabricSkinModule extends SkinModule {
         ClientboundPlayerInfoRemovePacket remove = new ClientboundPlayerInfoRemovePacket(List.of(spl.getUUID()));
         ClientboundPlayerInfoUpdatePacket add = ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(spl));
 
-        List<Pair<EquipmentSlot, ItemStack>> items = new ArrayList<>();
-
-        items.add(new Pair<>(EquipmentSlot.MAINHAND, spl.getMainHandItem()));
-        items.add(new Pair<>(EquipmentSlot.OFFHAND,  spl.getOffhandItem()));
-        items.add(new Pair<>(EquipmentSlot.HEAD,     spl.getInventory().armor.get(3)));
-        items.add(new Pair<>(EquipmentSlot.CHEST,    spl.getInventory().armor.get(2)));
-        items.add(new Pair<>(EquipmentSlot.LEGS,     spl.getInventory().armor.get(1)));
-        items.add(new Pair<>(EquipmentSlot.FEET,     spl.getInventory().armor.get(0)));
+        List<Pair<EquipmentSlot, ItemStack>> items = Arrays.stream(EquipmentSlot.values()).map(es -> new Pair<>(es, spl.getItemBySlot(es))).toList();
 
         ClientboundSetEquipmentPacket equip = new ClientboundSetEquipmentPacket(spl.getId(), items);
 
@@ -116,7 +109,7 @@ public class FabricSkinModule extends SkinModule {
 
         // Entity information packets should only be sent to observers in the same world
         Collection<ServerPlayer> observers = world.getPlayers(pl -> pl != spl);
-        if(observers.size() > 0) {
+        if(!observers.isEmpty()) {
 
             ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(spl.getId());
             ClientboundAddPlayerPacket spawn = new ClientboundAddPlayerPacket(spl);
