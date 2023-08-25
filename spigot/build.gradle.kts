@@ -27,33 +27,14 @@ val allCompileOnly = configurations.create("allCompileOnly")
 configurations.compileOnly.get().extendsFrom(allCompileOnly)
 
 
-
-val adapter = sourceSets.create("adapter")
-configurations.getByName("adapterCompileOnly").extendsFrom(allCompileOnly)
-tasks.named<JavaCompile>("compileAdapterJava") {
-    javaCompiler.set(project.javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    })
-}
 tasks.jar {
     archiveClassifier.set("1.17-1.20")
-    from(adapter.output)
 }
 
-
-val adapter8 = sourceSets.create("adapterJava8")
-configurations.getByName("adapterJava8CompileOnly").extendsFrom(allCompileOnly)
-tasks.named<JavaCompile>("compileAdapterJava8Java") {
-    source(adapter.java)
-    javaCompiler.set(project.javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    })
-}
 tasks.named<Jar>("java8Jar") {
     val id = project.properties["id"]
     archiveBaseName = "${id}-${project.name}"
     archiveClassifier.set("1.8-1.16")
-    from(adapter8.output)
 }
 
 
@@ -62,9 +43,11 @@ dependencies {
     // MidnightCore
     api(project(":common"))
     api(project(":server"))
+    api(project(":spigot:adapter"))
 
     shadow(project(":common").setTransitive(false))
     shadow(project(":server").setTransitive(false))
+    shadow(project(":spigot:adapter").setTransitive(false))
 
     // Shadowed Library Dependencies
     shadow(libs.midnight.cfg)
@@ -72,8 +55,6 @@ dependencies {
     shadow(libs.midnight.cfg.binary)
     shadow(libs.midnight.lib)
 
-    "adapterCompileOnly"("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
-    "adapterJava8CompileOnly"("org.spigotmc:spigot-api:1.16.4-R0.1-SNAPSHOT")
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
 
     // Dependencies which apply to adapters too
@@ -81,7 +62,7 @@ dependencies {
     allCompileOnly(libs.jetbrains.annotations)
     allCompileOnly(project(":common"))
     allCompileOnly(project(":server"))
-
+    allCompileOnly(project(":spigot:adapter"))
 }
 
 
@@ -96,23 +77,20 @@ fun setupVersion(version: VersionInfo, javaVersion: Int) {
     configurations.getByName("v${version.name}CompileOnly").extendsFrom(allCompileOnly)
 
     if(javaVersion == 8) {
-        tasks.jar {
+        tasks.named<Jar>("java8Jar") {
             from(set.output)
         }
     } else {
-        tasks.named<Jar>("java8Jar") {
+        tasks.jar {
             from(set.output)
         }
     }
 
     dependencies {
         if(javaVersion == 8) {
-            "v${version.name}CompileOnly"(adapter8.output)
-            "v${version.name}CompileOnly"(adapter.output)
-            "java8Implementation"(set.output)
+            "java8CompileOnly"(set.output)
         } else {
-            "v${version.name}CompileOnly"(adapter.output)
-            "java17Implementation"(set.output)
+            compileOnly(set.output)
         }
         "v${version.name}CompileOnly"("org.spigotmc:spigot-api:${version.version}-R0.1-SNAPSHOT")
         "v${version.name}CompileOnly"("org.spigotmc:spigot:${version.version}-R0.1-SNAPSHOT")
@@ -132,8 +110,8 @@ val legacyVersions = listOf(
         VersionInfo("1_11_R1","1.11.2"),
         VersionInfo("1_12_R1","1.12.2"),
         VersionInfo("1_13_R1","1.13"),
-        VersionInfo("1_13_R2_1131","1.13.1"),
-        VersionInfo("1_13_R2","1.13.2"),
+        VersionInfo("1_13_R2","1.13.1"),
+        VersionInfo("1_13_R2v2","1.13.2"),
         VersionInfo("1_14_R1","1.14.4"),
         VersionInfo("1_15_R1","1.15.2"),
         VersionInfo("1_16_R1","1.16.1"),
@@ -149,8 +127,8 @@ val modernVersions = listOf(
         VersionInfo("1_17_R1","1.17.1"),
         VersionInfo("1_18_R1","1.18"),
         VersionInfo("1_18_R2","1.18.2"),
-        VersionInfo("1_19_R1_1190","1.19"),
-        VersionInfo("1_19_R1","1.19.2"),
+        VersionInfo("1_19_R1","1.19"),
+        VersionInfo("1_19_R1v2","1.19.2"),
         VersionInfo("1_19_R2","1.19.3"),
         VersionInfo("1_19_R3","1.19.4"),
         VersionInfo("1_20_R1","1.20.1")
@@ -158,31 +136,3 @@ val modernVersions = listOf(
 for(version in modernVersions) {
     setupVersion(version, 17)
 }
-
-
-//
-//fun generateAdaptersFile(infos: List<VersionInfo>, prefix: String): File {
-//
-//    var text: String = ""
-//
-//    text += ("package org.wallentines.mcore.adapter;")
-//    text += "public class Adapters {"
-//    text += "public static Adapter createAdapter(String apiVersion) {"
-//    text += "switch(apiVersion) {"
-//    for(version in infos) {
-//        text += "case v${version.name}: return new org.wallentines.mcore.adapter.v${version.name}.AdapterImpl();"
-//    }
-//
-//    text += ""
-//    text += "}"
-//    text += "}"
-//    text += "}"
-//
-//    val dir = file("build/generated/sources/spigot/${prefix}/org/wallentines/mcore/adapter")
-//    dir.mkdirs()
-//
-//    val out = file(dir.absolutePath + "/Adapters.java")
-//    out.writeText(text, Charsets.UTF_8)
-//
-//    return out
-//}

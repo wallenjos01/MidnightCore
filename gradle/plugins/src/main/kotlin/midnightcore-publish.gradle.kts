@@ -6,10 +6,16 @@ plugins {
 
 publishing {
     publications.create<MavenPublication>("maven") {
-        artifactId = if(rootProject == project) {
-            project.name
+        if(rootProject == project) {
+            artifactId = project.name
         } else {
-            rootProject.name + "-" + project.name
+            var name = project.name
+            var currentParent = project.parent
+            while(currentParent != rootProject) {
+                name = currentParent!!.name + "-" + name
+                currentParent = currentParent.parent
+            }
+            rootProject.name + "-" + name
         }
         from(components["java"])
     }

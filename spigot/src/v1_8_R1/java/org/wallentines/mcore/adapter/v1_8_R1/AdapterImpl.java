@@ -2,12 +2,15 @@ package org.wallentines.mcore.adapter.v1_8_R1;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import net.minecraft.server.v1_8_R1.MinecraftServer;
+import net.minecraft.server.v1_8_R1.ServerPingServerData;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_8_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.SkinUpdater;
@@ -53,7 +56,6 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void sendActionBar(Player player, Component component) {
-
     }
 
     @Override
@@ -104,5 +106,11 @@ public class AdapterImpl implements Adapter {
     @Override
     public ItemStack setupInternal(ItemStack item) {
         return null;
+    }
+
+    @Override
+    public GameVersion getGameVersion() {
+        ServerPingServerData data = MinecraftServer.getServer().aE().c(); // ServerPing, ServerPingServerData
+        return new GameVersion(data.a(), data.b());
     }
 }
