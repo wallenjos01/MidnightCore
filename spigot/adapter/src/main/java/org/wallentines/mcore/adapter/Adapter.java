@@ -3,9 +3,11 @@ package org.wallentines.mcore.adapter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.types.Singleton;
 
 public interface Adapter {
 
@@ -125,5 +127,14 @@ public interface Adapter {
      * @return An internally-backed item
      */
     ItemStack setupInternal(ItemStack item);
+
+
+    /**
+     * Retrieves the current version name and protocol version from the internal Minecraft server
+     * @return The server's Minecraft version
+     */
+    GameVersion getGameVersion();
+
+    Singleton<Adapter> INSTANCE = new Singleton<>();
 
 }

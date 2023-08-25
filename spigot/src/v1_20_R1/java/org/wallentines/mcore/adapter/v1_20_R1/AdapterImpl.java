@@ -2,12 +2,14 @@ package org.wallentines.mcore.adapter.v1_20_R1;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import net.minecraft.SharedConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.SkinUpdater;
@@ -21,12 +23,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public boolean initialize() {
 
-        try {
-            updater = new SkinUpdaterImpl();
-        } catch (Exception ex) {
-            return false;
-        }
-
+        updater = new SkinUpdaterImpl();
         return true;
     }
 
@@ -117,5 +114,10 @@ public class AdapterImpl implements Adapter {
     @Override
     public ItemStack setupInternal(ItemStack item) {
         return null;
+    }
+
+    @Override
+    public GameVersion getGameVersion() {
+        return new GameVersion(SharedConstants.b().c(), SharedConstants.c()); // getCurrentVersion, getId, getProtocolVersion
     }
 }
