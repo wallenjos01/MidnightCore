@@ -19,5 +19,4 @@ include("proxy")
 
 include("fabric")
 include("spigot")
-include("spigot-adapter")
 include("velocity")
