@@ -1,5 +1,6 @@
 plugins {
     id("midnightcore-build")
+    id("midnightcore-publish")
     alias(libs.plugins.multiversion)
     alias(libs.plugins.patch)
 }

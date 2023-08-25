@@ -3,11 +3,9 @@ package org.wallentines.mcore.adapter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.wallentines.mcore.Server;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.midnightlib.event.HandlerList;
 
 public interface Adapter {
 
