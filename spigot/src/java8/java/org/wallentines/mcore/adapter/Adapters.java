@@ -35,11 +35,19 @@ public class Adapters {
                     return new org.wallentines.mcore.adapter.v1_13_R2v2.AdapterImpl();
                 }
             }
+            case "v1_14_R1":
+                return new org.wallentines.mcore.adapter.v1_14_R1.AdapterImpl();
+            case "v1_15_R1":
+                return new org.wallentines.mcore.adapter.v1_15_R1.AdapterImpl();
+            case "v1_16_R1":
+                return new org.wallentines.mcore.adapter.v1_16_R1.AdapterImpl();
+            case "v1_16_R2":
+                return new org.wallentines.mcore.adapter.v1_16_R2.AdapterImpl();
             case "v1_16_R3":
                 return new org.wallentines.mcore.adapter.v1_16_R3.AdapterImpl();
+            default:
+                return new GenericAdapter(plugin);
         }
-
-        return new GenericAdapter(plugin);
     }
 
 }

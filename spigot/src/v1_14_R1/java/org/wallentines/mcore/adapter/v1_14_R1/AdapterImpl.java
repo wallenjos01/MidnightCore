@@ -1,13 +1,13 @@
-package org.wallentines.mcore.adapter.v1_13_R2;
+package org.wallentines.mcore.adapter.v1_14_R1;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import net.minecraft.server.v1_13_R2.*;
+import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_13_R2.CraftServer;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_14_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -32,10 +32,10 @@ public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
     private Field handle;
-    public net.minecraft.server.v1_13_R2.ItemStack getHandle(ItemStack is) {
+    public net.minecraft.server.v1_14_R1.ItemStack getHandle(ItemStack is) {
 
         try {
-            return (net.minecraft.server.v1_13_R2.ItemStack) handle.get(is);
+            return (net.minecraft.server.v1_14_R1.ItemStack) handle.get(is);
 
         } catch (Exception ex) {
             return CraftItemStack.asNMSCopy(is);
@@ -63,13 +63,13 @@ public class AdapterImpl implements Adapter {
     @Override
     public void runOnServer(Runnable runnable) {
         CraftServer server = (CraftServer) Bukkit.getServer();
-        server.getHandle().getServer().postToMainThread(runnable);
+        server.getHandle().getServer().e(runnable);
     }
 
     @Override
     public void addTickListener(Runnable runnable) {
         CraftServer server = (CraftServer) Bukkit.getServer();
-        server.getHandle().getServer().a(runnable::run);
+        server.getHandle().getServer().b(runnable);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public boolean hasOpLevel(Player player, int i) {
         EntityPlayer ep = ((CraftPlayer) player).getHandle();
-        return ep.j(i); // hasPermissions
+        return ep.k(i); // hasPermissions
     }
 
     @Override
@@ -159,7 +159,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
 
-        net.minecraft.server.v1_13_R2.ItemStack mis = getHandle(itemStack);
+        net.minecraft.server.v1_14_R1.ItemStack mis = getHandle(itemStack);
         try {
             NBTTagCompound nbt = MojangsonParser.parse(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
             mis.setTag(nbt);
@@ -171,7 +171,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public ConfigSection getTag(ItemStack itemStack) {
 
-        net.minecraft.server.v1_13_R2.ItemStack mis = getHandle(itemStack);
+        net.minecraft.server.v1_14_R1.ItemStack mis = getHandle(itemStack);
         NBTTagCompound nbt = mis.getTag();
         if(nbt == null) return null;
 
@@ -185,7 +185,8 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public GameVersion getGameVersion() {
-        return VersionUtil.getGameVersion();
+        ServerPing.ServerData data = ((CraftServer) Bukkit.getServer()).getServer().getServerPing().getServerData();
+        return new GameVersion(data.a(), data.getProtocolVersion());
     }
     
     private ConfigSection convert(NBTTagCompound nbt) {
@@ -201,7 +202,7 @@ public class AdapterImpl implements Adapter {
                 nbt.set(key, flattened);
             }
         }
-        return JSONCodec.loadConfig(nbt.toString()).asSection();
+        return JSONCodec.loadConfig(nbt.asString()).asSection();
     }
 
     private IChatBaseComponent convert(Component component) {

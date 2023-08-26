@@ -1,5 +1,6 @@
 package org.wallentines.mcore.adapter.v1_13_R1;
 
+import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_13_R1.*;
@@ -16,10 +17,13 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.GsonContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -202,6 +206,11 @@ public class AdapterImpl implements Adapter {
     }
 
     private IChatBaseComponent convert(Component component) {
-        return IChatBaseComponent.ChatSerializer.a(component.toJSONString());
+        SerializeResult<JsonElement> serialized = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component);
+        if(!serialized.isComplete()) {
+            MidnightCoreAPI.LOGGER.error("An error occurred while serializing a component! " + serialized.getError());
+            return null;
+        }
+        return IChatBaseComponent.ChatSerializer.a(serialized.getOrThrow());
     }
 }
