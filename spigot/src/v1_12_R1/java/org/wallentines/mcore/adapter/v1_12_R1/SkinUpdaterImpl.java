@@ -1,23 +1,20 @@
-package org.wallentines.mcore.adapter.v1_16_R3;
+package org.wallentines.mcore.adapter.v1_12_R1;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.datafixers.util.Pair;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.server.v1_12_R1.*;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.SkinUpdater;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SkinUpdaterImpl implements SkinUpdater {
+
     private void setProfileSkin(GameProfile profile, @Nullable Skin skin) {
         profile.getProperties().get("textures").clear();
         if(skin != null) {
@@ -36,31 +33,32 @@ public class SkinUpdaterImpl implements SkinUpdater {
         if(server == null) return;
 
         // Make sure player is ready to receive a respawn packet
-        player.leaveVehicle();
+        player.leaveVehicle(); // stopRiding()
+        player.closeInventory(); // Clients do not close their own inventory before 1.16
 
         // Store velocity so it can be re-applied later
-        Vec3D velocity = epl.getMot(); // getDeltaMovement()
+        Vec3D velocity = new Vec3D(epl.motX, epl.motY, epl.motZ);
 
         // Create Packets
-        PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, epl);
-        PacketPlayOutPlayerInfo add = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, epl); // createPlayerInitializing()
-
-        List<Pair<EnumItemSlot, ItemStack>> items = Arrays.stream(EnumItemSlot.values()).map(eis -> new Pair<>(eis, epl.getEquipment(eis))).collect(Collectors.toList()); // getItemBySlot
+        PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, epl);
+        PacketPlayOutPlayerInfo add =  new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, epl);
 
         int entityId = epl.getId();
-        PacketPlayOutEntityEquipment equip = new PacketPlayOutEntityEquipment(entityId, items);
+
+        PacketPlayOutEntityEquipment equipM = new PacketPlayOutEntityEquipment(entityId, EnumItemSlot.MAINHAND, epl.getItemInMainHand());
+        PacketPlayOutEntityEquipment equipO = new PacketPlayOutEntityEquipment(entityId, EnumItemSlot.OFFHAND, epl.getItemInOffHand());
+        PacketPlayOutEntityEquipment equipF = new PacketPlayOutEntityEquipment(entityId, EnumItemSlot.FEET, epl.getEquipment(EnumItemSlot.FEET));
+        PacketPlayOutEntityEquipment equipL = new PacketPlayOutEntityEquipment(entityId, EnumItemSlot.LEGS, epl.getEquipment(EnumItemSlot.LEGS));
+        PacketPlayOutEntityEquipment equipC = new PacketPlayOutEntityEquipment(entityId, EnumItemSlot.CHEST, epl.getEquipment(EnumItemSlot.CHEST));
+        PacketPlayOutEntityEquipment equipH = new PacketPlayOutEntityEquipment(entityId, EnumItemSlot.HEAD, epl.getEquipment(EnumItemSlot.HEAD));
 
         WorldServer world = (WorldServer) epl.world;
 
         PacketPlayOutRespawn respawn = new PacketPlayOutRespawn(
-                world.getDimensionManager(),
-                world.getDimensionKey(),
-                BiomeManager.a(world.getSeed()), // obfuscateSeed(),
-                epl.playerInteractManager.getGameMode(),
-                epl.playerInteractManager.c(), // getPreviousGameModeForPlayer()
-                world.isDebugWorld(),
-                world.isFlatWorld(),
-                true
+                world.dimension,
+                world.getDifficulty(),
+                world.getWorldData().getType(),
+                epl.playerInteractManager.getGameMode()
         );
 
         Location location = player.getLocation();
@@ -74,13 +72,13 @@ public class SkinUpdaterImpl implements SkinUpdater {
         }
 
         // Entity information should be sent to observers in the same world
-        Collection<EntityPlayer> observers = world.a(pl -> pl != epl);
+        List<EntityPlayer> observers = world.b(EntityPlayer.class, a -> true);
+
         if(!observers.isEmpty()) {
 
             PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(entityId);
             PacketPlayOutNamedEntitySpawn spawn = new PacketPlayOutNamedEntitySpawn(epl);
-
-            PacketPlayOutEntityMetadata tracker = new PacketPlayOutEntityMetadata(entityId, epl.getDataWatcher(), true);
+            PacketPlayOutEntityMetadata tracker = new PacketPlayOutEntityMetadata(epl.getId(), epl.getDataWatcher(), true);
 
             float headRot = player.getEyeLocation().getYaw();
             int rot = (int) headRot;
@@ -93,20 +91,34 @@ public class SkinUpdaterImpl implements SkinUpdater {
                 obs.playerConnection.sendPacket(destroy);
                 obs.playerConnection.sendPacket(spawn);
                 obs.playerConnection.sendPacket(head);
-                obs.playerConnection.sendPacket(equip);
                 obs.playerConnection.sendPacket(tracker);
+
+                obs.playerConnection.sendPacket(equipM);
+                obs.playerConnection.sendPacket(equipO);
+                obs.playerConnection.sendPacket(equipF);
+                obs.playerConnection.sendPacket(equipL);
+                obs.playerConnection.sendPacket(equipC);
+                obs.playerConnection.sendPacket(equipH);
             }
         }
 
         // The remaining packets should only be sent to the updated player
         epl.playerConnection.sendPacket(respawn);
         epl.playerConnection.sendPacket(position);
-        epl.playerConnection.sendPacket(equip);
+
+        epl.playerConnection.sendPacket(equipM);
+        epl.playerConnection.sendPacket(equipO);
+        epl.playerConnection.sendPacket(equipF);
+        epl.playerConnection.sendPacket(equipL);
+        epl.playerConnection.sendPacket(equipC);
+        epl.playerConnection.sendPacket(equipH);
 
         server.getPlayerList().updateClient(epl);
         epl.updateAbilities();
 
-        epl.setMot(velocity); // setDeltaMovement()
+        epl.motX = velocity.x;
+        epl.motY = velocity.y;
+        epl.motZ = velocity.z;
         epl.playerConnection.sendPacket(new PacketPlayOutEntityVelocity(epl));
 
     }
