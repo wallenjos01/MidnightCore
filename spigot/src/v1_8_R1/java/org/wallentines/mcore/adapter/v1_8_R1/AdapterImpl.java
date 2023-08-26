@@ -28,6 +28,7 @@ public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
     private Field handle;
+
     public net.minecraft.server.v1_8_R1.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
 
         try {
