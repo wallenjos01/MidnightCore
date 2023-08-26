@@ -1,28 +1,67 @@
 package org.wallentines.mcore.adapter.v1_20_R1;
 
+import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.SharedConstants;
+import net.minecraft.nbt.MojangsonParser;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.chat.IChatBaseComponent;
+import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.server.level.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ModernSerializer;
+import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.GsonContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
+
+import java.lang.reflect.Field;
 
 public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
+    private Field handle;
+    public net.minecraft.world.item.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
+
+        try {
+            return (net.minecraft.world.item.ItemStack) handle.get(is);
+
+        } catch (Exception ex) {
+            return CraftItemStack.asNMSCopy(is);
+        }
+    }
 
     @Override
     public boolean initialize() {
 
+        try {
+            handle = CraftItemStack.class.getDeclaredField("handle");
+            handle.setAccessible(true);
+
+        } catch (Exception ex) {
+            return false;
+        }
         updater = new SkinUpdaterImpl();
         return true;
     }
@@ -30,7 +69,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public void runOnServer(Runnable runnable) {
         CraftServer server = (CraftServer) Bukkit.getServer();
-        server.getHandle().b().a(runnable);
+        server.getHandle().b().g(runnable);
     }
 
     @Override
@@ -42,13 +81,8 @@ public class AdapterImpl implements Adapter {
     @Override
     public @Nullable Skin getPlayerSkin(Player player) {
 
-        CraftPlayer craftPlayer = (CraftPlayer) player;
-        GameProfile profile = craftPlayer.getProfile();
-
-        if(!profile.getProperties().containsKey("textures") || profile.getProperties().get("textures").isEmpty()) { return null; }
-
-        Property property = profile.getProperties().get("textures").iterator().next();
-        return new Skin(profile.getId(), property.getValue(), property.getValue());
+        GameProfile profile = ((CraftPlayer) player).getProfile();
+        return profile.getProperties().get("textures").stream().map(prop -> new Skin(profile.getId(), prop.getValue(), prop.getSignature())).findFirst().orElse(null);
     }
 
     @Override
@@ -58,66 +92,128 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void sendMessage(Player player, Component component) {
-
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        IChatBaseComponent bc = convert(component);
+        if(bc != null) ep.a(bc); // sendMessage()
     }
 
     @Override
     public void sendActionBar(Player player, Component component) {
-
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        IChatBaseComponent bc = convert(component);
+        if(bc != null) ep.b(bc, true); // sendMessage()
     }
 
     @Override
     public void sendTitle(Player player, Component component) {
-
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        IChatBaseComponent bc = convert(component);
+        if(bc != null) ep.c.a(new ClientboundSetTitleTextPacket(bc));
     }
 
     @Override
     public void sendSubtitle(Player player, Component component) {
-
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        IChatBaseComponent bc = convert(component);
+        if(bc != null) ep.c.a(new ClientboundSetSubtitleTextPacket(bc));
     }
 
     @Override
-    public void setTitleAnimation(Player player, int fadeIn, int stay, int fadeOut) {
-
+    public void setTitleAnimation(Player player, int i, int i1, int i2) {
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        ep.c.a(new ClientboundSetTitlesAnimationPacket(i, i1, i2));
     }
 
     @Override
     public void clearTitles(Player player) {
-
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        ep.c.a(new ClientboundClearTitlesPacket(false));
     }
 
     @Override
     public void resetTitles(Player player) {
-
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        ep.c.a(new ClientboundClearTitlesPacket(true));
     }
 
     @Override
-    public boolean hasOpLevel(Player player, int level) {
-        return false;
+    public boolean hasOpLevel(Player player, int i) {
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        return ep.l(i);
     }
 
     @Override
-    public void loadTag(Player player, ConfigSection tag) {
-
+    public ConfigSection getTag(Player player) {
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        NBTTagCompound nbt = new NBTTagCompound();
+        ep.f(nbt);
+        return convert(nbt);
     }
 
     @Override
-    public void setTag(ItemStack itemStack, ConfigSection tag) {
+    public void loadTag(Player player, ConfigSection configSection) {
+        EntityPlayer ep = ((CraftPlayer) player).getHandle();
+        try {
+            NBTTagCompound nbt = MojangsonParser.a(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
+            ep.a(nbt);
+        } catch (IllegalArgumentException | CommandSyntaxException ex) {
+            MidnightCoreAPI.LOGGER.error("An error occurred while loading a player tag! " + ex.getMessage());
+        }
+    }
 
+    @Override
+    public void setTag(ItemStack itemStack, ConfigSection configSection) {
+
+        net.minecraft.world.item.ItemStack mis = getHandle(itemStack);
+        try {
+            NBTTagCompound nbt = MojangsonParser.a(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
+            mis.c(nbt);
+        } catch (IllegalArgumentException | CommandSyntaxException ex) {
+
+            MidnightCoreAPI.LOGGER.error("An error occurred while changing an item tag! " + ex.getMessage());
+        }
     }
 
     @Override
     public ConfigSection getTag(ItemStack itemStack) {
-        return null;
+
+        net.minecraft.world.item.ItemStack mis = getHandle(itemStack);
+        NBTTagCompound nbt = mis.v();
+        if(nbt == null) return null;
+
+        return convert(nbt);
     }
 
     @Override
-    public ItemStack setupInternal(ItemStack item) {
-        return null;
+    public ItemStack setupInternal(ItemStack itemStack) {
+        return CraftItemStack.asCraftCopy(itemStack);
     }
 
     @Override
     public GameVersion getGameVersion() {
         return new GameVersion(SharedConstants.b().c(), SharedConstants.c()); // getCurrentVersion, getId, getProtocolVersion
+    }
+
+    private ConfigSection convert(NBTTagCompound nbt) {
+        // Flatten int arrays, byte arrays, and long arrays to nbt lists
+        for(String key : nbt.e()) {
+            NBTBase base = nbt.c(key);
+            if(base instanceof NBTTagList && base.c() != NBTTagList.a) { // getType(), TYPE
+                NBTTagList flattened = new NBTTagList();
+                flattened.addAll(((NBTTagList) base));
+                nbt.a(key, flattened);
+            }
+        }
+        return JSONCodec.loadConfig(nbt.toString()).asSection();
+    }
+
+    private IChatBaseComponent convert(Component component) {
+
+        SerializeResult<JsonElement> serialized = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component);
+        if(!serialized.isComplete()) {
+            MidnightCoreAPI.LOGGER.error("An error occurred while serializing a component! " + serialized.getError());
+            return null;
+        }
+        return IChatBaseComponent.ChatSerializer.a(serialized.getOrThrow()); // fromJsonTree()
     }
 }

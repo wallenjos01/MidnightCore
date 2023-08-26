@@ -85,6 +85,11 @@ public class GenericAdapter implements Adapter {
     }
 
     @Override
+    public ConfigSection getTag(Player player) {
+        return null;
+    }
+
+    @Override
     public void loadTag(Player player, ConfigSection tag) {
 
     }
