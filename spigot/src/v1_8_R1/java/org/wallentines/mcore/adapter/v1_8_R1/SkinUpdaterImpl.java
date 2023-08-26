@@ -10,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.SkinUpdater;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
 
 public class SkinUpdaterImpl implements SkinUpdater {
 

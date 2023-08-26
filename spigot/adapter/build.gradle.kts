@@ -1,5 +1,3 @@
-import org.gradle.jvm.tasks.Jar
-
 plugins {
     id("midnightcore-build")
     id("midnightcore-publish")

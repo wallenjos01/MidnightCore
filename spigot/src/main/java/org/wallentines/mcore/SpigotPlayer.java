@@ -1,7 +1,6 @@
 package org.wallentines.mcore;
 
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.item.SpigotItem;
