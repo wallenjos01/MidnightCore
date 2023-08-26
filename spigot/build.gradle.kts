@@ -1,4 +1,5 @@
 import org.gradle.jvm.tasks.Jar
+import org.jetbrains.kotlin.parsing.parseBoolean
 
 plugins {
     id("midnightcore-build")
@@ -23,10 +24,6 @@ repositories {
     maven("https://libraries.minecraft.net/")
 }
 
-val allCompileOnly = configurations.create("allCompileOnly")
-configurations.compileOnly.get().extendsFrom(allCompileOnly)
-
-
 tasks.jar {
     archiveClassifier.set("1.17-1.20")
 }
@@ -36,68 +33,6 @@ tasks.named<Jar>("java8Jar") {
     archiveBaseName = "${id}-${project.name}"
     archiveClassifier.set("1.8-1.16")
 }
-
-
-dependencies {
-
-    // MidnightCore
-    api(project(":common"))
-    api(project(":server"))
-    api(project(":spigot:adapter"))
-
-    shadow(project(":common").setTransitive(false))
-    shadow(project(":server").setTransitive(false))
-    shadow(project(":spigot:adapter").setTransitive(false))
-
-    // Shadowed Library Dependencies
-    shadow(libs.midnight.cfg)
-    shadow(libs.midnight.cfg.json)
-    shadow(libs.midnight.cfg.binary)
-    shadow(libs.midnight.lib)
-
-    compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
-
-    // Dependencies which apply to adapters too
-    allCompileOnly(libs.midnight.cfg)
-    allCompileOnly(libs.jetbrains.annotations)
-    allCompileOnly(project(":common"))
-    allCompileOnly(project(":server"))
-    allCompileOnly(project(":spigot:adapter"))
-}
-
-
-fun setupVersion(version: VersionInfo, javaVersion: Int) {
-    val set = sourceSets.create("v${version.name}")
-    tasks.named<JavaCompile>("compileV${version.name}Java") {
-        javaCompiler.set(project.javaToolchains.compilerFor {
-            languageVersion.set(JavaLanguageVersion.of(javaVersion))
-        })
-    }
-
-    configurations.getByName("v${version.name}CompileOnly").extendsFrom(allCompileOnly)
-
-    if(javaVersion == 8) {
-        tasks.named<Jar>("java8Jar") {
-            from(set.output)
-        }
-    } else {
-        tasks.jar {
-            from(set.output)
-        }
-    }
-
-    dependencies {
-        if(javaVersion == 8) {
-            "java8CompileOnly"(set.output)
-        } else {
-            compileOnly(set.output)
-        }
-        "v${version.name}CompileOnly"("org.spigotmc:spigot-api:${version.version}-R0.1-SNAPSHOT")
-        "v${version.name}CompileOnly"("org.spigotmc:spigot:${version.version}-R0.1-SNAPSHOT")
-    }
-}
-
-class VersionInfo(val name: String, val version: String)
 
 // Versions compiled against Java 8
 val legacyVersions = listOf(
@@ -136,3 +71,74 @@ val modernVersions = listOf(
 for(version in modernVersions) {
     setupVersion(version, 17)
 }
+
+
+dependencies {
+
+    // MidnightCore
+    api(project(":common"))
+    api(project(":server"))
+    api(project(":spigot:adapter"))
+
+    shadow(project(":common").setTransitive(false))
+    shadow(project(":server").setTransitive(false))
+    shadow(project(":spigot:adapter").setTransitive(false))
+
+    // Shadowed Library Dependencies
+    shadow(libs.midnight.cfg)
+    shadow(libs.midnight.cfg.json)
+    shadow(libs.midnight.cfg.binary)
+    shadow(libs.midnight.lib)
+
+    compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
+}
+
+
+fun setupVersion(version: VersionInfo, javaVersion: Int) {
+    val set = sourceSets.create("v${version.name}")
+    tasks.named<JavaCompile>("compileV${version.name}Java") {
+        javaCompiler.set(project.javaToolchains.compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(javaVersion))
+        })
+    }
+
+    if(javaVersion == 8) {
+        tasks.named<Jar>("java8Jar") {
+            from(set.output)
+        }
+    } else {
+        tasks.jar {
+            from(set.output)
+        }
+    }
+
+    dependencies {
+        if(javaVersion == 8) {
+            "java8CompileOnly"(set.output)
+        } else {
+            compileOnly(set.output)
+        }
+        "v${version.name}Implementation"("org.spigotmc:spigot-api:${version.version}-R0.1-SNAPSHOT")
+        "v${version.name}Implementation"("org.spigotmc:spigot:${version.version}-R0.1-SNAPSHOT")
+
+        "v${version.name}CompileOnly"(libs.jetbrains.annotations)
+        "v${version.name}Implementation"(libs.midnight.cfg)
+        "v${version.name}Implementation"(libs.midnight.cfg.gson)
+
+        // For whatever reason, intellisense cannot find project dependencies on java 8 sources sets. Gradle still can,
+        // and compilation works fine, but intelliJ complains about it. To work around this, those dependencies can be
+        // pulled from repositories instead. In the case where this becomes a problem, set spigot_intellisense_workaround
+        // to false in gradle.properties.
+        if(javaVersion == 8 && parseBoolean(project.properties["spigot_intellisense_workaround"] as String)) {
+            "v${version.name}Implementation"("org.wallentines:midnightcore-common:${project.version}")
+            "v${version.name}Implementation"("org.wallentines:midnightcore-server:${project.version}")
+            "v${version.name}Implementation"("org.wallentines:midnightcore-spigot-adapter:${project.version}")
+        }
+
+        "v${version.name}Implementation"(project(":common"))
+        "v${version.name}Implementation"(project(":server"))
+        "v${version.name}Implementation"(project(":spigot:adapter"))
+    }
+}
+
+class VersionInfo(val name: String, val version: String)

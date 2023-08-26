@@ -7,12 +7,14 @@ public class Adapters {
 
     public static Adapter findAdapter(String apiVersion, Plugin plugin) {
 
-        switch (apiVersion) {
-            case "v1_20_R1":
-                return new org.wallentines.mcore.adapter.v1_20_R1.AdapterImpl();
-        }
+        return switch (apiVersion) {
+            case "v1_17_R1" -> new org.wallentines.mcore.adapter.v1_17_R1.AdapterImpl();
+            case "v1_18_R1" -> new org.wallentines.mcore.adapter.v1_18_R1.AdapterImpl();
+            case "v1_19_R3" -> new org.wallentines.mcore.adapter.v1_19_R3.AdapterImpl();
+            case "v1_20_R1" -> new org.wallentines.mcore.adapter.v1_20_R1.AdapterImpl();
+            default -> new GenericAdapter(plugin);
+        };
 
-        return new GenericAdapter(plugin);
     }
 
 }

@@ -10,6 +10,8 @@ public class Adapters {
         switch (apiVersion) {
             case "v1_8_R1":
                 return new org.wallentines.mcore.adapter.v1_8_R1.AdapterImpl();
+            case "v1_16_R3":
+                return new org.wallentines.mcore.adapter.v1_16_R3.AdapterImpl();
         }
 
         return new GenericAdapter(plugin);

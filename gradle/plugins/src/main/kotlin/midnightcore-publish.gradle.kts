@@ -15,7 +15,7 @@ publishing {
                 name = currentParent!!.name + "-" + name
                 currentParent = currentParent.parent
             }
-            rootProject.name + "-" + name
+            artifactId = rootProject.name + "-" + name
         }
         from(components["java"])
     }

@@ -101,6 +101,12 @@ public interface Adapter {
     boolean hasOpLevel(Player player, int level);
 
     /**
+     * Reads the NBT Tag for the given player
+     * @param player The player to read from
+     */
+    ConfigSection getTag(Player player);
+
+    /**
      * Loads the given ConfigSection as an NBT tag for the given player
      * @param player The player to load
      * @param tag The tag to load

@@ -1,4 +1,4 @@
-package org.wallentines.mcore.adapter.v1_20_R1;
+package org.wallentines.mcore.adapter.v1_19_R3;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.Skin;
@@ -39,14 +39,14 @@ public class SkinUpdaterImpl implements SkinUpdater {
         GameProfile gameProfile = ((CraftPlayer) player).getProfile(); // getGameProfile()
         setProfileSkin(gameProfile, skin);
 
-        MinecraftServer server = epl.d;
+        MinecraftServer server = epl.c;
         if(server == null) return;
 
         // Make sure player is ready to receive a respawn packet
-        epl.Y(); // stopRiding()
+        player.leaveVehicle();
 
         // Store velocity so it can be re-applied later
-        Vec3D velocity = epl.dl(); // getDeltaMovement()
+        Vec3D velocity = epl.dj(); // getDeltaMovement()
 
         // Create Packets
         ClientboundPlayerInfoRemovePacket remove = new ClientboundPlayerInfoRemovePacket(List.of(player.getUniqueId()));
@@ -60,16 +60,15 @@ public class SkinUpdaterImpl implements SkinUpdater {
         WorldServer world = epl.x(); // serverLevel()
 
         PacketPlayOutRespawn respawn = new PacketPlayOutRespawn(
-                world.aa(), // dimensionType()
-                world.ac(), // dimension()
+                world.Z(), // dimensionType()
+                world.ab(), // dimension()
                 BiomeManager.a(world.A()), // obfuscateSeed(), getSeed()
-                epl.e.b(), // gameMode, getGameModeForPlayer()
-                epl.e.c(), // gameMode, getPreviousGameModeForPlayer()
-                world.af(), // isDebug()
+                epl.d.b(), // gameMode, getGameModeForPlayer()
+                epl.d.c(), // gameMode, getPreviousGameModeForPlayer()
+                world.ae(), // isDebug()
                 world.z(), // isFlat()
                 (byte) 3, // Preserve metadata
-                Optional.empty(),
-                0
+                Optional.empty()
         );
 
         Location location = player.getLocation();
@@ -78,8 +77,8 @@ public class SkinUpdaterImpl implements SkinUpdater {
         // Player information should be sent to everyone
         for(EntityPlayer obs : server.ac().t()) { // getPlayerList(), getPlayers()
 
-            obs.c.a(remove); // connection, send
-            obs.c.a(add);
+            obs.b.a(remove); // connection, send
+            obs.b.a(add);
         }
 
         // Entity information should be sent to observers in the same world
@@ -103,29 +102,29 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
             for(EntityPlayer obs : observers) {
 
-                obs.c.a(destroy);
-                obs.c.a(spawn);
-                obs.c.a(head);
-                obs.c.a(equip);
-                if(tracker != null) obs.c.a(tracker);
+                obs.b.a(destroy);
+                obs.b.a(spawn);
+                obs.b.a(head);
+                obs.b.a(equip);
+                if(tracker != null) obs.b.a(tracker);
             }
         }
 
         // The remaining packets should only be sent to the updated player
-        epl.c.a(respawn);
-        epl.c.a(position);
-        epl.c.a(equip);
+        epl.b.a(respawn);
+        epl.b.a(position);
+        epl.b.a(equip);
 
         server.g(() -> {
+
             server.ac().d(epl); // sendPlayerPermissionLevel
             server.ac().e(epl); // sendAllLevelInfo
 
             epl.w(); // onUpdateAbilities
-            epl.fN().j(); // getInventory(), tick()
+            player.updateInventory();
 
             epl.f(velocity); // setDeltaMovement()
-            epl.c.a(new PacketPlayOutEntityVelocity(epl));
+            epl.b.a(new PacketPlayOutEntityVelocity(epl));
         });
-
     }
 }
