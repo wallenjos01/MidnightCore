@@ -1,12 +1,9 @@
 package org.wallentines.mcore.util;
 
-import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.TextColor;
-import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigPrimitive;
-import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 
 import java.util.*;

@@ -2,7 +2,6 @@ package org.wallentines.mcore.adapter.v1_20_R1;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.MojangsonParser;
