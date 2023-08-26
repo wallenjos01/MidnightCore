@@ -1,16 +1,17 @@
-package org.wallentines.mcore.adapter.v1_8_R1;
+package org.wallentines.mcore.adapter.v1_8_R3;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import net.minecraft.server.v1_8_R1.*;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.SkinUpdater;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
 
 public class SkinUpdaterImpl implements SkinUpdater {
 
@@ -22,7 +23,6 @@ public class SkinUpdaterImpl implements SkinUpdater {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void changePlayerSkin(Player player, @Nullable Skin skin) {
 
         EntityPlayer epl = ((CraftPlayer) player).getHandle();
@@ -40,8 +40,8 @@ public class SkinUpdaterImpl implements SkinUpdater {
         Vec3D velocity = new Vec3D(epl.motX, epl.motY, epl.motZ);
 
         // Create Packets
-        PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER, epl);
-        PacketPlayOutPlayerInfo add =  new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.ADD_PLAYER, epl);
+        PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, epl);
+        PacketPlayOutPlayerInfo add =  new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, epl);
 
         int entityId = epl.getId();
 
@@ -64,14 +64,14 @@ public class SkinUpdaterImpl implements SkinUpdater {
         PacketPlayOutPosition position = new PacketPlayOutPosition(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch(), new HashSet<>());
 
         // Player information should be sent to everyone
-        for(EntityPlayer obs : (List<EntityPlayer>) server.getPlayerList().players) { // getPlayerList(), getPlayers()
+        for(EntityPlayer obs : server.getPlayerList().players) { // getPlayerList(), getPlayers()
 
             obs.playerConnection.sendPacket(remove);
             obs.playerConnection.sendPacket(add);
         }
 
         // Entity information should be sent to observers in the same world
-        List<EntityPlayer> observers = (List<EntityPlayer>) world.b(EntityPlayer.class, a -> true);
+        List<EntityPlayer> observers = world.b(EntityPlayer.class, a -> true);
 
         if(!observers.isEmpty()) {
 
