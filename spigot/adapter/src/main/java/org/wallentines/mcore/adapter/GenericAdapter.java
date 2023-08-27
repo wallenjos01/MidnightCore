@@ -126,6 +126,11 @@ public class GenericAdapter implements Adapter {
         return new GameVersion(versionString, protocol);
     }
 
+    @Override
+    public void kickPlayer(Player player, Component message) {
+        player.kickPlayer(message.toLegacyText());
+    }
+
     // https://wiki.vg/Protocol_version_numbers
     private enum MinecraftVersion {
         V1_20_2(764, 1, 20, 2),

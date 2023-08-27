@@ -205,6 +205,11 @@ public class AdapterImpl implements Adapter {
         return JSONCodec.loadConfig(nbt.f_()).asSection();
     }
 
+    @Override
+    public void kickPlayer(Player player, Component message) {
+        ((CraftPlayer) player).getHandle().b.a(convert(message));
+    }
+
     private IChatBaseComponent convert(Component component) {
 
         SerializeResult<JsonElement> serialized = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component);

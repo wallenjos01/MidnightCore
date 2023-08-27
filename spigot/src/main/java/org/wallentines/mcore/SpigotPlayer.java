@@ -2,12 +2,15 @@ package org.wallentines.mcore;
 
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
+import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.item.SpigotItem;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class SpigotPlayer implements Player {
@@ -18,6 +21,10 @@ public class SpigotPlayer implements Player {
     public SpigotPlayer(Server server, @NotNull org.bukkit.entity.Player internal) {
         this.server = server;
         this.internal = internal;
+    }
+
+    public org.bukkit.entity.Player getInternal() {
+        return internal;
     }
 
     @Override
@@ -83,77 +90,91 @@ public class SpigotPlayer implements Player {
 
         SpigotItem si = (SpigotItem) item;
 
-        switch (slot) {
-            case FEET: {
-                internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.FEET, si.getInternal());
-                break;
-            }
+        switch(slot) {
+            case FEET -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.FEET, si.getInternal());
+            case LEGS -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.LEGS, si.getInternal());
+            case CHEST -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.CHEST, si.getInternal());
+            case HEAD -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.HEAD, si.getInternal());
+            case MAINHAND -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.HAND, si.getInternal());
+            case OFFHAND -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.OFF_HAND, si.getInternal());
         }
     }
 
     @Override
     public ItemStack getItem(EquipmentSlot slot) {
-        return null;
+
+        return new SpigotItem(switch (slot) {
+            case FEET -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.FEET);
+            case LEGS -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.LEGS);
+            case CHEST -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.CHEST);
+            case HEAD -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.HEAD);
+            case MAINHAND -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.HAND);
+            case OFFHAND -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.OFF_HAND);
+        });
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return internal.getName();
     }
 
     @Override
     public void sendMessage(Component component) {
-
+        Adapter.INSTANCE.get().sendMessage(internal, component);
     }
 
     @Override
     public void sendActionBar(Component component) {
-
+        Adapter.INSTANCE.get().sendActionBar(internal, component);
     }
 
     @Override
     public void sendTitle(Component title) {
-
+        Adapter.INSTANCE.get().sendTitle(internal, title);
     }
 
     @Override
     public void sendSubtitle(Component title) {
-
+        Adapter.INSTANCE.get().sendSubtitle(internal, title);
     }
 
     @Override
     public void clearTitles() {
-
+        Adapter.INSTANCE.get().clearTitles(internal);
     }
 
     @Override
     public void setTitleTimes(int fadeIn, int stay, int fadeOut) {
-
+        Adapter.INSTANCE.get().setTitleAnimation(internal, fadeIn, stay, fadeOut);
     }
 
     @Override
     public void resetTitles() {
-
+        Adapter.INSTANCE.get().resetTitles(internal);
     }
 
     @Override
     public void giveItem(ItemStack item) {
-
+        SpigotItem si = ConversionUtil.validate(item);
+        internal.getInventory().addItem(si.getInternal());
     }
 
     @Override
     public String getLanguage() {
-        return null;
+        if(GameVersion.CURRENT_VERSION.get().getProtocolVersion() >= 335) { // Spigot doesn't have the getLocale() method until 1.12
+            return internal.getLocale();
+        }
+        return "en_US";
     }
 
     @Override
     public GameMode getGameMode() {
-        return null;
+        return GameMode.valueOf(internal.getGameMode().name());
     }
 
     @Override
     public void setGameMode(GameMode mode) {
-
+        internal.setGameMode(org.bukkit.GameMode.valueOf(mode.name()));
     }
 
     @Override
@@ -163,21 +184,34 @@ public class SpigotPlayer implements Player {
 
     @Override
     public boolean hasPermission(String permission) {
-        return false;
+        return internal.hasPermission(permission);
     }
 
     @Override
     public boolean hasPermission(String permission, int defaultOpLevel) {
-        return false;
+        return internal.hasPermission(permission) || Adapter.INSTANCE.get().hasOpLevel(internal, defaultOpLevel);
     }
 
     @Override
     public void kick(Component message) {
-
+        Adapter.INSTANCE.get().kickPlayer(internal, message);
     }
 
     @Override
     public Skin getSkin() {
-        return null;
+        return Adapter.INSTANCE.get().getPlayerSkin(internal);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SpigotPlayer that = (SpigotPlayer) o;
+        return Objects.equals(server, that.server) && Objects.equals(internal, that.internal);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(server, internal);
     }
 }

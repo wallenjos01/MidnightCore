@@ -5,12 +5,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.Adapters;
 import org.wallentines.mcore.adapter.GenericAdapter;
+import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.item.SpigotItem;
+
+import java.util.Objects;
 
 public class MidnightCore extends JavaPlugin {
 
 
     @Override
-    public void onLoad() {
+    public void onEnable() {
 
         String apiVersion = Bukkit.getServer().getClass().getPackage().getName().replace(".",",").split(",")[3];
 
@@ -32,14 +36,15 @@ public class MidnightCore extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
 
+        MidnightCoreAPI.LOGGER.warn("onLoad() called");
+
         Server.RUNNING_SERVER.set(new SpigotServer());
         Adapter.INSTANCE.set(adapter);
         GameVersion.CURRENT_VERSION.set(adapter.getGameVersion());
-    }
 
-    @Override
-    public void onEnable() {
+        ItemStack.FACTORY.set(SpigotItem::new);
 
+        Objects.requireNonNull(getCommand("mcoretest")).setExecutor(new TestCommand());
         MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(Server.RUNNING_SERVER.get(), null));
     }
 

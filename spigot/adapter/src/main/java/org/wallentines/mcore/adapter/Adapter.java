@@ -141,6 +141,18 @@ public interface Adapter {
      */
     GameVersion getGameVersion();
 
+
+    /**
+     * Kicks the given player from the server with the given message
+     * @param player The player to kick
+     * @param message The kick message to send
+     */
+    void kickPlayer(Player player, Component message);
+
+
+    /**
+     * Contains the registered singleton for the given version. Populated as soon as the plugin is loaded
+     */
     Singleton<Adapter> INSTANCE = new Singleton<>();
 
 }
