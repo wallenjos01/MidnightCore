@@ -184,6 +184,11 @@ public class AdapterImpl implements Adapter {
         ServerPing.ServerData data = MinecraftServer.getServer().aF().c(); // ServerPing, ServerPingServerData
         return new GameVersion(data.a(), data.b());
     }
+
+    @Override
+    public void kickPlayer(Player player, Component message) {
+        ((CraftPlayer) player).getHandle().playerConnection.a(convert(message));
+    }
     
     private ConfigSection convert(NBTTagCompound nbt) {
         // Flatten int arrays, byte arrays, and long arrays to nbt lists

@@ -193,6 +193,11 @@ public class AdapterImpl implements Adapter {
         return new GameVersion(SharedConstants.b().c(), SharedConstants.c()); // getCurrentVersion, getId, getProtocolVersion
     }
 
+    @Override
+    public void kickPlayer(Player player, Component message) {
+        ((CraftPlayer) player).getHandle().c.a(convert(message));
+    }
+
     private ConfigSection convert(NBTTagCompound nbt) {
         // Flatten int arrays, byte arrays, and long arrays to nbt lists
         for(String key : nbt.e()) {

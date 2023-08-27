@@ -1,0 +1,44 @@
+[
+  {
+    "lines": [
+      {
+        "find_regex": "^ *switch *\\(slot\\) *\\{ *$",
+        "offset": [ 1, 6 ]
+      }
+    ],
+    "type": "replace_regex",
+    "find": "case ([A-Z]+) -> (.*);",
+    "replace": "case $1: { $2; break; }"
+  },
+  {
+    "lines": [
+      {
+        "find_regex": "^ *return *new *SpigotItem\\(switch *\\(slot\\) *\\{ *$",
+        "offset": 7
+      }
+    ],
+    "type": "replace",
+    "find": "});",
+    "replace": "}\n        return null;"
+  },
+  {
+    "lines": [
+      {
+        "find_regex": "^ *return *new *SpigotItem\\(switch *\\(slot\\) *\\{ *$",
+        "offset": [ 1, 6 ]
+      }
+    ],
+    "type": "replace_regex",
+    "find": "case ([A-Z]+) -> (.*);",
+    "replace": "case $1: return new SpigotItem($2);"
+  },
+  {
+    "lines": [
+      {
+        "find_regex": "^ *return *new *SpigotItem\\(switch *\\(slot\\) *\\{ *$"
+      }
+    ],
+    "type": "set",
+    "value": "        switch(slot) {"
+  }
+]

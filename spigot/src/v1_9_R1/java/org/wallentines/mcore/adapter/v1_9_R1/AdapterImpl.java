@@ -184,6 +184,11 @@ public class AdapterImpl implements Adapter {
         ServerPing.ServerData data = ((CraftServer) Bukkit.getServer()).getServer().getServerPing().getServerData();
         return new GameVersion(data.a(), data.getProtocolVersion());
     }
+
+    @Override
+    public void kickPlayer(Player player, Component message) {
+        ((CraftPlayer) player).getHandle().playerConnection.a(convert(message));
+    }
     
     private ConfigSection convert(NBTTagCompound nbt) {
         // Flatten int arrays, byte arrays, and long arrays to nbt lists

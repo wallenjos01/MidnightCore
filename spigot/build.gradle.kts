@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.parsing.parseBoolean
 
@@ -24,14 +25,35 @@ repositories {
     maven("https://libraries.minecraft.net/")
 }
 
-tasks.jar {
-    archiveClassifier.set("1.17-1.20")
-}
+configurations.create("shadow17").extendsFrom(configurations.shadow.get())
+configurations.create("shadow8").extendsFrom(configurations.shadow.get())
 
 tasks.named<Jar>("java8Jar") {
     val id = project.properties["id"]
     archiveBaseName = "${id}-${project.name}"
+}
+
+tasks.shadowJar {
+    archiveClassifier.set("1.17-1.20")
+    configurations = listOf(project.configurations["shadow17"])
+    minimize {
+        exclude("org.wallentines.*")
+    }
+}
+
+val java8ShadowJar = tasks.register<ShadowJar>("java8ShadowJar") {
+    from(sourceSets["java8"].output)
     archiveClassifier.set("1.8-1.16")
+    configurations = listOf(project.configurations["shadow8"])
+    minimize {
+        exclude("org.wallentines.*")
+    }
+}
+
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
+    dependsOn(java8ShadowJar)
 }
 
 // Versions compiled against Java 8
@@ -115,8 +137,10 @@ fun setupVersion(version: VersionInfo, javaVersion: Int) {
     dependencies {
         if(javaVersion == 8) {
             "java8CompileOnly"(set.output)
+            "shadow8"(set.output)
         } else {
             compileOnly(set.output)
+            "shadow17"(set.output)
         }
         "v${version.name}Implementation"("org.spigotmc:spigot-api:${version.version}-R0.1-SNAPSHOT")
         "v${version.name}Implementation"("org.spigotmc:spigot:${version.version}-R0.1-SNAPSHOT")
