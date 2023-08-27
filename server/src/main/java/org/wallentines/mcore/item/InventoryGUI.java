@@ -1,6 +1,7 @@
 package org.wallentines.mcore.item;
 
 import org.jetbrains.annotations.NotNull;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.types.Either;
@@ -46,15 +47,16 @@ public abstract class InventoryGUI {
     public void open(Player player) {
 
         closeMenu(player);
+        doOpen(player);
 
         OPEN_GUIS.put(player.getUUID(), this);
-        doOpen(player);
     }
 
     public void close(Player player) {
 
-        OPEN_GUIS.remove(player.getUUID());
-        doClose(player);
+        if(OPEN_GUIS.remove(player.getUUID()) == this) {
+            doClose(player);
+        }
     }
 
     public static void closeMenu(Player player) {

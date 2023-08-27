@@ -58,8 +58,15 @@ public class TestUtil {
                 );
             });
 
+            // Cursed hack to convert between spigot and vanilla dimension naming
+            String dim = "world_nether";
+            try {
+                Class.forName("org.wallentines.mcore.SpigotServer");
+            } catch (ClassNotFoundException ex) {
+                dim = "the_nether";
+            }
 
-            pl.teleport(new Location(new Identifier("minecraft", "the_nether"), 0, 100, 0, 0, 0));
+            pl.teleport(new Location(new Identifier("minecraft", dim), 0, 100, 0, 0, 0));
             pl.giveItem(is);
 
         } catch (Throwable th) {

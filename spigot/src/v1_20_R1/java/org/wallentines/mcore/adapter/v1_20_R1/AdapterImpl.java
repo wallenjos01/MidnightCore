@@ -146,31 +146,20 @@ public class AdapterImpl implements Adapter {
         EntityPlayer ep = ((CraftPlayer) player).getHandle();
         NBTTagCompound nbt = new NBTTagCompound();
         ep.f(nbt);
-        return convert(nbt);
+        return NBTConverter.fromNBT(nbt).asSection();
     }
 
     @Override
     public void loadTag(Player player, ConfigSection configSection) {
         EntityPlayer ep = ((CraftPlayer) player).getHandle();
-        try {
-            NBTTagCompound nbt = MojangsonParser.a(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
-            ep.a(nbt);
-        } catch (IllegalArgumentException | CommandSyntaxException ex) {
-            MidnightCoreAPI.LOGGER.error("An error occurred while loading a player tag! " + ex.getMessage());
-        }
+        ep.a((NBTTagCompound) NBTConverter.toNBT(configSection));
     }
 
     @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
 
         net.minecraft.world.item.ItemStack mis = getHandle(itemStack);
-        try {
-            NBTTagCompound nbt = MojangsonParser.a(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
-            mis.c(nbt);
-        } catch (IllegalArgumentException | CommandSyntaxException ex) {
-
-            MidnightCoreAPI.LOGGER.error("An error occurred while changing an item tag! " + ex.getMessage());
-        }
+        mis.c(configSection == null ? null : (NBTTagCompound) NBTConverter.toNBT(configSection));
     }
 
     @Override
@@ -180,7 +169,7 @@ public class AdapterImpl implements Adapter {
         NBTTagCompound nbt = mis.v();
         if(nbt == null) return null;
 
-        return convert(nbt);
+        return NBTConverter.fromNBT(nbt).asSection();
     }
 
     @Override
@@ -196,19 +185,6 @@ public class AdapterImpl implements Adapter {
     @Override
     public void kickPlayer(Player player, Component message) {
         ((CraftPlayer) player).getHandle().c.a(convert(message));
-    }
-
-    private ConfigSection convert(NBTTagCompound nbt) {
-        // Flatten int arrays, byte arrays, and long arrays to nbt lists
-        for(String key : nbt.e()) {
-            NBTBase base = nbt.c(key);
-            if(base instanceof NBTTagList && base.c() != NBTTagList.a) { // getType(), TYPE
-                NBTTagList flattened = new NBTTagList();
-                flattened.addAll(((NBTTagList) base));
-                nbt.a(key, flattened);
-            }
-        }
-        return JSONCodec.loadConfig(nbt.toString()).asSection();
     }
 
     private IChatBaseComponent convert(Component component) {

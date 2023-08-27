@@ -8,6 +8,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+import org.wallentines.mcore.MidnightCore;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.SpigotPlayer;
 import org.wallentines.mcore.text.Component;
@@ -19,7 +21,7 @@ public class SpigotInventoryGUI extends InventoryGUI {
 
     private final HashMap<Player, Inventory> players = new HashMap<>();
 
-    protected SpigotInventoryGUI(Component title, int rows) {
+    public SpigotInventoryGUI(Component title, int rows) {
         super(title, rows);
     }
 
@@ -46,8 +48,10 @@ public class SpigotInventoryGUI extends InventoryGUI {
     @Override
     protected void doClose(org.wallentines.mcore.Player player) {
         SpigotPlayer spl = ConversionUtil.validate(player);
-        players.remove(spl.getInternal());
-        spl.getInternal().closeInventory();
+        if(players.containsKey(spl.getInternal())) {
+            players.remove(spl.getInternal());
+            spl.getInternal().closeInventory();
+        }
     }
 
     private void doUpdate(Player player) {
@@ -113,18 +117,19 @@ public class SpigotInventoryGUI extends InventoryGUI {
         @EventHandler
         private void onClose(InventoryCloseEvent event) {
             Player pl = (Player) event.getPlayer();
-            if(!OPEN_GUIS.containsKey(pl.getUniqueId())) {
-                OPEN_GUIS.get(pl.getUniqueId()).close(new SpigotPlayer(Server.RUNNING_SERVER.get(), pl));
-            }
+            closeMenu(new SpigotPlayer(Server.RUNNING_SERVER.get(), pl));
         }
 
         @EventHandler
         private void onLeave(PlayerQuitEvent event) {
             Player pl = event.getPlayer();
-            if(OPEN_GUIS.containsKey(pl.getUniqueId())) {
-                OPEN_GUIS.get(pl.getUniqueId()).close(new SpigotPlayer(Server.RUNNING_SERVER.get(), pl));
-            }
+            closeMenu(new SpigotPlayer(Server.RUNNING_SERVER.get(), pl));
         }
+    }
+
+    static {
+
+        Bukkit.getPluginManager().registerEvents(new GUIListener(), MidnightCore.getPlugin(MidnightCore.class));
 
     }
 }

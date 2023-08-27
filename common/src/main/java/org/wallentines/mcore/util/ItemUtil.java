@@ -78,7 +78,7 @@ public class ItemUtil {
 
         // Strings
         if(context.isString(object)) {
-            return "\"" + context.asString(object) + "\"";
+            return "\"" + context.asString(object).replace("\"", "\\\"") + "\"";
         }
         // Numbers
         if(context.isNumber(object)) {
@@ -127,15 +127,19 @@ public class ItemUtil {
             StringBuilder out = new StringBuilder("[");
             if(maybeByte) {
                 out.append("B;");
-                for(T t : values) out.append(context.asNumber(t).byteValue()).append("b");
+                int i = 0;
+                for(T t : values) out.append(i++ > 0 ? "," : "").append(context.asNumber(t).byteValue()).append("b");
             } else if(maybeInt) {
                 out.append("I;");
-                for(T t : values) out.append(context.asNumber(t).byteValue());
+                int i = 0;
+                for(T t : values) out.append(i++ > 0 ? "," : "").append(context.asNumber(t).intValue());
             } else if(maybeLong) {
                 out.append("L;");
-                for(T t : values) out.append(context.asNumber(t).byteValue()).append("l");
+                int i = 0;
+                for(T t : values) out.append(i++ > 0 ? "," : "").append(context.asNumber(t).longValue()).append("l");
             } else {
-                for(T t : values) out.append(toNBTString(context, t));
+                int i = 0;
+                for(T t : values) out.append(i++ > 0 ? "," : "").append(toNBTString(context, t));
             }
             out.append("]");
             return out.toString();
@@ -144,8 +148,12 @@ public class ItemUtil {
         if(context.isMap(object)) {
             Map<String, T> values = context.asMap(object);
             StringBuilder out = new StringBuilder("{");
+            int i = 0;
             for(Map.Entry<String, T> ent : values.entrySet()) {
-                out.append("\"").append(ent.getKey()).append("\":");
+                if(i++ > 0) {
+                    out.append(",");
+                }
+                out.append("\"").append(ent.getKey().replace("\"", "\\\"")).append("\":");
                 out.append(toNBTString(context, ent.getValue()));
             }
             out.append("}");

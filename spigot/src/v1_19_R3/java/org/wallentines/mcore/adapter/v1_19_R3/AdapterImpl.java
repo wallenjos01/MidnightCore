@@ -146,41 +146,27 @@ public class AdapterImpl implements Adapter {
         EntityPlayer ep = ((CraftPlayer) player).getHandle();
         NBTTagCompound nbt = new NBTTagCompound();
         ep.f(nbt);
-        return convert(nbt);
+        return NBTConverter.fromNBT(nbt).asSection();
     }
 
     @Override
     public void loadTag(Player player, ConfigSection configSection) {
         EntityPlayer ep = ((CraftPlayer) player).getHandle();
-        try {
-            NBTTagCompound nbt = MojangsonParser.a(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
-            ep.a(nbt);
-        } catch (IllegalArgumentException | CommandSyntaxException ex) {
-            MidnightCoreAPI.LOGGER.error("An error occurred while loading a player tag! " + ex.getMessage());
-        }
+        ep.a((NBTTagCompound) NBTConverter.toNBT(configSection));
     }
 
     @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
-
         net.minecraft.world.item.ItemStack mis = getHandle(itemStack);
-        try {
-            NBTTagCompound nbt = MojangsonParser.a(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
-            mis.c(nbt);
-        } catch (IllegalArgumentException | CommandSyntaxException ex) {
-
-            MidnightCoreAPI.LOGGER.error("An error occurred while changing an item tag! " + ex.getMessage());
-        }
+        mis.c(configSection == null ? null : (NBTTagCompound) NBTConverter.toNBT(configSection));
     }
 
     @Override
     public ConfigSection getTag(ItemStack itemStack) {
-
         net.minecraft.world.item.ItemStack mis = getHandle(itemStack);
         NBTTagCompound nbt = mis.v();
         if(nbt == null) return null;
-
-        return convert(nbt);
+        return NBTConverter.fromNBT(nbt).asSection();
     }
 
     @Override

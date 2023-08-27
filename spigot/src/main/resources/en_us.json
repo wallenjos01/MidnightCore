@@ -1,0 +1,21 @@
+{
+  "command.main": "&bMidnightCore version &f%midnightcore_version%",
+  "command.module.already_loaded": "&fModule %module_id% is already loaded",
+  "command.module.already_unloaded": "&fThat module is already unloaded",
+  "command.module.loaded": "&fLoaded module %module_id%",
+  "command.module.unloaded": "&fUnloaded module %module_id%",
+  "command.module.list.header": "&fModules: &7(&f%server_modules_loaded%&7/&f%server_modules_registered%&7)",
+  "command.module.list.entry": " &7- &f%module_id%&7: %state%",
+  "command.module.enabled": "&fEnabled module %module_id%",
+  "command.module.disabled": "&fDisabled module %module_id%",
+  "command.module.reload": "&fReloaded module %module_id%",
+  "command.module.reload.all": "&fReloaded %count% modules",
+  "command.reload": "&bMidnightCore reloaded in &f%time%ms",
+  "module.state.loaded": "&a&lLOADED",
+  "module.state.unloaded": "&c&lUNLOADED",
+  "error.module_not_found": "A module with ID %module_id% was not found",
+  "error.module_load_failed": "Could not initialize module %module_id%",
+  "kick.missing_extensions": "&cThis server requires you use the following extensions:\n%entries%\n&cVisit &fhttps://github.com/M1dnightNinja/MidnightCore &cfor more information",
+  "kick.missing_extensions.entry": "&f%extension_id%\n",
+  "kick.invalid_extensions": "&fThe server received an invalid extension packet"
+}

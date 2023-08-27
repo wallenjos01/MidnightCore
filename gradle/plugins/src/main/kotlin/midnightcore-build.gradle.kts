@@ -11,8 +11,8 @@ java {
 
 repositories {
     mavenCentral()
-    maven("https://maven.wallentines.org/")
     mavenLocal()
+    maven("https://maven.wallentines.org/")
 }
 
 dependencies {
