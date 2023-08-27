@@ -3,11 +3,9 @@ package org.wallentines.mcore.adapter.v1_18_R1;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.dewy.nbt.tags.collection.CompoundTag;
 import net.minecraft.SharedConstants;
-import net.minecraft.nbt.MojangsonParser;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -25,6 +23,7 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
+import org.wallentines.mcore.adapter.NbtContext;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
@@ -35,6 +34,7 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 
+import java.io.DataInput;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -150,26 +150,12 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void loadTag(Player player, ConfigSection configSection) {
-        EntityPlayer ep = ((CraftPlayer) player).getHandle();
-        try {
-            NBTTagCompound nbt = MojangsonParser.a(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
-            ep.a(nbt);
-        } catch (IllegalArgumentException | CommandSyntaxException ex) {
-            MidnightCoreAPI.LOGGER.error("An error occurred while loading a player tag! " + ex.getMessage());
-        }
+        ((CraftPlayer) player).getHandle().a(convert(configSection));
     }
 
     @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
-
-        net.minecraft.world.item.ItemStack mis = getHandle(itemStack);
-        try {
-            NBTTagCompound nbt = MojangsonParser.a(ItemUtil.toNBTString(ConfigContext.INSTANCE, configSection));
-            mis.c(nbt);
-        } catch (IllegalArgumentException | CommandSyntaxException ex) {
-
-            MidnightCoreAPI.LOGGER.error("An error occurred while changing an item tag! " + ex.getMessage());
-        }
+        getHandle(itemStack).c(convert(configSection));
     }
 
     @Override
@@ -197,17 +183,16 @@ public class AdapterImpl implements Adapter {
         ((CraftPlayer) player).getHandle().b.a(convert(message));
     }
 
-    private ConfigSection convert(NBTTagCompound nbt) {
-        // Flatten int arrays, byte arrays, and long arrays to nbt lists
-        for(String key : List.copyOf(nbt.d())) {
-            NBTBase base = nbt.c(key);
-            if(base instanceof NBTTagList && base.b() != NBTTagList.a) { // getType(), TYPE
-                NBTTagList flattened = new NBTTagList();
-                flattened.addAll(((NBTTagList) base));
-                nbt.a(key, flattened);
-            }
-        }
-        return JSONCodec.loadConfig(nbt.e_()).asSection();
+    private ConfigSection convert(NBTTagCompound internal) {
+        if(internal == null) return null;
+        CompoundTag converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
+        return NbtContext.INSTANCE.convert(ConfigContext.INSTANCE, converted).asSection();
+    }
+
+    private NBTTagCompound convert(ConfigSection section) {
+        return NbtContext.toMojang(
+                (CompoundTag) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
+                dis -> NBTCompressedStreamTools.a((DataInput) dis));
     }
 
     private IChatBaseComponent convert(Component component) {

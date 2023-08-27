@@ -112,6 +112,7 @@ dependencies {
     shadow(libs.midnight.cfg.gson)
     shadow(libs.midnight.cfg.binary)
     shadow(libs.midnight.lib)
+    shadow(libs.bitbuf.nbt)
 
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
 }
