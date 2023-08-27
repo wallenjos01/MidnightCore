@@ -18,8 +18,6 @@ import org.wallentines.mcore.session.FabricSessionModule;
 import org.wallentines.mcore.session.SessionModule;
 import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
-import org.wallentines.mcore.text.CustomScoreboard;
-import org.wallentines.mcore.text.FabricScoreboard;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.midnightlib.types.ResettableSingleton;

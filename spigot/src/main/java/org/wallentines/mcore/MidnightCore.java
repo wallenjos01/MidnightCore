@@ -48,6 +48,7 @@ public class MidnightCore extends JavaPlugin {
 
         ItemStack.FACTORY.set(SpigotItem::new);
         InventoryGUI.FACTORY.set(SpigotInventoryGUI::new);
+        CustomScoreboard.FACTORY.set(SpigotScoreboard::new);
 
         Objects.requireNonNull(getCommand("mcoretest")).setExecutor(new TestCommand());
 

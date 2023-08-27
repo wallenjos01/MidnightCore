@@ -1,4 +1,4 @@
-package org.wallentines.mcore.text;
+package org.wallentines.mcore;
 
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
@@ -6,14 +6,12 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.ScoreboardHolder;
+import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.ConversionUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 public class FabricScoreboard extends CustomScoreboard {
@@ -141,21 +139,6 @@ public class FabricScoreboard extends CustomScoreboard {
                 board.getOrCreatePlayerScore(playerName, obj).setScore(line);
             }
         }
-    }
-
-    private static String generateRandomId() {
-
-        String values = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        Random rand = new Random();
-
-        StringBuilder builder = new StringBuilder();
-        for(int i = 0 ; i < 16 ; i++) {
-
-            int index = rand.nextInt(values.length());
-            builder.append(values.charAt(index));
-        }
-
-        return builder.toString();
     }
 
 }
