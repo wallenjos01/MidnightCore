@@ -9,7 +9,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.wallentines.mcore.MidnightCore;
-import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.SpigotPlayer;
 import org.wallentines.mcore.text.Component;

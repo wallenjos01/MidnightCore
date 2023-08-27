@@ -5,6 +5,7 @@ mdcfg = "2.0.0-SNAPSHOT"
 mdlib = "1.3.1-SNAPSHOT"
 slf4j = "2.0.7"
 jbr-anno = "24.0.1"
+nbt = "1.5.1"
 
 shadow = "8.1.1"
 loom = "1.3.8"
@@ -24,6 +25,7 @@ midnight-lib = { module = "org.wallentines:midnightlib", version.ref="mdlib" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref="jbr-anno" }
+bitbuf-nbt = { module = "dev.dewy:nbt", version.ref="nbt" }
 
 [plugins]
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }

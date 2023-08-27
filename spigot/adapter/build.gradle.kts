@@ -26,6 +26,7 @@ dependencies {
     // MidnightCore
     api(project(":common"))
     api(project(":server"))
+    api(libs.bitbuf.nbt)
 
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
     compileOnly(libs.midnight.cfg)

@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
+import net.minecraft.server.Main;
 import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
 import org.wallentines.mcore.item.FabricInventoryGUI;
