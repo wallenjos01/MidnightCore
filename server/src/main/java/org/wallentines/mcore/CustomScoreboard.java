@@ -1,10 +1,10 @@
-package org.wallentines.mcore.text;
+package org.wallentines.mcore;
 
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.WrappedPlayer;
+import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public abstract class CustomScoreboard {
@@ -66,6 +66,22 @@ public abstract class CustomScoreboard {
 
     public interface Factory {
         CustomScoreboard create(Component title);
+    }
+
+
+    protected static String generateRandomId() {
+
+        String values = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        Random rand = new Random();
+
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0 ; i < 16 ; i++) {
+
+            int index = rand.nextInt(values.length());
+            builder.append(values.charAt(index));
+        }
+
+        return builder.toString();
     }
 
 }

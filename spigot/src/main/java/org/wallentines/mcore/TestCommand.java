@@ -35,6 +35,11 @@ public class TestCommand implements CommandExecutor {
             return true;
         }
 
+        if(args[0].equals("scoreboard")) {
+            TestUtil.scoreboardCmd(player);
+            return true;
+        }
+
         return true;
     }
 }
