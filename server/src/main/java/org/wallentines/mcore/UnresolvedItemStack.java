@@ -1,6 +1,5 @@
-package org.wallentines.mcore.item;
+package org.wallentines.mcore;
 
-import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ComponentResolver;
 

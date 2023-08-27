@@ -3,7 +3,6 @@ package org.wallentines.mcore;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
-import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.mdcfg.ConfigSection;

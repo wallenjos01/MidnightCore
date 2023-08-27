@@ -1,7 +1,5 @@
-package org.wallentines.mcore.item;
+package org.wallentines.mcore;
 
-import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.TextColor;
 import org.wallentines.mcore.util.ItemUtil;

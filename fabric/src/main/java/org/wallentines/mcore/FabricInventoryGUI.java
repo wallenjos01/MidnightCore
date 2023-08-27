@@ -1,4 +1,4 @@
-package org.wallentines.mcore.item;
+package org.wallentines.mcore;
 
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,8 +10,6 @@ import net.minecraft.world.item.ItemStack;
 import org.wallentines.fbev.player.ContainerClickEvent;
 import org.wallentines.fbev.player.ContainerCloseEvent;
 import org.wallentines.fbev.player.PlayerLeaveEvent;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.WrappedPlayer;
 import org.wallentines.mcore.mixin.AccessorServerPlayer;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
@@ -107,7 +105,7 @@ public class FabricInventoryGUI extends InventoryGUI {
 
             if(items[i] == null) continue;
 
-            org.wallentines.mcore.item.ItemStack is = items[i].getItem(player);
+            org.wallentines.mcore.ItemStack is = items[i].getItem(player);
             if(is == null) {
                 continue;
             }
@@ -123,7 +121,7 @@ public class FabricInventoryGUI extends InventoryGUI {
             case QUICK_MOVE -> action == 0 ? ClickType.SHIFT_LEFT : ClickType.SHIFT_RIGHT;
             case SWAP -> ClickType.NUMBER_KEY;
             case CLONE -> ClickType.MIDDLE;
-            case THROW -> action == 0 ? ClickType.THROW : ClickType.SHIFT_THROW;
+            case THROW -> action == 0 ? ClickType.THROW : ClickType.THROW_ALL;
             case PICKUP_ALL -> ClickType.DOUBLE;
             default -> null;
         };

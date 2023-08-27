@@ -4,8 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.adapter.Adapter;
-import org.wallentines.mcore.item.ItemStack;
-import org.wallentines.mcore.item.SpigotItem;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.util.ConversionUtil;

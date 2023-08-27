@@ -1,7 +1,6 @@
-package org.wallentines.mcore.item;
+package org.wallentines.mcore;
 
 import org.bukkit.Material;
-import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;

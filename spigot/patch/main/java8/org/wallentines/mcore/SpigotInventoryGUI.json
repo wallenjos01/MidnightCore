@@ -1,0 +1,45 @@
+[
+  {
+    "lines": [
+      {
+        "find_regex": "^ *return *switch *\\(type\\) *\\{ *$",
+        "offset": [ 1, 9 ]
+      }
+    ],
+    "type": "replace_regex",
+    "find": "case ([A-Z_]+) -> (.*);",
+    "replace": "case $1: return $2;"
+  },
+  {
+    "lines": [
+      {
+        "find_regex": "^ *return *switch *\\(type\\) *\\{ *$",
+        "offset": 10
+      }
+    ],
+    "type": "set",
+    "value": ""
+  },
+  {
+    "lines": [
+      {
+        "find_regex": "^ *return *switch *\\(type\\) *\\{ *$",
+        "offset": 11
+      }
+    ],
+    "type": "replace",
+    "find": "};",
+    "replace": "} return null;"
+  },
+  {
+    "lines": [
+      "all",
+      {
+        "find_regex": "^ *return *switch *\\(type\\) *\\{ *$"
+      }
+    ],
+    "type": "replace_regex",
+    "find": "^( *)return *switch *\\(type\\) *\\{ *$",
+    "replace": "$1switch(type) {"
+  }
+]
