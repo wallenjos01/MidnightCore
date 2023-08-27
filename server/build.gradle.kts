@@ -17,5 +17,5 @@ patch {
 dependencies {
 
     api(project(":common"))
-    implementation(libs.midnight.cfg.binary)
+    api(libs.midnight.cfg.binary)
 }

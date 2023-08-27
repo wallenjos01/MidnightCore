@@ -8,6 +8,7 @@ import org.wallentines.mcore.adapter.GenericAdapter;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
 import java.io.IOException;
@@ -39,7 +40,9 @@ public class MidnightCore extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
 
+        MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(YamlCodec.fileCodec());
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
+        MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(BinaryCodec.fileCodec());
 
         Adapter.INSTANCE.set(adapter);
         GameVersion.CURRENT_VERSION.set(adapter.getGameVersion());
