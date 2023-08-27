@@ -1,11 +1,13 @@
 package org.wallentines.mcore;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.item.SpigotItem;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -75,8 +77,15 @@ public class SpigotPlayer implements Player {
 
     @Override
     public void teleport(Location location) {
+
+        String name = location.dimension.getPath();
+
+        World world = Bukkit.getWorld(name);
+        if(world == null) {
+            throw new IllegalArgumentException("Attempt to teleport player to invalid dimension! No dimension with ID " + name + " was found!");
+        }
         internal.teleport(new org.bukkit.Location(
-                Bukkit.getWorld(location.dimension.toString()),
+                world,
                 location.position.getX(),
                 location.position.getY(),
                 location.position.getZ(),
@@ -120,22 +129,22 @@ public class SpigotPlayer implements Player {
 
     @Override
     public void sendMessage(Component component) {
-        Adapter.INSTANCE.get().sendMessage(internal, component);
+        Adapter.INSTANCE.get().sendMessage(internal, ComponentResolver.resolveComponent(component, this));
     }
 
     @Override
     public void sendActionBar(Component component) {
-        Adapter.INSTANCE.get().sendActionBar(internal, component);
+        Adapter.INSTANCE.get().sendActionBar(internal, ComponentResolver.resolveComponent(component, this));
     }
 
     @Override
-    public void sendTitle(Component title) {
-        Adapter.INSTANCE.get().sendTitle(internal, title);
+    public void sendTitle(Component component) {
+        Adapter.INSTANCE.get().sendTitle(internal, ComponentResolver.resolveComponent(component, this));
     }
 
     @Override
-    public void sendSubtitle(Component title) {
-        Adapter.INSTANCE.get().sendSubtitle(internal, title);
+    public void sendSubtitle(Component component) {
+        Adapter.INSTANCE.get().sendSubtitle(internal, ComponentResolver.resolveComponent(component, this));
     }
 
     @Override
@@ -194,7 +203,7 @@ public class SpigotPlayer implements Player {
 
     @Override
     public void kick(Component message) {
-        Adapter.INSTANCE.get().kickPlayer(internal, message);
+        Adapter.INSTANCE.get().kickPlayer(internal, ComponentResolver.resolveComponent(message, this));
     }
 
     @Override

@@ -5,9 +5,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.Adapters;
 import org.wallentines.mcore.adapter.GenericAdapter;
+import org.wallentines.mcore.item.InventoryGUI;
 import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.item.SpigotInventoryGUI;
 import org.wallentines.mcore.item.SpigotItem;
+import org.wallentines.mcore.lang.LangRegistry;
+import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.JSONCodec;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class MidnightCore extends JavaPlugin {
@@ -36,16 +43,27 @@ public class MidnightCore extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
 
-        MidnightCoreAPI.LOGGER.warn("onLoad() called");
+        MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
 
-        Server.RUNNING_SERVER.set(new SpigotServer());
         Adapter.INSTANCE.set(adapter);
         GameVersion.CURRENT_VERSION.set(adapter.getGameVersion());
 
+        Server.RUNNING_SERVER.set(new SpigotServer());
+
         ItemStack.FACTORY.set(SpigotItem::new);
+        InventoryGUI.FACTORY.set(SpigotInventoryGUI::new);
 
         Objects.requireNonNull(getCommand("mcoretest")).setExecutor(new TestCommand());
-        MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(Server.RUNNING_SERVER.get(), null));
+
+        ConfigSection defaults = new ConfigSection();
+        try {
+            defaults = JSONCodec.loadConfig(MidnightCore.class.getResourceAsStream("/en_us.json")).asSection();
+        } catch (IOException ex) {
+            MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
+        }
+
+        MidnightCoreServer.registerPlaceholders(PlaceholderManager.INSTANCE);
+        MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(Server.RUNNING_SERVER.get(), LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE)));
     }
 
     @Override
