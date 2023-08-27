@@ -2,8 +2,8 @@ package org.wallentines.mcore.util;
 
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.SpigotPlayer;
-import org.wallentines.mcore.item.ItemStack;
-import org.wallentines.mcore.item.SpigotItem;
+import org.wallentines.mcore.ItemStack;
+import org.wallentines.mcore.SpigotItem;
 
 public class ConversionUtil {
 

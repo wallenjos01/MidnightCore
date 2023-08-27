@@ -1,5 +1,10 @@
 [
   {
+    "lines": [ 2 ],
+    "type": "set",
+    "value": "\nimport org.wallentines.mcore.ItemStack;"
+  },
+  {
     "lines": [ "all" ],
     "type": "replace",
     "find": "List.of()",

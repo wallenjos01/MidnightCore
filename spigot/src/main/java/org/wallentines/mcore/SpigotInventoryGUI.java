@@ -1,4 +1,4 @@
-package org.wallentines.mcore.item;
+package org.wallentines.mcore;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -8,9 +8,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
-import org.wallentines.mcore.MidnightCore;
-import org.wallentines.mcore.Server;
-import org.wallentines.mcore.SpigotPlayer;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.ConversionUtil;
 
@@ -68,7 +65,7 @@ public class SpigotInventoryGUI extends InventoryGUI {
 
             if(items[i] == null) continue;
 
-            org.wallentines.mcore.item.ItemStack is = items[i].getItem(spl);
+            ItemStack is = items[i].getItem(spl);
             if(is == null) {
                 continue;
             }
@@ -82,18 +79,18 @@ public class SpigotInventoryGUI extends InventoryGUI {
     private static class GUIListener implements Listener {
 
         private static ClickType getActionType(org.bukkit.event.inventory.ClickType type) {
-            switch (type) {
-                case LEFT: return ClickType.LEFT;
-                case SHIFT_LEFT: return ClickType.SHIFT_LEFT;
-                case RIGHT: return ClickType.RIGHT;
-                case SHIFT_RIGHT: return ClickType.SHIFT_RIGHT;
-                case MIDDLE: return ClickType.MIDDLE;
-                case NUMBER_KEY: return ClickType.NUMBER_KEY;
-                case DOUBLE_CLICK: return ClickType.DOUBLE;
-                case DROP: return ClickType.THROW;
-                case CONTROL_DROP: return ClickType.SHIFT_THROW;
-                default: return null;
-            }
+            return switch (type) {
+                case LEFT -> ClickType.LEFT;
+                case SHIFT_LEFT -> ClickType.SHIFT_LEFT;
+                case RIGHT -> ClickType.RIGHT;
+                case SHIFT_RIGHT -> ClickType.SHIFT_RIGHT;
+                case MIDDLE -> ClickType.MIDDLE;
+                case NUMBER_KEY -> ClickType.NUMBER_KEY;
+                case DOUBLE_CLICK -> ClickType.DOUBLE;
+                case DROP -> ClickType.THROW;
+                case CONTROL_DROP -> ClickType.THROW_ALL;
+                default -> null;
+            };
         }
 
 

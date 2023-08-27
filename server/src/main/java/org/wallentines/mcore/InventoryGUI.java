@@ -1,8 +1,6 @@
-package org.wallentines.mcore.item;
+package org.wallentines.mcore;
 
 import org.jetbrains.annotations.NotNull;
-import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.types.Either;
 import org.wallentines.midnightlib.types.Singleton;
@@ -78,7 +76,7 @@ public abstract class InventoryGUI {
         MIDDLE,
         DOUBLE,
         THROW,
-        SHIFT_THROW,
+        THROW_ALL,
         NUMBER_KEY
     }
 

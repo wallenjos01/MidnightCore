@@ -1,6 +1,5 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.serializer.InlineSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;

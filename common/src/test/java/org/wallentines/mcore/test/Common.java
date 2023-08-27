@@ -1,7 +1,7 @@
 package org.wallentines.mcore.test;
 
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.ItemStack;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 

@@ -1,7 +1,7 @@
 package org.wallentines.mcore.text;
 
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.ItemStack;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;

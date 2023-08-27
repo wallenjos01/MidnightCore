@@ -1,4 +1,4 @@
-package org.wallentines.mcore.item;
+package org.wallentines.mcore;
 
 import org.bukkit.Material;
 import org.wallentines.mcore.text.TextColor;

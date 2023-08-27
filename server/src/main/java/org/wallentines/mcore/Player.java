@@ -1,7 +1,6 @@
 package org.wallentines.mcore;
 
 
-import org.wallentines.mcore.item.ItemStack;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.skin.SkinModule;

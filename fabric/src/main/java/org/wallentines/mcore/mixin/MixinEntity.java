@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.Entity;
 import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Server;
-import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.util.ConversionUtil;

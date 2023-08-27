@@ -160,7 +160,7 @@ public class ConversionUtil {
      * @param is The ItemStack to check
      * @return The ItemStack casted to a Minecraft ItemStack
      */
-    public static ItemStack validate(org.wallentines.mcore.item.ItemStack is) {
+    public static ItemStack validate(org.wallentines.mcore.ItemStack is) {
 
         if(!(is instanceof ItemStack mis)) {
             throw new IllegalArgumentException("Attempt to access non-Minecraft ItemStack!");

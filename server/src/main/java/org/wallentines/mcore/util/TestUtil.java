@@ -1,9 +1,9 @@
 package org.wallentines.mcore.util;
 
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.item.InventoryGUI;
-import org.wallentines.mcore.item.ItemStack;
-import org.wallentines.mcore.item.UnresolvedItemStack;
+import org.wallentines.mcore.InventoryGUI;
+import org.wallentines.mcore.ItemStack;
+import org.wallentines.mcore.UnresolvedItemStack;
 import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.*;

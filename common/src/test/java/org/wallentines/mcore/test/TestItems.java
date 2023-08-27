@@ -2,7 +2,7 @@ package org.wallentines.mcore.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.wallentines.mcore.item.ItemStack;
+import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.TextColor;
 import org.wallentines.mcore.util.ItemUtil;
