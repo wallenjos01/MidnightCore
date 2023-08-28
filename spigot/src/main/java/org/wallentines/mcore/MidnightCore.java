@@ -5,10 +5,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.Adapters;
 import org.wallentines.mcore.adapter.GenericAdapter;
+import org.wallentines.mcore.extension.ServerExtensionModule;
+import org.wallentines.mcore.extension.SpigotExtensionModule;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
 import org.wallentines.mcore.messaging.SpigotMessagingModule;
+import org.wallentines.mcore.savepoint.SavepointModule;
+import org.wallentines.mcore.savepoint.SpigotSavepointModule;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.skin.SpigotSkinModule;
 import org.wallentines.mdcfg.ConfigSection;
@@ -98,6 +102,8 @@ public class MidnightCore extends JavaPlugin {
         // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, SpigotSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerMessagingModule.ID, SpigotMessagingModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(ServerExtensionModule.ID, SpigotExtensionModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(SavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
 
     }
 

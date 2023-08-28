@@ -2,15 +2,18 @@ package org.wallentines.mcore.savepoint;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 import org.wallentines.fbev.player.PlayerLeaveEvent;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
+import org.wallentines.mcore.ServerModule;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.event.Event;
+import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.util.EnumSet;
 
@@ -25,7 +28,11 @@ public class FabricSavepointModule extends SavepointModule {
             ((AdvancementExtension) spl.getAdvancements()).revokeAll(spl.server.getAdvancements());
         }
         if(flags.contains(SaveFlag.NBT)) {
+
+            Vec3 pos = spl.position();
             spl.load(new CompoundTag());
+            spl.setPos(pos);
+
             spl.removeAllEffects();
             spl.setRemainingFireTicks(0);
             spl.setArrowCount(0);
@@ -72,4 +79,6 @@ public class FabricSavepointModule extends SavepointModule {
 
         return true;
     }
+
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricSavepointModule::new, SavepointModule.ID, new ConfigSection());
 }
