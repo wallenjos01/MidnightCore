@@ -116,16 +116,14 @@ public class SkinUpdaterImpl implements SkinUpdater {
         epl.c.a(position);
         epl.c.a(equip);
 
-        server.g(() -> {
-            server.ac().d(epl); // sendPlayerPermissionLevel
-            server.ac().e(epl); // sendAllLevelInfo
+        server.ac().d(epl); // sendPlayerPermissionLevel
+        server.ac().e(epl); // sendAllLevelInfo
 
-            epl.w(); // onUpdateAbilities
-            epl.fN().j(); // getInventory(), tick()
+        epl.w(); // onUpdateAbilities
+        epl.fN().j(); // getInventory(), tick()
 
-            epl.f(velocity); // setDeltaMovement()
-            epl.c.a(new PacketPlayOutEntityVelocity(epl));
-        });
+        epl.f(velocity); // setDeltaMovement()
+        epl.c.a(new PacketPlayOutEntityVelocity(epl));
 
     }
 }

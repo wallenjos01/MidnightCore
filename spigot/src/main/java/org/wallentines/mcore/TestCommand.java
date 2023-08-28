@@ -40,6 +40,11 @@ public class TestCommand implements CommandExecutor {
             return true;
         }
 
+        if(args[0].equals("skin")) {
+            TestUtil.skinCmd(player);
+            return true;
+        }
+
         return true;
     }
 }

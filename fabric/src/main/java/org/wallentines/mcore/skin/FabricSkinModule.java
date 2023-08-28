@@ -25,21 +25,9 @@ import java.util.*;
 
 public class FabricSkinModule extends SkinModule {
 
-    private final HashMap<UUID, GameProfile> loginProfiles = new HashMap<>();
+    private final HashMap<UUID, Skin> loginSkins = new HashMap<>();
 
     public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricSkinModule::new, ID, DEFAULT_CONFIG);
-
-    @Override
-    public void setSkin(Player player, Skin skin) {
-
-        updateProfile(player, AuthUtil.forPlayer(ConversionUtil.validate(player), skin));
-    }
-
-    @Override
-    public void resetSkin(Player player) {
-
-        updateProfile(player, loginProfiles.get(player.getUUID()));
-    }
 
     @Override
     public boolean initialize(ConfigSection section, Server data) {
@@ -49,12 +37,11 @@ public class FabricSkinModule extends SkinModule {
         boolean offlineModeSkins = section.getBoolean("get_skins_in_offline_mode");
         Event.register(PlayerJoinEvent.class, this, 10, ev -> {
 
-            loginProfiles.put(ev.getPlayer().getUUID(), ev.getPlayer().getGameProfile());
+            loginSkins.put(ev.getPlayer().getUUID(), AuthUtil.getProfileSkin(ev.getPlayer().getGameProfile()));
             if(offlineModeSkins) {
                 MojangUtil.getSkinByNameAsync(ev.getPlayer().getGameProfile().getName()).thenAccept(skin -> {
-                    GameProfile newProfile = AuthUtil.forPlayer(ev.getPlayer(), skin);
-                    loginProfiles.put(ev.getPlayer().getUUID(), newProfile);
-                    updateProfile(ev.getPlayer(), newProfile);
+                    loginSkins.put(ev.getPlayer().getUUID(), skin);
+                    setSkin(ev.getPlayer(), skin);
                 });
             }
         });
@@ -62,10 +49,17 @@ public class FabricSkinModule extends SkinModule {
         return true;
     }
 
-    private void updateProfile(Player player, GameProfile gameProfile) {
+    @Override
+    public void resetSkin(Player player) {
+
+        setSkin(player, loginSkins.get(player.getUUID()));
+    }
+
+    @Override
+    public void setSkin(Player player, Skin skin) {
 
         ServerPlayer spl = ConversionUtil.validate(player);
-        ((AccessorPlayer) spl).setGameProfile(gameProfile);
+        AuthUtil.setProfileSkin(spl.getGameProfile(), skin);
 
         // Update
         MinecraftServer server = spl.getServer();
