@@ -20,7 +20,7 @@ public class FabricSessionModule extends SessionModule {
             if(sess != null) sess.removePlayer(ev.getPlayer());
         });
         Event.register(PlayerJoinEvent.class, this, 20, ev -> {
-            attemptRecovery(ev.getPlayer());
+            loadRecovery(ev.getPlayer());
         });
 
         return true;

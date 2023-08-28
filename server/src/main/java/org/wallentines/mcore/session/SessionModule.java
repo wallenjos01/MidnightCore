@@ -4,20 +4,19 @@ import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.data.DataManager;
 import org.wallentines.mcore.savepoint.Savepoint;
 import org.wallentines.mcore.savepoint.SavepointModule;
-import org.wallentines.mcore.util.FileExecutor;
+import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.BinaryCodec;
-import org.wallentines.mdcfg.codec.DecodeException;
+import org.wallentines.mdcfg.codec.FileCodecRegistry;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -30,11 +29,22 @@ public abstract class SessionModule implements ServerModule {
 
     protected final Singleton<Server> server = new Singleton<>();
     private final HashMap<UUID, Session> runningSessions = new HashMap<>();
+    private DataManager dataManager;
 
     @Override
     public boolean initialize(ConfigSection section, Server data) {
 
         this.server.set(data);
+
+        File recoveryFolder = data.getConfigDirectory().resolve("MidnightCore").resolve("recovery").toFile();
+        if(!recoveryFolder.isDirectory() && !recoveryFolder.mkdirs()) {
+            MidnightCoreAPI.LOGGER.error("Unable to create recovery folder at " + recoveryFolder.getAbsolutePath() + "!");
+            return false;
+        }
+
+        FileCodecRegistry reg = new FileCodecRegistry();
+        reg.registerFileCodec(BinaryCodec.fileCodec());
+        this.dataManager = new DataManager(recoveryFolder, reg);
 
         return true;
     }
@@ -106,64 +116,46 @@ public abstract class SessionModule implements ServerModule {
      * server
      * @param player The player to attempt recovery for
      */
-    protected void attemptRecovery(Player player) {
+    protected void loadRecovery(Player player) {
 
-        File lookup = getRecoveryFile(player);
-        if(!lookup.isFile()) return;
-        new FileExecutor(lookup, (file) -> {
+        ConfigSection recovery = dataManager.getDataOrNull(player.getUUID().toString());
+        if(recovery == null) {
+            return;
+        }
 
-            SavepointModule module = server.get().getModuleManager().getModule(SavepointModule.class);
-            if(module == null) {
-                throw new IllegalStateException("Savepoint module must be loaded!");
+        SavepointModule module = server.get().getModuleManager().getModule(SavepointModule.class);
+        if(module == null) {
+            throw new IllegalStateException("Savepoint module must be loaded!");
+        }
+
+        SerializeResult<Savepoint> savepoint = module.getSerializer().deserialize(ConfigContext.INSTANCE, recovery);
+
+        if (savepoint.isComplete()) {
+            savepoint.getOrThrow().load(player);
+            if (!dataManager.clear(player.getUUID().toString())) {
+                MidnightCoreAPI.LOGGER.warn("Failed to delete session recovery file! Please delete it manually, or else the session module may attempt to restore it again!");
             }
+        } else {
+            MidnightCoreAPI.LOGGER.warn("Failed to recover session data for " + player.getUsername() + "!");
+        }
 
-            try {
-                SerializeResult<Savepoint> savepoint = module.getSerializer().deserialize(
-                        ConfigContext.INSTANCE,
-                        BinaryCodec.fileCodec().loadFromFile(ConfigContext.INSTANCE, file, StandardCharsets.UTF_8));
+    }
 
-                if (savepoint.isComplete()) {
-                    savepoint.getOrThrow().load(player);
-                    if (!file.delete()) {
-                        MidnightCoreAPI.LOGGER.warn("Failed to delete session recovery file " + file.getAbsolutePath() + "! Please delete it manually, or else the session module may attempt to restore it again!");
-                    }
-                } else {
-                    MidnightCoreAPI.LOGGER.warn("Failed to recover session data for " + player.getUsername() + "!");
-                }
-            } catch (IOException | DecodeException ex) {
-                MidnightCoreAPI.LOGGER.warn("Failed to recover session data for " + player.getUsername() + "! " + ex.getMessage());
-            }
-        }).start();
-
+    protected void clearRecovery(Player player) {
+        dataManager.clear(player.getUUID().toString());
     }
 
     protected void saveRecovery(Player player, SavepointModule spm, Savepoint sp) {
-        new FileExecutor(SessionModule.getRecoveryFile(player), (file) -> {
-            try {
-                BinaryCodec.fileCodec().saveToFile(
-                        ConfigContext.INSTANCE,
-                        spm.getSerializer().serialize(ConfigContext.INSTANCE, sp).getOrThrow(),
-                        file,
-                        StandardCharsets.UTF_8);
 
-            } catch (IOException | DecodeException ex) {
-
-                MidnightCoreAPI.LOGGER.error("Unable to save player info! " + ex.getMessage());
-            }
+        SerializeResult<ConfigObject> res = spm.getSerializer().serialize(ConfigContext.INSTANCE, sp);
+        if(!res.isComplete()) {
+            MidnightCoreAPI.LOGGER.warn("Unable to save recovery data for " + player.getUsername() + "! " + res.getError());
+            return;
         }
-        ).start();
+
+        dataManager.save(player.getUUID().toString(), res.getOrThrow().asSection());
     }
 
-    /**
-     * Gets the recovery file name for the given Player
-     * @param player The player to lookup
-     * @return The recovery file name
-     */
-    public static File getRecoveryFile(Player player) {
-
-        String name = MidnightCoreAPI.MOD_ID + "-recovery-" + player.getUUID().toString() + ".tmp";
-        return player.getServer().getConfigDirectory().resolve(name).toFile();
-    }
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "session");
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
