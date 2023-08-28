@@ -13,6 +13,7 @@ import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.messaging.FabricServerMessagingModule;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
 import org.wallentines.mcore.savepoint.FabricSavepoint;
+import org.wallentines.mcore.savepoint.FabricSavepointModule;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.session.FabricSessionModule;
 import org.wallentines.mcore.session.SessionModule;
@@ -32,7 +33,7 @@ public class Init implements ModInitializer {
 
         // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
-        ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepoint.MODULE_INFO);
+        ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepointModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, FabricSessionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerMessagingModule.ID, FabricServerMessagingModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);

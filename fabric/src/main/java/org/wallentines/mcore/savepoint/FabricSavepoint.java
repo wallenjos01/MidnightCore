@@ -4,13 +4,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.phys.Vec3;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.util.NBTContext;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.ObjectSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;
-import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.util.EnumSet;
 
@@ -33,7 +33,9 @@ public class FabricSavepoint extends Savepoint {
         if(nbt != null) {
 
             spl.removeAllEffects();
+            Vec3 pos = spl.position();
             spl.load((CompoundTag) ConfigContext.INSTANCE.convert(NBTContext.INSTANCE, nbt));
+            spl.setPos(pos);
             for(MobEffectInstance inst : spl.getActiveEffects()) {
                 spl.connection.send(new ClientboundUpdateMobEffectPacket(spl.getId(), inst));
             }
@@ -96,6 +98,5 @@ public class FabricSavepoint extends Savepoint {
             }
     );
 
-    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricSavepointModule::new, SavepointModule.ID, new ConfigSection());
 
 }
