@@ -7,7 +7,6 @@ import org.wallentines.mcore.WrappedPlayer;
 import org.wallentines.mcore.savepoint.Savepoint;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.util.FileExecutor;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 
@@ -163,18 +162,10 @@ public abstract class Session {
 
         EnumSet<SavepointModule.SaveFlag> flags = getSavepointFlags();
         if(flags != null && !flags.isEmpty()) {
+
             server.getModuleManager().getModule(SavepointModule.class).loadPlayer(player, uuid.toString());
-
             if(isRegistered) {
-
-                // Delete session recovery if present
-                new FileExecutor(SessionModule.getRecoveryFile(player), (file) ->
-                {
-                    if (!file.delete()) {
-                        MidnightCoreAPI.LOGGER.warn("Unable to delete session recovery file at " + file.getAbsolutePath() + "! Please delete it manually, or else the session module may attempt to restore it again!");
-                    }
-                }
-                ).start();
+                module.clearRecovery(player);
             }
         }
 

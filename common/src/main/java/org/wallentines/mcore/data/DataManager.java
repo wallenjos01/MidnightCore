@@ -1,5 +1,6 @@
 package org.wallentines.mcore.data;
 
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
@@ -53,6 +54,22 @@ public class DataManager {
         return getWrapper(key).getRoot().asSection();
     }
 
+
+    /**
+     * Gets the data associated with a specific key
+     * @param key The key to lookup
+     * @return The data associated with the given key
+     */
+    @Nullable
+    public ConfigSection getDataOrNull(String key) {
+
+        FileWrapper<ConfigObject> wrapper = getWrapper(key, false);
+        if(wrapper == null) return null;
+
+        return wrapper.getRoot().asSection();
+    }
+
+
     /**
      * Saves the given data to a file associated with the given key
      * @param key The key to save
@@ -66,6 +83,23 @@ public class DataManager {
     }
 
     /**
+     * Clears all data associated with the given key and deletes the file
+     * @param key The key to clear
+     * @return Whether clearing was successful
+     */
+    public boolean clear(String key) {
+
+        FileWrapper<ConfigObject> obj = getWrapper(key);
+        openFiles.remove(key);
+
+        if(!obj.getFile().delete()) {
+            MidnightCoreAPI.LOGGER.error("Unable to delete data file " + obj.getFile().getAbsolutePath() + "!");
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Clears all references to files in the cache.
      */
     public void clearCache() {
@@ -75,6 +109,10 @@ public class DataManager {
     }
 
     private FileWrapper<ConfigObject> getWrapper(String key) {
+        return getWrapper(key, true);
+    }
+
+    private FileWrapper<ConfigObject> getWrapper(String key, boolean create) {
 
         if(opened.size() == cacheSize) {
             openFiles.remove(opened.remove());
@@ -82,12 +120,21 @@ public class DataManager {
 
         return openFiles.computeIfAbsent(key, k -> {
 
-            FileWrapper<ConfigObject> wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, k, searchDirectory);
-            wrapper.load();
-            if(wrapper.getRoot() == null || !wrapper.getRoot().isSection()) {
-                wrapper.setRoot(new ConfigSection());
+            FileWrapper<ConfigObject> wrapper;
+
+            if(create) {
+                wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, k, searchDirectory);
+            } else {
+                wrapper = fileCodecRegistry.find(ConfigContext.INSTANCE, k, searchDirectory);
             }
-            opened.add(key);
+
+            if(wrapper != null) {
+                wrapper.load();
+                if (wrapper.getRoot() == null || !wrapper.getRoot().isSection()) {
+                    wrapper.setRoot(new ConfigSection());
+                }
+                opened.add(key);
+            }
 
             return wrapper;
         });
