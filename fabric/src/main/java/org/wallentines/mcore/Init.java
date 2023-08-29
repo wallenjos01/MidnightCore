@@ -26,6 +26,7 @@ import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class Init implements ModInitializer {
 
@@ -41,7 +42,7 @@ public class Init implements ModInitializer {
             }
 
             MinecraftServer server = ConversionUtil.validate(srv);
-            MidnightCoreServer mcs = new MidnightCoreServer(srv, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE));
+            MidnightCoreServer mcs = new MidnightCoreServer(srv, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE), Path.of("config").resolve("MidnightCore"));
 
             ((ResettableSingleton<MidnightCoreServer>) MidnightCoreServer.INSTANCE).reset();
             MidnightCoreServer.INSTANCE.set(mcs);
