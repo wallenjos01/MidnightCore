@@ -1,6 +1,5 @@
 package org.wallentines.mcore.skin;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -13,7 +12,6 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3;
 import org.wallentines.fbev.player.PlayerJoinEvent;
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.mixin.AccessorPlayer;
 import org.wallentines.mcore.util.AuthUtil;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.MojangUtil;
@@ -35,19 +33,28 @@ public class FabricSkinModule extends SkinModule {
         super.initialize(section, data);
 
         boolean offlineModeSkins = section.getBoolean("get_skins_in_offline_mode");
-        Event.register(PlayerJoinEvent.class, this, 10, ev -> {
 
-            loginSkins.put(ev.getPlayer().getUUID(), AuthUtil.getProfileSkin(ev.getPlayer().getGameProfile()));
-            if(offlineModeSkins) {
-                MojangUtil.getSkinByNameAsync(ev.getPlayer().getGameProfile().getName()).thenAccept(skin -> {
-                    loginSkins.put(ev.getPlayer().getUUID(), skin);
-                    setSkin(ev.getPlayer(), skin);
-                });
-            }
-        });
+        for(Player player : data.getPlayers()) {
+            onLogin(player, offlineModeSkins);
+        }
+
+        Event.register(PlayerJoinEvent.class, this, 10, ev -> onLogin(ev.getPlayer(), offlineModeSkins));
 
         return true;
     }
+
+    private void onLogin(Player player, boolean offlineModeSkins) {
+
+        ServerPlayer spl = ConversionUtil.validate(player);
+        loginSkins.put(spl.getUUID(), AuthUtil.getProfileSkin(spl.getGameProfile()));
+        if(offlineModeSkins) {
+            MojangUtil.getSkinByNameAsync(spl.getGameProfile().getName()).thenAccept(skin -> {
+                loginSkins.put(spl.getUUID(), skin);
+                setSkin(spl, skin);
+            });
+        }
+    }
+
 
     @Override
     public void resetSkin(Player player) {
@@ -59,6 +66,9 @@ public class FabricSkinModule extends SkinModule {
     public void setSkin(Player player, Skin skin) {
 
         ServerPlayer spl = ConversionUtil.validate(player);
+
+        if(AuthUtil.getProfileSkin(spl.getGameProfile()) == skin) return;
+
         AuthUtil.setProfileSkin(spl.getGameProfile(), skin);
 
         // Update

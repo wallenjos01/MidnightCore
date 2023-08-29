@@ -9,6 +9,8 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 public abstract class SkinModule implements ServerModule {
 
+    protected Server server;
+
     public abstract void setSkin(Player player, Skin skin);
 
     public abstract void resetSkin(Player player);
@@ -19,6 +21,8 @@ public abstract class SkinModule implements ServerModule {
 
     @Override
     public boolean initialize(ConfigSection section, Server data) {
+
+        this.server = data;
 
         if(section.getBoolean("save_skins_in_savepoints")) {
             Event.register(SavepointCreatedEvent.class, this, ev -> {
@@ -31,6 +35,13 @@ public abstract class SkinModule implements ServerModule {
         }
 
         return true;
+    }
+
+    @Override
+    public void disable() {
+        for(Player player : server.getPlayers()) {
+            resetSkin(player);
+        }
     }
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "skin");
