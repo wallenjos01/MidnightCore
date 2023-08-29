@@ -3,7 +3,6 @@ package org.wallentines.mcore;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.Adapters;
@@ -12,6 +11,7 @@ import org.wallentines.mcore.extension.ServerExtensionModule;
 import org.wallentines.mcore.extension.SpigotExtensionModule;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
 import org.wallentines.mcore.messaging.SpigotMessagingModule;
 import org.wallentines.mcore.savepoint.SavepointModule;
@@ -74,7 +74,7 @@ public class MidnightCore extends JavaPlugin {
             MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
         }
 
-        MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(Server.RUNNING_SERVER.get(), LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE)));
+        MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(Server.RUNNING_SERVER.get(), LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE), null));
 
         // Commands
         registerCommand(new MainCommandExecutor());
@@ -124,6 +124,8 @@ public class MidnightCore extends JavaPlugin {
         ServerModule.REGISTRY.register(ServerExtensionModule.ID, SpigotExtensionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, SpigotSessionModule.MODULE_INFO);
+
+        PlaceholderManager.INSTANCE.registerSupplier("midnightcore_version", PlaceholderSupplier.inline(ctx -> getPlugin(MidnightCore.class).getDescription().getVersion()));
 
     }
 

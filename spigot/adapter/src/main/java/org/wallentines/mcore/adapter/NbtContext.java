@@ -181,6 +181,8 @@ public class NbtContext implements SerializeContext<Tag> {
                     }
                 });
                 tagWriter.writeToStream(object, new DataOutputStream(pos));
+                pos.close();
+
                 return out.get();
             }
         } catch (IOException | InterruptedException | ExecutionException ex) {
@@ -204,8 +206,9 @@ public class NbtContext implements SerializeContext<Tag> {
                 });
 
                 nbt.toStream(tag, new DataOutputStream(pos));
-                return out.get();
+                pos.close();
 
+                return out.get();
             }
         } catch (IOException | InterruptedException | ExecutionException ex) {
             return null;
