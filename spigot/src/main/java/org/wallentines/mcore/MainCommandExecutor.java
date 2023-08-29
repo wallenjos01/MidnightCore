@@ -56,14 +56,15 @@ public class MainCommandExecutor extends BukkitCommand {
                         sender.sendMessage(ChatColor.RED + "Usage: /mcore module load <[module]>");
                         return;
                     }
-                    MainCommand.executeLoadModule(server, Identifier.parseOrDefault(MidnightCoreAPI.MOD_ID, args[2]), cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeLoadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
                     return;
                 case "unload":
                     if(args.length == 2) {
                         sender.sendMessage(ChatColor.RED + "Usage: /mcore module unload <[module]>");
                         return;
                     }
-                    MainCommand.executeUnloadModule(server, Identifier.parseOrDefault(MidnightCoreAPI.MOD_ID, args[2]), cmp -> sendMessage(sender, cmp));
+
+                    MainCommand.executeUnloadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
                     return;
                 case "reload":
                     if(args.length == 2) {
@@ -73,7 +74,7 @@ public class MainCommandExecutor extends BukkitCommand {
                     if(args[2].equals("all")) {
                         MainCommand.executeReloadModule(server, null, cmp -> sendMessage(sender, cmp));
                     } else {
-                        MainCommand.executeReloadModule(server, Identifier.parseOrDefault(MidnightCoreAPI.MOD_ID, args[2]), cmp -> sendMessage(sender, cmp));
+                        MainCommand.executeReloadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
                     }
                     return;
                 case "enable":
@@ -81,14 +82,14 @@ public class MainCommandExecutor extends BukkitCommand {
                         sender.sendMessage(ChatColor.RED + "Usage: /mcore module enable <[module]>");
                         return;
                     }
-                    MainCommand.executeEnableModule(server, Identifier.parseOrDefault(MidnightCoreAPI.MOD_ID, args[2]), cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeEnableModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
                     return;
                 case "disable":
                     if(args.length == 2) {
                         sender.sendMessage(ChatColor.RED + "Usage: /mcore module disable <[module]>");
                         return;
                     }
-                    MainCommand.executeEnableModule(server, Identifier.parseOrDefault(MidnightCoreAPI.MOD_ID, args[2]), cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeEnableModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
                     return;
                 case "list":
                     MainCommand.executeListModules(server, cmp -> sendMessage(sender, cmp));

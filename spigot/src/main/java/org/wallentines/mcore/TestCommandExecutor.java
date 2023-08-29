@@ -46,6 +46,7 @@ public class TestCommandExecutor extends BukkitCommand {
 
         if(args.length == 0) {
             TestUtil.cmd(player);
+            return;
         }
 
         switch (args[0]) {

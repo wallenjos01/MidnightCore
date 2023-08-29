@@ -8,12 +8,13 @@ import dev.dewy.nbt.tags.array.LongArrayTag;
 import dev.dewy.nbt.tags.collection.CompoundTag;
 import dev.dewy.nbt.tags.collection.ListTag;
 import dev.dewy.nbt.tags.primitive.*;
-import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class NbtContext implements SerializeContext<Tag> {
@@ -172,10 +173,17 @@ public class NbtContext implements SerializeContext<Tag> {
                 PipedInputStream pis = new PipedInputStream();
                 pos.connect(pis);
 
+                CompletableFuture<CompoundTag> out = CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return nbt.fromStream(new DataInputStream(pis));
+                    } catch (IOException e) {
+                        return null;
+                    }
+                });
                 tagWriter.writeToStream(object, new DataOutputStream(pos));
-                return nbt.fromStream(new DataInputStream(pis));
+                return out.get();
             }
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException | ExecutionException ex) {
             return null;
         }
     }
@@ -187,10 +195,19 @@ public class NbtContext implements SerializeContext<Tag> {
                 PipedInputStream pis = new PipedInputStream();
                 pos.connect(pis);
 
+                CompletableFuture<T> out = CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return reader.readFromStream(new DataInputStream(pis));
+                    } catch (IOException e) {
+                        return null;
+                    }
+                });
+
                 nbt.toStream(tag, new DataOutputStream(pos));
-                return reader.readFromStream(new DataInputStream(pis));
+                return out.get();
+
             }
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException | ExecutionException ex) {
             return null;
         }
     }
