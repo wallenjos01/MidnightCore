@@ -45,9 +45,10 @@ public class FabricSkinModule extends SkinModule {
 
     private void onLogin(Player player, boolean offlineModeSkins) {
 
+        MinecraftServer mc = ConversionUtil.validate(server);
         ServerPlayer spl = ConversionUtil.validate(player);
         loginSkins.put(spl.getUUID(), AuthUtil.getProfileSkin(spl.getGameProfile()));
-        if(offlineModeSkins) {
+        if(offlineModeSkins && !mc.usesAuthentication()) {
             MojangUtil.getSkinByNameAsync(spl.getGameProfile().getName()).thenAccept(skin -> {
                 loginSkins.put(spl.getUUID(), skin);
                 setSkin(spl, skin);

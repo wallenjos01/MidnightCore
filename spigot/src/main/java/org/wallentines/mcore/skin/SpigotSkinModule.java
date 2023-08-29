@@ -56,7 +56,7 @@ public class SpigotSkinModule extends SkinModule {
     private void onLogin(Player player) {
 
         loginSkins.put(player, getSkin(player));
-        if(offlineModeSkins) {
+        if(offlineModeSkins && !Bukkit.getServer().getOnlineMode()) {
             MojangUtil.getSkinByNameAsync(player.getUsername()).thenAccept(skin -> {
                 loginSkins.put(player, skin);
                 setSkin(player, skin);
