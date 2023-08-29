@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
+import net.minecraft.server.MinecraftServer;
 import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
 import org.wallentines.mcore.lang.LangRegistry;
@@ -12,13 +13,13 @@ import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.messaging.FabricServerMessagingModule;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
-import org.wallentines.mcore.savepoint.FabricSavepoint;
 import org.wallentines.mcore.savepoint.FabricSavepointModule;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.session.FabricSessionModule;
 import org.wallentines.mcore.session.SessionModule;
 import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
+import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.codec.JSONCodec;
@@ -31,6 +32,28 @@ public class Init implements ModInitializer {
     @Override
     public void onInitialize() {
 
+        Server.RUNNING_SERVER.setEvent.register(this, srv -> {
+            ConfigSection defaults = new ConfigSection();
+            try {
+                defaults = JSONCodec.loadConfig(Init.class.getResourceAsStream("/midnightcore/en_us.json")).asSection();
+            } catch (IOException ex) {
+                MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
+            }
+
+            MinecraftServer server = ConversionUtil.validate(srv);
+            MidnightCoreServer mcs = new MidnightCoreServer(srv, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE));
+
+            ((ResettableSingleton<MidnightCoreServer>) MidnightCoreServer.INSTANCE).reset();
+            MidnightCoreServer.INSTANCE.set(mcs);
+
+            if (mcs.registerTestCommand()) {
+                TestCommand.register(server.getCommands().getDispatcher());
+            }
+            MainCommandExecutor.register(server.getCommands().getDispatcher());
+
+        });
+
+
         // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepointModule.MODULE_INFO);
@@ -38,11 +61,6 @@ public class Init implements ModInitializer {
         ServerModule.REGISTRY.register(ServerMessagingModule.ID, FabricServerMessagingModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
 
-        // Commands
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            MainCommand.register(dispatcher);
-            TestCommand.register(dispatcher);
-        });
     }
 
     static {
@@ -66,20 +84,6 @@ public class Init implements ModInitializer {
                 FabricLoader.getInstance().getModContainer("midnightcore")
                         .map(con -> con.getMetadata().getVersion().getFriendlyString())
                         .orElse("Unknown")));
-
-        // Lifecycle
-        ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
-            Server.RUNNING_SERVER.set(server);
-
-            ConfigSection defaults = new ConfigSection();
-            try {
-                defaults = JSONCodec.loadConfig(Init.class.getResourceAsStream("/midnightcore/en_us.json")).asSection();
-            } catch (IOException ex) {
-                MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
-            }
-            ((ResettableSingleton<MidnightCoreServer>) MidnightCoreServer.INSTANCE).reset();
-            MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(server, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE)));
-        });
 
         ServerLifecycleEvents.SERVER_STARTED.register(Server.START_EVENT::invoke);
         ServerLifecycleEvents.SERVER_STOPPING.register(Server.STOP_EVENT::invoke);

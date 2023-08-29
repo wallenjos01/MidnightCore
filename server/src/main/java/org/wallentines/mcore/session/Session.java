@@ -25,6 +25,11 @@ public abstract class Session {
     // This should only be on for registered Sessions. As such, this should only be set by the Session Module.
     boolean isRegistered = false;
 
+    /**
+     * Whether the session should make save points for players when they join, and load them when they leave
+     */
+    public boolean makeSavepoints = true;
+
     private boolean running = true;
 
     /**
@@ -122,21 +127,23 @@ public abstract class Session {
             return false;
         }
 
-        EnumSet<SavepointModule.SaveFlag> flags = null;
-        try {
-            flags = getSavepointFlags();
-        } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.error("An exception occurred while obtaining session savepoint slags!", ex);
-        }
-        if(flags != null && !flags.isEmpty()) {
-            SavepointModule spm = server.getModuleManager().getModule(SavepointModule.class);
-            if(spm == null) {
-                MidnightCoreAPI.LOGGER.error("Unable to save player info! Savepoint module is missing!");
-            } else {
+        if(makeSavepoints) {
+            EnumSet<SavepointModule.SaveFlag> flags = null;
+            try {
+                flags = getSavepointFlags();
+            } catch (Exception ex) {
+                MidnightCoreAPI.LOGGER.error("An exception occurred while obtaining session savepoint slags!", ex);
+            }
+            if (flags != null && !flags.isEmpty()) {
+                SavepointModule spm = server.getModuleManager().getModule(SavepointModule.class);
+                if (spm == null) {
+                    MidnightCoreAPI.LOGGER.error("Unable to save player info! Savepoint module is missing!");
+                } else {
 
-                Savepoint sp = spm.savePlayer(player, uuid.toString(), flags);
-                if (isRegistered) {
-                    module.saveRecovery(player, spm, sp);
+                    Savepoint sp = spm.savePlayer(player, uuid.toString(), flags);
+                    if (isRegistered) {
+                        module.saveRecovery(player, spm, sp);
+                    }
                 }
             }
         }
@@ -160,12 +167,14 @@ public abstract class Session {
      */
     public void removePlayer(Player player) {
 
-        EnumSet<SavepointModule.SaveFlag> flags = getSavepointFlags();
-        if(flags != null && !flags.isEmpty()) {
+        if(makeSavepoints) {
+            EnumSet<SavepointModule.SaveFlag> flags = getSavepointFlags();
+            if (flags != null && !flags.isEmpty()) {
 
-            server.getModuleManager().getModule(SavepointModule.class).loadPlayer(player, uuid.toString());
-            if(isRegistered) {
-                module.clearRecovery(player);
+                server.getModuleManager().getModule(SavepointModule.class).loadPlayer(player, uuid.toString());
+                if (isRegistered) {
+                    module.clearRecovery(player);
+                }
             }
         }
 

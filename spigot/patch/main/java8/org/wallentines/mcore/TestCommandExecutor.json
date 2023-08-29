@@ -1,0 +1,10 @@
+[
+  {
+    "lines": [
+      "all"
+    ],
+    "type": "replace_regex",
+    "find": "^ *case (\"[A-Za-z]+\") *-> *(.*); *$",
+    "replace": "case $1: $2; break;"
+  }
+]

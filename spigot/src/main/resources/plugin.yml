@@ -2,6 +2,3 @@ main: org.wallentines.mcore.MidnightCore
 name: midnightcore
 version: 0.1.0
 api-version: 1.13
-commands:
-  mcoretest:
-    description: MidnightCore test command

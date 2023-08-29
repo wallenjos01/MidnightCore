@@ -86,6 +86,8 @@ public abstract class MixinMinecraftServer implements Server {
 
     @Inject(method = "runServer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/MinecraftServer;initServer()Z", shift = At.Shift.AFTER))
     private void afterInit(CallbackInfo ci) {
+        Server.RUNNING_SERVER.reset();
+        Server.RUNNING_SERVER.set(this);
         loadModules(ServerModule.REGISTRY);
     }
 
