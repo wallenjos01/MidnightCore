@@ -34,6 +34,10 @@ public class SpigotSkinModule extends SkinModule {
 
         offlineModeSkins = section.getBoolean("get_skins_in_offline_mode");
 
+        for(Player player : data.getPlayers()) {
+            onLogin(player);
+        }
+
         Bukkit.getPluginManager().registerEvents(new SkinListener(this), MidnightCore.getPlugin(MidnightCore.class));
         return true;
     }
@@ -45,7 +49,19 @@ public class SpigotSkinModule extends SkinModule {
 
     @Override
     public void resetSkin(Player player) {
+        if(getSkin(player) == loginSkins.get(player)) return;
         setSkin(player, loginSkins.get(player));
+    }
+
+    private void onLogin(Player player) {
+
+        loginSkins.put(player, getSkin(player));
+        if(offlineModeSkins) {
+            MojangUtil.getSkinByNameAsync(player.getUsername()).thenAccept(skin -> {
+                loginSkins.put(player, skin);
+                setSkin(player, skin);
+            });
+        }
     }
 
     private static class SkinListener implements Listener {
@@ -67,14 +83,7 @@ public class SpigotSkinModule extends SkinModule {
                 return;
             }
 
-            SpigotPlayer player = new SpigotPlayer(Server.RUNNING_SERVER.get(), event.getPlayer());
-            mod.loginSkins.put(player, mod.getSkin(player));
-            if(mod.offlineModeSkins) {
-                MojangUtil.getSkinByNameAsync(player.getUsername()).thenAccept(skin -> {
-                    mod.loginSkins.put(player, skin);
-                    mod.setSkin(player, skin);
-                });
-            }
+            mod.onLogin(new SpigotPlayer(Server.RUNNING_SERVER.get(), event.getPlayer()));
         }
 
     }
