@@ -91,3 +91,10 @@ dependencies {
     modApi(include("org.wallentines:fabric-events:0.1.0-SNAPSHOT")!!)
     modApi(include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")!!)
 }
+
+
+tasks.withType<ProcessResources>() {
+    filesMatching("fabric.mod.json") {
+        expand(getProperties())
+    }
+}
