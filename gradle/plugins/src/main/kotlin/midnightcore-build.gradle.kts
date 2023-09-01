@@ -29,3 +29,12 @@ tasks.withType<Test>() {
     useJUnitPlatform()
     workingDir("run/test")
 }
+
+fun getProperties(): Map<String, String> {
+
+    return mapOf(
+            Pair("version", project.version as String),
+            Pair("id", project.properties["id"] as String)
+    )
+
+}

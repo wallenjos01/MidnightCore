@@ -117,6 +117,12 @@ dependencies {
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
 }
 
+tasks.withType<ProcessResources>() {
+    filesMatching("plugin.yml") {
+        expand(getProperties())
+    }
+}
+
 
 fun setupVersion(version: VersionInfo, javaVersion: Int) {
     val set = sourceSets.create("v${version.name}")

@@ -1,7 +1,7 @@
 {
     "schemaVersion": 1,
-    "id": "midnightcore",
-    "version": "0.1.0",
+    "id": "${id}",
+    "version": "${version}",
     "environment": "*",
     "entrypoints": {
         "main": [

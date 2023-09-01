@@ -1,4 +1,4 @@
 main: org.wallentines.mcore.MidnightCore
-name: midnightcore
-version: 0.1.0
+name: ${id}
+version: ${version}
 api-version: 1.13
