@@ -66,6 +66,7 @@ public class MidnightCoreServer {
 
         Player.registerPlaceholders(manager);
         Server.registerPlaceholders(manager);
+        Entity.registerPlaceholders(manager);
         LangContent.registerPlaceholders(manager);
     }
 

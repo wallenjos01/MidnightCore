@@ -1,8 +1,6 @@
 package org.wallentines.mcore;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.Adapters;
@@ -20,12 +18,12 @@ import org.wallentines.mcore.session.SessionModule;
 import org.wallentines.mcore.session.SpigotSessionModule;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.skin.SpigotSkinModule;
+import org.wallentines.mcore.util.CommandUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 public class MidnightCore extends JavaPlugin {
 
@@ -77,20 +75,10 @@ public class MidnightCore extends JavaPlugin {
         MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(Server.RUNNING_SERVER.get(), LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE), null));
 
         // Commands
-        registerCommand(new MainCommandExecutor());
+        CommandUtil.registerCommand(this, new MainCommandExecutor());
 
         if(MidnightCoreServer.INSTANCE.get().registerTestCommand()) {
-            registerCommand(new TestCommandExecutor());
-        }
-    }
-
-    private void registerCommand(Command cmd) {
-
-        try {
-            CommandMap cm = (CommandMap) Bukkit.getServer().getClass().getDeclaredMethod("getCommandMap").invoke(Bukkit.getServer());
-            cm.register(MidnightCoreAPI.MOD_ID, cmd);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            MidnightCoreAPI.LOGGER.error("Unable to register command!", ex);
+            CommandUtil.registerCommand(this, new TestCommandExecutor());
         }
     }
 
