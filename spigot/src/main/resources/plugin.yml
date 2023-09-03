@@ -2,3 +2,4 @@ main: org.wallentines.mcore.MidnightCore
 name: ${id}
 version: ${version}
 api-version: 1.13
+author: M1dnight_Ninja

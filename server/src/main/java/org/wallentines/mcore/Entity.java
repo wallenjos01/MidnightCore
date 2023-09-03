@@ -1,5 +1,7 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.serializer.InlineSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;
@@ -124,6 +126,14 @@ public interface Entity {
         }
 
         public static final Serializer<EquipmentSlot> SERIALIZER = InlineSerializer.of(EquipmentSlot::getId, EquipmentSlot::byId);
+    }
+
+    static void registerPlaceholders(PlaceholderManager manager) {
+
+        manager.registerSupplier("entity_uuid", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Entity.class, en -> en.getUUID().toString(), "")));
+        manager.registerSupplier("entity_type", PlaceholderSupplier.of(ctx -> ctx.onValueOr(Entity.class, en -> Component.translate("entity." + en.getType().getNamespace() + "." + en.getType().getPath()), Component.empty())));
+        manager.registerSupplier("entity_name", PlaceholderSupplier.of(ctx -> ctx.onValueOr(Entity.class, Entity::getDisplayName, Component.empty())));
+
     }
 
 }
