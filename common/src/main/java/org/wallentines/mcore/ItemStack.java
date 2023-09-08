@@ -72,6 +72,14 @@ public interface ItemStack {
     void shrink(int amount);
 
     /**
+     * Makes an exact copy of this item stack
+     * @return An exact copy
+     */
+    default ItemStack copy() {
+        return Builder.of(getType()).withCount(getCount()).withTag(getTag()).withDataValue(getLegacyDataValue()).build();
+    }
+
+    /**
      * Changes the display name of the item
      * @param component The new display name
      */
@@ -177,7 +185,7 @@ public interface ItemStack {
          * @return A reference to self
          */
         public Builder withDataValue(byte dataValue) {
-            if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+            if(dataValue != -1 && GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
                 throw new IllegalArgumentException("ItemStack data value specified on a version which does not support it!");
             }
 

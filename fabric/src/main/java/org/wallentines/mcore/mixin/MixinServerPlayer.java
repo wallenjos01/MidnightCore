@@ -28,6 +28,7 @@ import org.wallentines.mcore.util.ConversionUtil;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 
 @Mixin(ServerPlayer.class)
@@ -52,6 +53,11 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
     @Shadow public ServerGamePacketListenerImpl connection;
 
     @Shadow public abstract ServerLevel serverLevel();
+
+    @Intrinsic(displace = true)
+    public UUID mcore$getUUID() {
+        return getUUID();
+    }
 
     public String mcore$getUsername() {
         return ((net.minecraft.world.entity.player.Player) (Object) this).getGameProfile().getName();

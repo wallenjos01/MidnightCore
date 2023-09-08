@@ -8,4 +8,6 @@ public interface Skinnable {
 
     void setSkin(Skin skin);
 
+    void resetSkin();
+
 }

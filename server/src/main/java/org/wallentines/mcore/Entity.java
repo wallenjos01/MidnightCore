@@ -84,18 +84,18 @@ public interface Entity {
     void teleport(Location location);
 
     /**
-     * Changes the item in the given equipment slot. For entities that cannot hold items, this will do nothing.
-     * @param slot The slot to update
-     * @param item The item to put there
-     */
-    void setItem(EquipmentSlot slot, ItemStack item);
-
-    /**
      * Gets the item in the given equipment slot.
      * @param slot The slot to look up
      * @return The item in that slot
      */
     ItemStack getItem(EquipmentSlot slot);
+
+    /**
+     * Changes the item in the given equipment slot. For entities that cannot hold items, this will do nothing.
+     * @param slot The slot to update
+     * @param item The item to put there
+     */
+    void setItem(EquipmentSlot slot, ItemStack item);
 
     enum EquipmentSlot {
 

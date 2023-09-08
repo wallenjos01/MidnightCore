@@ -30,7 +30,7 @@ import java.util.UUID;
 
 @Mixin(net.minecraft.world.entity.Entity.class)
 @Implements(@Interface(iface=Entity.class, prefix = "mcore$"))
-public abstract class MixinEntity implements Entity {
+public abstract class MixinEntity {
 
     @Shadow public abstract UUID getUUID();
 
@@ -55,6 +55,10 @@ public abstract class MixinEntity implements Entity {
     @Shadow public abstract String getStringUUID();
 
     @Shadow public abstract void setItemSlot(net.minecraft.world.entity.EquipmentSlot par1, net.minecraft.world.item.ItemStack par2);
+
+    @Shadow @Nullable public abstract MinecraftServer getServer();
+
+    @Shadow public abstract boolean isRemoved();
 
     @Intrinsic(displace = true)
     public UUID mcore$getUUID() {
@@ -99,6 +103,11 @@ public abstract class MixinEntity implements Entity {
         return xRot;
     }
 
+    @Intrinsic(displace = true)
+    public boolean mcore$isRemoved() {
+        return isRemoved();
+    }
+
     public void mcore$teleport(Location location) {
 
         if(level.isClientSide) {
@@ -107,7 +116,11 @@ public abstract class MixinEntity implements Entity {
 
         net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
 
-        MinecraftServer server = ConversionUtil.validate(getServer());
+        MinecraftServer server = getServer();
+        if(server == null) {
+            throw new IllegalStateException("Attempt to teleport a non-server entity!");
+        }
+
         ServerLevel level = server.getLevel(ResourceKey.create(Registries.DIMENSION, ConversionUtil.toResourceLocation(location.dimension)));
 
         double x = location.position.getX();
@@ -141,7 +154,7 @@ public abstract class MixinEntity implements Entity {
         }
     }
 
-    public ItemStack mcore$getItem(EquipmentSlot slot) {
+    public ItemStack mcore$getItem(Entity.EquipmentSlot slot) {
 
         net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
         if(self instanceof LivingEntity le) {
@@ -151,7 +164,7 @@ public abstract class MixinEntity implements Entity {
         return null;
     }
 
-    public void mcore$setItem(EquipmentSlot slot, ItemStack item) {
+    public void mcore$setItem(Entity.EquipmentSlot slot, ItemStack item) {
 
         net.minecraft.world.item.ItemStack is = ConversionUtil.validate(item);
         setItemSlot(ConversionUtil.toMCEquipmentSlot(slot), is);
