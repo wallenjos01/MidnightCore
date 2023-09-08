@@ -101,6 +101,11 @@ public class SpigotItem implements ItemStack {
         setCount(internal.getAmount() - amount);
     }
 
+    @Override
+    public ItemStack copy() {
+        return new SpigotItem(internal.clone());
+    }
+
     public org.bukkit.inventory.ItemStack getInternal() {
         return internal;
     }

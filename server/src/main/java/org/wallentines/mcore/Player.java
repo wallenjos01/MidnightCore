@@ -127,6 +127,13 @@ public interface Player extends Entity, Skinnable {
         getServer().getModuleManager().getModule(SkinModule.class).setSkin(this, skin);
     }
 
+
+    @Override
+    default void resetSkin() {
+
+        getServer().getModuleManager().getModule(SkinModule.class).resetSkin(this);
+    }
+
     /**
      * Kicks the player from the server with the given message
      * @param message The kick message to send

@@ -116,6 +116,7 @@ public class PlaceholderContext {
 
         return clazz.cast(cache.computeIfAbsent(clazz, k -> {
             for (Object value : values) {
+                if(value == null) continue;
                 if (k.isAssignableFrom(value.getClass())) {
                     return k.cast(value);
                 }

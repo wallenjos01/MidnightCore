@@ -20,20 +20,26 @@ import java.util.Optional;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
 @Implements(@Interface(iface= ItemStack.class, prefix = "mcore$"))
-public abstract class MixinItemStack implements ItemStack {
+public abstract class MixinItemStack {
+
 
     @Shadow public abstract Item getItem();
-
-    @Shadow public abstract int getCount();
-    @Shadow public abstract void setCount(int count);
-    @Shadow public abstract void shrink(int count);
-    @Shadow public abstract void grow(int count);
 
     @Shadow @Nullable private CompoundTag tag;
 
     @Shadow public abstract void setTag(@Nullable CompoundTag compoundTag);
 
-    @Shadow public abstract net.minecraft.world.item.ItemStack setHoverName(net.minecraft.network.chat.@Nullable Component component);
+    @Shadow public abstract net.minecraft.world.item.ItemStack setHoverName(@Nullable net.minecraft.network.chat.Component component);
+
+    @Shadow public abstract int getCount();
+
+    @Shadow public abstract void setCount(int i);
+
+    @Shadow public abstract void grow(int i);
+
+    @Shadow public abstract void shrink(int i);
+
+    @Shadow public abstract net.minecraft.world.item.ItemStack copy();
 
     public Identifier mcore$getType() {
         return RegistryUtil.registry(Registries.ITEM)
@@ -53,4 +59,30 @@ public abstract class MixinItemStack implements ItemStack {
     public void mcore$setName(Component component) {
         setHoverName(new WrappedComponent(ItemUtil.applyItemNameBaseStyle(component)));
     }
+
+    public byte mcore$getLegacyDataValue() {
+        return 0;
+    }
+
+    public ItemStack mcore$copy() {
+        return copy();
+    }
+
+//    int mcore$getCount() {
+//        return getCount();
+//    }
+//
+//    void mcore$setCount(int count) {
+//        setCount(count);
+//    }
+//
+//    void mcore$grow(int amount) {
+//        grow(amount);
+//    }
+//
+//    void mcore$shrink(int amount) {
+//        shrink(amount);
+//    }
+
+
 }
