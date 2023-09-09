@@ -108,7 +108,12 @@ public interface ItemStack {
             Identifier.serializer("minecraft").entry("type", ItemStack::getType),
             NumberSerializer.forInt(1, 64).entry("count", ItemStack::getCount).orElse(1),
             ConfigSection.SERIALIZER.entry("tag", ItemStack::getTag).optional(),
-            Serializer.BYTE.entry("data", ItemStack::getLegacyDataValue).orElse((byte) -1),
+            Serializer.BYTE.<ItemStack>entry("data", is -> {
+                if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                    return null;
+                }
+                return is.getLegacyDataValue();
+            }).orElse((byte) 0),
             (type, count, tag, data) -> FACTORY.get().build(type, count, tag, data)
     );
 
@@ -129,7 +134,7 @@ public interface ItemStack {
         private final Identifier id;
         private int count = 1;
         private ConfigSection tag = null;
-        private byte dataValue = -1;
+        private byte dataValue = 0;
 
         private Builder(Identifier id) {
             this.id = id;
@@ -185,8 +190,8 @@ public interface ItemStack {
          * @return A reference to self
          */
         public Builder withDataValue(byte dataValue) {
-            if(dataValue != -1 && GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-                throw new IllegalArgumentException("ItemStack data value specified on a version which does not support it!");
+            if(dataValue != 0 && GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                MidnightCoreAPI.LOGGER.warn("ItemStack data value specified on a version which does not support it!");
             }
 
             this.dataValue = dataValue;
