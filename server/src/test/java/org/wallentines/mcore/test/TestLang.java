@@ -3,7 +3,6 @@ package org.wallentines.mcore.test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ComponentResolver;

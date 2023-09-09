@@ -2,10 +2,10 @@ package org.wallentines.mcore.adapter.v1_19_R1v2;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dewy.nbt.tags.collection.CompoundTag;
 import net.minecraft.SharedConstants;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NBTCompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -27,16 +27,13 @@ import org.wallentines.mcore.adapter.NbtContext;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
-import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 
 import java.io.DataInput;
 import java.lang.reflect.Field;
-import java.util.List;
 
 public class AdapterImpl implements Adapter {
 

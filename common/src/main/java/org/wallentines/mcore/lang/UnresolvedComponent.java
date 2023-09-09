@@ -1,6 +1,9 @@
 package org.wallentines.mcore.lang;
 
-import org.wallentines.mcore.text.*;
+import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ConfigSerializer;
+import org.wallentines.mcore.text.Content;
+import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.JSONCodec;
@@ -8,7 +11,10 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.types.Either;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;

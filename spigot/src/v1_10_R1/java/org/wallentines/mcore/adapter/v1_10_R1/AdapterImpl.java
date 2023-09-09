@@ -12,19 +12,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.NbtContext;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 public class AdapterImpl implements Adapter {
 

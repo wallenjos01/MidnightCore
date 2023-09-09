@@ -152,7 +152,6 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
         Scoreboard prev = mcore_sb$getScoreboard();
         mcore$scoreboard = scoreboard;
 
-        MidnightCoreAPI.LOGGER.warn("Updated Scoreboard Override");
         ServerPlayer spl = (ServerPlayer) (Object) this;
 
         // Clear existing scoreboard if necessary

@@ -2,7 +2,10 @@ package org.wallentines.mcore.messaging;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.wallentines.mcore.*;
+import org.wallentines.mcore.MidnightCoreAPI;
+import org.wallentines.mcore.ProxyModule;
+import org.wallentines.mcore.ProxyPlayer;
+import org.wallentines.mcore.ProxyServer;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
