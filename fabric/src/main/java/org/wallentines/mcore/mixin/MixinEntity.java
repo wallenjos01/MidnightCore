@@ -14,9 +14,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.Entity;
+import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Server;
-import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -30,9 +30,7 @@ import java.util.UUID;
 
 @Mixin(net.minecraft.world.entity.Entity.class)
 @Implements(@Interface(iface=Entity.class, prefix = "mcore$"))
-public abstract class MixinEntity {
-
-    @Shadow public abstract UUID getUUID();
+public abstract class MixinEntity implements Entity {
 
     @Shadow private Level level;
 
@@ -56,15 +54,12 @@ public abstract class MixinEntity {
 
     @Shadow public abstract void setItemSlot(net.minecraft.world.entity.EquipmentSlot par1, net.minecraft.world.item.ItemStack par2);
 
-    @Shadow @Nullable public abstract MinecraftServer getServer();
-
-    @Shadow public abstract boolean isRemoved();
-
     @Intrinsic(displace = true)
     public UUID mcore$getUUID() {
-        return getUUID();
+        return ((net.minecraft.world.entity.Entity) (Object) this).getUUID();
     }
 
+    @Intrinsic(displace = true)
     public Identifier mcore$getType() {
 
         net.minecraft.world.entity.Entity ent = (net.minecraft.world.entity.Entity) (Object) this;
@@ -75,10 +70,12 @@ public abstract class MixinEntity {
                 .orElseGet(() -> new Identifier("minecraft", "pig"));
     }
 
+    @Intrinsic(displace = true)
     public Server mcore$getServer() {
-        return ((net.minecraft.world.entity.Entity) (Object) this).getServer();
+        return (Server) ((net.minecraft.world.entity.Entity) (Object) this).getServer();
     }
 
+    @Intrinsic(displace = true)
     public Component mcore$getDisplayName() {
 
         net.minecraft.network.chat.Component comp = getCustomName();
@@ -105,7 +102,7 @@ public abstract class MixinEntity {
 
     @Intrinsic(displace = true)
     public boolean mcore$isRemoved() {
-        return isRemoved();
+        return ((net.minecraft.world.entity.Entity) (Object) this).isRemoved();
     }
 
     public void mcore$teleport(Location location) {
@@ -116,7 +113,7 @@ public abstract class MixinEntity {
 
         net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
 
-        MinecraftServer server = getServer();
+        MinecraftServer server = self.getServer();
         if(server == null) {
             throw new IllegalStateException("Attempt to teleport a non-server entity!");
         }
@@ -158,7 +155,7 @@ public abstract class MixinEntity {
 
         net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
         if(self instanceof LivingEntity le) {
-            return le.getItemBySlot(ConversionUtil.toMCEquipmentSlot(slot));
+            return (ItemStack) (Object) le.getItemBySlot(ConversionUtil.toMCEquipmentSlot(slot));
         }
 
         return null;

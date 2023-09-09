@@ -19,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.text.WrappedComponent;
@@ -28,7 +27,6 @@ import org.wallentines.mcore.util.ConversionUtil;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 
 @Mixin(ServerPlayer.class)
@@ -54,10 +52,6 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
 
     @Shadow public abstract ServerLevel serverLevel();
 
-    @Intrinsic(displace = true)
-    public UUID mcore$getUUID() {
-        return getUUID();
-    }
 
     public String mcore$getUsername() {
         return ((net.minecraft.world.entity.player.Player) (Object) this).getGameProfile().getName();
@@ -67,6 +61,7 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
         return AuthUtil.getProfileSkin(((net.minecraft.world.entity.player.Player) (Object) this).getGameProfile());
     }
 
+    @Intrinsic(displace = true)
     public Component mcore$getDisplayName() {
         ServerPlayer spl = (ServerPlayer) (Object) this;
         return ContentConverter.convertReverse(spl.getDisplayName());
@@ -147,6 +142,7 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
         mcore$language = packet.language();
     }
 
+    @Intrinsic(displace = true)
     public Scoreboard mcore_sb$getScoreboard() {
         return mcore$scoreboard == null ? serverLevel().getScoreboard() : mcore$scoreboard;
     }
@@ -184,6 +180,6 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
 
     public void mcore$kick(Component message) {
 
-        connection.disconnect(WrappedComponent.resolved(message, (ServerPlayer) (Object) this));
+        connection.disconnect(WrappedComponent.resolved(message, this));
     }
 }

@@ -18,14 +18,6 @@
     "mixins": [
         "midnightcore.mixins.json"
     ],
-    "custom": {
-        "loom:injected_interfaces": {
-            "net/minecraft/server/MinecraftServer": [ "org/wallentines/mcore/Server" ],
-            "net/minecraft/class_3222": [ "org/wallentines/mcore/Player", "org/wallentines/mcore/ScoreboardHolder" ],
-            "net/minecraft/class_1297": [ "org/wallentines/mcore/Entity" ],
-            "net/minecraft/class_1799": [ "org/wallentines/mcore/ItemStack" ]
-        }
-    },
     "name": "MidnightCore",
     "description": "such wow.",
     "contact": {

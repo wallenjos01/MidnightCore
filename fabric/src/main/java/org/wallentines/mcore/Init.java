@@ -1,7 +1,6 @@
 package org.wallentines.mcore;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
@@ -86,8 +85,12 @@ public class Init implements ModInitializer {
                         .map(con -> con.getMetadata().getVersion().getFriendlyString())
                         .orElse("Unknown")));
 
-        ServerLifecycleEvents.SERVER_STARTED.register(Server.START_EVENT::invoke);
-        ServerLifecycleEvents.SERVER_STOPPING.register(Server.STOP_EVENT::invoke);
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            Server.START_EVENT.invoke((Server) server);
+        });
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            Server.STOP_EVENT.invoke((Server) server);
+        });
         ServerLifecycleEvents.SERVER_STOPPED.register(srv -> Server.RUNNING_SERVER.reset());
 
 

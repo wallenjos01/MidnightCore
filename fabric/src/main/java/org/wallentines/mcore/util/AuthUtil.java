@@ -16,7 +16,7 @@ public class AuthUtil {
     public static Skin getProfileSkin(GameProfile profile) {
 
         PropertyMap map = profile.getProperties();
-        if(map == null || !map.containsKey("textures") || map.get("textures").size() == 0) return null;
+        if(map == null || !map.containsKey("textures") || map.get("textures").isEmpty()) return null;
 
         Property skin = map.get("textures").iterator().next();
         return new Skin(profile.getId(), skin.getValue(), skin.getSignature());
@@ -31,7 +31,7 @@ public class AuthUtil {
     public static GameProfile setProfileSkin(GameProfile profile, Skin skin) {
 
         profile.getProperties().get("textures").clear();
-        profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
+        if(skin != null) profile.getProperties().put("textures", new Property("textures", skin.getValue(), skin.getSignature()));
         return profile;
     }
 

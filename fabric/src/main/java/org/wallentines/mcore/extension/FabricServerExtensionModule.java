@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public class FabricServerExtensionModule extends ServerExtensionModule {
     @Override
     protected void registerJoinListener(Consumer<Player> player) {
-        Event.register(PlayerJoinEvent.class, this, ev -> player.accept(ev.getPlayer()));
+        Event.register(PlayerJoinEvent.class, this, ev -> player.accept((Player) ev.getPlayer()));
     }
 
     public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<Server, ServerModule>(FabricServerExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ServerMessagingModule.ID);
