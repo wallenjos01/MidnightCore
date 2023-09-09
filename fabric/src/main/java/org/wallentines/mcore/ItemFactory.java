@@ -17,7 +17,7 @@ public class ItemFactory implements ItemStack.Factory {
 
         Item it = ((DefaultedRegistry<Item>) RegistryUtil.registryOrThrow(Registries.ITEM)).get(ConversionUtil.toResourceLocation(type));
 
-        ItemStack out = new net.minecraft.world.item.ItemStack(it, count);
+        ItemStack out = (ItemStack) (Object) new net.minecraft.world.item.ItemStack(it, count);
         out.setTag(tag);
         return out;
     }

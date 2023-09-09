@@ -27,7 +27,7 @@ public class FabricInventoryGUI extends InventoryGUI {
 
         Event.register(ContainerClickEvent.class, this, ev -> {
 
-            Player pl = ev.getPlayer();
+            Player pl = (Player) ev.getPlayer();
             if(!players.containsKey(pl.wrap())) return;
             ev.setCancelled(true);
 
@@ -37,13 +37,13 @@ public class FabricInventoryGUI extends InventoryGUI {
         });
 
         Event.register(ContainerCloseEvent.class, this, ev -> {
-            Player pl = ev.getPlayer();
+            Player pl = (Player) ev.getPlayer();
             if(!players.containsKey(pl.wrap())) return;
             close(pl);
         });
 
         Event.register(PlayerLeaveEvent.class, this, ev -> {
-            Player pl = ev.getPlayer();
+            Player pl = (Player) ev.getPlayer();
             if(!players.containsKey(pl.wrap())) return;
             close(pl);
         });
@@ -72,7 +72,7 @@ public class FabricInventoryGUI extends InventoryGUI {
         SimpleContainer inv = new SimpleContainer(size);
         ChestMenu handler = createScreen(size / 9, spl, inv);
 
-        spl.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), WrappedComponent.resolved(title, spl)));
+        spl.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), WrappedComponent.resolved(title, (Player) spl)));
         spl.containerMenu = handler;
 
         players.put(player.wrap(), handler);
@@ -94,9 +94,9 @@ public class FabricInventoryGUI extends InventoryGUI {
 
     private void doUpdate(ServerPlayer player) {
 
-        ChestMenu menu = players.get(player.wrap());
+        ChestMenu menu = players.get(((Player) player).wrap());
         if(menu == null) {
-            doOpen(player);
+            doOpen((Player) player);
             doUpdate(player);
             return;
         }
@@ -105,7 +105,7 @@ public class FabricInventoryGUI extends InventoryGUI {
 
             if(items[i] == null) continue;
 
-            org.wallentines.mcore.ItemStack is = items[i].getItem(player);
+            org.wallentines.mcore.ItemStack is = items[i].getItem((Player) player);
             if(is == null) {
                 continue;
             }

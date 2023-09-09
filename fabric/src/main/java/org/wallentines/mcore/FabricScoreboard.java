@@ -87,7 +87,7 @@ public class FabricScoreboard extends CustomScoreboard {
             Objective obj = board.addObjective(
                     objectiveId,
                     ObjectiveCriteria.DUMMY,
-                    WrappedComponent.resolved(title, player),
+                    WrappedComponent.resolved(title, (Player) player),
                     ObjectiveCriteria.RenderType.INTEGER);
 
             board.startTrackingObjective(obj);
@@ -112,7 +112,7 @@ public class FabricScoreboard extends CustomScoreboard {
                 throw new IllegalStateException("Attempt to update scoreboard before initialization!");
             }
 
-            obj.setDisplayName(WrappedComponent.resolved(title, player));
+            obj.setDisplayName(WrappedComponent.resolved(title, (Player) player));
         }
 
         public void updateLine(int line) {
@@ -135,7 +135,7 @@ public class FabricScoreboard extends CustomScoreboard {
             if(entries[line] == null) {
                 board.resetPlayerScore(playerName, obj);
             } else {
-                team.setPlayerPrefix(WrappedComponent.resolved(entries[line], player));
+                team.setPlayerPrefix(WrappedComponent.resolved(entries[line], (Player) player));
                 board.getOrCreatePlayerScore(playerName, obj).setScore(line);
             }
         }

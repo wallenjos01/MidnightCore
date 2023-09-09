@@ -9,7 +9,9 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.wallentines.mcore.*;
+import org.wallentines.mcore.Player;
+import org.wallentines.mcore.Server;
+import org.wallentines.mcore.ServerModule;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
@@ -21,7 +23,7 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(MinecraftServer.class)
 @Implements(@Interface(iface=Server.class, prefix = "mcore$"))
-public abstract class MixinMinecraftServer {
+public abstract class MixinMinecraftServer implements Server {
 
     @Unique
     private final ModuleManager<Server, ServerModule> mcore$moduleManager = new ModuleManager<>();
@@ -39,11 +41,11 @@ public abstract class MixinMinecraftServer {
 
 
     public Player mcore$getPlayer(UUID uuid) {
-        return playerList.getPlayer(uuid);
+        return (Player) playerList.getPlayer(uuid);
     }
 
     public Player mcore$findPlayer(String name) {
-        return playerList.getPlayerByName(name);
+        return (Player) playerList.getPlayerByName(name);
     }
 
     public Collection<Player> mcore$getPlayers() {
@@ -81,6 +83,7 @@ public abstract class MixinMinecraftServer {
         return mcore$stopEvent;
     }
 
+    @Intrinsic(displace = true)
     public void mcore$submit(Runnable runnable) {
         MinecraftServer server = (MinecraftServer) (Object) this;
         server.submit(runnable);

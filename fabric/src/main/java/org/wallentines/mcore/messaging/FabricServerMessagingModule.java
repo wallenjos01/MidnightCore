@@ -1,7 +1,10 @@
 package org.wallentines.mcore.messaging;
 
 import io.netty.buffer.ByteBuf;
-import net.fabricmc.fabric.api.networking.v1.*;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
@@ -35,7 +38,7 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
     @Override
     protected void doRegister(Identifier packetId) {
         ServerPlayNetworking.registerGlobalReceiver(ConversionUtil.toResourceLocation(packetId), (server, player, listener, buf, responseSender) ->
-                handlePacket(player, packetId, buf));
+                handlePacket((Player) player, packetId, buf));
     }
 
     @Override

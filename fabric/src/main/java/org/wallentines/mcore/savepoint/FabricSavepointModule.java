@@ -75,7 +75,7 @@ public class FabricSavepointModule extends SavepointModule {
     @Override
     public boolean initialize(ConfigSection section, Server data) {
 
-        Event.register(PlayerLeaveEvent.class, this, 100, ev -> clearSavepoints(ev.getPlayer()));
+        Event.register(PlayerLeaveEvent.class, this, 100, ev -> clearSavepoints((Player) ev.getPlayer()));
 
         return true;
     }

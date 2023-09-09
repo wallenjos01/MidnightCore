@@ -13,48 +13,48 @@ public class TestCommand {
         dispatcher.register(Commands.literal("mcoretest")
             .requires(Permissions.require(MidnightCoreAPI.MOD_ID + ".command.test", 4))
             .executes(ctx -> {
-                Player pl = ctx.getSource().getPlayerOrException();
+                Player pl = (Player) ctx.getSource().getPlayerOrException();
                 TestUtil.cmd(pl);
                 return 1;
             })
             .then(Commands.literal("skin")
                     .executes(ctx -> {
-                        Player pl = ctx.getSource().getPlayerOrException();
+                        Player pl = (Player) ctx.getSource().getPlayerOrException();
                         TestUtil.skinCmd(pl);
                         return 1;
                     })
             )
             .then(Commands.literal("save")
                     .executes(ctx -> {
-                        Player pl = ctx.getSource().getPlayerOrException();
+                        Player pl = (Player) ctx.getSource().getPlayerOrException();
                         TestUtil.saveCmd(pl);
                         return 1;
                     })
             )
             .then(Commands.literal("load")
                     .executes(ctx -> {
-                        Player pl = ctx.getSource().getPlayerOrException();
+                        Player pl = (Player) ctx.getSource().getPlayerOrException();
                         TestUtil.loadCmd(pl);
                         return 1;
                     })
             )
             .then(Commands.literal("gui")
                     .executes(ctx -> {
-                        Player pl = ctx.getSource().getPlayerOrException();
+                        Player pl = (Player) ctx.getSource().getPlayerOrException();
                         TestUtil.guiCmd(pl);
                         return 1;
                     })
             )
             .then(Commands.literal("scoreboard")
                     .executes(ctx -> {
-                        Player pl = ctx.getSource().getPlayerOrException();
+                        Player pl = (Player) ctx.getSource().getPlayerOrException();
                         TestUtil.scoreboardCmd(pl);
                         return 1;
                     })
             )
             .then(Commands.literal("equip")
                     .executes(ctx -> {
-                        Player pl = ctx.getSource().getPlayerOrException();
+                        Player pl = (Player) ctx.getSource().getPlayerOrException();
                         TestUtil.equipCmd(pl);
                         return 1;
                     })

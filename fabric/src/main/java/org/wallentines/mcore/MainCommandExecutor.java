@@ -8,15 +8,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.resources.ResourceLocation;
-import org.wallentines.mcore.lang.CustomPlaceholder;
-import org.wallentines.mcore.lang.LangContent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.ConversionUtil;
-import org.wallentines.mcore.util.ModuleUtil;
-import org.wallentines.mdcfg.ConfigObject;
-import org.wallentines.mdcfg.codec.FileWrapper;
-import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
 public class MainCommandExecutor {
@@ -35,7 +29,7 @@ public class MainCommandExecutor {
                     )
                     .then(Commands.literal("unload")
                         .then(Commands.argument("module", ResourceLocationArgument.id())
-                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ctx.getSource().getServer().getModuleManager().getLoadedModuleIds().stream().map(ConversionUtil::toResourceLocation), builder))
+                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(((Server) ((Server) ctx.getSource().getServer())).getModuleManager().getLoadedModuleIds().stream().map(ConversionUtil::toResourceLocation), builder))
                             .executes(MainCommandExecutor::moduleUnloadCommand)
                         )
                     )
@@ -44,7 +38,7 @@ public class MainCommandExecutor {
                             .executes(ctx -> moduleReloadCommand(ctx, null))
                         )
                         .then(Commands.argument("module", ResourceLocationArgument.id())
-                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ctx.getSource().getServer().getModuleManager().getLoadedModuleIds().stream().map(ConversionUtil::toResourceLocation), builder))
+                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(((Server) ((Server) ctx.getSource().getServer())).getModuleManager().getLoadedModuleIds().stream().map(ConversionUtil::toResourceLocation), builder))
                             .executes(ctx -> moduleReloadCommand(ctx, ConversionUtil.toIdentifier(ctx.getArgument("module", ResourceLocation.class))))
                         )
                     )
@@ -72,40 +66,40 @@ public class MainCommandExecutor {
     }
 
     private static int emptyCommand(CommandContext<CommandSourceStack> ctx) {
-        return MainCommand.executeMain(ctx.getSource().getServer(), cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeMain(((Server) ctx.getSource().getServer()), cmp -> sendSuccess(ctx.getSource(), cmp));
     }
 
     private static int moduleLoadCommand(CommandContext<CommandSourceStack> ctx) {
 
         Identifier id = ConversionUtil.toIdentifier(ctx.getArgument("module", ResourceLocation.class));
-        return MainCommand.executeLoadModule(ctx.getSource().getServer(), id, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeLoadModule(((Server) ctx.getSource().getServer()), id, cmp -> sendSuccess(ctx.getSource(), cmp));
     }
 
     private static int moduleUnloadCommand(CommandContext<CommandSourceStack> ctx) {
 
         Identifier id = ConversionUtil.toIdentifier(ctx.getArgument("module", ResourceLocation.class));
-        return MainCommand.executeUnloadModule(ctx.getSource().getServer(), id, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeUnloadModule(((Server) ctx.getSource().getServer()), id, cmp -> sendSuccess(ctx.getSource(), cmp));
     }
 
     private static int moduleReloadCommand(CommandContext<CommandSourceStack> ctx, Identifier module) {
-        return MainCommand.executeReloadModule(ctx.getSource().getServer(), module, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeReloadModule(((Server) ctx.getSource().getServer()), module, cmp -> sendSuccess(ctx.getSource(), cmp));
     }
 
     private static int moduleListCommand(CommandContext<CommandSourceStack> ctx) {
 
-        return MainCommand.executeListModules(ctx.getSource().getServer(), cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeListModules(((Server) ctx.getSource().getServer()), cmp -> sendSuccess(ctx.getSource(), cmp));
     }
 
     private static int moduleEnableCommand(CommandContext<CommandSourceStack> ctx) {
 
         Identifier id = ConversionUtil.toIdentifier(ctx.getArgument("module", ResourceLocation.class));
-        return MainCommand.executeEnableModule(ctx.getSource().getServer(), id, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeEnableModule(((Server) ctx.getSource().getServer()), id, cmp -> sendSuccess(ctx.getSource(), cmp));
     }
 
     private static int moduleDisableCommand(CommandContext<CommandSourceStack> ctx) {
 
         Identifier id = ConversionUtil.toIdentifier(ctx.getArgument("module", ResourceLocation.class));
-        return MainCommand.executeDisableModule(ctx.getSource().getServer(), id, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeDisableModule(((Server) ctx.getSource().getServer()), id, cmp -> sendSuccess(ctx.getSource(), cmp));
     }
 
     private static int reloadCommand(CommandContext<CommandSourceStack> ctx) {
@@ -116,7 +110,7 @@ public class MainCommandExecutor {
 
     private static void sendSuccess(CommandSourceStack stack, Component comp) {
 
-        stack.sendSuccess(() -> WrappedComponent.resolved(comp, stack.getPlayer()), false);
+        stack.sendSuccess(() -> WrappedComponent.resolved(comp, (Player) stack.getPlayer()), false);
     }
 
 

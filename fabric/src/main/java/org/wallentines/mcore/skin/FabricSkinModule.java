@@ -11,7 +11,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3;
 import org.wallentines.fbev.player.PlayerJoinEvent;
-import org.wallentines.mcore.*;
+import org.wallentines.mcore.Player;
+import org.wallentines.mcore.Server;
+import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.util.AuthUtil;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.MojangUtil;
@@ -38,7 +41,7 @@ public class FabricSkinModule extends SkinModule {
             onLogin(player, offlineModeSkins);
         }
 
-        Event.register(PlayerJoinEvent.class, this, 10, ev -> onLogin(ev.getPlayer(), offlineModeSkins));
+        Event.register(PlayerJoinEvent.class, this, 10, ev -> onLogin((Player) ev.getPlayer(), offlineModeSkins));
 
         return true;
     }
@@ -51,7 +54,7 @@ public class FabricSkinModule extends SkinModule {
         if(offlineModeSkins && !mc.usesAuthentication()) {
             MojangUtil.getSkinByNameAsync(spl.getGameProfile().getName()).thenAccept(skin -> {
                 loginSkins.put(spl.getUUID(), skin);
-                setSkin(spl, skin);
+                setSkin((Player) spl, skin);
             });
         }
     }

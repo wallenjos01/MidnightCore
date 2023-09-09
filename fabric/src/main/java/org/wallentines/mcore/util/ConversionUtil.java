@@ -162,7 +162,7 @@ public class ConversionUtil {
      */
     public static ItemStack validate(org.wallentines.mcore.ItemStack is) {
 
-        if(!(is instanceof ItemStack mis)) {
+        if(!((Object) is instanceof ItemStack mis)) {
             throw new IllegalArgumentException("Attempt to access non-Minecraft ItemStack!");
         }
         return mis;

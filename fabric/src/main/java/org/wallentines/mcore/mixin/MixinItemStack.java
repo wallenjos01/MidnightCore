@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
+import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mcore.util.NBTContext;
-import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
 @Implements(@Interface(iface= ItemStack.class, prefix = "mcore$"))
-public abstract class MixinItemStack {
+public abstract class MixinItemStack implements ItemStack {
 
 
     @Shadow public abstract Item getItem();
@@ -31,16 +31,8 @@ public abstract class MixinItemStack {
 
     @Shadow public abstract net.minecraft.world.item.ItemStack setHoverName(@Nullable net.minecraft.network.chat.Component component);
 
-    @Shadow public abstract int getCount();
 
-    @Shadow public abstract void setCount(int i);
-
-    @Shadow public abstract void grow(int i);
-
-    @Shadow public abstract void shrink(int i);
-
-    @Shadow public abstract net.minecraft.world.item.ItemStack copy();
-
+    @Intrinsic(displace = true)
     public Identifier mcore$getType() {
         return RegistryUtil.registry(Registries.ITEM)
                 .flatMap(res -> Optional.ofNullable(res.getKey(getItem())))
@@ -48,6 +40,7 @@ public abstract class MixinItemStack {
                 .orElse(new Identifier("minecraft", "air"));
     }
 
+    @Intrinsic(displace = true)
     public ConfigSection mcore$getTag() {
         return tag == null ? null : NBTContext.INSTANCE.convert(ConfigContext.INSTANCE, tag).asSection();
     }
@@ -64,25 +57,30 @@ public abstract class MixinItemStack {
         return 0;
     }
 
+    @Intrinsic(displace = true)
     public ItemStack mcore$copy() {
-        return copy();
+        return (ItemStack) (Object) ((net.minecraft.world.item.ItemStack) (Object) this).copy();
     }
 
-//    int mcore$getCount() {
-//        return getCount();
-//    }
-//
-//    void mcore$setCount(int count) {
-//        setCount(count);
-//    }
-//
-//    void mcore$grow(int amount) {
-//        grow(amount);
-//    }
-//
-//    void mcore$shrink(int amount) {
-//        shrink(amount);
-//    }
+    @Intrinsic(displace = true)
+    public int mcore$getCount() {
+        return ((net.minecraft.world.item.ItemStack) (Object) this).getCount();
+    }
+
+    @Intrinsic(displace = true)
+    public void mcore$setCount(int count) {
+        ((net.minecraft.world.item.ItemStack) (Object) this).setCount(count);
+    }
+
+    @Intrinsic(displace = true)
+    public void mcore$grow(int amount) {
+        ((net.minecraft.world.item.ItemStack) (Object) this).grow(amount);
+    }
+
+    @Intrinsic(displace = true)
+    public void mcore$shrink(int amount) {
+        ((net.minecraft.world.item.ItemStack) (Object) this).shrink(amount);
+    }
 
 
 }
