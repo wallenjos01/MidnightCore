@@ -11,8 +11,8 @@ import org.wallentines.midnightlib.registry.Identifier;
 public class ItemFactory implements ItemStack.Factory {
     @Override
     public ItemStack build(Identifier type, int count, ConfigSection tag, byte legacyData) {
-        if(legacyData != -1) {
-            throw new IllegalStateException("ItemStack data value requested for an unsupported version!");
+        if(legacyData != 0) {
+            MidnightCoreAPI.LOGGER.warn("ItemStack data value requested for an unsupported version!");
         }
 
         Item it = ((DefaultedRegistry<Item>) RegistryUtil.registryOrThrow(Registries.ITEM)).get(ConversionUtil.toResourceLocation(type));
