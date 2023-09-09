@@ -3,12 +3,10 @@ package org.wallentines.mcore.savepoint;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.adapter.Adapter;
-import org.wallentines.mcore.extension.SpigotExtensionModule;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.Serializer;
@@ -16,7 +14,6 @@ import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.lang.ref.WeakReference;
 import java.util.EnumSet;
-import java.util.function.Consumer;
 
 public class SpigotSavepointModule extends SavepointModule {
 

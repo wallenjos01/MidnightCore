@@ -10,7 +10,9 @@ import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public abstract class Session {

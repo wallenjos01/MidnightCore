@@ -1,12 +1,12 @@
 package org.wallentines.mcore.util;
 
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.InventoryGUI;
-import org.wallentines.mcore.ItemStack;
-import org.wallentines.mcore.UnresolvedItemStack;
 import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.savepoint.SavepointModule;
-import org.wallentines.mcore.text.*;
+import org.wallentines.mcore.text.ClickEvent;
+import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.HoverEvent;
+import org.wallentines.mcore.text.TextColor;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 

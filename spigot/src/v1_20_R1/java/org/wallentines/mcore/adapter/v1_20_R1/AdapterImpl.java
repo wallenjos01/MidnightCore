@@ -33,7 +33,7 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 
-import java.io.*;
+import java.io.DataInput;
 import java.lang.reflect.Field;
 
 public class AdapterImpl implements Adapter {
