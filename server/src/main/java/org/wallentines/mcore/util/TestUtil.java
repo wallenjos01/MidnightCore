@@ -115,8 +115,8 @@ public class TestUtil {
 
             InventoryGUI gui = InventoryGUI.FACTORY.get().build(Component.text("Hello"), 3);
 
-            gui.setItem(0, ItemStack.Builder.concreteWithColor(TextColor.RED).withName(Component.text("Hello, World").withColor(TextColor.AQUA)).build(), null);
-            gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.concreteWithColor(TextColor.GREEN), PlaceholderContent.component("%player_name%"), null), (cpl, cl) -> {
+            gui.setItem(0, ItemStack.Builder.woolWithColor(TextColor.RED).withName(Component.text("Hello, World").withColor(TextColor.AQUA)).build(), null);
+            gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.glassWithColor(TextColor.GREEN), PlaceholderContent.component("%player_name%"), null), (cpl, cl) -> {
                 cpl.sendMessage(Component.text(cl.name()));
                 gui.close(cpl);
             });gui.setItem(8, ItemStack.empty(), (cpl, cl) -> {
@@ -149,7 +149,7 @@ public class TestUtil {
         try {
 
             ItemStack hat = ItemStack.Builder
-                    .of(new Identifier("minecraft", "turtle_helmet"))
+                    .of(new Identifier("minecraft", "leather_helmet"))
                     .withEnchantment(new Identifier("minecraft", "respiration"), 3)
                     .build();
 
@@ -164,17 +164,11 @@ public class TestUtil {
                     .build();
 
             ItemStack feet = ItemStack.Builder
-                    .of(new Identifier("minecraft", "netherite_boots"))
+                    .of(new Identifier("minecraft", "diamond_boots"))
                     .withEnchantment(new Identifier("minecraft", "feather_falling"), 4)
                     .build();
-
-            ItemStack cmd = ItemStack.Builder
-                    .of(new Identifier("minecraft", "command_block"))
-                    .withName(Component.text("Hello").withColor(new Color(0x398F3C)))
-                    .build();
-
             ItemStack sword = ItemStack.Builder
-                    .of(new Identifier("minecraft", "netherite_sword"))
+                    .of(new Identifier("minecraft", "stone_sword"))
                     .withEnchantment(new Identifier("minecraft", "sharpness"), 100)
                     .withName(Component.text("Test Sword").withColor(new Color(0xAF4EBE)))
                     .build();
@@ -183,8 +177,17 @@ public class TestUtil {
             pl.setItem(Entity.EquipmentSlot.CHEST, shirt);
             pl.setItem(Entity.EquipmentSlot.LEGS, legs);
             pl.setItem(Entity.EquipmentSlot.FEET, feet);
-            pl.setItem(Entity.EquipmentSlot.OFFHAND, cmd);
             pl.setItem(Entity.EquipmentSlot.MAINHAND, sword);
+
+            if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.OFF_HAND)) {
+
+                ItemStack cmd = ItemStack.Builder
+                        .of(new Identifier("minecraft", "command_block"))
+                        .withName(Component.text("Hello").withColor(new Color(0x398F3C)))
+                        .build();
+
+                pl.setItem(Entity.EquipmentSlot.OFFHAND, cmd);
+            }
 
         } catch (Throwable th) {
             MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);

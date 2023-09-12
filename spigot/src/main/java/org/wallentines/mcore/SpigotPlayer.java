@@ -98,12 +98,12 @@ public class SpigotPlayer implements Player {
         SpigotItem si = (SpigotItem) item;
 
         switch(slot) {
-            case FEET -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.FEET, si.getInternal());
-            case LEGS -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.LEGS, si.getInternal());
-            case CHEST -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.CHEST, si.getInternal());
-            case HEAD -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.HEAD, si.getInternal());
-            case MAINHAND -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.HAND, si.getInternal());
-            case OFFHAND -> internal.getInventory().setItem(org.bukkit.inventory.EquipmentSlot.OFF_HAND, si.getInternal());
+            case FEET -> internal.getInventory().setBoots(si.getInternal());
+            case LEGS -> internal.getInventory().setLeggings(si.getInternal());
+            case CHEST -> internal.getInventory().setChestplate(si.getInternal());
+            case HEAD -> internal.getInventory().setHelmet(si.getInternal());
+            case MAINHAND -> internal.getInventory().setItemInMainHand(si.getInternal());
+            case OFFHAND -> internal.getInventory().setItemInOffHand(si.getInternal());
         }
     }
 

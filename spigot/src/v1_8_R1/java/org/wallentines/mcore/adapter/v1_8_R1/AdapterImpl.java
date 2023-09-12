@@ -150,7 +150,9 @@ public class AdapterImpl implements Adapter {
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
 
         net.minecraft.server.v1_8_R1.ItemStack handle = getHandle(itemStack);
-        handle.setTag(convert(configSection));
+        NBTTagCompound cmp = convert(configSection);
+
+        handle.setTag(cmp);
     }
 
     @Override

@@ -172,7 +172,7 @@ public class Component {
      * Converts the component to a ConfigSection in the component JSON format
      * @return A ConfigSection representing the component
      */
-    public ConfigSection toJSON() {
+    public ConfigSection toConfigSection() {
         return ModernSerializer.INSTANCE.serialize(ConfigContext.INSTANCE, this).getOrThrow().asSection();
     }
 
@@ -181,7 +181,7 @@ public class Component {
      * @return The component in JSON
      */
     public String toJSONString() {
-        return JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, toJSON());
+        return JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, toConfigSection());
     }
 
     /**

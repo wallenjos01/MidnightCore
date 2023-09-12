@@ -117,6 +117,9 @@ dependencies {
     // Shadowed Library Dependencies
     shadow(libs.midnight.cfg)
     shadow(libs.midnight.cfg.json)
+    shadow(libs.midnight.cfg.gson) {
+        isTransitive = false
+    }
     shadow(libs.midnight.cfg.binary)
     shadow(libs.midnight.lib)
     shadow(libs.nullicorn.nedit) {

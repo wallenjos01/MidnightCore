@@ -5,8 +5,6 @@ import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.util.Locale;
-
 public class SpigotItem implements ItemStack {
 
     private final org.bukkit.inventory.ItemStack internal;
@@ -14,18 +12,29 @@ public class SpigotItem implements ItemStack {
 
     public SpigotItem(org.bukkit.inventory.ItemStack internal) {
         this.internal = Adapter.INSTANCE.get().setupInternal(internal);
-        this.id = Adapter.INSTANCE.get().getItemId(this.internal);
+        this.id = getItemId(this.internal);
     }
 
     public SpigotItem(Identifier id, int count, ConfigSection tag, byte data) {
 
         internal = Adapter.INSTANCE.get().buildItem(id, count, data);
-        this.id = Adapter.INSTANCE.get().getItemId(internal);
+        if(internal == null || (internal.getType() == Material.AIR && !id.toString().equals("minecraft:air"))) {
+            throw new IllegalArgumentException("Could not find an item with ID " + id + "!");
+        }
+
+        this.id = getItemId(internal);
 
         if(tag != null) {
             Adapter.INSTANCE.get().setTag(internal, tag);
         }
+    }
 
+    private static Identifier getItemId(org.bukkit.inventory.ItemStack internal) {
+
+        if(internal == null || internal.getType() == Material.AIR) {
+            return new Identifier("minecraft", "air");
+        }
+        return Adapter.INSTANCE.get().getItemId(internal);
     }
 
     @Override

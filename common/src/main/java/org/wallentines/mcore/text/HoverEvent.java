@@ -2,12 +2,9 @@ package org.wallentines.mcore.text;
 
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
+import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.codec.JSONCodec;
-import org.wallentines.mdcfg.serializer.ConfigContext;
-import org.wallentines.mdcfg.serializer.InlineSerializer;
-import org.wallentines.mdcfg.serializer.ObjectSerializer;
-import org.wallentines.mdcfg.serializer.Serializer;
+import org.wallentines.mdcfg.serializer.*;
 
 /**
  * A data type representing a chat component HoverEvent
@@ -51,8 +48,8 @@ public class HoverEvent {
 
     private HoverEvent(Action action, ConfigSection contents, String value) {
 
-        if (contents != null && !GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
-            throw new IllegalArgumentException("Attempt to construct a hover event with contents on an unsupported version!");
+        if (contents != null && value == null && !GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
+            value = ItemUtil.toNBTString(ConfigContext.INSTANCE, contents);
         }
 
         if(action == Action.SHOW_ACHIEVEMENT && !GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.HOVER_SHOW_ACHIEVEMENT)) {
@@ -60,8 +57,13 @@ public class HoverEvent {
         }
 
         this.action = action;
-        this.contents = contents;
         this.value = value;
+
+        if (GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
+            this.contents = contents;
+        } else {
+            this.contents = null;
+        }
     }
 
     /**
@@ -96,7 +98,7 @@ public class HoverEvent {
      */
     public static HoverEvent createTextHover(Component hover) {
 
-        return new HoverEvent(Action.SHOW_TEXT, hover.toJSON());
+        return new HoverEvent(Action.SHOW_TEXT, hover.toConfigSection());
     }
 
     /**
@@ -109,7 +111,7 @@ public class HoverEvent {
         return new HoverEvent(Action.SHOW_ITEM, new ConfigSection()
                 .with("id", stack.getType().toString())
                 .with("Count", stack.getCount())
-                .with("tag", stack.getTag() == null ? null : JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, stack.getTag())));
+                .with("tag", stack.getTag() == null ? null : ItemUtil.toNBTString(ConfigContext.INSTANCE, stack.getTag())));
     }
 
     /**
@@ -121,6 +123,72 @@ public class HoverEvent {
             Serializer.STRING.entry("value", HoverEvent::getValue).optional(),
             HoverEvent::new
     );
+
+//    public static class HoverSerializer implements Serializer<HoverEvent> {
+//
+//        private final GameVersion version;
+//
+//        public HoverSerializer(GameVersion version) {
+//            this.version = version;
+//        }
+//
+//        @Override
+//        public <O> SerializeResult<O> serialize(SerializeContext<O> context, HoverEvent value) {
+//
+//            Map<String, O> out = new HashMap<>();
+//            out.put("action", context.toString(value.action.id));
+//
+//            if(version.hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
+//                if(value.contents != null) {
+//                    out.put("contents", ConfigContext.INSTANCE.convert(context, value.contents));
+//                }
+//            }
+//            if(value.value != null) {
+//                out.put("value", context.toString(value.value));
+//            }
+//
+//            return SerializeResult.success(context.toMap(out));
+//        }
+//
+//        @Override
+//        public <O> SerializeResult<HoverEvent> deserialize(SerializeContext<O> context, O value) {
+//
+//            if(!context.isMap(value)) {
+//                return SerializeResult.failure("Unable to deserialize hover event! Not an object!");
+//            }
+//
+//            Map<String, O> in = context.asMap(value);
+//            if(!in.containsKey("action")) {
+//                return SerializeResult.failure("Unable to deserialize hover event! Missing key action!");
+//            }
+//
+//            String actId = context.asString(in.get("action"));
+//            Action act = Action.byId(actId);
+//            if(act == null) {
+//                return SerializeResult.failure("Unable to deserialize hover event! Invalid action type " + actId + "!");
+//            }
+//
+//            if(version.hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
+//                if(!in.containsKey("contents")) {
+//                    return SerializeResult.failure("Unable to deserialize hover event! Missing key contents!");
+//                }
+//                if(!context.isMap(in.get("contents"))) {
+//                    return SerializeResult.failure("Unable to deserialize hover event! Contents is not an object!");
+//                }
+//                return SerializeResult.success(new HoverEvent(act, context.convert(ConfigContext.INSTANCE, context.get("contents", value)).asSection()));
+//            } else {
+//                if(!in.containsKey("value")) {
+//                    return SerializeResult.failure("Unable to deserialize hover event! Missing key value!");
+//                }
+//                if(!context.isString(in.get("value"))) {
+//                    return SerializeResult.failure("Unable to deserialize hover event! value is not a String!");
+//                }
+//                return SerializeResult.success(new HoverEvent(act, context.asString(in.get("value"))));
+//            }
+//        }
+//    }
+
+
 
     /**
      * The type of action which will be performed when a HoverEvent is fired
