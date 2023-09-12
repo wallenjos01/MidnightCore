@@ -12,6 +12,7 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
+import org.wallentines.midnightlib.registry.Identifier;
 
 public class GenericAdapter implements Adapter {
 
@@ -92,6 +93,16 @@ public class GenericAdapter implements Adapter {
     @Override
     public void loadTag(Player player, ConfigSection tag) {
 
+    }
+
+    @Override
+    public ItemStack buildItem(Identifier id, int count, byte data) {
+        return null;
+    }
+
+    @Override
+    public Identifier getItemId(ItemStack stack) {
+        return null;
     }
 
     @Override

@@ -2,7 +2,7 @@ package org.wallentines.mcore.adapter.v1_8_R1;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import dev.dewy.nbt.tags.collection.CompoundTag;
+import me.nullicorn.nedit.type.NBTCompound;
 import net.minecraft.server.v1_8_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_8_R1.CraftServer;
@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.NbtContext;
@@ -19,6 +20,7 @@ import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.midnightlib.registry.Identifier;
 
 import java.lang.reflect.Field;
 
@@ -28,15 +30,14 @@ public class AdapterImpl implements Adapter {
     private Field handle;
 
     public net.minecraft.server.v1_8_R1.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
-
         try {
-            return (net.minecraft.server.v1_8_R1.ItemStack) handle.get(is);
+            net.minecraft.server.v1_8_R1.ItemStack mis = (net.minecraft.server.v1_8_R1.ItemStack) handle.get(is);
+            return mis == null ? CraftItemStack.asNMSCopy(is) : mis;
 
         } catch (Exception ex) {
             return CraftItemStack.asNMSCopy(is);
         }
     }
-
 
     
     @Override
@@ -147,7 +148,20 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
-        getHandle(itemStack).setTag(convert(configSection));
+
+        net.minecraft.server.v1_8_R1.ItemStack handle = getHandle(itemStack);
+        handle.setTag(convert(configSection));
+    }
+
+    @Override
+    public ItemStack buildItem(Identifier id, int count, byte data) {
+        net.minecraft.server.v1_8_R1.ItemStack is = new net.minecraft.server.v1_8_R1.ItemStack((Item) Item.REGISTRY.get(new MinecraftKey(id.toString())), count, data);
+        return CraftItemStack.asCraftMirror(is);
+    }
+
+    @Override
+    public Identifier getItemId(ItemStack is) {
+        return Identifier.parse(Item.REGISTRY.c(getHandle(is).getItem()).toString());
     }
 
     @Override
@@ -161,14 +175,15 @@ public class AdapterImpl implements Adapter {
     }
 
     @Override
-    public ItemStack setupInternal(ItemStack itemStack) {
-        return CraftItemStack.asCraftCopy(itemStack);
+    public ItemStack setupInternal(ItemStack itemStack)  {
+        return CraftItemStack.asCraftMirror(CraftItemStack.asNMSCopy(itemStack));
     }
 
     @Override
     public GameVersion getGameVersion() {
-        ServerPingServerData data = MinecraftServer.getServer().aE().c(); // ServerPing, ServerPingServerData
-        return new GameVersion(data.a(), data.b());
+
+        MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+        return new GameVersion(server.getVersion(), 47);
     }
 
     @Override
@@ -178,13 +193,13 @@ public class AdapterImpl implements Adapter {
     
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        CompoundTag converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
+        NBTCompound converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
         return NbtContext.INSTANCE.convert(ConfigContext.INSTANCE, converted).asSection();
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         return NbtContext.toMojang(
-                (CompoundTag) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
+                (NBTCompound) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
                 NBTCompressedStreamTools::a);
     }
 

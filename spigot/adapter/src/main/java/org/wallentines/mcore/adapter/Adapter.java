@@ -7,6 +7,7 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
 public interface Adapter {
@@ -112,6 +113,22 @@ public interface Adapter {
      * @param tag The tag to load
      */
     void loadTag(Player player, ConfigSection tag);
+
+    /**
+     * Creates a new ItemStack using the given ID, count, and data
+     * @param id The item's ID
+     * @param count The item's count
+     * @param data The item's data value
+     * @return A new ItemStack
+     */
+    ItemStack buildItem(Identifier id, int count, byte data);
+
+    /**
+     * Gets the type ID of the given item stack
+     * @param stack The item to look up
+     * @return The item's ID
+     */
+    Identifier getItemId(ItemStack stack);
 
     /**
      * Changes the NBT tag on an Item Stack

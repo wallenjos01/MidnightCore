@@ -26,7 +26,10 @@ repositories {
 }
 
 configurations.create("shadow17").extendsFrom(configurations.shadow.get())
-configurations.create("shadow8").extendsFrom(configurations.shadow.get())
+configurations.create("shadow8") {
+    extendsFrom(configurations.shadow.get())
+    attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 8)
+}
 
 tasks.named<Jar>("java8Jar") {
     val id = project.properties["id"]
@@ -36,18 +39,23 @@ tasks.named<Jar>("java8Jar") {
 tasks.shadowJar {
     archiveClassifier.set("1.17-1.20")
     configurations = listOf(project.configurations["shadow17"])
-    minimize {
-        exclude("org.wallentines.*")
-    }
+//    minimize {
+//        exclude("org.wallentines.*")
+//    }
 }
 
 val java8ShadowJar = tasks.register<ShadowJar>("java8ShadowJar") {
-    from(sourceSets["java8"].output)
     archiveClassifier.set("1.8-1.16")
     configurations = listOf(project.configurations["shadow8"])
-    minimize {
-        exclude("org.wallentines.*")
-    }
+
+    dependsOn(tasks.processResources)
+
+    from(sourceSets["java8"].output)
+    from(tasks.processResources.get().destinationDir)
+//
+//    minimize {
+//        exclude("org.wallentines.*")
+//    }
 }
 
 
@@ -109,10 +117,18 @@ dependencies {
     // Shadowed Library Dependencies
     shadow(libs.midnight.cfg)
     shadow(libs.midnight.cfg.json)
-    shadow(libs.midnight.cfg.gson)
     shadow(libs.midnight.cfg.binary)
     shadow(libs.midnight.lib)
-    shadow(libs.bitbuf.nbt)
+    shadow(libs.nullicorn.nedit) {
+        isTransitive = false
+    }
+
+    "shadow8"(libs.slf4j.simple)
+
+//    shadow("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0") {
+//        isTransitive = false
+//    }
+
 
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
 }

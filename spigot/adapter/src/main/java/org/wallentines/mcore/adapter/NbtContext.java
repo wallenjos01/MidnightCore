@@ -1,184 +1,196 @@
 package org.wallentines.mcore.adapter;
 
-import dev.dewy.nbt.Nbt;
-import dev.dewy.nbt.api.Tag;
-import dev.dewy.nbt.tags.array.ByteArrayTag;
-import dev.dewy.nbt.tags.array.IntArrayTag;
-import dev.dewy.nbt.tags.array.LongArrayTag;
-import dev.dewy.nbt.tags.collection.CompoundTag;
-import dev.dewy.nbt.tags.collection.ListTag;
-import dev.dewy.nbt.tags.primitive.*;
+import me.nullicorn.nedit.NBTReader;
+import me.nullicorn.nedit.NBTWriter;
+import me.nullicorn.nedit.type.NBTCompound;
+import me.nullicorn.nedit.type.NBTList;
+import me.nullicorn.nedit.type.TagType;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class NbtContext implements SerializeContext<Tag> {
+public class NbtContext implements SerializeContext<Object> {
 
     public static final NbtContext INSTANCE = new NbtContext();
 
     @Override
-    public String asString(Tag object) {
-        return object instanceof StringTag ? ((StringTag) object).getValue() : null;
+    public String asString(Object object) {
+        return object instanceof String ? (String) object : null;
     }
 
     @Override
-    public Number asNumber(Tag object) {
-        return object instanceof NumericalTag<?> ? ((NumericalTag<?>) object).getValue() : null;
+    public Number asNumber(Object object) {
+        return object instanceof Number ? (Number) object : null;
     }
 
     @Override
-    public Boolean asBoolean(Tag object) {
-        return object instanceof ByteTag ? ((ByteTag) object).getValue() != 0 : null;
+    public Boolean asBoolean(Object object) {
+        return object instanceof Number ? ((Number) object).byteValue() != 0 : null;
     }
 
     @Override
-    public Collection<Tag> asList(Tag object) {
-        if(object instanceof ListTag<?>) {
-            return new ArrayList<>(((ListTag<?>) object).getValue());
+    public Collection<Object> asList(Object object) {
+
+        if(object instanceof int[]) {
+            List<Object> out = new ArrayList<>();
+            for(int i : (int[]) object) {
+                out.add(i);
+            }
+            return out;
         }
-        ArrayList<Tag> out = new ArrayList<>();
-        if(object instanceof IntArrayTag) {
-            for(int i : ((IntArrayTag) object).getValue()) { out.add(new IntTag(i)); }
-        } else if(object instanceof ByteArrayTag) {
-            for(byte i : ((ByteArrayTag) object).getValue()) { out.add(new ByteTag(i)); }
-        } else if(object instanceof LongArrayTag) {
-            for(long i : ((LongArrayTag) object).getValue()) { out.add(new LongTag(i)); }
+        if(object instanceof byte[]) {
+            List<Object> out = new ArrayList<>();
+            for(byte i : (byte[]) object) {
+                out.add(i);
+            }
+            return out;
         }
-        return out;
+        if(object instanceof long[]) {
+            List<Object> out = new ArrayList<>();
+            for(long i : (long[]) object) {
+                out.add(i);
+            }
+            return out;
+        }
+
+        return object instanceof NBTList ? (NBTList) object : null;
     }
 
     @Override
-    public Map<String, Tag> asMap(Tag object) {
-        if(!isMap(object)) return null;
-
-        CompoundTag tag = (CompoundTag) object;
-        Map<String, Tag> out = new HashMap<>();
-        for(String key : tag.keySet()) {
-            out.put(key, tag.get(key));
-        }
-        return out;
+    public Map<String, Object> asMap(Object object) {
+        return object instanceof NBTCompound ? (NBTCompound) object : null;
     }
 
     @Override
-    public Map<String, Tag> asOrderedMap(Tag object) {
+    public Map<String, Object> asOrderedMap(Object object) {
         return asMap(object);
     }
 
     @Override
-    public boolean isString(Tag object) {
-        return object instanceof StringTag;
+    public boolean isString(Object object) {
+        return object instanceof String;
     }
 
     @Override
-    public boolean isNumber(Tag object) {
-        return object instanceof NumericalTag<?>;
+    public boolean isNumber(Object object) {
+        return object instanceof Number;
     }
 
     @Override
-    public boolean isBoolean(Tag object) {
-        return object instanceof ByteTag;
+    public boolean isBoolean(Object object) {
+        return object instanceof Number;
     }
 
     @Override
-    public boolean isList(Tag object) {
-        return object instanceof ListTag<?>;
+    public boolean isList(Object object) {
+        return object instanceof NBTList ||
+                object instanceof int[] ||
+                object instanceof byte[] ||
+                object instanceof long[];
     }
 
     @Override
-    public boolean isMap(Tag object) {
-        return object instanceof CompoundTag;
+    public boolean isMap(Object object) {
+        return object instanceof NBTCompound;
     }
 
     @Override
-    public Collection<String> getOrderedKeys(Tag object) {
+    public Collection<String> getOrderedKeys(Object object) {
         if(!isMap(object)) return null;
-        return ((CompoundTag) object).keySet();
+        return ((NBTCompound) object).keySet();
     }
 
     @Override
-    public Tag get(String key, Tag object) {
+    public Object get(String key, Object object) {
         if(!isMap(object)) return null;
-        return ((CompoundTag) object).get(key);
+        return ((NBTCompound) object).get(key);
     }
 
     @Override
-    public Tag toString(String object) {
-        return new StringTag(object);
-    }
-
-    @Override
-    public Tag toNumber(Number object) {
-
-        if(object instanceof Integer) return new IntTag(object.intValue());
-        if(object instanceof Byte) return new ByteTag(object.byteValue());
-        if(object instanceof Long) return new LongTag(object.longValue());
-        if(object instanceof Short) return new ShortTag(object.shortValue());
-        if(object instanceof Float) return new FloatTag(object.floatValue());
-        if(object instanceof Double) return new DoubleTag(object.floatValue());
-
-        return ConfigPrimitive.isInteger(object) ? new LongTag(object.longValue()) : new DoubleTag(object.doubleValue());
-    }
-
-    @Override
-    public Tag toBoolean(Boolean object) {
-        return new ByteTag(object ? 1 : 0);
-    }
-
-    @Override
-    public Tag toList(Collection<Tag> list) {
-
-        if(list.stream().allMatch(tag -> tag instanceof IntTag)) {
-            return new IntArrayTag(list.stream().map(tag -> ((IntTag) tag).getValue()).collect(Collectors.toList()));
-        }
-        if(list.stream().allMatch(tag -> tag instanceof ByteTag)) {
-            return new ByteArrayTag(list.stream().map(tag -> ((ByteTag) tag).getValue()).collect(Collectors.toList()));
-        }
-        if(list.stream().allMatch(tag -> tag instanceof LongTag)) {
-            return new LongArrayTag(list.stream().map(tag -> ((LongTag) tag).getValue()).collect(Collectors.toList()));
-        }
-
-        ListTag<Tag> out = new ListTag<>();
-        list.forEach(out::add);
-
-        return out;
-    }
-
-    @Override
-    public Tag toMap(Map<String, Tag> map) {
-
-        CompoundTag out = new CompoundTag();
-        for(Map.Entry<String, Tag> ent : map.entrySet()) {
-            out.put(ent.getKey(), ent.getValue());
-        }
-        return out;
-    }
-
-    @Override
-    public Tag set(String key, Tag value, Tag object) {
-        if(!isMap(object)) return null;
-
-        ((CompoundTag) object).put(key, value);
+    public Object toString(String object) {
         return object;
     }
 
-    public static <T> CompoundTag fromMojang(TagWriter<T> tagWriter, T object) {
+    @Override
+    public Object toNumber(Number object) {
+        return object;
+    }
+
+    @Override
+    public Object toBoolean(Boolean object) {
+        return object ? (byte) 1 : (byte) 0;
+    }
+
+    @Override
+    public Object toList(Collection<Object> list) {
+
+        if(list.isEmpty()) {
+            return new NBTList(TagType.END);
+        }
+
+        if(list.stream().allMatch(tag -> tag instanceof Integer)) {
+
+            int[] out = new int[list.size()];
+            int index = 0;
+            for(Object o : list) {
+                out[index++] = (Integer) o;
+            }
+            return out;
+        }
+        if(list.stream().allMatch(tag -> tag instanceof Byte)) {
+            byte[] out = new byte[list.size()];
+            int index = 0;
+            for(Object o : list) {
+                out[index++] = (Byte) o;
+            }
+            return out;
+        }
+        if(list.stream().allMatch(tag -> tag instanceof Long)) {
+            long[] out = new long[list.size()];
+            int index = 0;
+            for(Object o : list) {
+                out[index++] = (Byte) o;
+            }
+            return out;
+        }
+
+
+        NBTList out = new NBTList(TagType.fromObject(list.iterator().next()));
+        out.addAll(list);
+
+        return out;
+    }
+
+    @Override
+    public Object toMap(Map<String, Object> map) {
+
+        NBTCompound out = new NBTCompound();
+        out.putAll(map);
+        return out;
+    }
+
+    @Override
+    public Object set(String key, Object value, Object object) {
+        if(!isMap(object)) return null;
+
+        ((NBTCompound) object).put(key, value);
+        return object;
+    }
+
+    public static <T> NBTCompound fromMojang(TagWriter<T> tagWriter, T object) {
         try {
-            Nbt nbt = new Nbt();
             try (PipedOutputStream pos = new PipedOutputStream()) {
                 PipedInputStream pis = new PipedInputStream();
                 pos.connect(pis);
 
-                CompletableFuture<CompoundTag> out = CompletableFuture.supplyAsync(() -> {
+                CompletableFuture<NBTCompound> out = CompletableFuture.supplyAsync(() -> {
                     try {
-                        return nbt.fromStream(new DataInputStream(pis));
+                        return NBTReader.read(pis);
                     } catch (IOException e) {
                         return null;
                     }
@@ -193,9 +205,8 @@ public class NbtContext implements SerializeContext<Tag> {
         }
     }
 
-    public static <T> T toMojang(CompoundTag tag, TagReader<T> reader) {
+    public static <T> T toMojang(NBTCompound tag, TagReader<T> reader) {
         try {
-            Nbt nbt = new Nbt();
             try(PipedOutputStream pos = new PipedOutputStream()) {
                 PipedInputStream pis = new PipedInputStream();
                 pos.connect(pis);
@@ -208,7 +219,7 @@ public class NbtContext implements SerializeContext<Tag> {
                     }
                 });
 
-                nbt.toStream(tag, new DataOutputStream(pos));
+                NBTWriter.write(tag, new DataOutputStream(pos));
                 pos.close();
 
                 return out.get();

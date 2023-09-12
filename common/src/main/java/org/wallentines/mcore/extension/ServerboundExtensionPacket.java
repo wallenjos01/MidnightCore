@@ -62,5 +62,5 @@ public class ServerboundExtensionPacket implements Packet {
     }
 
 
-    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "extensions");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "ext");
 }

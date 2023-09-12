@@ -51,5 +51,5 @@ public class ClientboundExtensionPacket implements Packet {
         return new ClientboundExtensionPacket(extensions);
     }
 
-    private static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "extensions");
+    private static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "ext");
 }
