@@ -99,6 +99,11 @@ public class GameVersion {
         HOVER_SHOW_ACHIEVEMENT(0, 316),
 
         /**
+         * In 1.9, the offhand slot was added
+         */
+        OFF_HAND(49),
+
+        /**
          * In 1.20.2, A new network protocol state called "Configuration" was added.
          */
         CONFIGURATION_PROTOCOL(764, -1, 144);

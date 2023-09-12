@@ -40,5 +40,11 @@
     ],
     "type": "set",
     "value": "        switch(slot) {"
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "setItemInMainHand",
+    "replace": "setItemInHand"
   }
 ]

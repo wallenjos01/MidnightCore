@@ -81,7 +81,9 @@ public class SpigotScoreboard extends CustomScoreboard {
 
         void init() {
 
-            Objective obj = board.registerNewObjective(objectiveId, Criteria.DUMMY, "");
+            @SuppressWarnings("deprecation")
+            Objective obj = board.registerNewObjective(objectiveId, "dummy");
+            //Objective obj = board.registerNewObjective(objectiveId, Criteria.DUMMY, "");
             obj.setDisplayName(ComponentResolver.resolveComponent(title, player).toLegacyText());
             obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
@@ -133,6 +135,5 @@ public class SpigotScoreboard extends CustomScoreboard {
                 obj.getScore(playerName).setScore(line);
             }
         }
-
     }
 }

@@ -5,6 +5,8 @@ import me.nullicorn.nedit.NBTWriter;
 import me.nullicorn.nedit.type.NBTCompound;
 import me.nullicorn.nedit.type.NBTList;
 import me.nullicorn.nedit.type.TagType;
+import org.wallentines.mcore.MidnightCoreAPI;
+import org.wallentines.mcore.Server;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 
@@ -192,15 +194,17 @@ public class NbtContext implements SerializeContext<Object> {
                     try {
                         return NBTReader.read(pis);
                     } catch (IOException e) {
+                        MidnightCoreAPI.LOGGER.warn("An error occurred while reading NBT!", e);
                         return null;
                     }
                 });
-                tagWriter.writeToStream(object, new DataOutputStream(pos));
+                tagWriter.writeToStream(object, pos);
                 pos.close();
 
                 return out.get();
             }
         } catch (IOException | InterruptedException | ExecutionException ex) {
+            MidnightCoreAPI.LOGGER.warn("An error occurred while writing Minecraft NBT!", ex);
             return null;
         }
     }
@@ -213,27 +217,29 @@ public class NbtContext implements SerializeContext<Object> {
 
                 CompletableFuture<T> out = CompletableFuture.supplyAsync(() -> {
                     try {
-                        return reader.readFromStream(new DataInputStream(pis));
+                        return reader.readFromStream(pis);
                     } catch (IOException e) {
+                        MidnightCoreAPI.LOGGER.warn("An error occurred while reading Minecraft NBT!", e);
                         return null;
                     }
                 });
 
-                NBTWriter.write(tag, new DataOutputStream(pos));
+                NBTWriter.write(tag, pos, true);
                 pos.close();
 
                 return out.get();
             }
         } catch (IOException | InterruptedException | ExecutionException ex) {
+            MidnightCoreAPI.LOGGER.warn("An error occurred while writing NBT!", ex);
             return null;
         }
     }
 
     public interface TagWriter<T> {
-        void writeToStream(T object, DataOutput stream) throws IOException;
+        void writeToStream(T object, OutputStream stream) throws IOException;
     }
 
     public interface TagReader<T> {
-        T readFromStream(DataInputStream stream) throws IOException;
+        T readFromStream(InputStream stream) throws IOException;
     }
 }
