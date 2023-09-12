@@ -2,9 +2,9 @@ package org.wallentines.mcore.adapter.v1_20_R1;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
-import dev.dewy.nbt.Nbt;
-import dev.dewy.nbt.tags.collection.CompoundTag;
+import me.nullicorn.nedit.type.NBTCompound;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NBTCompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.IChatBaseComponent;
@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
@@ -32,15 +33,16 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.midnightlib.registry.Identifier;
 
 import java.io.DataInput;
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
     private Field handle;
-    private Nbt nbt;
 
     public net.minecraft.world.item.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
 
@@ -157,6 +159,17 @@ public class AdapterImpl implements Adapter {
     }
 
     @Override
+    public ItemStack buildItem(Identifier id, int count, byte data) {
+        net.minecraft.world.item.ItemStack is = new net.minecraft.world.item.ItemStack(BuiltInRegistries.i.a(MinecraftKey.a(id.toString())), count);
+        return CraftItemStack.asCraftMirror(is);
+    }
+
+    @Override
+    public Identifier getItemId(ItemStack is) {
+        return Identifier.parse(Objects.requireNonNull(BuiltInRegistries.i.b(getHandle(is).d())).toString());
+    }
+
+    @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
 
         getHandle(itemStack).c(configSection == null ? null : convert(configSection));
@@ -185,13 +198,13 @@ public class AdapterImpl implements Adapter {
 
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        CompoundTag converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
+        NBTCompound converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
         return NbtContext.INSTANCE.convert(ConfigContext.INSTANCE, converted).asSection();
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         return NbtContext.toMojang(
-                (CompoundTag) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
+                (NBTCompound) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
                 dis -> NBTCompressedStreamTools.a((DataInput) dis));
     }
 

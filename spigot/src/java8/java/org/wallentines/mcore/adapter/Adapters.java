@@ -29,7 +29,7 @@ public class Adapters {
             case "v1_13_R2": {
                 // 1.13.1 has a couple differences in implementation to 1.13.2+, even though they share the same API
                 // version
-                if(org.wallentines.mcore.adapter.v1_13_R2.VersionUtil.getGameVersion().getProtocolVersion() == 401) {
+                if(org.wallentines.mcore.adapter.v1_13_R2.VersionUtil.getGameVersion().getId().equals("1.13.1")) {
                     return new org.wallentines.mcore.adapter.v1_13_R2.AdapterImpl();
                 } else {
                     return new org.wallentines.mcore.adapter.v1_13_R2v2.AdapterImpl();

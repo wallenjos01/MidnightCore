@@ -14,45 +14,13 @@ public class SpigotItem implements ItemStack {
 
     public SpigotItem(org.bukkit.inventory.ItemStack internal) {
         this.internal = Adapter.INSTANCE.get().setupInternal(internal);
-        if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-            this.id = new Identifier(internal.getType().getKey().getNamespace(), internal.getType().getKey().getKey());
-        } else {
-            this.id = new Identifier("minecraft", internal.getType().name());
-        }
+        this.id = Adapter.INSTANCE.get().getItemId(this.internal);
     }
 
-    @SuppressWarnings("deprecation")
     public SpigotItem(Identifier id, int count, ConfigSection tag, byte data) {
 
-        if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-
-            Material mat = Material.matchMaterial(id.toString());
-            if(mat == null) {
-                throw new IllegalArgumentException("Unable to find material for ID " + id + "!");
-            }
-            this.id = id;
-
-            internal = Adapter.INSTANCE.get().setupInternal(new org.bukkit.inventory.ItemStack(mat, count));
-            if(data != -1) {
-                throw new IllegalArgumentException("Attempt to construct an item with data value on an unsupported version!");
-            }
-
-        } else {
-
-            LegacyUtil.ItemData it = LegacyUtil.fromLegacyMaterial(id);
-            if(it == null) {
-                throw new IllegalArgumentException("Unable to find legacy material for ID " + id + "!");
-            }
-
-            this.id = new Identifier("minecraft", it.id.toLowerCase(Locale.ENGLISH));
-            internal = Adapter.INSTANCE.get().setupInternal(new org.bukkit.inventory.ItemStack(Material.valueOf(it.id), count));
-
-            if(data == -1) data = it.data;
-            if(data != -1) {
-                internal.setDurability(data);
-            }
-
-        }
+        internal = Adapter.INSTANCE.get().buildItem(id, count, data);
+        this.id = Adapter.INSTANCE.get().getItemId(internal);
 
         if(tag != null) {
             Adapter.INSTANCE.get().setTag(internal, tag);

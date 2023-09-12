@@ -3,7 +3,7 @@ package org.wallentines.mcore.adapter.v1_16_R2;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import dev.dewy.nbt.tags.collection.CompoundTag;
+import me.nullicorn.nedit.type.NBTCompound;
 import net.minecraft.server.v1_16_R2.*;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_16_R2.CraftServer;
@@ -24,9 +24,11 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.midnightlib.registry.Identifier;
 
 import java.io.DataInput;
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 public class AdapterImpl implements Adapter {
 
@@ -151,6 +153,17 @@ public class AdapterImpl implements Adapter {
     }
 
     @Override
+    public ItemStack buildItem(Identifier id, int count, byte data) {
+        net.minecraft.server.v1_16_R2.ItemStack is = new net.minecraft.server.v1_16_R2.ItemStack(IRegistry.ITEM.get(new MinecraftKey(id.toString())), count);
+        return CraftItemStack.asCraftMirror(is);
+    }
+
+    @Override
+    public Identifier getItemId(ItemStack is) {
+        return Identifier.parse(Objects.requireNonNull(IRegistry.ITEM.getKey(getHandle(is).getItem())).toString());
+    }
+
+    @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
         getHandle(itemStack).setTag(convert(configSection));
     }
@@ -173,8 +186,7 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public GameVersion getGameVersion() {
-        ServerPing.ServerData data = ((CraftServer) Bukkit.getServer()).getServer().getServerPing().getServerData();
-        return new GameVersion(data.a(), data.getProtocolVersion());
+        return new GameVersion(SharedConstants.getGameVersion().getId(), SharedConstants.getGameVersion().getProtocolVersion());
     }
 
     @Override
@@ -184,13 +196,13 @@ public class AdapterImpl implements Adapter {
     
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        CompoundTag converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
+        NBTCompound converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
         return NbtContext.INSTANCE.convert(ConfigContext.INSTANCE, converted).asSection();
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         return NbtContext.toMojang(
-                (CompoundTag) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
+                (NBTCompound) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
                 dis -> NBTCompressedStreamTools.a((DataInput) dis));
     }
 
