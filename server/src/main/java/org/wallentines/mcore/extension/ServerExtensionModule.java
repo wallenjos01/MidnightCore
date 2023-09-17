@@ -112,7 +112,7 @@ public abstract class ServerExtensionModule implements ServerModule {
 
     private Component handleResponse(UUID playerId, String username, ByteBuf response) {
 
-        if(response == null) {
+        if(response == null || response.writerIndex() == 0) {
             MidnightCoreAPI.LOGGER.info("Player " + username + " ignored extension packet");
             return null;
         }

@@ -1,0 +1,13 @@
+{
+  "id":"midnightcore",
+  "name":"MidnightCore",
+  "version":"2.0.0-SNAPSHOT",
+  "url":"",
+  "authors": [
+    "M1dnight_Ninja"
+  ],
+  "dependencies":[
+
+  ],
+  "main":"org.wallentines.mcore.MidnightCore"
+}

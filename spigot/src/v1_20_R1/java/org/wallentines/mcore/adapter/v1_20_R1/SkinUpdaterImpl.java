@@ -72,6 +72,8 @@ public class SkinUpdaterImpl implements SkinUpdater {
                 0
         );
 
+        PacketPlayOutExperience exp = new PacketPlayOutExperience(epl.cg, epl.cf, epl.ce);
+
         Location location = player.getLocation();
         PacketPlayOutPosition position = new PacketPlayOutPosition(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch(), Set.of(), 0);
 
@@ -115,6 +117,7 @@ public class SkinUpdaterImpl implements SkinUpdater {
         epl.c.a(respawn);
         epl.c.a(position);
         epl.c.a(equip);
+        epl.c.a(exp);
 
         server.ac().d(epl); // sendPlayerPermissionLevel
         server.ac().e(epl); // sendAllLevelInfo

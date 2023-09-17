@@ -151,25 +151,30 @@ public class TestUtil {
             ItemStack hat = ItemStack.Builder
                     .of(new Identifier("minecraft", "leather_helmet"))
                     .withEnchantment(new Identifier("minecraft", "respiration"), 3)
+                    .withLegacyEnchantment(5, 3)
                     .build();
 
             ItemStack shirt = ItemStack.Builder
                     .of(new Identifier("minecraft", "iron_chestplate"))
                     .withEnchantment(new Identifier("minecraft", "protection"), 5)
+                    .withLegacyEnchantment(0, 5)
                     .build();
 
             ItemStack legs = ItemStack.Builder
                     .of(new Identifier("minecraft", "golden_leggings"))
                     .withEnchantment(new Identifier("minecraft", "unbreaking"), 3)
+                    .withLegacyEnchantment(34, 3)
                     .build();
 
             ItemStack feet = ItemStack.Builder
                     .of(new Identifier("minecraft", "diamond_boots"))
                     .withEnchantment(new Identifier("minecraft", "feather_falling"), 4)
+                    .withLegacyEnchantment(2, 4)
                     .build();
             ItemStack sword = ItemStack.Builder
                     .of(new Identifier("minecraft", "stone_sword"))
                     .withEnchantment(new Identifier("minecraft", "sharpness"), 100)
+                    .withLegacyEnchantment(16, 100)
                     .withName(Component.text("Test Sword").withColor(new Color(0xAF4EBE)))
                     .build();
 

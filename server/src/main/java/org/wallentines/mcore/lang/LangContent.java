@@ -5,6 +5,7 @@ import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.text.Content;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -36,7 +37,10 @@ public class LangContent extends Content {
     }
 
     public static Component component(LangManager manager, String key, Object... args) {
-        List<Object> lst = List.of(args);
+        List<Object> lst = new ArrayList<>();
+        for(Object o : args) {
+            if(o != null) lst.add(o);
+        }
         return new Component(new LangContent(manager, key, pl -> lst));
     }
 

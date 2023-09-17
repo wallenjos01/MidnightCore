@@ -4,6 +4,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import org.wallentines.mcore.Proxy;
 import org.wallentines.mcore.ProxyModule;
+import org.wallentines.mcore.VelocityPlayer;
 import org.wallentines.mcore.VelocityProxy;
 import org.wallentines.mcore.messaging.ProxyMessagingModule;
 import org.wallentines.mdcfg.ConfigSection;
@@ -30,7 +31,7 @@ public class VelocityExtensionModule extends ProxyExtensionModule {
      */
     @Subscribe
     public void onLogin(LoginEvent event) {
-        onFinishLogin(proxy.getPlayer(event.getPlayer().getUniqueId()));
+        onFinishLogin(new VelocityPlayer(event.getPlayer(), proxy));
     }
 
     public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<Proxy, ProxyModule>(VelocityExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ProxyMessagingModule.ID);
