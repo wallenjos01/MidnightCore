@@ -107,6 +107,7 @@ public class FabricSkinModule extends SkinModule {
         );
 
         ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getX(), spl.getY(), spl.getZ(), spl.getRotationVector().y, spl.getRotationVector().x, new HashSet<>(), 0);
+        ClientboundSetExperiencePacket experience = new ClientboundSetExperiencePacket(spl.experienceProgress, spl.totalExperience, spl.experienceLevel);
 
         // Player information packets should be sent to everyone
         for(ServerPlayer obs : server.getPlayerList().getPlayers()) {
@@ -147,6 +148,7 @@ public class FabricSkinModule extends SkinModule {
         spl.connection.send(respawn);
         spl.connection.send(position);
         spl.connection.send(equip);
+        spl.connection.send(experience);
 
         server.getPlayerList().sendPlayerPermissionLevel(spl);
         server.getPlayerList().sendAllPlayerInfo(spl);

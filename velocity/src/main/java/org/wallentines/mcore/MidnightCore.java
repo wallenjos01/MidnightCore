@@ -7,15 +7,21 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.wallentines.mcore.extension.VelocityExtensionModule;
 import org.wallentines.mcore.messaging.VelocityMessagingModule;
+import org.wallentines.mdcfg.codec.BinaryCodec;
+import org.wallentines.mdcfg.codec.JSONCodec;
 
-@Plugin(id=MidnightCoreAPI.MOD_ID, name="MidnightCore", version="0.1.0-SNAPSHOT")
+@Plugin(id=MidnightCoreAPI.MOD_ID, name="MidnightCore", version="2.0.0-SNAPSHOT")
 public class MidnightCore {
+
+    private final ProxyServer server;
 
     @Inject
     public MidnightCore(ProxyServer server) {
 
-        VelocityProxy proxy = new VelocityProxy(this, server);
-        Proxy.RUNNING_PROXY.set(proxy);
+        MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
+        MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(BinaryCodec.fileCodec());
+
+        this.server = server;
 
         // Register default modules.
         ProxyModule.tryRegister(VelocityMessagingModule.ID, VelocityMessagingModule.MODULE_INFO);
@@ -26,7 +32,10 @@ public class MidnightCore {
     @Subscribe
     private void onInit(ProxyInitializeEvent ev) {
 
-        Proxy.RUNNING_PROXY.get().loadModules(ProxyModule.REGISTRY);
+        VelocityProxy proxy = new VelocityProxy(this, server);
+        Proxy.RUNNING_PROXY.set(proxy);
+
+        proxy.loadModules(ProxyModule.REGISTRY);
     }
 
 }

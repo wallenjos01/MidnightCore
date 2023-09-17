@@ -53,7 +53,6 @@ public class Init implements ModInitializer {
 
         });
 
-
         // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepointModule.MODULE_INFO);

@@ -2,7 +2,7 @@ plugins {
     id("midnightcore-build")
     id("midnightcore-publish")
     alias(libs.plugins.loom)
-    //alias(libs.plugins.shadow)
+    alias(libs.plugins.shadow)
 }
 
 
@@ -23,21 +23,18 @@ loom {
 
 
 tasks {
-//    build {
-//        dependsOn(shadowJar)
-//    }
-//    shadowJar {
-//        dependsOn(remapJar)
-//
-//        archiveClassifier.set("dev")
-//        configurations = listOf(project.configurations.shadow.get())
-//        minimize {
-//            exclude("org.wallentines.*")
-//        }
-//    }
+    build {
+        dependsOn(shadowJar)
+    }
+    shadowJar {
+        archiveClassifier.set("dev")
+        configurations = listOf(project.configurations.shadow.get())
+    }
     remapJar {
         val id = project.properties["id"]
         archiveBaseName.set("${id}-${project.name}")
+        dependsOn(shadowJar)
+        inputFile.set(shadowJar.get().archiveFile)
     }
 }
 
@@ -71,6 +68,7 @@ dependencies {
 
     // Fabric API
     val apiModules = listOf(
+            "fabric-api-base",
             "fabric-command-api-v2",
             "fabric-lifecycle-events-v1",
             "fabric-networking-api-v1"
@@ -79,12 +77,13 @@ dependencies {
         modApi(include(fabricApi.module(mod, "0.86.1+1.20.1"))!!)
     }
 
-    // Included Library Dependencies
-    include(libs.midnight.cfg)
-    include(libs.midnight.cfg.json)
-    include(libs.midnight.cfg.binary)
-    include(libs.midnight.cfg.gson)
-    include(libs.midnight.lib)
+    // Shadowed Library Dependencies
+    shadow(libs.midnight.cfg) { isTransitive = false }
+    shadow(libs.midnight.cfg.json) { isTransitive = false }
+    shadow(libs.midnight.cfg.binary) { isTransitive = false }
+    shadow(libs.midnight.cfg.gson) { isTransitive = false }
+    shadow(libs.midnight.lib) { isTransitive = false }
+    shadow(libs.zstd.jni)
 
     // Included Mod Dependencies
     modApi(include("org.wallentines:fabric-events:0.1.0-SNAPSHOT")!!)
@@ -94,6 +93,9 @@ dependencies {
 
 tasks.withType<ProcessResources>() {
     filesMatching("fabric.mod.json") {
-        expand(getProperties())
+        expand(mapOf(
+                Pair("version", project.version as String),
+                Pair("id", project.properties["id"] as String)
+        ))
     }
 }

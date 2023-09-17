@@ -245,6 +245,17 @@ public interface ItemStack {
             return this;
         }
 
+        public Builder withLegacyEnchantment(int id, int level) {
+
+            ConfigSection tag = getOrCreateTag();
+            if(!tag.hasList("ench")) {
+                tag.set("ench", new ConfigList());
+            }
+
+            tag.getList("ench").add(new ConfigSection().with("id", id).with("lvl", level));
+            return this;
+        }
+
         /**
          * Makes an exact copy of this Builder
          * @return An exact copy of the Builder

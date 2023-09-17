@@ -39,9 +39,6 @@ tasks.named<Jar>("java8Jar") {
 tasks.shadowJar {
     archiveClassifier.set("1.17-1.20")
     configurations = listOf(project.configurations["shadow17"])
-//    minimize {
-//        exclude("org.wallentines.*")
-//    }
 }
 
 val java8ShadowJar = tasks.register<ShadowJar>("java8ShadowJar") {
@@ -52,10 +49,6 @@ val java8ShadowJar = tasks.register<ShadowJar>("java8ShadowJar") {
 
     from(sourceSets["java8"].output)
     from(tasks.processResources.get().destinationDir)
-//
-//    minimize {
-//        exclude("org.wallentines.*")
-//    }
 }
 
 
@@ -115,30 +108,27 @@ dependencies {
     shadow(project(":spigot:adapter").setTransitive(false))
 
     // Shadowed Library Dependencies
-    shadow(libs.midnight.cfg)
-    shadow(libs.midnight.cfg.json)
-    shadow(libs.midnight.cfg.gson) {
-        isTransitive = false
-    }
-    shadow(libs.midnight.cfg.binary)
-    shadow(libs.midnight.lib)
-    shadow(libs.nullicorn.nedit) {
-        isTransitive = false
-    }
+    shadow(libs.midnight.cfg) { isTransitive = false }
+    shadow(libs.midnight.cfg.json) { isTransitive = false }
+    shadow(libs.midnight.cfg.gson) { isTransitive = false }
+    shadow(libs.midnight.cfg.binary) { isTransitive = false }
+    shadow(libs.midnight.lib) { isTransitive = false }
+    shadow(libs.zstd.jni)
+
+    shadow(libs.nullicorn.nedit) { isTransitive = false }
+
 
     "shadow8"(libs.slf4j.simple)
-
-//    shadow("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0") {
-//        isTransitive = false
-//    }
-
 
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
 }
 
 tasks.withType<ProcessResources>() {
     filesMatching("plugin.yml") {
-        expand(getProperties())
+        expand(mapOf(
+                Pair("version", project.version as String),
+                Pair("id", project.properties["id"] as String)
+        ))
     }
 }
 
