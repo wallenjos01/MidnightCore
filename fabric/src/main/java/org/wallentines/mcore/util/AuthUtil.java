@@ -19,7 +19,7 @@ public class AuthUtil {
         if(map == null || !map.containsKey("textures") || map.get("textures").isEmpty()) return null;
 
         Property skin = map.get("textures").iterator().next();
-        return new Skin(profile.getId(), skin.getValue(), skin.getSignature());
+        return new Skin(profile.getId(), skin.value(), skin.signature());
 
     }
 

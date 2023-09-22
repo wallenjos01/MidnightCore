@@ -2,9 +2,9 @@ package org.wallentines.mcore;
 
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
@@ -91,7 +91,7 @@ public class FabricScoreboard extends CustomScoreboard {
                     ObjectiveCriteria.RenderType.INTEGER);
 
             board.startTrackingObjective(obj);
-            board.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, obj);
+            board.setDisplayObjective(DisplaySlot.SIDEBAR, obj);
 
             for(int i = 0 ; i < 15 ; i++) {
                 updateLine(i);

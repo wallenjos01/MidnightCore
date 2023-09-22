@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public interface AccessorLoginPacketHandler {
 
-    @Accessor("gameProfile")
+    @Accessor("authenticatedProfile")
     GameProfile getGameProfile();
 
 }

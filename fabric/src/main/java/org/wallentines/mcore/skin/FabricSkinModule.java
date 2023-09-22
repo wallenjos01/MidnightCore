@@ -1,6 +1,7 @@
 package org.wallentines.mcore.skin;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.MinecraftServer;
@@ -93,7 +94,7 @@ public class FabricSkinModule extends SkinModule {
 
         ServerLevel world = spl.serverLevel();
 
-        ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(
+        CommonPlayerSpawnInfo spawnInfo = new CommonPlayerSpawnInfo(
                 world.dimensionTypeId(),
                 world.dimension(),
                 BiomeManager.obfuscateSeed(world.getSeed()),
@@ -101,10 +102,11 @@ public class FabricSkinModule extends SkinModule {
                 spl.gameMode.getPreviousGameModeForPlayer(),
                 world.isDebug(),
                 world.isFlat(),
-                (byte) 3, // Preserve Metadata
                 Optional.empty(),
                 0
         );
+
+        ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(spawnInfo, (byte) 3);
 
         ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getX(), spl.getY(), spl.getZ(), spl.getRotationVector().y, spl.getRotationVector().x, new HashSet<>(), 0);
         ClientboundSetExperiencePacket experience = new ClientboundSetExperiencePacket(spl.experienceProgress, spl.totalExperience, spl.experienceLevel);
@@ -121,7 +123,7 @@ public class FabricSkinModule extends SkinModule {
         if(!observers.isEmpty()) {
 
             ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(spl.getId());
-            ClientboundAddPlayerPacket spawn = new ClientboundAddPlayerPacket(spl);
+            Packet<?> spawn = spl.getAddEntityPacket();
 
             List<SynchedEntityData.DataValue<?>> entityData = spl.getEntityData().getNonDefaultValues();
             ClientboundSetEntityDataPacket tracker = null;

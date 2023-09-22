@@ -60,7 +60,7 @@ dependencies {
     include(project(":client").setTransitive(false))
 
     // Minecraft
-    minecraft("com.mojang:minecraft:1.20.1")
+    minecraft("com.mojang:minecraft:1.20.2")
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
@@ -74,7 +74,7 @@ dependencies {
             "fabric-networking-api-v1"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.86.1+1.20.1"))!!)
+        modApi(include(fabricApi.module(mod, "0.89.1+1.20.2"))!!)
     }
 
     // Shadowed Library Dependencies
@@ -86,7 +86,7 @@ dependencies {
     shadow(libs.zstd.jni)
 
     // Included Mod Dependencies
-    modApi(include("org.wallentines:fabric-events:0.1.0-SNAPSHOT")!!)
+    modApi(include("org.wallentines:fabric-events:0.1.1-SNAPSHOT")!!)
     modApi(include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")!!)
 }
 

@@ -1,7 +1,8 @@
 package org.wallentines.mcore.mixin;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -26,23 +27,23 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
 
     @Shadow public abstract void stopListening();
 
-    @Shadow @Final private Map<Advancement, AdvancementProgress> progress;
+    @Shadow @Final private Map<AdvancementHolder, AdvancementProgress> progress;
 
-    @Shadow @Final private Set<Advancement> visible;
+    @Shadow @Final private Set<AdvancementHolder> visible;
 
-    @Shadow @Final private Set<Advancement> rootsToUpdate;
+    @Shadow @Final private Set<AdvancementHolder> progressChanged;
 
-    @Shadow @Final private Set<Advancement> progressChanged;
+    @Shadow @Final private Set<AdvancementNode> rootsToUpdate;
 
     @Shadow private boolean isFirstPacket;
 
-    @Shadow @Nullable private Advancement lastSelectedTab;
+    @Shadow @Nullable private AdvancementHolder lastSelectedTab;
 
     @Shadow protected abstract void checkForAutomaticTriggers(ServerAdvancementManager serverAdvancementManager);
 
     @Shadow protected abstract void registerListeners(ServerAdvancementManager serverAdvancementManager);
 
-    @Shadow protected abstract void startProgress(Advancement advancement, AdvancementProgress advancementProgress);
+    @Shadow protected abstract void startProgress(AdvancementHolder advancement, AdvancementProgress advancementProgress);
 
     @Shadow public abstract void flushDirty(ServerPlayer serverPlayer);
 
@@ -60,8 +61,11 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
         lastSelectedTab = null;
 
         map.forEach((loc, prog) -> {
-            Advancement adv = serverAdvancementManager.getAdvancement(loc);
-            startProgress(adv, prog);
+            AdvancementHolder adv = serverAdvancementManager.get(loc);
+
+            if(adv != null) {
+                startProgress(adv, prog);
+            }
         });
 
         checkForAutomaticTriggers(serverAdvancementManager);
@@ -78,7 +82,7 @@ public abstract class MixinPlayerAdvancements implements AdvancementExtension {
         progress.forEach((adv, prog) -> {
             FriendlyByteBuf copyBuf = new FriendlyByteBuf(Unpooled.buffer(1024));
             prog.serializeToNetwork(copyBuf);
-            map.put(adv.getId(), AdvancementProgress.fromNetwork(copyBuf));
+            map.put(adv.id(), AdvancementProgress.fromNetwork(copyBuf));
         });
         return map;
     }
