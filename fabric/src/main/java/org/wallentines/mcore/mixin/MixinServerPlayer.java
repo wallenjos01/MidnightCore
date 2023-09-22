@@ -11,13 +11,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ContentConverter;
@@ -36,9 +34,6 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
     @Unique
     private ServerScoreboard mcore$scoreboard = null;
 
-    @Unique
-    private String mcore$language = "en_us";
-
     @Shadow public abstract void sendSystemMessage(net.minecraft.network.chat.Component component, boolean bl);
     @Shadow @Final public MinecraftServer server;
 
@@ -52,6 +47,8 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
 
     @Shadow public abstract ServerLevel serverLevel();
 
+
+    @Shadow private String language;
 
     public String mcore$getUsername() {
         return ((net.minecraft.world.entity.player.Player) (Object) this).getGameProfile().getName();
@@ -116,7 +113,7 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
     }
 
     public String mcore$getLanguage() {
-        return mcore$language;
+        return language;
     }
 
     public GameMode mcore$getGameMode() {
@@ -137,11 +134,6 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
         });
     }
 
-    @Inject(method="updateOptions", at=@At("RETURN"))
-    private void onUpdateOptions(ServerboundClientInformationPacket packet, CallbackInfo ci) {
-        mcore$language = packet.language();
-    }
-
     @Intrinsic(displace = true)
     public Scoreboard mcore_sb$getScoreboard() {
         return mcore$scoreboard == null ? serverLevel().getScoreboard() : mcore$scoreboard;
@@ -160,8 +152,8 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
             for (PlayerTeam playerTeam : psb.getPlayerTeams()) {
                 spl.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(playerTeam));
             }
-            for (int i = 0; i < 19; ++i) {
-                Objective objective = psb.getDisplayObjective(i);
+            for (DisplaySlot ds : DisplaySlot.values()) {
+                Objective objective = psb.getDisplayObjective(ds);
                 if (objective == null || visited.contains(objective)) continue;
                 List<Packet<?>> list = psb.getStopTrackingPackets(objective);
                 for (Packet<?> packet : list) {
