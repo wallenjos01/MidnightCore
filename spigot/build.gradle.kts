@@ -89,7 +89,8 @@ val modernVersions = listOf(
         VersionInfo("1_19_R1v2","1.19.2"),
         VersionInfo("1_19_R2","1.19.3"),
         VersionInfo("1_19_R3","1.19.4"),
-        VersionInfo("1_20_R1","1.20.1")
+        VersionInfo("1_20_R1","1.20.1"),
+        VersionInfo("1_20_R2","1.20.2")
 )
 for(version in modernVersions) {
     setupVersion(version, 17)
