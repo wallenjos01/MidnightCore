@@ -1,7 +1,6 @@
 package org.wallentines.mcore.text;
 
 import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.Player;
 import org.wallentines.mcore.lang.LangContent;
 import org.wallentines.mcore.lang.PlaceholderContent;
 import org.wallentines.midnightlib.registry.StringRegistry;
@@ -18,10 +17,10 @@ public interface ComponentResolver {
     /**
      * Resolves a component according to the given Player
      * @param other The component to resolve. Note that all children will be removed before resolution
-     * @param player The player for whom this component is being resolved
+     * @param context The context by which to resolve the content
      * @return A resolved component
      */
-    Component resolve(Content other, Player player);
+    Component resolve(Content other, Object... context);
 
     /**
      * A registry for ComponentResolvers according to their Content type.
@@ -42,12 +41,12 @@ public interface ComponentResolver {
     }
 
     /**
-     * Resolves a component and all of its children according to the given Player
+     * Resolves a component and all of its children according to the given context
      * @param comp The component to resolve
-     * @param player The player
+     * @param context The context
      * @return A resolved component
      */
-    static Component resolveComponent(Component comp, Player player) {
+    static Component resolveComponent(Component comp, Object... context) {
 
         // Don't attempt to resolve if the component cannot be resolved
         if(!canBeResolved(comp)) return comp;
@@ -59,26 +58,26 @@ public interface ComponentResolver {
                 out = Component.empty();
                 MidnightCoreAPI.LOGGER.warn("Component with type " + comp.content.type + " requires resolution but no resolver was found!");
             } else {
-                out = resolver.resolve(comp.content, player);
+                out = resolver.resolve(comp.content, context);
             }
         } else {
             out = comp.baseCopy();
         }
 
         for(Component child : comp.children) {
-            out = out.addChild(resolveComponent(child, player));
+            out = out.addChild(resolveComponent(child, context));
         }
 
         return out;
     }
 
-    ComponentResolver LANG = REGISTRY.register("lang", (cnt, player) -> {
+    ComponentResolver LANG = REGISTRY.register("lang", (cnt, ctx) -> {
         LangContent lng = (LangContent) cnt;
-        return lng.resolve(player);
+        return lng.resolve(ctx);
     });
-    ComponentResolver PLACEHOLDER = REGISTRY.register("placeholder", (cnt, player) -> {
+    ComponentResolver PLACEHOLDER = REGISTRY.register("placeholder", (cnt, ctx) -> {
         PlaceholderContent plc = (PlaceholderContent) cnt;
-        return plc.resolve(player);
+        return plc.resolve(ctx);
     });
 
 }

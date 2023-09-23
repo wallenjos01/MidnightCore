@@ -111,6 +111,10 @@ public class LangManager {
         scanDirectory();
     }
 
+    public Component component(String key, Object... args) {
+        return LangContent.component(this, key, args);
+    }
+
     /**
      * Saves the given registry to the search directory as the given language name. Will not overwrite existing entries.
      * @param language The language to save

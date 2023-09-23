@@ -1,5 +1,8 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.lang.LocaleHolder;
+import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.text.Component;
 
 import java.util.UUID;
@@ -7,7 +10,7 @@ import java.util.UUID;
 /**
  * Represents a proxied player
  */
-public interface ProxyPlayer {
+public interface ProxyPlayer extends LocaleHolder {
 
     /**
      * Gets the UUID of the player
@@ -31,7 +34,7 @@ public interface ProxyPlayer {
      * Gets the locale for a player
      * @return The player's locale
      */
-    String getLocale();
+    String getLanguage();
 
     /**
      * Sends a component message to the player
@@ -57,4 +60,21 @@ public interface ProxyPlayer {
      * @return Whether the player has the permission
      */
     boolean hasPermission(String permission);
+
+    /**
+     * Gets the hostname the player used to connect to the proxy
+     * @return The hostname used to connect
+     */
+    String getHostname();
+
+
+    /**
+     * Registers placeholders for proxied players into the given PlaceholderManager
+     * @param manager The PlaceholderManager to register placeholders into.
+     */
+    static void registerPlaceholders(PlaceholderManager manager) {
+        manager.registerSupplier("player_name", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(ProxyPlayer.class, ProxyPlayer::getUsername, "")));
+        manager.registerSupplier("player_uuid", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(ProxyPlayer.class, pl -> pl.getUUID().toString(), "")));
+        manager.registerSupplier("player_hostname", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(ProxyPlayer.class, ProxyPlayer::getHostname, "")));
+    }
 }

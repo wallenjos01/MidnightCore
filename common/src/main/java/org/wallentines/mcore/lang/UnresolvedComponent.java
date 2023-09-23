@@ -7,8 +7,7 @@ import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.JSONCodec;
-import org.wallentines.mdcfg.serializer.ConfigContext;
-import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.types.Either;
 
 import java.io.BufferedReader;
@@ -379,5 +378,20 @@ public class UnresolvedComponent {
 
         return SerializeResult.success(this);
     }
+
+    public static final Serializer<UnresolvedComponent> SERIALIZER = new Serializer<>() {
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> context, UnresolvedComponent value) {
+            return SerializeResult.success(context.toString(value.toRaw()));
+        }
+
+        @Override
+        public <O> SerializeResult<UnresolvedComponent> deserialize(SerializeContext<O> context, O value) {
+            if(context.isString(value)) {
+                return SerializeResult.failure("Unable to parse unresolved component! Expected a String!");
+            }
+            return parse(context.asString(value));
+        }
+    };
 
 }
