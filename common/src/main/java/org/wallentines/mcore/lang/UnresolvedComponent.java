@@ -35,11 +35,21 @@ public class UnresolvedComponent {
 
 
     /**
-     * Resolves this component while flattening all components to a single string
+     * Resolves this component while flattening all components to a single string, using the global PlaceholderManager
      * @param ctx The context by which to resolve placeholders
      * @return A resolved String
      */
     public String resolveFlat(PlaceholderContext ctx) {
+        return resolveFlat(PlaceholderManager.INSTANCE, ctx);
+    }
+
+    /**
+     * Resolves this component while flattening all components to a single string
+     * @param manager The placeholders to consider
+     * @param ctx The context by which to resolve placeholders
+     * @return A resolved String
+     */
+    public String resolveFlat(PlaceholderManager manager, PlaceholderContext ctx) {
 
         if(completed != null) {
             return completed.allText();
@@ -47,7 +57,7 @@ public class UnresolvedComponent {
 
         StringBuilder out = new StringBuilder();
         for(Either<String, UnresolvedPlaceholder> e : parts) {
-            out.append(e.leftOrGet(r -> r.resolve(ctx).leftOrGet(Component::allText)));
+            out.append(e.leftOrGet(r -> r.resolve(manager, ctx).leftOrGet(Component::allText)));
         }
 
         return out.toString();
@@ -59,13 +69,23 @@ public class UnresolvedComponent {
      * @return A resolved component
      */
     public Component resolve(PlaceholderContext ctx) {
+        return resolve(PlaceholderManager.INSTANCE, ctx);
+    }
+
+    /**
+     * Resolves this to a Component based on the given context
+     * @param manager The placeholders to consider
+     * @param ctx The context to use to resolve this component
+     * @return A resolved component
+     */
+    public Component resolve(PlaceholderManager manager, PlaceholderContext ctx) {
 
         // Will only be non-null if the component had no placeholders
         if(completed != null) {
             return completed;
         }
 
-        List<Either<String, Component>> inlined = resolvePlaceholders(ctx);
+        List<Either<String, Component>> inlined = resolvePlaceholders(manager, ctx);
 
         // Do not attempt to parse JSON if not requested
         if(!tryParseJSON) {
@@ -93,7 +113,7 @@ public class UnresolvedComponent {
             try {
                 SerializeResult<Component> base = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.loadConfig(toParse.toString()));
                 if (base.isComplete()) {
-                    return finalizeJSON(finalContext, base.getOrThrow());
+                    return finalizeJSON(manager, finalContext, base.getOrThrow());
                 }
             } catch (DecodeException ex) {
                 // Component is not JSON, default to config text
@@ -147,31 +167,29 @@ public class UnresolvedComponent {
     /**
      * Parses a String into an unresolved component that will not attempt to parse JSON strings.
      * @param str The String to parse
-     * @param manager The placeholders to consider
      * @return An unresolved component
      */
-    public static SerializeResult<UnresolvedComponent> parse(String str, PlaceholderManager manager) {
+    public static SerializeResult<UnresolvedComponent> parse(String str) {
 
-        return parse(str, manager, false);
+        return parse(str, false);
     }
 
 
     /**
      * Parses a String into an unresolved component
      * @param str The String to parse
-     * @param manager The placeholders to consider
      * @param tryParseJSON Whether an attempt should be made to parse JSON-formatted strings as components at
      *                     resolution time. This allows placeholders to be used in JSON components, at a performance
      *                     cost for each resolution.
      * @return An unresolved component
      */
-    public static SerializeResult<UnresolvedComponent> parse(String str, PlaceholderManager manager, boolean tryParseJSON) {
+    public static SerializeResult<UnresolvedComponent> parse(String str, boolean tryParseJSON) {
 
-        return parse(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8)))), null, manager, tryParseJSON);
+        return parse(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8)))), null, tryParseJSON);
 
     }
 
-    static SerializeResult<UnresolvedComponent> parse(BufferedReader reader, Character earlyTerminate, PlaceholderManager manager, boolean tryParseJSON) {
+    static SerializeResult<UnresolvedComponent> parse(BufferedReader reader, Character earlyTerminate, boolean tryParseJSON) {
 
         try {
 
@@ -190,7 +208,7 @@ public class UnresolvedComponent {
 
                     } else {
                         reader.reset();
-                        SerializeResult<UnresolvedPlaceholder> placeholder = UnresolvedPlaceholder.parse(reader, manager, tryParseJSON);
+                        SerializeResult<UnresolvedPlaceholder> placeholder = UnresolvedPlaceholder.parse(reader, tryParseJSON);
                         if(!placeholder.isComplete()) {
                             return SerializeResult.failure("Unable to parse entry! " + placeholder.getError());
                         }
@@ -232,7 +250,7 @@ public class UnresolvedComponent {
     }
 
     // Resolve all inline placeholders (placeholders which return a String)
-    private List<Either<String, Component>> resolvePlaceholders(PlaceholderContext ctx) {
+    private List<Either<String, Component>> resolvePlaceholders(PlaceholderManager manager, PlaceholderContext ctx) {
 
         List<Either<String, Component>> out = new ArrayList<>();
         StringBuilder current = new StringBuilder();
@@ -242,7 +260,7 @@ public class UnresolvedComponent {
             // If the part is a Placeholder
             if(e.hasRight()) {
 
-                Either<String, Component> resolved = e.rightOrThrow().resolve(ctx);
+                Either<String, Component> resolved = e.rightOrThrow().resolve(manager, ctx);
 
                 // If the placeholder was resolved to a string
                 if(resolved.hasLeft()) {
@@ -311,14 +329,14 @@ public class UnresolvedComponent {
     }
 
 
-    private Component finalizeJSON(PlaceholderContext ctx, Component base) throws DecodeException {
+    private Component finalizeJSON(PlaceholderManager manager, PlaceholderContext ctx, Component base) throws DecodeException {
 
         Component out = base.baseCopy();
 
         if(base.content instanceof Content.Text) {
 
             String text = ((Content.Text) base.content).text;
-            UnresolvedComponent ent = parse(text, new PlaceholderManager()).getOrThrow();
+            UnresolvedComponent ent = parse(text).getOrThrow();
             if(!ent.parts.isEmpty()) {
 
                 int start = 0;
@@ -335,14 +353,14 @@ public class UnresolvedComponent {
                     if(part.hasLeft()) {
                         out = out.addChild(Component.text(part.left()));
                     } else {
-                        out = out.addChild(part.rightOrThrow().resolve(ctx).rightOrGet(Component::text));
+                        out = out.addChild(part.rightOrThrow().resolve(manager, ctx).rightOrGet(Component::text));
                     }
                 }
             }
         }
 
         for(Component child : base.children) {
-            out = out.addChild(finalizeJSON(ctx, child));
+            out = out.addChild(finalizeJSON(manager, ctx, child));
         }
 
         return out;
@@ -355,7 +373,7 @@ public class UnresolvedComponent {
         if(parts.stream().noneMatch(Either::hasRight)) {
 
             // No placeholders found; resolve immediately and remove unresolved parts
-            completed = resolve(new PlaceholderContext());
+            completed = resolve(PlaceholderManager.INSTANCE, new PlaceholderContext());
             parts.clear();
         }
 

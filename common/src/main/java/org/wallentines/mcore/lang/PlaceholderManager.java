@@ -57,7 +57,7 @@ public class PlaceholderManager {
      * @return An unresolved component representing the string and all its placeholders
      */
     public UnresolvedComponent parse(String str) {
-        return UnresolvedComponent.parse(str, this).getOrThrow();
+        return UnresolvedComponent.parse(str).getOrThrow();
     }
 
     /**
@@ -77,7 +77,7 @@ public class PlaceholderManager {
      * @return A new component
      */
     public Component parseAndResolve(String str, PlaceholderContext ctx, boolean tryParseJSON) {
-        return UnresolvedComponent.parse(str, this, tryParseJSON).getOrThrow().resolve(ctx);
+        return UnresolvedComponent.parse(str, tryParseJSON).getOrThrow().resolve(this, ctx);
     }
 
 }

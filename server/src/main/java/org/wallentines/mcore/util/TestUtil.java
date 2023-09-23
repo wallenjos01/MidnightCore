@@ -20,15 +20,15 @@ public class TestUtil {
 
         try {
             LangRegistry defaults = new LangRegistry();
-            defaults.register("test", UnresolvedComponent.parse("default", PlaceholderManager.INSTANCE).getOrThrow());
+            defaults.register("test", UnresolvedComponent.parse("default").getOrThrow());
 
             LangManager manager = new LangManager(defaults, null);
 
             LangRegistry english = new LangRegistry();
-            english.register("test", UnresolvedComponent.parse("&cEnglish, %player_name%", PlaceholderManager.INSTANCE).getOrThrow());
+            english.register("test", UnresolvedComponent.parse("&cEnglish, %player_name%").getOrThrow());
 
             LangRegistry spanish = new LangRegistry();
-            spanish.register("test", UnresolvedComponent.parse("&aSpanish, %player_name%", PlaceholderManager.INSTANCE).getOrThrow());
+            spanish.register("test", UnresolvedComponent.parse("&aSpanish, %player_name%").getOrThrow());
 
             manager.setLanguageEntries("en_us", english);
             manager.setLanguageEntries("es_mx", spanish);
