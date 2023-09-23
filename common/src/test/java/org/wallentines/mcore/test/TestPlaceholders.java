@@ -59,4 +59,39 @@ public class TestPlaceholders {
 
     }
 
+    @Test
+    public void testDefaults() {
+
+        PlaceholderManager manager = new PlaceholderManager();
+        manager.registerDefaults();
+
+        String unparsed = "&6Text: %toUpperCase<hello world>%";
+        Component parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
+        Assertions.assertEquals(Component.text("Text: ").withColor(TextColor.GOLD).addChild(Component.text("HELLO WORLD")), parsed);
+
+        unparsed = "&6Text: %toLowerCase<HELLO WORLD>%";
+        parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
+        Assertions.assertEquals(Component.text("Text: ").withColor(TextColor.GOLD).addChild(Component.text("hello world")), parsed);
+
+        unparsed = "&6Text: %toTitleCase<hello WORLD>%";
+        parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
+        Assertions.assertEquals(Component.text("Text: ").withColor(TextColor.GOLD).addChild(Component.text("Hello World")), parsed);
+
+        unparsed = "&6Text: %first<hello world>%";
+        parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
+        Assertions.assertEquals(Component.text("Text: ").withColor(TextColor.GOLD).addChild(Component.text("h")), parsed);
+
+        unparsed = "&6Text: %eachFirst<hello world>%";
+        parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
+        Assertions.assertEquals(Component.text("Text: ").withColor(TextColor.GOLD).addChild(Component.text("hw")), parsed);
+
+
+        manager.registerSupplier("username", PlaceholderSupplier.inline(ctx -> "Name"));
+
+        unparsed = "&6Text: %toUpperCase<hello, %username%>%";
+        parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
+        Assertions.assertEquals(Component.text("Text: ").withColor(TextColor.GOLD).addChild(Component.text("HELLO, NAME")), parsed);
+
+    }
+
 }
