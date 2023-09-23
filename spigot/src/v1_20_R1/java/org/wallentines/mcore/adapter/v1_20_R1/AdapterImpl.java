@@ -45,7 +45,6 @@ public class AdapterImpl implements Adapter {
     private Field handle;
 
     public net.minecraft.world.item.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
-
         try {
             return (net.minecraft.world.item.ItemStack) handle.get(is);
 

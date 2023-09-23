@@ -102,8 +102,8 @@ public class TestLang {
         PlaceholderManager plMan = new PlaceholderManager();
         plMan.registerSupplier("player_name", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Player.class, Player::getUsername, "")));
 
-        LangRegistry registry = new LangRegistry();
-        registry.register("test", UnresolvedComponent.parse("Hello, world %player_name%", plMan).getOrThrow());
+        LangRegistry registry = new LangRegistry(plMan);
+        registry.register("test", UnresolvedComponent.parse("Hello, world %player_name%").getOrThrow());
         LangManager manager = new LangManager(registry, null);
 
         Player pl = new DummyPlayer();

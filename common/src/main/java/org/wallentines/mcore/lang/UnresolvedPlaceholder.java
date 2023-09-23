@@ -1,6 +1,5 @@
 package org.wallentines.mcore.lang;
 
-import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.types.Either;
@@ -14,30 +13,19 @@ import java.util.Objects;
  */
 public class UnresolvedPlaceholder {
 
-    private final PlaceholderSupplier supplier;
     private final String id;
     private final UnresolvedComponent argument;
 
     /**
      * Constructs a new unresolved placeholder
-     * @param supplier The placeholder supplier
      * @param id The ID of the placeholder
      * @param argument The argument for the placeholder, if applicable
      */
-    public UnresolvedPlaceholder(@Nullable PlaceholderSupplier supplier, String id, UnresolvedComponent argument) {
-        this.supplier = supplier;
+    public UnresolvedPlaceholder(String id, UnresolvedComponent argument) {
         this.id = id;
         this.argument = argument;
     }
 
-    /**
-     * Gets the parsed placeholder supplier
-     * @return The placeholder supplier
-     */
-    @Nullable
-    public PlaceholderSupplier getSupplier() {
-        return supplier;
-    }
 
     /**
      * Returns the parsed placeholder ID
@@ -73,24 +61,22 @@ public class UnresolvedPlaceholder {
 
     /**
      * Resolves this placeholder according to the given context
+     * @param manager The placeholders to consider
      * @param ctx The context by which to resolve this placeholder
      * @return Either a String or a Component, depending on the placeholder supplier
      */
-    public Either<String, Component> resolve(PlaceholderContext ctx) {
+    public Either<String, Component> resolve(PlaceholderManager manager, PlaceholderContext ctx) {
 
-        if(argument != null) ctx = ctx.copy(argument.resolve(ctx));
-        if(supplier == null) {
-            Either<String, Component> cpl = ctx.getCustomPlaceholder(id);
-            if(cpl == null) {
+        if(argument != null) ctx = ctx.copy(argument.resolve(manager, ctx));
+
+        Either<String, Component> out = ctx.getCustomPlaceholder(id);
+        if(out == null) {
+            PlaceholderSupplier supp = manager.getPlaceholderSupplier(id);
+            if(supp == null || (out = supp.get(ctx)) == null) {
                 return Either.left(toRawPlaceholder());
             }
-            return cpl;
         }
 
-        Either<String,Component> out = supplier.get(ctx);
-        if(out == null) {
-            return Either.left(toRawPlaceholder());
-        }
         return out;
     }
 
@@ -99,12 +85,12 @@ public class UnresolvedPlaceholder {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UnresolvedPlaceholder that = (UnresolvedPlaceholder) o;
-        return Objects.equals(supplier, that.supplier) && Objects.equals(id, that.id) && Objects.equals(argument, that.argument);
+        return Objects.equals(id, that.id) && Objects.equals(argument, that.argument);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(supplier, id, argument);
+        return Objects.hash(id, argument);
     }
 
     @Override
@@ -112,7 +98,7 @@ public class UnresolvedPlaceholder {
         return toRawPlaceholder();
     }
 
-    static SerializeResult<UnresolvedPlaceholder> parse(BufferedReader reader, PlaceholderManager manager, boolean tryParseJSON) {
+    static SerializeResult<UnresolvedPlaceholder> parse(BufferedReader reader, boolean tryParseJSON) {
 
         try {
 
@@ -127,21 +113,19 @@ public class UnresolvedPlaceholder {
 
                 if(chara == '%' || chara == '<') {
                     String finalId = id.toString();
-                    PlaceholderSupplier supp = manager.getPlaceholderSupplier(finalId);
-
 
                     if(chara == '%') {
-                        return SerializeResult.success(new UnresolvedPlaceholder(supp, finalId, null));
+                        return SerializeResult.success(new UnresolvedPlaceholder(finalId, null));
                     } else {
 
-                        SerializeResult<UnresolvedComponent> entry = UnresolvedComponent.parse(reader, '>', manager, tryParseJSON);
+                        SerializeResult<UnresolvedComponent> entry = UnresolvedComponent.parse(reader, '>', tryParseJSON);
                         if(!entry.isComplete()) {
                             return SerializeResult.failure("Unable to parse placeholder argument! " + entry.get());
                         }
                         if(reader.read() != '%') {
                             return SerializeResult.failure("Unable to parse placeholder! Found junk data after argument!");
                         }
-                        return SerializeResult.success(new UnresolvedPlaceholder(supp, finalId, entry.getOrThrow()));
+                        return SerializeResult.success(new UnresolvedPlaceholder(finalId, entry.getOrThrow()));
                     }
 
                 } else {

@@ -21,16 +21,16 @@ public class PlaceholderContent extends Content {
     }
 
     public static Component component(String component) {
-        return new Component(new PlaceholderContent(UnresolvedComponent.parse(component, PlaceholderManager.INSTANCE).getOrThrow(), null));
+        return new Component(new PlaceholderContent(UnresolvedComponent.parse(component).getOrThrow(), null));
     }
 
     public static Component component(String component, Object... args) {
         List<Object> lst = List.of(args);
-        return new Component(new PlaceholderContent(UnresolvedComponent.parse(component, PlaceholderManager.INSTANCE).getOrThrow(), pl -> lst));
+        return new Component(new PlaceholderContent(UnresolvedComponent.parse(component).getOrThrow(), pl -> lst));
     }
 
     public static Component component(String component, Function<Player, Collection<Object>> args) {
-        return new Component(new PlaceholderContent(UnresolvedComponent.parse(component, PlaceholderManager.INSTANCE).getOrThrow(), args));
+        return new Component(new PlaceholderContent(UnresolvedComponent.parse(component).getOrThrow(), args));
     }
 
 

@@ -20,7 +20,7 @@ public class PlaceholderContext {
     private final HashMap<String, Either<String, Component>> customCache = new HashMap<>();
 
     /**
-     * Constructs a new placeholder context with no parameter or values
+     * Constructs a new placeholder context with no parameter or values, with the global PlaceholderManager
      */
     public PlaceholderContext() {
         this.parameter = null;

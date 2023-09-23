@@ -18,6 +18,16 @@ import java.util.function.Function;
 public class LangRegistry {
 
     private final StringRegistry<UnresolvedComponent> entries = new StringRegistry<>();
+    private final PlaceholderManager manager;
+
+
+    public LangRegistry() {
+        this.manager = PlaceholderManager.INSTANCE;
+    }
+
+    public LangRegistry(PlaceholderManager manager) {
+        this.manager = manager;
+    }
 
     /**
      * Gets the entry with the given name, or null
@@ -52,7 +62,7 @@ public class LangRegistry {
         UnresolvedComponent comp = get(entry);
         if(comp == null) return Component.text(entry);
 
-        return comp.resolve(ctx);
+        return comp.resolve(manager, ctx);
     }
 
     /**
@@ -65,7 +75,7 @@ public class LangRegistry {
         UnresolvedComponent comp = get(entry);
         if(comp == null) return other.apply(entry, ctx);
 
-        return comp.resolve(ctx);
+        return comp.resolve(manager, ctx);
     }
 
     public void register(String entry, UnresolvedComponent component) {
@@ -106,26 +116,26 @@ public class LangRegistry {
      */
     public static LangRegistry fromConfig(ConfigSection section, PlaceholderManager manager, boolean tryParseJSON) {
 
-        LangRegistry out = new LangRegistry();
-        addAll(section, out, "", manager, tryParseJSON);
+        LangRegistry out = new LangRegistry(manager);
+        addAll(section, out, "", tryParseJSON);
 
         return out;
     }
 
-    private static void addAll(ConfigSection section, LangRegistry registry, String prefix, PlaceholderManager manager, boolean tryParseJSON) {
+    private static void addAll(ConfigSection section, LangRegistry registry, String prefix,  boolean tryParseJSON) {
 
         for(String key : section.getKeys()) {
             ConfigObject obj = section.get(key);
             String finalKey = prefix + key;
             if(obj.isString()) {
-                SerializeResult<UnresolvedComponent> result = UnresolvedComponent.parse(obj.asString(), manager, tryParseJSON);
+                SerializeResult<UnresolvedComponent> result = UnresolvedComponent.parse(obj.asString(), tryParseJSON);
                 if(result.isComplete()) {
                     registry.entries.register(finalKey, result.getOrThrow());
                 } else {
                     MidnightCoreAPI.LOGGER.warn("An error occurred while parsing a language entry! (" + finalKey + ") " + result.getError());
                 }
             } else if(obj.isSection()) {
-                addAll(obj.asSection(), registry, finalKey + ".", manager, tryParseJSON);
+                addAll(obj.asSection(), registry, finalKey + ".", tryParseJSON);
             }
         }
     }
