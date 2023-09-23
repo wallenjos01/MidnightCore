@@ -100,9 +100,8 @@ public class PlaceholderContext {
             customCache.putIfAbsent(cpl.getId(), cpl.getValue());
         }
 
-        int index = values.size();
         values.add(object);
-        cache.putIfAbsent(object.getClass(), index);
+        cache.putIfAbsent(object.getClass(), object);
     }
 
     /**

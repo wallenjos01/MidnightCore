@@ -5,9 +5,11 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mcore.util.GsonContext;
 
+import java.net.InetSocketAddress;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -37,7 +39,7 @@ public class VelocityPlayer implements ProxyPlayer {
     }
 
     @Override
-    public String getLocale() {
+    public String getLanguage() {
         Locale loc = player.getEffectiveLocale();
         if(loc == null) {
             return null;
@@ -49,7 +51,7 @@ public class VelocityPlayer implements ProxyPlayer {
     public void sendMessage(Component message) {
         // TODO: Proper conversion of components to adventure components
 
-        JsonObject obj = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, message).getOrThrow().getAsJsonObject();
+        JsonObject obj = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, ComponentResolver.resolveComponent(message, this)).getOrThrow().getAsJsonObject();
         net.kyori.adventure.text.Component cmp = GsonComponentSerializer.builder().build().deserializeFromTree(obj);
         player.sendMessage(cmp);
     }
@@ -69,4 +71,10 @@ public class VelocityPlayer implements ProxyPlayer {
     public boolean hasPermission(String permission) {
         return player.hasPermission(permission);
     }
+
+    @Override
+    public String getHostname() {
+        return player.getVirtualHost().map(InetSocketAddress::getHostString).orElse("");
+    }
+
 }

@@ -1,27 +1,24 @@
 package org.wallentines.mcore.lang;
 
-import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.text.Content;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
 public class LangContent extends Content {
 
 
     private final LangManager manager;
     private final String key;
-    private final Function<Player, Collection<Object>> args;
+    private final Collection<Object> context;
 
-    public LangContent(LangManager manager, String key, Function<Player, Collection<Object>> args) {
+    public LangContent(LangManager manager, String key, Collection<Object> context) {
         super("lang");
         this.manager = manager;
         this.key = key;
-        this.args = args;
+        this.context = context;
     }
 
     public LangManager getLangManager() {
@@ -33,37 +30,37 @@ public class LangContent extends Content {
     }
 
     public static Component component(LangManager manager, String key) {
-        return new Component(new LangContent(manager, key, null));
+        return new Component(new LangContent(manager, key, List.of()));
     }
 
     public static Component component(LangManager manager, String key, Object... args) {
-        List<Object> lst = new ArrayList<>();
-        for(Object o : args) {
-            if(o != null) lst.add(o);
-        }
-        return new Component(new LangContent(manager, key, pl -> lst));
+        return new Component(new LangContent(manager, key, List.of(args)));
     }
 
-    public static Component component(LangManager manager, String key, Function<Player, Collection<Object>> args) {
-        return new Component(new LangContent(manager, key, args));
+    public static Component component(LangManager manager, String key, Collection<Object> args) {
+        return new Component(new LangContent(manager, key, List.copyOf(args)));
     }
 
-    public Component resolve(Player player) {
+    public Component resolve(Object... args) {
 
         PlaceholderContext ctx;
         if(args == null) {
             ctx = new PlaceholderContext();
         } else {
-            ctx = new PlaceholderContext(args.apply(player));
+            ctx = new PlaceholderContext(List.of(args));
+        }
+
+        for(Object o : context) {
+            ctx.addValue(o);
         }
 
         String language = null;
-        if(player != null) {
-            ctx.addValue(player);
-            language = player.getLanguage();
+        LocaleHolder holder = ctx.getValue(LocaleHolder.class);
+        if(holder != null) {
+            language = holder.getLanguage();
         }
 
-        return ComponentResolver.resolveComponent(manager.getMessage(key, language, ctx), player);
+        return ComponentResolver.resolveComponent(manager.getMessage(key, language, ctx), args);
     }
 
     @Override

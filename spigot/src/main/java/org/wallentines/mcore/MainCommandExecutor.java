@@ -148,7 +148,7 @@ public class MainCommandExecutor extends BukkitCommand {
         if(sender instanceof Player) {
             Adapter.INSTANCE.get().sendMessage((Player) sender, ComponentResolver.resolveComponent(cmp, new SpigotPlayer(Server.RUNNING_SERVER.get(), (Player) sender)));
         } else {
-            sender.sendMessage(ComponentResolver.resolveComponent(cmp, null).toLegacyText());
+            sender.sendMessage(ComponentResolver.resolveComponent(cmp).toLegacyText());
         }
     }
 }

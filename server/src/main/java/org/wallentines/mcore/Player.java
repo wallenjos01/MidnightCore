@@ -1,6 +1,7 @@
 package org.wallentines.mcore;
 
 
+import org.wallentines.mcore.lang.LocaleHolder;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.skin.SkinModule;
@@ -14,7 +15,7 @@ import org.wallentines.mcore.text.Component;
  * server. Player objects are recreated by the server whenever the player dies and respawns. When persistence is
  * required, store by UUID or look into {@link WrappedPlayer WrappedPlayer}
  */
-public interface Player extends Entity, Skinnable {
+public interface Player extends Entity, Skinnable, LocaleHolder {
 
     /**
      * Gets the player's username associated with the GameProfile they signed in with
