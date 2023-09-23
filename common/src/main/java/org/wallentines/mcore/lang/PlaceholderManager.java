@@ -2,9 +2,12 @@ package org.wallentines.mcore.lang;
 
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.util.ComponentUtil;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * A class for registering and applying placeholders to strings and components
@@ -78,6 +81,52 @@ public class PlaceholderManager {
      */
     public Component parseAndResolve(String str, PlaceholderContext ctx, boolean tryParseJSON) {
         return UnresolvedComponent.parse(str, tryParseJSON).getOrThrow().resolve(this, ctx);
+    }
+
+    public void registerDefaults() {
+
+        registerSupplier("toUpperCase", PlaceholderSupplier.of(ctx ->
+                ctx.getParameter() == null ?
+                        Component.empty() :
+                        ComponentUtil.editText(ctx.getParameter(), String::toUpperCase)));
+
+        registerSupplier("toLowerCase", PlaceholderSupplier.of(ctx ->
+                ctx.getParameter() == null ?
+                        Component.empty() :
+                        ComponentUtil.editText(ctx.getParameter(), String::toLowerCase)));
+
+        registerSupplier("toTitleCase", PlaceholderSupplier.of(ctx ->
+                ctx.getParameter() == null ?
+                        Component.empty() :
+                        ComponentUtil.editText(ctx.getParameter(), str ->
+                                str.isEmpty() ?
+                                        str :
+                                        Arrays.stream(str.split(" "))
+                                                .map(word -> Character.toTitleCase(word.charAt(0)) + word.substring(1).toLowerCase())
+                                                .collect(Collectors.joining(" ")))));
+
+        registerSupplier("first", PlaceholderSupplier.of(ctx ->
+                ctx.getParameter() == null ?
+                        Component.empty() :
+                        ComponentUtil.editText(ctx.getParameter(), str ->
+                                str.isEmpty() ?
+                                        str :
+                                        str.charAt(0) + "")));
+
+        registerSupplier("eachFirst", PlaceholderSupplier.of(ctx ->
+                ctx.getParameter() == null ?
+                        Component.empty() :
+                        ComponentUtil.editText(ctx.getParameter(), str ->
+                                str.isEmpty() ?
+                                        str :
+                                        Arrays.stream(str.split(" "))
+                                                .map(word -> word.charAt(0) + "")
+                                                .collect(Collectors.joining()))));
+
+    }
+
+    static {
+        INSTANCE.registerDefaults();
     }
 
 }
