@@ -6,7 +6,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
-import org.wallentines.mcore.Player;
 import org.wallentines.mcore.util.ConversionUtil;
 
 import java.util.List;
@@ -33,11 +32,11 @@ public class WrappedComponent implements Component {
     /**
      * Creates a new WrappedComponent by resolving then wrapping a MidnightCore component
      * @param comp The component to resolve and wrap
-     * @param player The player to resolve the component for
+     * @param args The context by which to resolve the component
      * @return A new WrappedComponent
      */
-    public static WrappedComponent resolved(org.wallentines.mcore.text.Component comp, Player player) {
-        return new WrappedComponent(ComponentResolver.resolveComponent(comp, player));
+    public static WrappedComponent resolved(org.wallentines.mcore.text.Component comp, Object... args) {
+        return new WrappedComponent(ComponentResolver.resolveComponent(comp, args));
     }
 
     /**

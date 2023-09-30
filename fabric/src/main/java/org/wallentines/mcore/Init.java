@@ -1,10 +1,15 @@
 package org.wallentines.mcore;
 
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
+import org.wallentines.fbev.server.CommandLoadEvent;
 import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
 import org.wallentines.mcore.lang.LangRegistry;
@@ -12,6 +17,7 @@ import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.messaging.FabricServerMessagingModule;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
+import org.wallentines.mcore.mixin.AccessorCommandNode;
 import org.wallentines.mcore.savepoint.FabricSavepointModule;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.session.FabricSessionModule;
@@ -22,15 +28,24 @@ import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Init implements ModInitializer {
 
     @Override
     public void onInitialize() {
+
+        List<CommandNode<CommandSourceStack>> vanillaCommands = new ArrayList<>();
+
+        Event.register(CommandLoadEvent.class, this, -100, ev -> {
+            vanillaCommands.addAll(ev.dispatcher().getRoot().getChildren());
+        });
 
         Server.RUNNING_SERVER.setEvent.register(this, srv -> {
             ConfigSection defaults = new ConfigSection();
@@ -40,11 +55,21 @@ public class Init implements ModInitializer {
                 MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
             }
 
+            MidnightCoreServer.DEFAULT_CONFIG.set("vanilla_command_permissions", false);
+
             MinecraftServer server = ConversionUtil.validate(srv);
             MidnightCoreServer mcs = new MidnightCoreServer(srv, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE), Path.of("config").resolve("MidnightCore"));
 
             ((ResettableSingleton<MidnightCoreServer>) MidnightCoreServer.INSTANCE).reset();
             MidnightCoreServer.INSTANCE.set(mcs);
+
+            if(mcs.getConfig().getOrDefault("vanilla_command_permissions", false)) {
+                for(CommandNode<CommandSourceStack> node : vanillaCommands) {
+                    if(!(node instanceof LiteralCommandNode<CommandSourceStack> lit)) continue;
+                    ((AccessorCommandNode) node).setRequirement(node.getRequirement().or(Permissions.require("minecraft.command." + lit.getLiteral())));
+                }
+                vanillaCommands.clear();
+            }
 
             if (mcs.registerTestCommand()) {
                 TestCommand.register(server.getCommands().getDispatcher());

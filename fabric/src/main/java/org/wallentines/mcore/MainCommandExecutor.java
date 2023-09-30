@@ -108,6 +108,8 @@ public class MainCommandExecutor {
     }
 
 
+
+
     private static void sendSuccess(CommandSourceStack stack, Component comp) {
 
         stack.sendSuccess(() -> WrappedComponent.resolved(comp, (Player) stack.getPlayer()), false);
