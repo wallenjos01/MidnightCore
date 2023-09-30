@@ -21,7 +21,9 @@ public class MidnightCoreServer {
     private final LangManager langManager;
     private final boolean testCommand;
 
-    private static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
+    private final FileWrapper<ConfigObject> config;
+
+    public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
             .with("register_test_command", false);
 
     public MidnightCoreServer(Server server, LangRegistry langDefaults, Path globalConfig) {
@@ -55,7 +57,7 @@ public class MidnightCoreServer {
         langManager = new LangManager(langDefaults, langDirectory.toFile());
         langManager.saveLanguageDefaults("en_us", langDefaults);
 
-        FileWrapper<ConfigObject> config = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "config", directory.toFile(), defaultConfig);
+        this.config = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "config", directory.toFile(), defaultConfig);
         testCommand = config.getRoot().asSection().getBoolean("register_test_command");
 
         config.save();
@@ -77,6 +79,11 @@ public class MidnightCoreServer {
     public boolean registerTestCommand() {
         return testCommand;
     }
+
+    public ConfigSection getConfig() {
+        return config.getRoot().asSection();
+    }
+
 
     public static final Singleton<MidnightCoreServer> INSTANCE = new ResettableSingleton<>();
 

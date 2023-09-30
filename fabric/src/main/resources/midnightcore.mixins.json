@@ -4,6 +4,7 @@
   "package": "org.wallentines.mcore.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AccessorCommandNode",
     "AccessorLoginPacketHandler",
     "AccessorPlayer",
     "AccessorPlayerAdvancements",

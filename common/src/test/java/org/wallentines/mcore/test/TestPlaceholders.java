@@ -92,6 +92,9 @@ public class TestPlaceholders {
         parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
         Assertions.assertEquals(Component.text("Text: ").withColor(TextColor.GOLD).addChild(Component.text("HELLO, NAME")), parsed);
 
+        unparsed = "&6Text: %toLowerCase<hello, %username%>%";
+        parsed = manager.parseAndResolve(unparsed, new PlaceholderContext());
+        Assertions.assertEquals(Component.text("Text: ").withColor(TextColor.GOLD).addChild(Component.text("hello, name")), parsed);
     }
 
 }
