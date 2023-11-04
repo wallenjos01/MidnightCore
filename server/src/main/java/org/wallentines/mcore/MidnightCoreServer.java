@@ -4,7 +4,6 @@ import org.wallentines.mcore.lang.LangContent;
 import org.wallentines.mcore.lang.LangManager;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
-import org.wallentines.mcore.util.FileUtil;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.FileWrapper;
@@ -14,6 +13,7 @@ import org.wallentines.midnightlib.types.Singleton;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MidnightCoreServer {
@@ -41,7 +41,7 @@ public class MidnightCoreServer {
             File langFolder = globalConfig.resolve("lang").toFile();
             if(langFolder.isDirectory()) {
                 try {
-                    FileUtil.copyFolder(langFolder, langDirectory);
+                    Files.copy(langFolder.toPath(), langDirectory);
                 } catch (IOException ex) {
                     MidnightCoreAPI.LOGGER.warn("Unable to copy lang defaults to world!");
                 }

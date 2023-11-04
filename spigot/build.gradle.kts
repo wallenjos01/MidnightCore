@@ -121,7 +121,7 @@ dependencies {
 
     "shadow8"(libs.slf4j.simple)
 
-    compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot-api:1.20.2-R0.1-SNAPSHOT")
 }
 
 tasks.withType<ProcessResources>() {
