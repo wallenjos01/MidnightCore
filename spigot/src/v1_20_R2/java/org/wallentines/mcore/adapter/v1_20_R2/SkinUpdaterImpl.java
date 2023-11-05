@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.SkinUpdater;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
@@ -41,13 +43,19 @@ public class SkinUpdaterImpl implements SkinUpdater {
         setProfileSkin(gameProfile, skin);
 
         MinecraftServer server = epl.d;
-        if(server == null) return;
+        if (server == null) return;
 
         // Make sure player is ready to receive a respawn packet
         epl.Y(); // stopRiding()
 
         // Store velocity so it can be re-applied later
-        Vec3D velocity = epl.dj(); // getDeltaMovement()
+        Vec3D velocity = Vec3D.b;
+        try {
+
+            velocity = (Vec3D) Entity.class.getDeclaredMethod("do").invoke(epl); // getDeltaMovement()
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            // Ignore
+        }
 
         // Create Packets
         ClientboundPlayerInfoRemovePacket remove = new ClientboundPlayerInfoRemovePacket(List.of(player.getUniqueId()));
@@ -79,55 +87,58 @@ public class SkinUpdaterImpl implements SkinUpdater {
         PacketPlayOutPosition position = new PacketPlayOutPosition(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch(), Set.of(), 0);
 
         // Player information should be sent to everyone
-        for(EntityPlayer obs : server.ac().t()) { // getPlayerList(), getPlayers()
+        for (EntityPlayer obs : server.ac().t()) { // getPlayerList(), getPlayers()
 
-            obs.c.a(remove); // connection, send
-            obs.c.a(add);
+            obs.c.b(remove); // connection, send
+            obs.c.b(add);
         }
 
         // Entity information should be sent to observers in the same world
         Collection<EntityPlayer> observers = world.a(pl -> pl != epl);
-        if(!observers.isEmpty()) {
+        if (!observers.isEmpty()) {
 
             PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(entityId);
             Packet<?> spawn = epl.di();
 
             PacketPlayOutEntityMetadata tracker = null;
             List<DataWatcher.b<?>> entityData = epl.al().c(); // DataValue<?>, getEntityData(), getNonDefaultValues()
-            if(entityData != null) {
+            if (entityData != null) {
                 tracker = new PacketPlayOutEntityMetadata(entityId, entityData);
             }
 
             float headRot = player.getEyeLocation().getYaw();
             int rot = (int) headRot;
-            if(headRot < (float) rot) rot -= 1;
+            if (headRot < (float) rot) rot -= 1;
             PacketPlayOutEntityHeadRotation head = new PacketPlayOutEntityHeadRotation(epl, (byte) ((rot * 256.0f) / 360.0f));
 
 
-            for(EntityPlayer obs : observers) {
+            for (EntityPlayer obs : observers) {
 
-                obs.c.a(destroy);
-                obs.c.a(spawn);
-                obs.c.a(head);
-                obs.c.a(equip);
-                if(tracker != null) obs.c.a(tracker);
+                obs.c.b(destroy);
+                obs.c.b(spawn);
+                obs.c.b(head);
+                obs.c.b(equip);
+                if (tracker != null) obs.c.b(tracker);
             }
         }
 
         // The remaining packets should only be sent to the updated player
-        epl.c.a(respawn);
-        epl.c.a(position);
-        epl.c.a(equip);
-        epl.c.a(exp);
-
-        server.ac().d(epl); // sendPlayerPermissionLevel
-        server.ac().e(epl); // sendAllLevelInfo
-
-        epl.w(); // onUpdateAbilities
-        epl.fR().j(); // getInventory(), tick()
+        epl.c.b(respawn);
+        epl.c.b(position);
+        epl.c.b(equip);
+        epl.c.b(exp);
 
         epl.f(velocity); // setDeltaMovement()
-        epl.c.a(new PacketPlayOutEntityVelocity(epl));
+        epl.c.b(new PacketPlayOutEntityVelocity(epl));
+
+        server.g(() -> {
+            server.ac().d(epl); // sendPlayerPermissionLevel
+            server.ac().e(epl); // sendAllLevelInfo
+
+            epl.w(); // onUpdateAbilities
+            epl.fR().j(); // getInventory(), tick()
+
+        });
 
     }
 }
