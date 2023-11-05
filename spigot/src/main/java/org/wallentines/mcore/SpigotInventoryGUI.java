@@ -34,7 +34,7 @@ public class SpigotInventoryGUI extends InventoryGUI {
         SpigotPlayer spl = ConversionUtil.validate(player);
         spl.getInternal().closeInventory();
 
-        Inventory inv = Bukkit.createInventory(null, size);
+        Inventory inv = Bukkit.createInventory(null, size, title.toLegacyText());
         spl.getInternal().openInventory(inv);
 
         players.put(spl.getInternal(), inv);
