@@ -18,7 +18,6 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.NbtContext;
 import org.wallentines.mcore.adapter.SkinUpdater;
-import org.wallentines.mcore.adapter.UncertainGameVersion;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mdcfg.ConfigSection;

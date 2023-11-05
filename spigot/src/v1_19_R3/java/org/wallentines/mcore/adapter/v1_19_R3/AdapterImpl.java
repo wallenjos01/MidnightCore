@@ -35,7 +35,6 @@ import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.io.DataInput;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
@@ -205,7 +204,7 @@ public class AdapterImpl implements Adapter {
 
         return NbtContext.toMojang(
                 (NBTCompound) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
-                dis -> NBTCompressedStreamTools.a((DataInput) dis));
+                NBTCompressedStreamTools::a);
     }
 
     private IChatBaseComponent convert(Component component) {
