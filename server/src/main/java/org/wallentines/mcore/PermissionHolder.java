@@ -17,4 +17,26 @@ public interface PermissionHolder {
      */
     boolean hasPermission(String permission, int defaultOpLevel);
 
+    PermissionHolder ALL = new PermissionHolder() {
+        @Override
+        public boolean hasPermission(String permission) {
+            return true;
+        }
+        @Override
+        public boolean hasPermission(String permission, int defaultOpLevel) {
+            return true;
+        }
+    };
+
+    PermissionHolder NONE = new PermissionHolder() {
+        @Override
+        public boolean hasPermission(String permission) {
+            return false;
+        }
+        @Override
+        public boolean hasPermission(String permission, int defaultOpLevel) {
+            return false;
+        }
+    };
+
 }

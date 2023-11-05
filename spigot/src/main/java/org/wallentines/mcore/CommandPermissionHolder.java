@@ -10,6 +10,10 @@ public class CommandPermissionHolder implements PermissionHolder {
         this.sender = sender;
     }
 
+    public CommandSender getSender() {
+        return sender;
+    }
+
     @Override
     public boolean hasPermission(String permission) {
         return sender.hasPermission(permission);
