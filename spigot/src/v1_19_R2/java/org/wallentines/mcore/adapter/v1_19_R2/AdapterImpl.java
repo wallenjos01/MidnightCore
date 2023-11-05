@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import me.nullicorn.nedit.type.NBTCompound;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.IRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NBTCompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -36,7 +35,6 @@ import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.io.DataInput;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
@@ -205,7 +203,7 @@ public class AdapterImpl implements Adapter {
     private NBTTagCompound convert(ConfigSection section) {
         return NbtContext.toMojang(
                 (NBTCompound) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
-                dis -> NBTCompressedStreamTools.a((DataInput) dis));
+                NBTCompressedStreamTools::a);
     }
 
     private IChatBaseComponent convert(Component component) {
