@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 
 public class CommandUtil {
 
-
     public static void registerCommand(Plugin plugin, Command cmd) {
 
         try {

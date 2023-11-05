@@ -15,7 +15,7 @@ import org.wallentines.mcore.text.Component;
  * server. Player objects are recreated by the server whenever the player dies and respawns. When persistence is
  * required, store by UUID or look into {@link WrappedPlayer WrappedPlayer}
  */
-public interface Player extends Entity, Skinnable, LocaleHolder {
+public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolder {
 
     /**
      * Gets the player's username associated with the GameProfile they signed in with
@@ -94,21 +94,6 @@ public interface Player extends Entity, Skinnable, LocaleHolder {
      * @return Whether the player is online
      */
     boolean isOnline();
-
-    /**
-     * Checks if the player has the given permission
-     * @param permission The permission to check
-     * @return Whether the player has the permission
-     */
-    boolean hasPermission(String permission);
-
-    /**
-     * Checks if the player has the given permission or is at least the given operator level
-     * @param permission The permission to check
-     * @param defaultOpLevel The operator permission level
-     * @return Whether the player has the permission or the op level
-     */
-    boolean hasPermission(String permission, int defaultOpLevel);
 
     /**
      * Creates a new WrappedPlayer from this Player

@@ -28,7 +28,11 @@ import java.util.List;
 
 
 @Mixin(ServerPlayer.class)
-@Implements({@Interface(iface = Player.class, prefix = "mcore$"), @Interface(iface = ScoreboardHolder.class, prefix = "mcore_sb$")})
+@Implements({
+        @Interface(iface = Player.class, prefix = "mcore$"),
+        @Interface(iface = ScoreboardHolder.class, prefix = "mcore_sb$"),
+        @Interface(iface = PermissionHolder.class, prefix = "mcore_pm$")
+})
 public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
 
     @Unique
@@ -69,11 +73,11 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
     }
 
 
-    public boolean mcore$hasPermission(String permission) {
+    public boolean mcore_pm$hasPermission(String permission) {
         return Permissions.check((ServerPlayer) (Object) this, permission);
     }
 
-    public boolean mcore$hasPermission(String permission, int defaultOpLevel) {
+    public boolean mcore_pm$hasPermission(String permission, int defaultOpLevel) {
         return Permissions.check((ServerPlayer) (Object) this, permission, defaultOpLevel);
     }
 
