@@ -16,7 +16,8 @@
     "MixinMinecraftServer",
     "MixinPlayerAdvancements",
     "MixinServerPlayer",
-    "MixinServerScoreboard"
+    "MixinServerScoreboard",
+    "MixinCommandSourceStack"
   ],
   "client": [
     "MixinMinecraft"
