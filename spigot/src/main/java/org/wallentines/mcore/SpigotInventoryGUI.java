@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.util.ConversionUtil;
 
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class SpigotInventoryGUI extends InventoryGUI {
         SpigotPlayer spl = ConversionUtil.validate(player);
         spl.getInternal().closeInventory();
 
-        Inventory inv = Bukkit.createInventory(null, size, title.toLegacyText());
+        Inventory inv = Bukkit.createInventory(null, size, ComponentResolver.resolveComponent(title, player).toLegacyText());
         spl.getInternal().openInventory(inv);
 
         players.put(spl.getInternal(), inv);
