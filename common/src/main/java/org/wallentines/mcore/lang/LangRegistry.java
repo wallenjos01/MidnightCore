@@ -89,8 +89,11 @@ public class LangRegistry {
     public ConfigSection save() {
 
         ConfigSection out = new ConfigSection();
-        for(UnresolvedComponent cmp : entries) {
-            out.set(entries.getId(cmp), cmp.toRaw());
+        for(String key : entries.getIds()) {
+            UnresolvedComponent cmp = entries.get(key);
+            if(cmp != null) {
+                out.set(key, cmp.toRaw());
+            }
         }
 
         return out;
@@ -122,7 +125,7 @@ public class LangRegistry {
         return out;
     }
 
-    private static void addAll(ConfigSection section, LangRegistry registry, String prefix,  boolean tryParseJSON) {
+    private static void addAll(ConfigSection section, LangRegistry registry, String prefix, boolean tryParseJSON) {
 
         for(String key : section.getKeys()) {
             ConfigObject obj = section.get(key);

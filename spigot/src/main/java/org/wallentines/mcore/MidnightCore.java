@@ -61,6 +61,11 @@ public class MidnightCore extends JavaPlugin {
         SpigotServer server = new SpigotServer();
         Server.RUNNING_SERVER.set(server);
 
+        Server.RUNNING_SERVER.resetEvent.register(this, ev -> {
+            MidnightCoreAPI.LOGGER.warn("Running server was reset!");
+            Thread.dumpStack();
+        });
+
         // Load Modules
         server.loadModules(ServerModule.REGISTRY);
 
@@ -84,10 +89,13 @@ public class MidnightCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        MidnightCoreAPI.LOGGER.warn("MidnightCore is shutting down");
         Server server = Server.RUNNING_SERVER.getOrNull();
         if(server != null) {
             server.getModuleManager().unloadAll();
             server.shutdownEvent().invoke(server);
+        } else {
+            MidnightCoreAPI.LOGGER.warn("Server was null!");
         }
     }
 

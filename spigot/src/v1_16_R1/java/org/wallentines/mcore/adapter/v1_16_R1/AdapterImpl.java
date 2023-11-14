@@ -78,7 +78,7 @@ public class AdapterImpl implements Adapter {
         GameProfile profile = ((CraftPlayer) player).getProfile();
         if(!profile.getProperties().containsKey("textures") || profile.getProperties().get("textures").isEmpty()) { return null; }
         Property property = profile.getProperties().get("textures").iterator().next();
-        return new Skin(profile.getId(), property.getValue(), property.getValue());
+        return new Skin(profile.getId(), property.getValue(), property.getSignature());
     }
 
     @Override
