@@ -29,18 +29,6 @@ public class LangContent extends Content {
         return key;
     }
 
-    public static Component component(LangManager manager, String key) {
-        return new Component(new LangContent(manager, key, List.of()));
-    }
-
-    public static Component component(LangManager manager, String key, Object... args) {
-        return new Component(new LangContent(manager, key, List.of(args)));
-    }
-
-    public static Component component(LangManager manager, String key, Collection<Object> args) {
-        return new Component(new LangContent(manager, key, List.copyOf(args)));
-    }
-
     public Component resolve(Object... args) {
 
         PlaceholderContext ctx;
@@ -83,7 +71,7 @@ public class LangContent extends Content {
                 return null;
             }
 
-            return component(langManager, param);
+            return langManager.component(param);
         }));
 
     }

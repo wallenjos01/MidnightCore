@@ -35,7 +35,7 @@ public class TestUtil {
 
 
             pl.sendMessage(org.wallentines.mcore.text.Component.text("Hello").withColor(TextColor.RED));
-            pl.sendMessage(LangContent.component(manager, "test"));
+            pl.sendMessage(manager.component("test"));
 
             ItemStack is = ItemStack.Builder.woolWithColor(TextColor.RED)
                     .withCount(13)

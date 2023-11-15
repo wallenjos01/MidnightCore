@@ -31,7 +31,7 @@ public class TestLang {
         Dummy pl = new Dummy();
 
         Component got = manager.getMessage("test", pl.getLanguage(), pl);
-        Component cmp = LangContent.component(manager, "test");
+        Component cmp = manager.component("test");
 
         cmp = ComponentResolver.resolveComponent(cmp, pl);
 

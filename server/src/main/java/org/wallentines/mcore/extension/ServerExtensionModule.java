@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.lang.CustomPlaceholder;
-import org.wallentines.mcore.lang.LangContent;
 import org.wallentines.mcore.messaging.ServerMessagingModule;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigList;
@@ -100,8 +99,8 @@ public abstract class ServerExtensionModule implements ServerModule {
 
     private Component getKickMessage() {
         MidnightCoreServer mcore = MidnightCoreServer.INSTANCE.get();
-        return LangContent.component(mcore.getLangManager(), "kick.missing_extensions", CustomPlaceholder.of("entries", () -> {
-            List<Component> entries = requiredExtensions.stream().map(id -> LangContent.component(mcore.getLangManager(), "kick.missing_extensions.entry", CustomPlaceholder.inline("extension_id", id.toString()))).toList();
+        return mcore.getLangManager().component("kick.missing_extensions", CustomPlaceholder.of("entries", () -> {
+            List<Component> entries = requiredExtensions.stream().map(id -> mcore.getLangManager().component("kick.missing_extensions.entry", CustomPlaceholder.inline("extension_id", id.toString()))).toList();
             if(entries.isEmpty()) return Component.empty();
             Component out = entries.get(0);
             out = out.addChildren(entries.subList(1, entries.size()));
@@ -136,7 +135,7 @@ public abstract class ServerExtensionModule implements ServerModule {
             MidnightCoreAPI.LOGGER.warn("Player " + username + " sent invalid extension packet! " + ex.getMessage());
 
             MidnightCoreServer mcore = MidnightCoreServer.INSTANCE.get();
-            return LangContent.component(mcore.getLangManager(), "kick.invalid_extensions");
+            return mcore.getLangManager().component("kick.invalid_extensions");
         }
     }
 
