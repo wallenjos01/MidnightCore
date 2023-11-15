@@ -170,6 +170,12 @@ public class AdapterImpl implements Adapter {
     }
 
     @Override
+    public String getTranslationKey(ItemStack is) {
+        net.minecraft.world.item.ItemStack mis = getHandle(is);
+        return mis.c().a();
+    }
+
+    @Override
     public ConfigSection getTag(ItemStack itemStack) {
 
         net.minecraft.world.item.ItemStack mis = getHandle(itemStack);

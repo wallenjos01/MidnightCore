@@ -1,12 +1,12 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.TextColor;
+import org.wallentines.mcore.text.*;
 import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.NumberSerializer;
 import org.wallentines.mdcfg.serializer.ObjectSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;
@@ -71,6 +71,8 @@ public interface ItemStack {
      */
     void shrink(int amount);
 
+    String getTranslationKey();
+
     /**
      * Makes an exact copy of this item stack
      * @return An exact copy
@@ -92,6 +94,26 @@ public interface ItemStack {
         ConfigSection tag = getTag();
         tag.getOrCreateSection("display").set("Name", strName);
         setTag(tag);
+    }
+
+    default Component getName() {
+
+        ConfigSection tag = getTag();
+        Component def = Component.translate(getTranslationKey());
+        if(tag == null || !tag.has("display")) {
+            return def;
+        }
+
+        ConfigSection display = tag.getSection("display");
+        if(!display.hasString("Name")) {
+            return def;
+        }
+
+        ComponentSerializer ser = GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
+                ModernSerializer.INSTANCE :
+                LegacySerializer.INSTANCE;
+
+        return ser.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(display.getString("Name"))).get().orElse(def);
     }
 
     static ItemStack empty() {

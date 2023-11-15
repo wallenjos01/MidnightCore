@@ -82,5 +82,9 @@ public abstract class MixinItemStack implements ItemStack {
         ((net.minecraft.world.item.ItemStack) (Object) this).shrink(amount);
     }
 
+    public String mcore$getTranslationKey() {
+        return ((net.minecraft.world.item.ItemStack) (Object) this).getItem().getDescriptionId();
+    }
+
 
 }
