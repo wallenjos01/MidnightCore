@@ -112,7 +112,11 @@ public class LangManager {
     }
 
     public Component component(String key, Object... args) {
-        return LangContent.component(this, key, args);
+        return new Component(new LangContent(this, key, List.of(args)));
+    }
+
+    public Component componentWith(String key, List<Object> args) {
+        return new Component(new LangContent(this, key, List.copyOf(args)));
     }
 
     /**

@@ -1,7 +1,6 @@
 package org.wallentines.mcore;
 
 import org.wallentines.mcore.lang.CustomPlaceholder;
-import org.wallentines.mcore.lang.LangContent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.ModuleUtil;
 import org.wallentines.mdcfg.ConfigObject;
@@ -113,9 +112,7 @@ public class MainCommand {
                     "command.module.list.entry",
                     server,
                     CustomPlaceholder.inline("module_id", id),
-                    CustomPlaceholder.of("state", () -> LangContent.component(
-                            mcore.getLangManager(),
-                            "module.state." + state))
+                    CustomPlaceholder.of("state", () -> mcore.getLangManager().component("module.state." + state))
             ));
         }
 
@@ -152,7 +149,7 @@ public class MainCommand {
     private static Component message(String key, Object... args) {
 
         MidnightCoreServer mcore = MidnightCoreServer.INSTANCE.get();
-        return LangContent.component(mcore.getLangManager(), key, args);
+        return mcore.getLangManager().component(key, args);
     }
 
 }
