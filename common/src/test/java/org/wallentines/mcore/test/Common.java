@@ -2,6 +2,7 @@ package org.wallentines.mcore.test;
 
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
+import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -94,6 +95,11 @@ public class Common {
         @Override
         public void shrink(int amount) {
             grow(-amount);
+        }
+
+        @Override
+        public String getTranslationKey() {
+            return null;
         }
     }
 

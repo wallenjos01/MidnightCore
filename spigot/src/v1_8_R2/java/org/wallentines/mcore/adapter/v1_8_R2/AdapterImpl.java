@@ -39,7 +39,7 @@ public class AdapterImpl implements Adapter {
 
 
     
-    @Override
+
     public boolean initialize() {
 
         try {
@@ -159,6 +159,12 @@ public class AdapterImpl implements Adapter {
     @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
         getHandle(itemStack).setTag(convert(configSection));
+    }
+
+    @Override
+    public String getTranslationKey(ItemStack is) {
+        net.minecraft.server.v1_8_R2.ItemStack mis = getHandle(is);
+        return mis.getItem().a(mis);
     }
 
     @Override

@@ -166,6 +166,10 @@ public interface Adapter {
      */
     void kickPlayer(Player player, Component message);
 
+    default String getTranslationKey(ItemStack itemStack) {
+        return itemStack.getTranslationKey();
+    }
+
 
     /**
      * Contains the registered singleton for the given version. Populated as soon as the plugin is loaded

@@ -168,6 +168,13 @@ public class AdapterImpl implements Adapter {
         getHandle(itemStack).c(convert(configSection));
     }
 
+
+    @Override
+    public String getTranslationKey(ItemStack is) {
+        net.minecraft.world.item.ItemStack mis = getHandle(is);
+        return mis.c().a();
+    }
+
     @Override
     public ConfigSection getTag(ItemStack itemStack) {
 
