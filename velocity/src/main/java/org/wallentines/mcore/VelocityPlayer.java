@@ -73,6 +73,11 @@ public class VelocityPlayer implements ProxyPlayer {
     }
 
     @Override
+    public boolean hasPermission(String permission, int defaultOpLevel) {
+        return player.hasPermission(permission);
+    }
+
+    @Override
     public String getHostname() {
         return player.getVirtualHost().map(InetSocketAddress::getHostString).orElse("");
     }

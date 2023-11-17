@@ -10,7 +10,7 @@ import java.util.UUID;
 /**
  * Represents a proxied player
  */
-public interface ProxyPlayer extends LocaleHolder {
+public interface ProxyPlayer extends LocaleHolder, PermissionHolder {
 
     /**
      * Gets the UUID of the player
@@ -53,13 +53,6 @@ public interface ProxyPlayer extends LocaleHolder {
      * @return The player's server
      */
     ProxyServer getServer();
-
-    /**
-     * Checks if the player has the given permission
-     * @param permission The permission to check
-     * @return Whether the player has the permission
-     */
-    boolean hasPermission(String permission);
 
     /**
      * Gets the hostname the player used to connect to the proxy
