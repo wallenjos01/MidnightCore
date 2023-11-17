@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -184,7 +185,7 @@ public class UnresolvedComponent {
      */
     public static SerializeResult<UnresolvedComponent> parse(String str, boolean tryParseJSON) {
 
-        return parse(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8)))), null, tryParseJSON);
+        return parse(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8)), null, tryParseJSON);
 
     }
 
@@ -193,20 +194,54 @@ public class UnresolvedComponent {
         try {
 
             UnresolvedComponent out = new UnresolvedComponent(tryParseJSON);
+
+            CharBuffer buffer = CharBuffer.allocate(1024);
             StringBuilder currentString = new StringBuilder();
 
-            int chara;
-            reader.mark(2);
+            while(true) {
 
-            while ((chara = reader.read()) != -1) {
+                buffer.clear();
 
-                if (chara == '%') {
+                reader.mark(1024);
+                int bytesRead = reader.read(buffer);
 
-                    if (reader.read() == '%') {
-                        currentString.append('%');
+                if(bytesRead == -1) {
+                    break;
+                }
+                String str = buffer.rewind().toString().substring(0, bytesRead);
+
+                int earlyIndex = Integer.MAX_VALUE;
+                if(earlyTerminate != null) {
+                    int idx = str.indexOf(earlyTerminate);
+                    if(idx > -1) {
+                        earlyIndex = idx;
+                    }
+                }
+
+                int index = str.indexOf('%');
+                if(earlyIndex < index) {
+                    reader.reset();
+                    reader.skip(earlyIndex+1);
+                    if(earlyIndex > 0) {
+                        out.parts.add(Either.left(str.substring(0, earlyIndex)));
+                    }
+                    break;
+                }
+
+                if(index > -1) {
+                    if(index > 0) {
+                        currentString.append(str, 0, index);
+                    }
+
+                    reader.reset();
+                    reader.skip(index);
+
+                    if(str.charAt(index + 1) == '%') {
+                        currentString.append("%");
+                        reader.skip(1);
 
                     } else {
-                        reader.reset();
+
                         SerializeResult<UnresolvedPlaceholder> placeholder = UnresolvedPlaceholder.parse(reader, tryParseJSON);
                         if(!placeholder.isComplete()) {
                             return SerializeResult.failure("Unable to parse entry! " + placeholder.getError());
@@ -219,26 +254,14 @@ public class UnresolvedComponent {
 
                         out.parts.add(Either.right(placeholder.getOrThrow()));
                     }
-
-                } else if (earlyTerminate != null && chara == earlyTerminate) {
-
-                    if (!currentString.isEmpty()) {
-                        out.parts.add(Either.left(currentString.toString()));
-                        currentString.setLength(0);
-                    }
-
-                    return out.finish();
-
                 } else {
-                    currentString.appendCodePoint(chara);
+
+                    out.parts.add(Either.left(str));
+
                 }
-                reader.mark(2);
             }
 
-            if (!currentString.isEmpty()) {
-                out.parts.add(Either.left(currentString.toString()));
-                currentString.setLength(0);
-            }
+            buffer.clear();
 
             return out.finish();
 

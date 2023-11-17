@@ -39,4 +39,17 @@ public class TestUnresolved {
     }
 
 
+    @Test
+    public void testUnicode() {
+
+        String unparsed = "%placeholder%: \u00bb";
+
+        SerializeResult<UnresolvedComponent> parsed = UnresolvedComponent.parse(unparsed);
+        Assertions.assertTrue(parsed.isComplete());
+
+        Assertions.assertEquals("%placeholder%: \u00bb", parsed.getOrThrow().toRaw());
+
+    }
+
+
 }
