@@ -101,7 +101,7 @@ public interface ItemStack {
     default Component getName() {
 
         ConfigSection tag = getTag();
-        Component def = Component.translate(getTranslationKey());
+        Component def = Component.translate(getTranslationKey()).withColor(getRarityColor());
         if(tag == null || !tag.has("display")) {
             return def;
         }

@@ -6,6 +6,7 @@ import org.wallentines.midnightlib.types.Either;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.CharBuffer;
 import java.util.Objects;
 
 /**
@@ -107,37 +108,63 @@ public class UnresolvedPlaceholder {
                 return SerializeResult.failure("Unable to parse placeholder! Expected placeholder to start with '%'");
             }
 
-            StringBuilder id = new StringBuilder();
+            StringBuilder placeholder = new StringBuilder();
 
-            while ((chara = reader.read()) != -1) {
+            CharBuffer buffer = CharBuffer.allocate(1024);
+            boolean param;
 
-                if(chara == '%' || chara == '<') {
-                    String finalId = id.toString();
+            while(true) {
 
-                    if(chara == '%') {
-                        return SerializeResult.success(new UnresolvedPlaceholder(finalId, null));
-                    } else {
+                buffer.clear();
 
-                        SerializeResult<UnresolvedComponent> entry = UnresolvedComponent.parse(reader, '>', tryParseJSON);
-                        if(!entry.isComplete()) {
-                            return SerializeResult.failure("Unable to parse placeholder argument! " + entry.get());
-                        }
-                        if(reader.read() != '%') {
-                            return SerializeResult.failure("Unable to parse placeholder! Found junk data after argument!");
-                        }
-                        return SerializeResult.success(new UnresolvedPlaceholder(finalId, entry.getOrThrow()));
-                    }
-
-                } else {
-                    id.appendCodePoint(chara);
+                reader.mark(1024);
+                int bytesRead = reader.read(buffer);
+                if(bytesRead == -1) {
+                    return SerializeResult.failure("Unable to parse placeholder! Found EOF while parsing placeholder ID!");
                 }
+
+                String str = buffer.rewind().toString().substring(0, bytesRead);
+
+                int endIndex = str.indexOf('%');
+                int paramIndex = str.indexOf('<');
+
+                if(endIndex == -1) endIndex = Integer.MAX_VALUE;
+                if(paramIndex == -1) paramIndex = Integer.MAX_VALUE;
+
+                int index = Math.min(endIndex, paramIndex);
+
+                param = paramIndex < endIndex;
+
+                if(index == Integer.MAX_VALUE) {
+                    placeholder.append(str);
+                } else {
+                    reader.reset();
+                    reader.skip(index + 1);
+                    placeholder.append(str, 0, index);
+                    break;
+                }
+            }
+            buffer.clear();
+
+            String finalId = placeholder.toString();
+
+            if(param) {
+
+                SerializeResult<UnresolvedComponent> res = UnresolvedComponent.parse(reader, '>', tryParseJSON);
+                if(!res.isComplete()) {
+                    return SerializeResult.failure("Unable to parse placeholder argument! " + res.get());
+                }
+                if(reader.read() != '%') {
+                    return SerializeResult.failure("Unable to parse placeholder! Found junk data after argument!");
+                }
+                return SerializeResult.success(new UnresolvedPlaceholder(finalId, res.getOrThrow()));
+            } else {
+                return SerializeResult.success(new UnresolvedPlaceholder(finalId, null));
             }
 
         } catch (IOException ex) {
 
             return SerializeResult.failure("Unable to parse placeholder! Encountered IOException! " + ex.getMessage());
         }
-
-        return SerializeResult.failure("Unable to parse placeholder! Found end of string before ending %!");
     }
 }
