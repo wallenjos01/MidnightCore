@@ -50,6 +50,11 @@ public class TestUtil {
                             .withHoverEvent(HoverEvent.createItemHover(is))
             );
 
+            ItemStack hand = pl.getItem(Entity.EquipmentSlot.MAINHAND);
+            pl.sendMessage(
+                    hand.getName().addChild(Component.text(" (" + hand.getTranslationKey() + ")"))
+            );
+
             srv.submit(() -> {
                 pl.sendMessage(
                         Component.text("Submitted")
