@@ -2,8 +2,8 @@ package org.wallentines.mcore;
 
 import org.bukkit.Material;
 import org.wallentines.mcore.adapter.Adapter;
-import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 public class SpigotItem implements ItemStack {
@@ -82,6 +82,11 @@ public class SpigotItem implements ItemStack {
     @Override
     public String getTranslationKey() {
         return Adapter.INSTANCE.get().getTranslationKey(internal);
+    }
+
+    @Override
+    public Color getRarityColor() {
+        return Adapter.INSTANCE.get().getRarityColor(internal);
     }
 
     @Override

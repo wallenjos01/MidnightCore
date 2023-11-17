@@ -14,6 +14,7 @@ import org.wallentines.mcore.util.NBTContext;
 import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Optional;
@@ -86,5 +87,9 @@ public abstract class MixinItemStack implements ItemStack {
         return ((net.minecraft.world.item.ItemStack) (Object) this).getItem().getDescriptionId();
     }
 
+    public Color mcore$getRarityColor() {
 
+        Integer color = ((net.minecraft.world.item.ItemStack) (Object) this).getRarity().color.getColor();
+        return color == null ? Color.WHITE : new Color(color);
+    }
 }

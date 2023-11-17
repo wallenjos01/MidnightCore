@@ -121,11 +121,14 @@ public interface ItemStack {
         if(comp.isComplete()) {
             Component out = comp.getOrThrow();
             if(out.italic == null) out = out.withItalic(true);
+            if(out.color == null) out = out.withColor(getRarityColor());
             return out;
         }
 
         return def;
     }
+
+    Color getRarityColor();
 
     static ItemStack empty() {
         return Builder.of(new Identifier("minecraft", "air")).build();
