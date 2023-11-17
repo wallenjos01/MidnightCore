@@ -387,7 +387,7 @@ public class UnresolvedComponent {
 
         @Override
         public <O> SerializeResult<UnresolvedComponent> deserialize(SerializeContext<O> context, O value) {
-            if(context.isString(value)) {
+            if(!context.isString(value)) {
                 return SerializeResult.failure("Unable to parse unresolved component! Expected a String!");
             }
             return parse(context.asString(value));

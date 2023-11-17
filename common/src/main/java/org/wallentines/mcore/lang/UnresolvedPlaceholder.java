@@ -138,6 +138,6 @@ public class UnresolvedPlaceholder {
             return SerializeResult.failure("Unable to parse placeholder! Encountered IOException! " + ex.getMessage());
         }
 
-        return SerializeResult.failure("Unable to parse placeholder! An unknown error occurred!");
+        return SerializeResult.failure("Unable to parse placeholder! Found end of string before ending %!");
     }
 }
