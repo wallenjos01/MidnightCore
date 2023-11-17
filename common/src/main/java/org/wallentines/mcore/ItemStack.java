@@ -6,6 +6,7 @@ import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -110,11 +111,13 @@ public interface ItemStack {
             return def;
         }
 
-        ComponentSerializer ser = GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
-                ModernSerializer.INSTANCE :
-                LegacySerializer.INSTANCE;
+        SerializeResult<Component> comp;
+        if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS)) {
+            comp = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, display.getString("Name")));
+        } else {
+            comp = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(display.getString("Name")));
+        }
 
-        SerializeResult<Component> comp = ser.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(display.getString("Name")));
         if(comp.isComplete()) {
             Component out = comp.getOrThrow();
             if(out.italic == null) out = out.withItalic(true);
