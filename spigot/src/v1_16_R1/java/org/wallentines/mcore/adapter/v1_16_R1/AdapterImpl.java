@@ -24,6 +24,7 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.lang.reflect.Field;
@@ -197,6 +198,12 @@ public class AdapterImpl implements Adapter {
     @Override
     public void kickPlayer(Player player, Component message) {
         ((CraftPlayer) player).getHandle().playerConnection.a(convert(message));
+    }
+
+    @Override
+    public Color getRarityColor(ItemStack itemStack) {
+        Integer clr = getHandle(itemStack).v().e.e();
+        return clr == null ? Color.WHITE : new Color(clr);
     }
     
     private ConfigSection convert(NBTTagCompound internal) {

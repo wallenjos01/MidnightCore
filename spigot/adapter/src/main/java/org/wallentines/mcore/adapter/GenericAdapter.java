@@ -10,8 +10,10 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.TextColor;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 public class GenericAdapter implements Adapter {
@@ -140,6 +142,14 @@ public class GenericAdapter implements Adapter {
     @Override
     public void kickPlayer(Player player, Component message) {
         player.kickPlayer(message.toLegacyText());
+    }
+
+    @Override
+    public Color getRarityColor(ItemStack itemStack) {
+        if(itemStack.getItemMeta() != null && itemStack.getItemMeta().hasEnchants()) {
+            return TextColor.AQUA;
+        }
+        return TextColor.WHITE;
     }
 
     // https://wiki.vg/Protocol_version_numbers

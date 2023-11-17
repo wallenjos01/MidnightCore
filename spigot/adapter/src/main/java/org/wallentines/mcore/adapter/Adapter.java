@@ -7,6 +7,7 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
@@ -169,6 +170,8 @@ public interface Adapter {
     default String getTranslationKey(ItemStack itemStack) {
         return itemStack.getTranslationKey();
     }
+
+    Color getRarityColor(ItemStack itemStack);
 
 
     /**
