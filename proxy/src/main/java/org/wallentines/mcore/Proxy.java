@@ -13,6 +13,7 @@ import org.wallentines.midnightlib.types.Singleton;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -38,6 +39,12 @@ public interface Proxy {
      * @return The found player, or null
      */
     ProxyPlayer getPlayer(UUID uuid);
+
+    /**
+     * Gets a collection of all players connected to the proxy
+     * @return A collection of players
+     */
+    Collection<ProxyPlayer> getPlayers();
 
     /**
      * Gets the server with the given name

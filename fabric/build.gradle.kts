@@ -86,7 +86,7 @@ dependencies {
     shadow(libs.zstd.jni)
 
     // Included Mod Dependencies
-    modApi(include("org.wallentines:fabric-events:0.2.0-SNAPSHOT")!!)
+    modApi(include("org.wallentines:fabric-events:0.3.0-SNAPSHOT")!!)
     modApi(include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")!!)
 }
 

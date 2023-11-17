@@ -6,10 +6,7 @@ import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.serializer.ConfigContext;
-import org.wallentines.mdcfg.serializer.NumberSerializer;
-import org.wallentines.mdcfg.serializer.ObjectSerializer;
-import org.wallentines.mdcfg.serializer.Serializer;
+import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
@@ -71,6 +68,10 @@ public interface ItemStack {
      */
     void shrink(int amount);
 
+    /**
+     * Gets the translation key for this item type, for use in translate Components.
+     * @return The translation key for this item type
+     */
     String getTranslationKey();
 
     /**
@@ -113,7 +114,14 @@ public interface ItemStack {
                 ModernSerializer.INSTANCE :
                 LegacySerializer.INSTANCE;
 
-        return ser.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(display.getString("Name"))).get().orElse(def);
+        SerializeResult<Component> comp = ser.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(display.getString("Name")));
+        if(comp.isComplete()) {
+            Component out = comp.getOrThrow();
+            if(out.italic == null) out = out.withItalic(true);
+            return out;
+        }
+
+        return def;
     }
 
     static ItemStack empty() {

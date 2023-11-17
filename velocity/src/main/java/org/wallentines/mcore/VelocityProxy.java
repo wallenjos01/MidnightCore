@@ -2,15 +2,14 @@ package org.wallentines.mcore;
 
 import com.google.common.eventbus.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class VelocityProxy implements Proxy {
 
@@ -47,6 +46,17 @@ public class VelocityProxy implements Proxy {
     @Override
     public VelocityPlayer getPlayer(UUID uuid) {
         return playerCache.compute(uuid, (k,v) -> server.getPlayer(uuid).map(player -> v == null ? new VelocityPlayer(player, this) : v).orElse(null));
+    }
+
+    @Override
+    public Collection<ProxyPlayer> getPlayers() {
+
+        List<ProxyPlayer> players = new ArrayList<>(server.getPlayerCount());
+        for(Player player : server.getAllPlayers()) {
+            getPlayer(player.getUniqueId());
+        }
+
+        return players;
     }
 
     @Override
