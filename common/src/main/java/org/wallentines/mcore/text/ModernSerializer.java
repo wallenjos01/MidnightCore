@@ -151,12 +151,14 @@ public class ModernSerializer extends ComponentSerializer {
             return SerializeResult.failure("Unable to deserialize component contents! Could not find valid content type!");
         }
 
-        String clr = context.asString(context.get("color", value));
-        if(clr.equals("reset")) {
-            out = out.withReset(true);
-        } else {
-            out = out.withColor(TextColor.parse(clr));
-        }
+        Component finalOut = out;
+        out = Serializer.STRING.deserialize(context, context.get("color", value)).get().map(clr -> {
+            if (clr.equals("reset")) {
+                return finalOut.withReset(true);
+            } else {
+                return finalOut.withColor(TextColor.parse(clr));
+            }
+        }).orElse(out);
 
         out = Serializer.BOOLEAN.deserialize(context, context.get("bold", value)).get().map(out::withBold).orElse(out);
         out = Serializer.BOOLEAN.deserialize(context, context.get("italic", value)).get().map(out::withItalic).orElse(out);

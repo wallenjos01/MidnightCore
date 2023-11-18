@@ -120,7 +120,7 @@ public abstract class Content {
         public static Serializer<Translate> serializer(Serializer<Component> serializer) {
 
             return ObjectSerializer.create(
-                    Serializer.STRING.entry("text", con -> con.key),
+                    Serializer.STRING.entry("translate", con -> con.key),
                     Serializer.STRING.<Translate>entry("fallback", con -> con.fallback).optional(),
                     serializer.listOf().<Translate>entry("with", con -> con.with).optional(),
                     Translate::new
