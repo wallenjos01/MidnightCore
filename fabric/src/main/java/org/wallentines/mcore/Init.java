@@ -55,7 +55,7 @@ public class Init implements ModInitializer {
                 MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
             }
 
-            MidnightCoreServer.DEFAULT_CONFIG.set("vanilla_command_permissions", false);
+            MidnightCoreServer.DEFAULT_CONFIG.set("vanilla_command_permissions", true);
 
             MinecraftServer server = ConversionUtil.validate(srv);
             MidnightCoreServer mcs = new MidnightCoreServer(srv, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE), Path.of("config").resolve("MidnightCore"));
@@ -63,7 +63,7 @@ public class Init implements ModInitializer {
             ((ResettableSingleton<MidnightCoreServer>) MidnightCoreServer.INSTANCE).reset();
             MidnightCoreServer.INSTANCE.set(mcs);
 
-            if(mcs.getConfig().getOrDefault("vanilla_command_permissions", false)) {
+            if(mcs.getConfig().getOrDefault("vanilla_command_permissions", true)) {
                 for(CommandNode<CommandSourceStack> node : vanillaCommands) {
                     if(!(node instanceof LiteralCommandNode<CommandSourceStack> lit)) continue;
                     ((AccessorCommandNode) node).setRequirement(node.getRequirement().or(Permissions.require("minecraft.command." + lit.getLiteral())));
