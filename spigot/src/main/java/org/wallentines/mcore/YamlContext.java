@@ -1,7 +1,6 @@
 package org.wallentines.mcore;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 
 import java.util.*;
@@ -89,9 +88,9 @@ public class YamlContext implements SerializeContext<Object> {
     @Override
     public Collection<String> getOrderedKeys(Object object) {
         if(!isMap(object)) return null;
-        return object instanceof ConfigurationSection ?
-                ((ConfigurationSection) object).getKeys(false) :
-                ((Map<String, ?>) object).keySet();
+        return object instanceof Map ?
+                ((Map<String, ?>) object).keySet() :
+                ((ConfigurationSection) object).getKeys(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -99,9 +98,9 @@ public class YamlContext implements SerializeContext<Object> {
     public Object get(String key, Object object) {
         if(!isMap(object)) return null;
 
-        return object instanceof ConfigurationSection ?
-                ((ConfigurationSection) object).get(key) :
-                ((Map<String, ?>) object).get(key);
+        return object instanceof Map ?
+                ((Map<String, ?>) object).get(key) :
+                ((ConfigurationSection) object).get(key);
     }
 
     @Override
@@ -132,8 +131,8 @@ public class YamlContext implements SerializeContext<Object> {
     @Override
     public Object toMap(Map<String, Object> map) {
 
-        ConfigurationSection sec = new YamlConfiguration();
-        map.forEach((key, value) -> sec.set(key, serializeObject(value)));
+        LinkedHashMap<String, Object> sec = new LinkedHashMap<>();
+        map.forEach((key, value) -> sec.put(key, serializeObject(value)));
         return sec;
     }
 
@@ -141,10 +140,10 @@ public class YamlContext implements SerializeContext<Object> {
     @Override
     public Object set(String key, Object value, Object object) {
         if(!isMap(object)) return null;
-        if(object instanceof ConfigurationSection) {
-            ((ConfigurationSection) object).set(key, value);
-        } else {
+        if(object instanceof Map) {
             ((Map<String, Object>) object).put(key, value);
+        } else {
+            ((ConfigurationSection) object).set(key, value);
         }
         return value;
     }

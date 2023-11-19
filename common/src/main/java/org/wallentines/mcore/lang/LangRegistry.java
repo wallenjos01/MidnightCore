@@ -120,27 +120,25 @@ public class LangRegistry {
     public static LangRegistry fromConfig(ConfigSection section, PlaceholderManager manager, boolean tryParseJSON) {
 
         LangRegistry out = new LangRegistry(manager);
-        addAll(section, out, "", tryParseJSON);
-
-        return out;
-    }
-
-    private static void addAll(ConfigSection section, LangRegistry registry, String prefix, boolean tryParseJSON) {
 
         for(String key : section.getKeys()) {
             ConfigObject obj = section.get(key);
-            String finalKey = prefix + key;
-            if(obj.isString()) {
-                SerializeResult<UnresolvedComponent> result = UnresolvedComponent.parse(obj.asString(), tryParseJSON);
-                if(result.isComplete()) {
-                    registry.entries.register(finalKey, result.getOrThrow());
-                } else {
-                    MidnightCoreAPI.LOGGER.warn("An error occurred while parsing a language entry! (" + finalKey + ") " + result.getError());
-                }
-            } else if(obj.isSection()) {
-                addAll(obj.asSection(), registry, finalKey + ".", tryParseJSON);
+
+            if(obj == null || !obj.isString()) {
+                MidnightCoreAPI.LOGGER.warn("Found non-string key in lang file: " + key);
+                continue;
+            }
+
+            SerializeResult<UnresolvedComponent> result = UnresolvedComponent.parse(obj.asString(), tryParseJSON);
+            if(result.isComplete()) {
+                out.entries.register(key, result.getOrThrow());
+            } else {
+                MidnightCoreAPI.LOGGER.warn("An error occurred while parsing a language entry! (" + key + ") " + result.getError());
             }
         }
+
+
+        return out;
     }
 
 }
