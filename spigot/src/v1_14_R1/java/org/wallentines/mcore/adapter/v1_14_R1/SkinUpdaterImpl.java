@@ -71,7 +71,7 @@ public class SkinUpdaterImpl implements SkinUpdater {
         }
 
         // Entity information should be sent to observers in the same world
-        List<EntityPlayer> observers = world.getPlayers();
+        List<EntityPlayer> observers = world.a(pl -> pl != epl);
 
         if(!observers.isEmpty()) {
 
