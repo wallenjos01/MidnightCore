@@ -15,6 +15,7 @@ import org.wallentines.mcore.text.ClickEvent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.HoverEvent;
 import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 

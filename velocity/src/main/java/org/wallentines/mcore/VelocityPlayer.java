@@ -1,13 +1,10 @@
 package org.wallentines.mcore;
 
-import com.google.gson.JsonObject;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ComponentResolver;
-import org.wallentines.mcore.text.ModernSerializer;
-import org.wallentines.mcore.util.GsonContext;
+import org.wallentines.mcore.util.ConversionUtil;
 
 import java.net.InetSocketAddress;
 import java.util.Locale;
@@ -49,11 +46,7 @@ public class VelocityPlayer implements ProxyPlayer {
 
     @Override
     public void sendMessage(Component message) {
-        // TODO: Proper conversion of components to adventure components
-
-        JsonObject obj = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, ComponentResolver.resolveComponent(message, this)).getOrThrow().getAsJsonObject();
-        net.kyori.adventure.text.Component cmp = GsonComponentSerializer.builder().build().deserializeFromTree(obj);
-        player.sendMessage(cmp);
+        player.sendMessage(ConversionUtil.toAdventure(ComponentResolver.resolveComponent(message, this)));
     }
 
     @Override
