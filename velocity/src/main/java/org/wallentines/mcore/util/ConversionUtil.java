@@ -1,12 +1,17 @@
 package org.wallentines.mcore.util;
 
+import com.google.gson.JsonObject;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.ProxyPlayer;
 import org.wallentines.mcore.ProxyServer;
+import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ModernSerializer;
+import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.midnightlib.registry.Identifier;
 
 /**
@@ -38,6 +43,12 @@ public class ConversionUtil {
         return MinecraftChannelIdentifier.create(id.getNamespace(), id.getPath());
     }
 
+
+    public static net.kyori.adventure.text.Component toAdventure(Component component) {
+
+        JsonObject obj = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component).getOrThrow().getAsJsonObject();
+        return GsonComponentSerializer.builder().build().deserializeFromTree(obj);
+    }
 
     /**
      * Ensures the given ProxyPlayer is actually a velocity Player

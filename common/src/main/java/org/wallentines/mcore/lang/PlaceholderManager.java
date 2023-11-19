@@ -123,6 +123,11 @@ public class PlaceholderManager {
                                                 .map(word -> word.charAt(0) + "")
                                                 .collect(Collectors.joining()))));
 
+        registerSupplier("translate", PlaceholderSupplier.of(ctx ->
+                ctx.getParameter() == null ?
+                        Component.empty() :
+                        Component.translate(ctx.getParameter().text())));
+
     }
 
     static {
