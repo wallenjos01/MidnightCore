@@ -122,6 +122,7 @@ dependencies {
     "shadow8"(libs.slf4j.simple)
 
     compileOnly("org.spigotmc:spigot-api:1.20.2-R0.1-SNAPSHOT")
+    testImplementation("org.yaml:snakeyaml:2.2")
 }
 
 tasks.withType<ProcessResources>() {
