@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.wallentines.mcore.Client;
 import org.wallentines.mcore.ClientModule;
-import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.midnightlib.module.ModuleManager;
 
 import java.nio.file.Path;
@@ -26,7 +25,6 @@ public abstract class MixinMinecraft implements Client {
     @Inject(method="<init>", at=@At("RETURN"))
     private void onInit(GameConfig gameConfig, CallbackInfo ci) {
 
-        MidnightCoreAPI.LOGGER.warn("Client created!");
         Client.RUNNING_CLIENT.set(this);
 
         loadModules(ClientModule.REGISTRY);
