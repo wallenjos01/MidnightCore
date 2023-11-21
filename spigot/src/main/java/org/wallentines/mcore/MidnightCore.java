@@ -59,7 +59,6 @@ public class MidnightCore extends JavaPlugin {
 
         // Create server
         SpigotServer server = new SpigotServer();
-        Server.RUNNING_SERVER.set(server);
 
         Server.RUNNING_SERVER.resetEvent.register(this, ev -> {
             MidnightCoreAPI.LOGGER.warn("Running server was reset!");
@@ -68,6 +67,8 @@ public class MidnightCore extends JavaPlugin {
 
         // Load Modules
         server.loadModules(ServerModule.REGISTRY);
+
+        Server.RUNNING_SERVER.set(server);
 
         // MidnightCore
         ConfigSection defaults = new ConfigSection();

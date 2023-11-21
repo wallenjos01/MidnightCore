@@ -12,6 +12,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Context by which to resolve placeholders. Contains arguments and an optional placeholder parameter.
+ */
 public class PlaceholderContext {
 
     private final Component parameter;

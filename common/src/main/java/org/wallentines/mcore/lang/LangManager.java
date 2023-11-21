@@ -177,6 +177,7 @@ public class LangManager {
         }
     }
 
+    // Attempts to find the closest loaded language to the requested string
     private String findClosestLanguage(String language) {
 
         if (language == null) {

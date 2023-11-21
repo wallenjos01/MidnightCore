@@ -10,11 +10,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * A packet sent to clients to query the extensions they have enabled
+ */
 public class ClientboundExtensionPacket implements Packet {
 
     private final List<Identifier> extensions;
 
 
+    /**
+     * Constructs a new extension packet with the given supported extensions
+     * @param extensions The extensions supported by the server, will be sent to the client.
+     */
     public ClientboundExtensionPacket(Collection<Identifier> extensions) {
         this.extensions = List.copyOf(extensions);
     }
@@ -32,10 +39,20 @@ public class ClientboundExtensionPacket implements Packet {
         }
     }
 
+    /**
+     * Gets a list of the extensions supported by the server. The client should respond with the versions of these
+     * extensions it supports.
+     * @return A list of extension identifiers
+     */
     public List<Identifier> getExtensions() {
         return extensions;
     }
 
+    /**
+     * Creates a new extension packet by reading a data buffer
+     * @param buffer The bytes to read
+     * @return A new extension packet
+     */
     public static ClientboundExtensionPacket read(ByteBuf buffer) {
 
         int count = PacketBufferUtil.readVarInt(buffer);

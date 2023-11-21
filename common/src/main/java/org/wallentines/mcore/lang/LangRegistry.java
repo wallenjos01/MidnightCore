@@ -21,10 +21,16 @@ public class LangRegistry {
     private final PlaceholderManager manager;
 
 
+    /**
+     * Creates a new LangRegistry with the global PlaceholderManager instance
+     */
     public LangRegistry() {
         this.manager = PlaceholderManager.INSTANCE;
     }
 
+    /**
+     * Creates a new LangRegistry with the given PlaceholderManager instance
+     */
     public LangRegistry(PlaceholderManager manager) {
         this.manager = manager;
     }

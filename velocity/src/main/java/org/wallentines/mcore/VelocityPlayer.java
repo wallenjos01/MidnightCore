@@ -75,4 +75,7 @@ public class VelocityPlayer implements ProxyPlayer {
         return player.getVirtualHost().map(InetSocketAddress::getHostString).orElse("");
     }
 
+    public Player getInternal() {
+        return player;
+    }
 }

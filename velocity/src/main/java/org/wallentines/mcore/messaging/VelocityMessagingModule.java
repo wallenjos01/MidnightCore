@@ -41,6 +41,18 @@ public class VelocityMessagingModule extends ProxyMessagingModule {
         ConversionUtil.validate(server).sendPluginMessage(ConversionUtil.toChannelIdentifier(id), out.array());
     }
 
+    @Override
+    public void registerPlayerHandler(Identifier id, PacketHandler<ProxyPlayer> handler) {
+        super.registerPlayerHandler(id, handler);
+        proxy.getInternal().getChannelRegistrar().register(ConversionUtil.toChannelIdentifier(id));
+    }
+
+    @Override
+    public void registerServerHandler(Identifier id, PacketHandler<ProxyPlayer> handler) {
+        super.registerServerHandler(id, handler);
+        proxy.getInternal().getChannelRegistrar().register(ConversionUtil.toChannelIdentifier(id));
+    }
+
     @Subscribe
     private void onMessage(PluginMessageEvent event) {
 

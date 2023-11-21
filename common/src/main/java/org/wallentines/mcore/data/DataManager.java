@@ -13,6 +13,9 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Queue;
 
+/**
+ * A class for loading and saving data files from a directory on disk.
+ */
 public class DataManager {
 
     private final File searchDirectory;
@@ -107,6 +110,7 @@ public class DataManager {
         opened.clear();
         openFiles.clear();
     }
+
 
     private FileWrapper<ConfigObject> getWrapper(String key) {
         return getWrapper(key, true);

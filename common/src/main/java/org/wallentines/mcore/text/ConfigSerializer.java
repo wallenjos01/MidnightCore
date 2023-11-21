@@ -6,7 +6,7 @@ import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 
 /**
- * A {@link ComponentSerializer} which serializes components into Strings optimized for config files
+ * A {@link ComponentSerializer} which serializes components into Strings optimized for config files.
  */
 public class ConfigSerializer extends ComponentSerializer {
 

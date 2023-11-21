@@ -35,9 +35,9 @@ public class MidnightCore {
     private void onInit(ProxyInitializeEvent ev) {
 
         VelocityProxy proxy = new VelocityProxy(this, server);
+        proxy.loadModules(ProxyModule.REGISTRY);
         Proxy.RUNNING_PROXY.set(proxy);
 
-        proxy.loadModules(ProxyModule.REGISTRY);
     }
 
 }

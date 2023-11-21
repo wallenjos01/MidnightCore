@@ -92,12 +92,13 @@ public abstract class ProxyMessagingModule implements ProxyModule {
 
     private <T> boolean handleGeneric(T data, Registry<PacketHandler<T>> registry, Identifier id, ByteBuf buffer) {
 
-        if(!registry.contains(id)) {
+        PacketHandler<T> handler = registry.get(id);
+        if(handler == null) {
             return false;
         }
 
         try {
-            registry.get(id).handle(data, buffer);
+            handler.handle(data, buffer);
         } catch (Exception ex) {
             MidnightCoreAPI.LOGGER.error("An exception occurred while handling a message from a Server!", ex);
         }

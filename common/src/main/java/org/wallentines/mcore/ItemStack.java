@@ -98,6 +98,10 @@ public interface ItemStack {
         setTag(tag);
     }
 
+    /**
+     * Gets the display name of an item as it appears when hovering over it
+     * @return The item's custom name if available, or a translate component
+     */
     default Component getName() {
 
         ConfigSection tag = getTag();
@@ -128,8 +132,16 @@ public interface ItemStack {
         return def;
     }
 
+    /**
+     * Gets the color associated with the item's rarity
+     * @return The item's rarity color.
+     */
     Color getRarityColor();
 
+    /**
+     * Constructs an empty (Air) item stack
+     * @return An empty item stack
+     */
     static ItemStack empty() {
         return Builder.of(new Identifier("minecraft", "air")).build();
     }

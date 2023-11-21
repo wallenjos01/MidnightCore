@@ -6,9 +6,7 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.ProxyPlayer;
-import org.wallentines.mcore.ProxyServer;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mdcfg.serializer.GsonContext;
@@ -27,7 +25,7 @@ public class ConversionUtil {
     public static Identifier toIdentifier(ChannelIdentifier id) {
 
         if((id instanceof MinecraftChannelIdentifier mci)) {
-            return new Identifier(mci.getNamespace(), mci.getId());
+            return new Identifier(mci.getNamespace(), mci.getName());
         }
 
         return Identifier.parseOrDefault(id.getId(), MidnightCoreAPI.MOD_ID);
@@ -57,11 +55,11 @@ public class ConversionUtil {
      */
     public static Player validate(ProxyPlayer player) {
 
-        if(!(player instanceof Player)) {
+        if(!(player instanceof VelocityPlayer vpl)) {
             throw new IllegalArgumentException("Attempt to access a non-Velocity player!");
         }
 
-        return (Player) player;
+        return vpl.getInternal();
     }
 
 
@@ -72,11 +70,11 @@ public class ConversionUtil {
      */
     public static RegisteredServer validate(ProxyServer server) {
 
-        if(!(server instanceof RegisteredServer)) {
+        if(!(server instanceof VelocityServer vs)) {
             throw new IllegalArgumentException("Attempt to access a non-Velocity server!");
         }
 
-        return (RegisteredServer) server;
+        return vs.getInternal();
     }
 
 }

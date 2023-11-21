@@ -15,6 +15,10 @@ import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+
+/**
+ * A utility class for interacting with Mojang's web APIs
+ */
 public class MojangUtil {
 
     private static final String UUID_URL = "https://api.mojang.com/users/profiles/minecraft/%s";

@@ -1,5 +1,8 @@
 package org.wallentines.mcore;
 
+/**
+ * An interface implemented by classes which can have permissions
+ */
 public interface PermissionHolder {
 
     /**
@@ -17,6 +20,9 @@ public interface PermissionHolder {
      */
     boolean hasPermission(String permission, int defaultOpLevel);
 
+    /**
+     * A permission holder which has all permissions
+     */
     PermissionHolder ALL = new PermissionHolder() {
         @Override
         public boolean hasPermission(String permission) {
@@ -28,6 +34,9 @@ public interface PermissionHolder {
         }
     };
 
+    /**
+     * A permission holder which has no permissions
+     */
     PermissionHolder NONE = new PermissionHolder() {
         @Override
         public boolean hasPermission(String permission) {

@@ -11,6 +11,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * A utility class with many item-related functions
+ */
 public class ItemUtil {
 
     /**

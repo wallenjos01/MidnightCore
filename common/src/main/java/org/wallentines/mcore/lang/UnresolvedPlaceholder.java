@@ -53,7 +53,7 @@ public class UnresolvedPlaceholder {
         StringBuilder out = new StringBuilder("%");
         out.append(id);
         if(argument != null) {
-            out.append("<").append(argument).append(">");
+            out.append("<").append(argument.toRaw()).append(">");
         }
         out.append("%");
 

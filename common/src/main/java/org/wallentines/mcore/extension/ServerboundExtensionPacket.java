@@ -42,10 +42,19 @@ public class ServerboundExtensionPacket implements Packet {
         }
     }
 
+    /**
+     * Gets a map of extensions supported by the client, and their versions.
+     * @return The extensions supported by the client
+     */
     public Map<Identifier, Version> getExtensions() {
         return extensions;
     }
 
+    /**
+     * Creates an extension packet by reading from a data buffer.
+     * @param buffer The bytes to read.
+     * @return A new extension packet.
+     */
     public static ServerboundExtensionPacket read(ByteBuf buffer) {
 
         HashMap<Identifier, Version> modules = new HashMap<>();

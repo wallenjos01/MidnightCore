@@ -31,4 +31,8 @@ dependencies {
 
     api(libs.slf4j.api)
 
+    testImplementation(libs.midnight.cfg)
+    testImplementation(libs.midnight.cfg.json)
+    testImplementation(libs.midnight.lib)
+
 }

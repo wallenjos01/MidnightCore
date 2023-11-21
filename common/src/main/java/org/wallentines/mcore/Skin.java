@@ -45,8 +45,8 @@ public class Skin {
     }
 
     /**
-     * Returns the skin's signature. Signed with Mojang's private key, clients will not display a skin unless it has a valid
-     * signature corresponding to the skin's value
+     * Returns the skin's signature. Signed with Mojang's private key, clients will not display a skin unless it has a
+     * valid signature corresponding to the skin's value
      * @return The skin's signature
      */
     public String getSignature() {

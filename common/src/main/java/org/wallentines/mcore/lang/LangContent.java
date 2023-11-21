@@ -5,8 +5,10 @@ import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.text.Content;
 
 import java.util.Collection;
-import java.util.List;
 
+/**
+ * A special Component content type which resolves to a lang entry
+ */
 public class LangContent extends Content {
 
 
@@ -14,6 +16,12 @@ public class LangContent extends Content {
     private final String key;
     private final Collection<Object> context;
 
+    /**
+     * Creates a new lang content with the given manager, key, and context
+     * @param manager The manager in which to look up the key
+     * @param key The lang key to look up
+     * @param context Additional context by which to resolve the content
+     */
     public LangContent(LangManager manager, String key, Collection<Object> context) {
         super("lang");
         this.manager = manager;
@@ -21,25 +29,36 @@ public class LangContent extends Content {
         this.context = context;
     }
 
+    /**
+     * Gets the lang manager which will be looked into during resolution
+     * @return The lang manager
+     */
     public LangManager getLangManager() {
         return manager;
     }
 
+    /**
+     * Gets the key which will be looked up during resolution
+     * @return The lang entry key
+     */
     public String getKey() {
         return key;
     }
 
+    /**
+     * Resolves the component according to the given arguments
+     * @param args The arguments to pass. Will be added to the placeholder context. If this contains a LocaleHolder
+     *             Object, it will be used to determine the language to lookup
+     * @return A resolved Component
+     */
     public Component resolve(Object... args) {
 
-        PlaceholderContext ctx;
-        if(args == null) {
-            ctx = new PlaceholderContext();
-        } else {
-            ctx = new PlaceholderContext(List.of(args));
-        }
+        PlaceholderContext ctx = new PlaceholderContext(context);
 
-        for(Object o : context) {
-            ctx.addValue(o);
+        if(args != null) {
+            for(Object o : args) {
+                ctx.addValue(o);
+            }
         }
 
         String language = null;
@@ -56,6 +75,10 @@ public class LangContent extends Content {
         return true;
     }
 
+    /**
+     * Registers a default placeholder 'lang' to the given placeholder manager
+     * @param manager The placeholder manager to register to.
+     */
     public static void registerPlaceholders(PlaceholderManager manager) {
 
         manager.registerSupplier("lang", PlaceholderSupplier.of(ctx -> {

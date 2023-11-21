@@ -8,6 +8,9 @@ import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Registry;
 
 
+/**
+ * A utility class with module editing functions
+ */
 public class ModuleUtil {
 
     /**

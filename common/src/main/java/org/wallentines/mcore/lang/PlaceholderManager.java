@@ -83,18 +83,24 @@ public class PlaceholderManager {
         return UnresolvedComponent.parse(str, tryParseJSON).getOrThrow().resolve(this, ctx);
     }
 
+    /**
+     * Registers some default placeholders
+     */
     public void registerDefaults() {
 
+        // %toUpperCase<upper case>% -> UPPER CASE
         registerSupplier("toUpperCase", PlaceholderSupplier.of(ctx ->
                 ctx.getParameter() == null ?
                         Component.empty() :
                         ComponentUtil.editText(ctx.getParameter(), String::toUpperCase)));
 
+        // %toLowerCase<LOWER CASE>% -> lower case
         registerSupplier("toLowerCase", PlaceholderSupplier.of(ctx ->
                 ctx.getParameter() == null ?
                         Component.empty() :
                         ComponentUtil.editText(ctx.getParameter(), String::toLowerCase)));
 
+        // %toTitleCase<title case>% -> Title Case
         registerSupplier("toTitleCase", PlaceholderSupplier.of(ctx ->
                 ctx.getParameter() == null ?
                         Component.empty() :
@@ -105,6 +111,7 @@ public class PlaceholderManager {
                                                 .map(word -> Character.toTitleCase(word.charAt(0)) + word.substring(1).toLowerCase())
                                                 .collect(Collectors.joining(" ")))));
 
+        // %first<first letter>% -> f
         registerSupplier("first", PlaceholderSupplier.of(ctx ->
                 ctx.getParameter() == null ?
                         Component.empty() :
@@ -113,6 +120,7 @@ public class PlaceholderManager {
                                         str :
                                         str.charAt(0) + "")));
 
+        // %eachFirst<first letter>% -> fl
         registerSupplier("eachFirst", PlaceholderSupplier.of(ctx ->
                 ctx.getParameter() == null ?
                         Component.empty() :
@@ -123,6 +131,7 @@ public class PlaceholderManager {
                                                 .map(word -> word.charAt(0) + "")
                                                 .collect(Collectors.joining()))));
 
+        // %translate<item.minecraft.apple>% -> {translate:"item.minecraft.apple"}
         registerSupplier("translate", PlaceholderSupplier.of(ctx ->
                 ctx.getParameter() == null ?
                         Component.empty() :

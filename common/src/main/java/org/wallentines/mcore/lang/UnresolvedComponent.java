@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * A data type representing a component which has been parsed but not resolved
+ */
 public class UnresolvedComponent {
 
     private final boolean tryParseJSON;
@@ -402,6 +405,9 @@ public class UnresolvedComponent {
         return SerializeResult.success(this);
     }
 
+    /**
+     * A MidnightCFG serializer for unresolved components. Expects a string input and supplies a string output
+     */
     public static final Serializer<UnresolvedComponent> SERIALIZER = new Serializer<>() {
         @Override
         public <O> SerializeResult<O> serialize(SerializeContext<O> context, UnresolvedComponent value) {
