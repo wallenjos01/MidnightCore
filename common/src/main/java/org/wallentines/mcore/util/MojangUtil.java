@@ -51,7 +51,6 @@ public class MojangUtil {
         return null;
     }
 
-
     /**
      * Retrieves a player UUID by their username, asynchronously
      * @param playerName The username to look up.
@@ -62,6 +61,40 @@ public class MojangUtil {
         return CompletableFuture.supplyAsync(() -> getUUID(playerName));
     }
 
+
+    /**
+     * Retrieves a player username by their UUID.
+     * @param playerId The uuid to look up.
+     * @return The current username of the player, or null
+     */
+    public static String getUsername(UUID playerId) {
+
+        try {
+            URL url = new URL(String.format(SKIN_URL, playerId.toString().replace("-", "")));
+            ConfigSection sec = makeHttpRequest(url);
+            if(sec == null) {
+                return null;
+            }
+
+            return sec.getOrDefault("name", (String) null);
+
+        } catch(IOException | IllegalArgumentException ex) {
+            MidnightCoreAPI.LOGGER.error("An exception occurred while looking a player's UUID!", ex);
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Retrieves a player username by their UUID.
+     * @param playerId The uuid to look up.
+     * @return The current username of the player, or null
+     */
+    public static CompletableFuture<String> getUsernameAsync(UUID playerId) {
+
+        return CompletableFuture.supplyAsync(() -> getUsername(playerId));
+    }
 
     /**
      * Retrieves a player Skin by their UUID, asynchronously
