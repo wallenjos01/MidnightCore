@@ -43,6 +43,11 @@ public class SpigotSkinModule extends SkinModule {
     }
 
     @Override
+    public void forceUpdate(Player player) {
+        updater.changePlayerSkin(ConversionUtil.validate(player).getInternal(), getSkin(player));
+    }
+
+    @Override
     public void setSkin(Player player, Skin skin) {
         updater.changePlayerSkin(ConversionUtil.validate(player).getInternal(), skin);
     }

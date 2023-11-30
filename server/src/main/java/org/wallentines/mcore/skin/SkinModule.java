@@ -44,6 +44,8 @@ public abstract class SkinModule implements ServerModule {
         }
     }
 
+    public abstract void forceUpdate(Player player);
+
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "skin");
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
             .with("get_skins_in_offline_mode", true)

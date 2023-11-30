@@ -1,5 +1,6 @@
 package org.wallentines.mcore.data;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mdcfg.ConfigObject;
@@ -17,6 +18,8 @@ import java.util.Queue;
  * A class for loading and saving data files from a directory on disk.
  */
 public class DataManager {
+
+
 
     private final File searchDirectory;
     private final FileCodecRegistry fileCodecRegistry;
@@ -54,7 +57,12 @@ public class DataManager {
      */
     public ConfigSection getData(String key) {
 
-        return getWrapper(key).getRoot().asSection();
+        FileWrapper<ConfigObject> out = getWrapper(key, true);
+        if(out.getRoot() == null) {
+            out.setRoot(new ConfigSection());
+        }
+
+        return out.getRoot().asSection();
     }
 
 
@@ -69,20 +77,48 @@ public class DataManager {
         FileWrapper<ConfigObject> wrapper = getWrapper(key, false);
         if(wrapper == null) return null;
 
+        if(wrapper.getRoot() == null) {
+            wrapper.setRoot(new ConfigSection());
+        }
+
         return wrapper.getRoot().asSection();
     }
 
 
     /**
-     * Saves the given data to a file associated with the given key
+     * Saves the cached data for the given key to disk
      * @param key The key to save
-     * @param section The data to save
      */
-    public void save(String key, ConfigSection section) {
+    public void save(String key) {
 
-        FileWrapper<ConfigObject> obj = getWrapper(key);
-        obj.setRoot(section);
+        if(!openFiles.containsKey(key)) return;
+        openFiles.remove(key).save();
+        opened.remove(key);
+    }
+
+
+    /**
+     * Saves the given data for the given key to disk
+     * @param key The key to save
+     * @param data The data to save
+     */
+    public void save(String key, ConfigSection data) {
+
+        if(!openFiles.containsKey(key)) return;
+        FileWrapper<ConfigObject> obj = openFiles.remove(key);
+        obj.setRoot(data);
         obj.save();
+        opened.remove(key);
+    }
+
+    /**
+     * Saves all cached files to disk
+     */
+    public void saveAll() {
+        while(!opened.isEmpty()) {
+            String key = opened.remove();
+            openFiles.remove(key).save();
+        }
     }
 
     /**
@@ -92,8 +128,15 @@ public class DataManager {
      */
     public boolean clear(String key) {
 
-        FileWrapper<ConfigObject> obj = getWrapper(key);
-        openFiles.remove(key);
+        FileWrapper<ConfigObject> obj;
+        if(openFiles.containsKey(key)) {
+            obj = openFiles.remove(key);
+            opened.remove(key);
+        } else {
+            obj = getWrapper(key, false);
+        }
+
+        if(obj == null) return true;
 
         if(!obj.getFile().delete()) {
             MidnightCoreAPI.LOGGER.error("Unable to delete data file " + obj.getFile().getAbsolutePath() + "!");
@@ -112,14 +155,11 @@ public class DataManager {
     }
 
 
-    private FileWrapper<ConfigObject> getWrapper(String key) {
-        return getWrapper(key, true);
-    }
-
+    @Contract("_,true -> !null")
     private FileWrapper<ConfigObject> getWrapper(String key, boolean create) {
 
         if(opened.size() == cacheSize) {
-            openFiles.remove(opened.remove());
+            openFiles.remove(opened.remove()).save();
         }
 
         return openFiles.computeIfAbsent(key, k -> {
@@ -127,16 +167,12 @@ public class DataManager {
             FileWrapper<ConfigObject> wrapper;
 
             if(create) {
-                wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, k, searchDirectory);
+                wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, k, searchDirectory, new ConfigSection());
             } else {
-                wrapper = fileCodecRegistry.find(ConfigContext.INSTANCE, k, searchDirectory);
+                wrapper = fileCodecRegistry.find(ConfigContext.INSTANCE, k, searchDirectory, new ConfigSection());
             }
 
             if(wrapper != null) {
-                wrapper.load();
-                if (wrapper.getRoot() == null || !wrapper.getRoot().isSection()) {
-                    wrapper.setRoot(new ConfigSection());
-                }
                 opened.add(key);
             }
 

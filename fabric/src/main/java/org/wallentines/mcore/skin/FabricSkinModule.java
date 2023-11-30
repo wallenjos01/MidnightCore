@@ -11,7 +11,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3;
-import org.wallentines.fbev.player.PlayerJoinEvent;
+import org.wallentines.fbev.player.PlayerPreJoinEvent;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
@@ -42,39 +42,15 @@ public class FabricSkinModule extends SkinModule {
             onLogin(player, offlineModeSkins);
         }
 
-        Event.register(PlayerJoinEvent.class, this, 10, ev -> onLogin((Player) ev.getPlayer(), offlineModeSkins));
+        Event.register(PlayerPreJoinEvent.class, this, 10, ev -> onLogin((Player) ev.getPlayer(), offlineModeSkins));
 
         return true;
     }
 
-    private void onLogin(Player player, boolean offlineModeSkins) {
-
-        MinecraftServer mc = ConversionUtil.validate(server);
-        ServerPlayer spl = ConversionUtil.validate(player);
-        loginSkins.put(spl.getUUID(), AuthUtil.getProfileSkin(spl.getGameProfile()));
-        if(offlineModeSkins && !mc.usesAuthentication()) {
-            MojangUtil.getSkinByNameAsync(spl.getGameProfile().getName()).thenAccept(skin -> {
-                loginSkins.put(spl.getUUID(), skin);
-                setSkin((Player) spl, skin);
-            });
-        }
-    }
-
-
     @Override
-    public void resetSkin(Player player) {
-
-        setSkin(player, loginSkins.get(player.getUUID()));
-    }
-
-    @Override
-    public void setSkin(Player player, Skin skin) {
+    public void forceUpdate(Player player) {
 
         ServerPlayer spl = ConversionUtil.validate(player);
-
-        if(AuthUtil.getProfileSkin(spl.getGameProfile()) == skin) return;
-
-        AuthUtil.setProfileSkin(spl.getGameProfile(), skin);
 
         // Update
         MinecraftServer server = spl.getServer();
@@ -161,5 +137,36 @@ public class FabricSkinModule extends SkinModule {
         spl.setDeltaMovement(velocity);
         spl.connection.send(new ClientboundSetEntityMotionPacket(spl));
 
+    }
+
+    private void onLogin(Player player, boolean offlineModeSkins) {
+
+        MinecraftServer mc = ConversionUtil.validate(server);
+        ServerPlayer spl = ConversionUtil.validate(player);
+        loginSkins.put(spl.getUUID(), AuthUtil.getProfileSkin(spl.getGameProfile()));
+        if(offlineModeSkins && !mc.usesAuthentication()) {
+            MojangUtil.getSkinByNameAsync(spl.getGameProfile().getName()).thenAccept(skin -> {
+                loginSkins.put(spl.getUUID(), skin);
+                setSkin((Player) spl, skin);
+            });
+        }
+    }
+
+
+    @Override
+    public void resetSkin(Player player) {
+
+        setSkin(player, loginSkins.get(player.getUUID()));
+    }
+
+    @Override
+    public void setSkin(Player player, Skin skin) {
+
+        ServerPlayer spl = ConversionUtil.validate(player);
+
+        if(AuthUtil.getProfileSkin(spl.getGameProfile()) == skin) return;
+        AuthUtil.setProfileSkin(spl.getGameProfile(), skin);
+
+        forceUpdate(player);
     }
 }
