@@ -19,8 +19,6 @@ import java.util.Queue;
  */
 public class DataManager {
 
-
-
     private final File searchDirectory;
     private final FileCodecRegistry fileCodecRegistry;
     private final HashMap<String, FileWrapper<ConfigObject>> openFiles = new HashMap<>();
@@ -104,10 +102,12 @@ public class DataManager {
      */
     public void save(String key, ConfigSection data) {
 
-        if(!openFiles.containsKey(key)) return;
-        FileWrapper<ConfigObject> obj = openFiles.remove(key);
+        FileWrapper<ConfigObject> obj = getWrapper(key, true);
+
         obj.setRoot(data);
         obj.save();
+
+        openFiles.remove(key);
         opened.remove(key);
     }
 
@@ -158,26 +158,34 @@ public class DataManager {
     @Contract("_,true -> !null")
     private FileWrapper<ConfigObject> getWrapper(String key, boolean create) {
 
+        if(cacheSize == 0) {
+            return findWrapper(key, create);
+        }
+
         if(opened.size() == cacheSize) {
             openFiles.remove(opened.remove()).save();
         }
 
-        return openFiles.computeIfAbsent(key, k -> {
+        FileWrapper<ConfigObject> out = openFiles.computeIfAbsent(key, k -> findWrapper(k, create));
+        if(out != null) {
+            opened.add(key);
+        }
 
-            FileWrapper<ConfigObject> wrapper;
+        return out;
+    }
 
-            if(create) {
-                wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, k, searchDirectory, new ConfigSection());
-            } else {
-                wrapper = fileCodecRegistry.find(ConfigContext.INSTANCE, k, searchDirectory, new ConfigSection());
-            }
+    private FileWrapper<ConfigObject> findWrapper(String key, boolean create) {
 
-            if(wrapper != null) {
-                opened.add(key);
-            }
+        FileWrapper<ConfigObject> wrapper;
 
-            return wrapper;
-        });
+        if(create) {
+            wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, key, searchDirectory, new ConfigSection());
+        } else {
+            wrapper = fileCodecRegistry.find(ConfigContext.INSTANCE, key, searchDirectory, new ConfigSection());
+        }
+
+        return wrapper;
+
     }
 
 

@@ -11,6 +11,8 @@ import org.wallentines.mcore.messaging.VelocityMessagingModule;
 import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
+import java.nio.file.Path;
+
 @Plugin(id=MidnightCoreAPI.MOD_ID, name="MidnightCore", version="2.0.0-SNAPSHOT")
 public class MidnightCore {
 
@@ -21,6 +23,8 @@ public class MidnightCore {
 
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(BinaryCodec.fileCodec());
+
+        MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.set(Path.of("plugins"));
 
         this.server = server;
 

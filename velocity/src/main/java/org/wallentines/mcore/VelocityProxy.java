@@ -30,7 +30,7 @@ public class VelocityProxy implements Proxy {
 
     @Override
     public Path getConfigDirectory() {
-        return Path.of("plugins");
+        return MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.get();
     }
 
     @Override

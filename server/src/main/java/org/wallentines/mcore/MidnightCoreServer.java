@@ -26,12 +26,13 @@ public class MidnightCoreServer {
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
             .with("register_test_command", false);
 
-    public MidnightCoreServer(Server server, LangRegistry langDefaults, Path globalConfig) {
+    public MidnightCoreServer(Server server, LangRegistry langDefaults) {
 
         ConfigSection defaultConfig = DEFAULT_CONFIG;
 
         Path directory = server.getConfigDirectory().resolve("MidnightCore");
         Path langDirectory = directory.resolve("lang");
+        Path globalConfig = MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.get().resolve("MidnightCore");
 
         if(!server.isDedicatedServer() && globalConfig != directory && !directory.toFile().exists()) {
 

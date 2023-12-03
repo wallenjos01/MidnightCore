@@ -7,7 +7,6 @@ import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -62,7 +61,7 @@ public class SpigotServer implements Server, Listener {
 
     @Override
     public Path getConfigDirectory() {
-        return Paths.get("plugins");
+        return MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.get();
     }
 
     @Override

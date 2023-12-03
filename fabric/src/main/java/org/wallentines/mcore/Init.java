@@ -41,7 +41,7 @@ public class Init implements ModInitializer {
                 MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
             }
             MinecraftServer server = ConversionUtil.validate(srv);
-            MidnightCoreServer mcs = new MidnightCoreServer(srv, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE), Path.of("config").resolve("MidnightCore"));
+            MidnightCoreServer mcs = new MidnightCoreServer(srv, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE));
 
             ((ResettableSingleton<MidnightCoreServer>) MidnightCoreServer.INSTANCE).reset();
             MidnightCoreServer.INSTANCE.set(mcs);
@@ -67,6 +67,7 @@ public class Init implements ModInitializer {
         // File Codecs
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(BinaryCodec.fileCodec());
+        MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.set(Path.of("config"));
 
         // Version
         GameVersion.CURRENT_VERSION.set(new GameVersion(SharedConstants.getCurrentVersion().getId(), SharedConstants.getProtocolVersion()));

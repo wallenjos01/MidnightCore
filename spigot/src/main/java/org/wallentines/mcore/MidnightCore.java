@@ -24,6 +24,7 @@ import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class MidnightCore extends JavaPlugin {
 
@@ -78,7 +79,7 @@ public class MidnightCore extends JavaPlugin {
             MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
         }
 
-        MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(Server.RUNNING_SERVER.get(), LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE), null));
+        MidnightCoreServer.INSTANCE.set(new MidnightCoreServer(Server.RUNNING_SERVER.get(), LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE)));
 
         // Commands
         CommandUtil.registerCommand(this, new MainCommandExecutor());
@@ -106,6 +107,8 @@ public class MidnightCore extends JavaPlugin {
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(YamlCodec.fileCodec());
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(JSONCodec.fileCodec());
         MidnightCoreAPI.FILE_CODEC_REGISTRY.registerFileCodec(BinaryCodec.fileCodec());
+
+        MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.set(Paths.get("plugins"));
 
         // Factories
         ItemStack.FACTORY.set(SpigotItem::new);
