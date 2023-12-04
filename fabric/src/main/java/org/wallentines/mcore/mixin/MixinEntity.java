@@ -1,5 +1,6 @@
 package org.wallentines.mcore.mixin;
 
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -53,6 +54,9 @@ public abstract class MixinEntity implements Entity {
     @Shadow public abstract String getStringUUID();
 
     @Shadow public abstract void setItemSlot(net.minecraft.world.entity.EquipmentSlot par1, net.minecraft.world.item.ItemStack par2);
+
+    @Shadow public abstract CommandSourceStack createCommandSourceStack();
+
 
     @Intrinsic(displace = true)
     public UUID mcore$getUUID() {
@@ -166,5 +170,13 @@ public abstract class MixinEntity implements Entity {
         net.minecraft.world.item.ItemStack is = ConversionUtil.validate(item);
         setItemSlot(ConversionUtil.toMCEquipmentSlot(slot), is);
 
+    }
+
+    public void mcore$runCommand(String command) {
+
+        net.minecraft.world.entity.Entity ent = (net.minecraft.world.entity.Entity) (Object) this;
+
+        CommandSourceStack css = createCommandSourceStack();
+        ent.getServer().getCommands().performPrefixedCommand(css, command);
     }
 }

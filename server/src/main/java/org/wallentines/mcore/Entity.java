@@ -96,6 +96,12 @@ public interface Entity {
      * @param item The item to put there
      */
     void setItem(EquipmentSlot slot, ItemStack item);
+    
+    /**
+     * Runs a command on the server as this entity
+     * @param command The command text to run
+     */
+    void runCommand(String command);
 
     enum EquipmentSlot {
 

@@ -93,6 +93,11 @@ public class SpigotPlayer implements Player {
     }
 
     @Override
+    public void runCommand(String command) {
+        Bukkit.getServer().dispatchCommand(internal, command);
+    }
+
+    @Override
     public void setItem(EquipmentSlot slot, ItemStack item) {
 
         SpigotItem si = (SpigotItem) item;
