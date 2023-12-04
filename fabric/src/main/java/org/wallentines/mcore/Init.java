@@ -79,6 +79,7 @@ public class Init implements ModInitializer {
 
         // Placeholders
         MidnightCoreServer.registerPlaceholders(PlaceholderManager.INSTANCE);
+        MidnightCoreServer.registerRequirements(Server.REQUIREMENT_REGISTRY);
 
         PlaceholderManager.INSTANCE.registerSupplier("midnightcore_version", PlaceholderSupplier.inline(ctx ->
                 FabricLoader.getInstance().getModContainer("midnightcore")

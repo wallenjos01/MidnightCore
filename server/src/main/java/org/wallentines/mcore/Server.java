@@ -5,13 +5,17 @@ import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.util.ModuleUtil;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.FileCodecRegistry;
 import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
+import org.wallentines.midnightlib.math.Region;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
+import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
+import org.wallentines.midnightlib.requirement.RequirementType;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
 import java.io.File;
@@ -146,5 +150,11 @@ public interface Server {
         manager.registerSupplier("server_modules_registered", PlaceholderSupplier.inline(ctx -> ServerModule.REGISTRY.getSize() + ""));
 
     }
+
+    /**
+     * The global file codec registry. Contains a JSON codec, and YAML on Spigot
+     */
+    Registry<RequirementType<Player>> REQUIREMENT_REGISTRY = new Registry<>(MidnightCoreAPI.MOD_ID);
+
 
 }
