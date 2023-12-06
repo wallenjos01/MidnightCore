@@ -47,7 +47,14 @@ public class TestComponentSerializing {
         Assertions.assertEquals(0, comp.children.get(0).children.size());
         Assertions.assertTrue(comp.children.get(0).content instanceof Content.Text);
 
+        String serialized = comp.toLegacyText();
+        String serialized2 = LegacySerializer.INSTANCE.serialize(ConfigContext.INSTANCE, comp).getOrThrow().asString();
+
+        Assertions.assertEquals(serialized, unparsed.asString());
+        Assertions.assertEquals(serialized2, unparsed.asString());
+
     }
+
 
     @Test
     public void testModernSerializer() {

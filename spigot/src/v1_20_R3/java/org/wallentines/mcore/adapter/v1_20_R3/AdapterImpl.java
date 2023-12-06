@@ -26,6 +26,7 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
+import org.wallentines.mcore.adapter.ItemReflector;
 import org.wallentines.mcore.adapter.NbtContext;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
@@ -37,30 +38,18 @@ import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
-    private Field handle;
-
-    public net.minecraft.world.item.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
-
-        try {
-            return (net.minecraft.world.item.ItemStack) handle.get(is);
-
-        } catch (Exception ex) {
-            return CraftItemStack.asNMSCopy(is);
-        }
-    }
+    private ItemReflector<net.minecraft.world.item.ItemStack, CraftItemStack> reflector;
 
     @Override
     public boolean initialize() {
 
         try {
-            handle = CraftItemStack.class.getDeclaredField("handle");
-            handle.setAccessible(true);
+            reflector = new ItemReflector<>(CraftItemStack.class);
 
         } catch (Exception ex) {
             return false;
@@ -167,19 +156,19 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public Identifier getItemId(ItemStack is) {
-        return Identifier.parse(Objects.requireNonNull(BuiltInRegistries.h.b(getHandle(is).d())).toString());
+        return Identifier.parse(Objects.requireNonNull(BuiltInRegistries.h.b(reflector.getHandle(is).d())).toString());
     }
 
     @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
 
-        getHandle(itemStack).c(configSection == null ? null : convert(configSection));
+        reflector.getHandle(itemStack).c(configSection == null ? null : convert(configSection));
     }
 
     @Override
     public ConfigSection getTag(ItemStack itemStack) {
 
-        return convert(getHandle(itemStack).v());
+        return convert(reflector.getHandle(itemStack).v());
     }
 
     @Override
@@ -199,7 +188,7 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public Color getRarityColor(ItemStack itemStack) {
-        Integer clr = getHandle(itemStack).C().e.f();
+        Integer clr = reflector.getHandle(itemStack).C().e.f();
         return clr == null ? Color.WHITE : new Color(clr);
     }
 

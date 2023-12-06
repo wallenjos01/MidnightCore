@@ -8,6 +8,7 @@ import net.minecraft.world.phys.Vec3;
 import org.wallentines.mcore.GameMode;
 import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Player;
+import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.NBTContext;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
@@ -28,10 +29,7 @@ public class FabricSavepoint extends Savepoint {
     @Override
     public void load(Player player) {
 
-        if(!(player instanceof ServerPlayer spl)) {
-            throw new IllegalArgumentException("Attempt to load savepoint for non-ServerPlayer!");
-        }
-
+        ServerPlayer spl = ConversionUtil.validate(player);
         if(nbt != null) {
 
             spl.removeAllEffects();

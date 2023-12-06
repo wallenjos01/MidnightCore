@@ -1,5 +1,6 @@
 package org.wallentines.mcore.savepoint;
 
+import org.bukkit.potion.PotionEffect;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -19,7 +20,24 @@ public class SpigotSavepoint extends Savepoint {
     public void load(Player player) {
 
         SpigotPlayer spl = ConversionUtil.validate(player);
-
+        org.bukkit.entity.Player bpl = spl.getInternal();
+        if(nbt != null) {
+            for(PotionEffect eff : bpl.getActivePotionEffects()) {
+                bpl.removePotionEffect(eff.getType());
+            }
+            org.bukkit.Location loc = bpl.getLocation();
+            Adapter.INSTANCE.get().loadTag(bpl, nbt);
+            bpl.teleport(loc);
+            for(PotionEffect eff : bpl.getActivePotionEffects()) {
+                eff.apply(bpl);
+            }
+        }
+        if(gameMode != null) {
+            spl.setGameMode(gameMode);
+        }
+        if(location != null) {
+            spl.teleport(location);
+        }
 
     }
 
