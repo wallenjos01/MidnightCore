@@ -182,8 +182,8 @@ public abstract class ContentConverter<T extends Content, M extends ComponentCon
     static {
 
         // Default types
-        register("text", Content.Text.class, LiteralContents.class,
-                (md) -> new LiteralContents(md.text),
+        register("text", Content.Text.class, PlainTextContents.LiteralContents.class,
+                (md) -> new PlainTextContents.LiteralContents(md.text),
                 (mc) -> new Content.Text(mc.text()));
 
         register("translate", Content.Translate.class, TranslatableContents.class,

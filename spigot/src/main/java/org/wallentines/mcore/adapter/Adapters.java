@@ -24,6 +24,7 @@ public class Adapters {
             case "v1_19_R3" -> new org.wallentines.mcore.adapter.v1_19_R3.AdapterImpl();
             case "v1_20_R1" -> new org.wallentines.mcore.adapter.v1_20_R1.AdapterImpl();
             case "v1_20_R2" -> new org.wallentines.mcore.adapter.v1_20_R2.AdapterImpl();
+            case "v1_20_R3" -> new org.wallentines.mcore.adapter.v1_20_R3.AdapterImpl();
             default -> new GenericAdapter(plugin);
         };
 

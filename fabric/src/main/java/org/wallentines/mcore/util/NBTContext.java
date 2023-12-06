@@ -207,7 +207,9 @@ public class NBTContext implements SerializeContext<Tag> {
     public Tag toMap(Map<String, Tag> map) {
         if(map == null) return null;
         CompoundTag tag = new CompoundTag();
-        map.forEach(tag::put);
+        map.forEach((k,v) -> {
+            if(v != null) tag.put(k,v);
+        });
         return tag;
     }
 
@@ -249,7 +251,7 @@ public class NBTContext implements SerializeContext<Tag> {
     @Override
     public Tag set(String key, Tag value, Tag object) {
         if(!isMap(object)) return null;
-        ((CompoundTag) object).put(key, value);
+        if(value != null) ((CompoundTag) object).put(key, value);
         return object;
     }
 }

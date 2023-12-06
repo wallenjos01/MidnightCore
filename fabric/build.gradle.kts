@@ -60,11 +60,11 @@ dependencies {
     include(project(":client").setTransitive(false))
 
     // Minecraft
-    minecraft("com.mojang:minecraft:1.20.2")
+    minecraft("com.mojang:minecraft:1.20.3")
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
-    modImplementation("net.fabricmc:fabric-loader:0.14.21")
+    modImplementation("net.fabricmc:fabric-loader:0.15.0")
 
     // Fabric API
     val apiModules = listOf(
@@ -74,7 +74,7 @@ dependencies {
             "fabric-networking-api-v1"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.89.1+1.20.2"))!!)
+        modApi(include(fabricApi.module(mod, "0.91.1+1.20.3"))!!)
     }
 
     // Shadowed Library Dependencies
@@ -85,9 +85,16 @@ dependencies {
     shadow(libs.midnight.lib) { isTransitive = false }
     shadow(libs.zstd.jni)
 
+    modRuntimeOnly(libs.midnight.cfg) { isTransitive = false }
+    modRuntimeOnly(libs.midnight.cfg.json) { isTransitive = false }
+    modRuntimeOnly(libs.midnight.cfg.binary) { isTransitive = false }
+    modRuntimeOnly(libs.midnight.cfg.gson) { isTransitive = false }
+    modRuntimeOnly(libs.midnight.lib) { isTransitive = false }
+    modRuntimeOnly(libs.zstd.jni)
+
     // Included Mod Dependencies
     modApi(include("org.wallentines:fabric-events:0.3.0-SNAPSHOT")!!)
-    modApi(include("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")!!)
+    modApi(include("me.lucko:fabric-permissions-api:0.3-SNAPSHOT")!!)
 }
 
 

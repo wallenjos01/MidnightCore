@@ -1,6 +1,8 @@
 package org.wallentines.mcore.util;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
@@ -9,6 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.wallentines.mcore.Entity;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.text.ClickEvent;
@@ -48,11 +51,12 @@ public class ConversionUtil {
      */
     public static net.minecraft.network.chat.HoverEvent toMCHoverEvent(HoverEvent event) {
 
-        net.minecraft.network.chat.HoverEvent.Action<?> act = net.minecraft.network.chat.HoverEvent.Action.getByName(event.getAction().getId());
-        if(act == null) throw new IllegalArgumentException("Don't know how to convert HoverEvent of type " + event.getAction().id + " to a Minecraft Hover event!");
-
         JsonObject obj = ConfigContext.INSTANCE.convert(GsonContext.INSTANCE, event.getContents()).getAsJsonObject();
-        return act.deserialize(obj);
+        try {
+            return net.minecraft.network.chat.HoverEvent.CODEC.decode(JsonOps.INSTANCE, obj).getOrThrow(false, MidnightCoreAPI.LOGGER::error).getFirst();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Don't know how to convert HoverEvent of type " + event.getAction().id + " to a Minecraft Hover event!", ex);
+        }
     }
 
     /**
@@ -62,9 +66,14 @@ public class ConversionUtil {
      */
     public static HoverEvent toHoverEvent(net.minecraft.network.chat.HoverEvent event) {
 
+        JsonElement serialized = net.minecraft.network.chat.HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, event).getOrThrow(false, MidnightCoreAPI.LOGGER::error);
+        if(!serialized.isJsonObject()) {
+            throw new IllegalArgumentException("Don't know how to convert HoverEvent of type " + event.getAction().getSerializedName() + " to a MidnightCore Hover event!");
+        }
+
         return new HoverEvent(
-                HoverEvent.Action.byId(event.getAction().getName()),
-                GsonContext.INSTANCE.convert(ConfigContext.INSTANCE, event.getAction().serializeArg(event.getValue(event.getAction()))).asSection()
+                HoverEvent.Action.byId(event.getAction().getSerializedName()),
+                GsonContext.INSTANCE.convert(ConfigContext.INSTANCE, serialized.getAsJsonObject().getAsJsonObject("contents")).asSection()
         );
     }
 
@@ -75,7 +84,7 @@ public class ConversionUtil {
      */
     public static net.minecraft.network.chat.ClickEvent toMCClickEvent(ClickEvent event) {
         return new net.minecraft.network.chat.ClickEvent(
-                net.minecraft.network.chat.ClickEvent.Action.getByName(event.getAction().getId()),
+                net.minecraft.network.chat.ClickEvent.Action.valueOf(event.getAction().getId()),
                 event.getValue()
         );
     }
@@ -88,7 +97,7 @@ public class ConversionUtil {
     public static ClickEvent toClickEvent(net.minecraft.network.chat.ClickEvent event) {
 
         return new ClickEvent(
-                ClickEvent.Action.byId(event.getAction().getName()),
+                ClickEvent.Action.byId(event.getAction().getSerializedName()),
                 event.getValue()
         );
     }

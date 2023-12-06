@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
@@ -88,7 +89,9 @@ public class FabricScoreboard extends CustomScoreboard {
                     objectiveId,
                     ObjectiveCriteria.DUMMY,
                     WrappedComponent.resolved(title, (Player) player),
-                    ObjectiveCriteria.RenderType.INTEGER);
+                    ObjectiveCriteria.RenderType.INTEGER,
+                    false,
+                    null);
 
             board.startTrackingObjective(obj);
             board.setDisplayObjective(DisplaySlot.SIDEBAR, obj);
@@ -132,11 +135,13 @@ public class FabricScoreboard extends CustomScoreboard {
                 board.addPlayerToTeam(playerName, team);
             }
 
+            ScoreHolder sh = ScoreHolder.forNameOnly(playerName);
+
             if(entries[line] == null) {
-                board.resetPlayerScore(playerName, obj);
+                board.resetSinglePlayerScore(sh, obj);
             } else {
                 team.setPlayerPrefix(WrappedComponent.resolved(entries[line], (Player) player));
-                board.getOrCreatePlayerScore(playerName, obj).setScore(line);
+                board.getOrCreatePlayerScore(sh, obj).set(line);
             }
         }
     }
