@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3;
 import org.wallentines.fbev.player.PlayerPreJoinEvent;
 import org.wallentines.mcore.Player;
@@ -69,23 +68,12 @@ public class FabricSkinModule extends SkinModule {
         ClientboundSetEquipmentPacket equip = new ClientboundSetEquipmentPacket(spl.getId(), items);
 
         ServerLevel world = spl.serverLevel();
+        ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(spl.createCommonSpawnInfo(world), (byte) 3);
 
-        CommonPlayerSpawnInfo spawnInfo = new CommonPlayerSpawnInfo(
-                world.dimensionTypeId(),
-                world.dimension(),
-                BiomeManager.obfuscateSeed(world.getSeed()),
-                spl.gameMode.getGameModeForPlayer(),
-                spl.gameMode.getPreviousGameModeForPlayer(),
-                world.isDebug(),
-                world.isFlat(),
-                Optional.empty(),
-                0
-        );
-
-        ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(spawnInfo, (byte) 3);
 
         ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getX(), spl.getY(), spl.getZ(), spl.getRotationVector().y, spl.getRotationVector().x, new HashSet<>(), 0);
         ClientboundSetExperiencePacket experience = new ClientboundSetExperiencePacket(spl.experienceProgress, spl.totalExperience, spl.experienceLevel);
+
 
         // Player information packets should be sent to everyone
         for(ServerPlayer obs : server.getPlayerList().getPlayers()) {
@@ -124,6 +112,9 @@ public class FabricSkinModule extends SkinModule {
 
         // The remaining packets should only be sent to the player themselves
         spl.connection.send(respawn);
+
+        // The client waits for a game event after respawning to show the screen properly
+        spl.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START, 0.0f));
         spl.connection.send(position);
         spl.connection.send(equip);
         spl.connection.send(experience);
@@ -151,7 +142,6 @@ public class FabricSkinModule extends SkinModule {
             });
         }
     }
-
 
     @Override
     public void resetSkin(Player player) {

@@ -9,10 +9,8 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
@@ -21,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.SkinUpdater;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
@@ -49,13 +46,7 @@ public class SkinUpdaterImpl implements SkinUpdater {
         epl.Y(); // stopRiding()
 
         // Store velocity so it can be re-applied later
-        Vec3D velocity = Vec3D.b;
-        try {
-
-            velocity = (Vec3D) Entity.class.getDeclaredMethod("do").invoke(epl); // getDeltaMovement()
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            // Ignore
-        }
+        Vec3D velocity = epl.dp();
 
         // Create Packets
         ClientboundPlayerInfoRemovePacket remove = new ClientboundPlayerInfoRemovePacket(List.of(player.getUniqueId()));
@@ -67,19 +58,7 @@ public class SkinUpdaterImpl implements SkinUpdater {
         PacketPlayOutEntityEquipment equip = new PacketPlayOutEntityEquipment(entityId, items);
 
         WorldServer world = epl.z(); // serverLevel()
-
-        CommonPlayerSpawnInfo spawnInfo = new CommonPlayerSpawnInfo(
-                world.ac(), // dimensionType()
-                world.ae(), // dimension()
-                BiomeManager.a(world.C()), // obfuscateSeed(), getSeed()
-                epl.e.b(), // gameMode, getGameModeForPlayer()
-                epl.e.c(), // gameMode, getPreviousGameModeForPlayer()
-                world.ah(), // isDebug()
-                world.B(), // isFlat()
-                Optional.empty(),
-                0);
-
-        PacketPlayOutRespawn respawn = new PacketPlayOutRespawn(spawnInfo, (byte) 3);
+        PacketPlayOutRespawn respawn = new PacketPlayOutRespawn(epl.d(world), (byte) 3);
 
         PacketPlayOutExperience exp = new PacketPlayOutExperience(epl.cg, epl.cf, epl.cf);
 
@@ -124,6 +103,7 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
         // The remaining packets should only be sent to the updated player
         epl.c.b(respawn);
+        epl.c.b(new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.n, 0.0f));
         epl.c.b(position);
         epl.c.b(equip);
         epl.c.b(exp);

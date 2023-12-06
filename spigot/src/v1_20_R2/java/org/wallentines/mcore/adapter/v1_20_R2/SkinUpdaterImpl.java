@@ -12,7 +12,6 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
@@ -51,7 +50,6 @@ public class SkinUpdaterImpl implements SkinUpdater {
         // Store velocity so it can be re-applied later
         Vec3D velocity = Vec3D.b;
         try {
-
             velocity = (Vec3D) Entity.class.getDeclaredMethod("do").invoke(epl); // getDeltaMovement()
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
             // Ignore
@@ -68,18 +66,7 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
         WorldServer world = epl.x(); // serverLevel()
 
-        CommonPlayerSpawnInfo spawnInfo = new CommonPlayerSpawnInfo(
-                world.aa(), // dimensionType()
-                world.ac(), // dimension()
-                BiomeManager.a(world.A()), // obfuscateSeed(), getSeed()
-                epl.e.b(), // gameMode, getGameModeForPlayer()
-                epl.e.c(), // gameMode, getPreviousGameModeForPlayer()
-                world.af(), // isDebug()
-                world.z(), // isFlat()
-                Optional.empty(),
-                0);
-
-        PacketPlayOutRespawn respawn = new PacketPlayOutRespawn(spawnInfo, (byte) 3);
+        PacketPlayOutRespawn respawn = new PacketPlayOutRespawn(epl.d(world), (byte) 3);
 
         PacketPlayOutExperience exp = new PacketPlayOutExperience(epl.cg, epl.cf, epl.cf);
 
