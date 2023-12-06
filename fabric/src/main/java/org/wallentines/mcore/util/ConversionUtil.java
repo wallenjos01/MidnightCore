@@ -51,7 +51,7 @@ public class ConversionUtil {
      */
     public static net.minecraft.network.chat.HoverEvent toMCHoverEvent(HoverEvent event) {
 
-        JsonObject obj = ConfigContext.INSTANCE.convert(GsonContext.INSTANCE, event.getContents()).getAsJsonObject();
+        JsonObject obj = HoverEvent.SERIALIZER.serialize(GsonContext.INSTANCE, event).getOrThrow().getAsJsonObject();
         try {
             return net.minecraft.network.chat.HoverEvent.CODEC.decode(JsonOps.INSTANCE, obj).getOrThrow(false, MidnightCoreAPI.LOGGER::error).getFirst();
         } catch (Exception ex) {
@@ -83,10 +83,14 @@ public class ConversionUtil {
      * @return A new Minecraft ClickEvent
      */
     public static net.minecraft.network.chat.ClickEvent toMCClickEvent(ClickEvent event) {
-        return new net.minecraft.network.chat.ClickEvent(
-                net.minecraft.network.chat.ClickEvent.Action.valueOf(event.getAction().getId()),
-                event.getValue()
-        );
+
+        JsonObject obj = ClickEvent.SERIALIZER.serialize(GsonContext.INSTANCE, event).getOrThrow().getAsJsonObject();
+
+        try {
+            return net.minecraft.network.chat.ClickEvent.CODEC.decode(JsonOps.INSTANCE, obj).getOrThrow(false, MidnightCoreAPI.LOGGER::error).getFirst();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Don't know how to convert ClickEvent of type " + event.getAction().id + " to a Minecraft Click event!", ex);
+        }
     }
 
     /**

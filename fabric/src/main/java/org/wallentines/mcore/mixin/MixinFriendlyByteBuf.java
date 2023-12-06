@@ -16,8 +16,6 @@ import org.wallentines.mcore.util.NBTContext;
 @Mixin(FriendlyByteBuf.class)
 public abstract class MixinFriendlyByteBuf {
 
-    @Shadow public abstract FriendlyByteBuf writeUtf(String string);
-
     @Shadow public abstract FriendlyByteBuf writeNbt(@Nullable Tag tag);
 
     @Inject(method = "writeComponent", at=@At("HEAD"), cancellable = true)
