@@ -92,7 +92,7 @@ public class Init implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             Server.STOP_EVENT.invoke((Server) server);
         });
-        ServerLifecycleEvents.SERVER_STOPPED.register(srv -> Server.RUNNING_SERVER.reset());
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> Server.RUNNING_SERVER.reset());
 
     }
 }

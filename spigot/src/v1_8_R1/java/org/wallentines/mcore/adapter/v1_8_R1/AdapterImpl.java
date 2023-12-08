@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
+import org.wallentines.mcore.adapter.ItemReflector;
 import org.wallentines.mcore.adapter.NbtContext;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
@@ -27,25 +28,13 @@ import java.lang.reflect.Field;
 public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
-    private Field handle;
+    private ItemReflector<net.minecraft.server.v1_8_R1.ItemStack, CraftItemStack> reflector;
 
-    public net.minecraft.server.v1_8_R1.ItemStack getHandle(org.bukkit.inventory.ItemStack is) {
-        try {
-            net.minecraft.server.v1_8_R1.ItemStack mis = (net.minecraft.server.v1_8_R1.ItemStack) handle.get(is);
-            return mis == null ? CraftItemStack.asNMSCopy(is) : mis;
-
-        } catch (Exception ex) {
-            return CraftItemStack.asNMSCopy(is);
-        }
-    }
-
-    
     @Override
     public boolean initialize() {
 
         try {
-            handle = CraftItemStack.class.getDeclaredField("handle");
-            handle.setAccessible(true);
+            reflector = new ItemReflector<>(CraftItemStack.class);
 
         } catch (Exception ex) {
             return false;
@@ -149,7 +138,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public void setTag(ItemStack itemStack, ConfigSection configSection) {
 
-        net.minecraft.server.v1_8_R1.ItemStack handle = getHandle(itemStack);
+        net.minecraft.server.v1_8_R1.ItemStack handle = reflector.getHandle(itemStack);
         NBTTagCompound cmp = convert(configSection);
 
         handle.setTag(cmp);
@@ -163,19 +152,19 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public Identifier getItemId(ItemStack is) {
-        return Identifier.parse(Item.REGISTRY.c(getHandle(is).getItem()).toString());
+        return Identifier.parse(Item.REGISTRY.c(reflector.getHandle(is).getItem()).toString());
     }
 
     @Override
     public String getTranslationKey(ItemStack is) {
-        net.minecraft.server.v1_8_R1.ItemStack mis = getHandle(is);
+        net.minecraft.server.v1_8_R1.ItemStack mis = reflector.getHandle(is);
         return mis.getItem().a(mis);
     }
 
     @Override
     public ConfigSection getTag(ItemStack itemStack) {
 
-        net.minecraft.server.v1_8_R1.ItemStack mis = getHandle(itemStack);
+        net.minecraft.server.v1_8_R1.ItemStack mis = reflector.getHandle(itemStack);
         NBTTagCompound nbt = mis.getTag();
         if(nbt == null) return null;
 
@@ -201,7 +190,7 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public Color getRarityColor(ItemStack itemStack) {
-        return Color.fromRGBI(getHandle(itemStack).u().e.b());
+        return Color.fromRGBI(reflector.getHandle(itemStack).u().e.b());
     }
 
     private ConfigSection convert(NBTTagCompound internal) {
