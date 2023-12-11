@@ -61,7 +61,23 @@ public class TestComponentSerializing {
     @Test
     public void testModernSerializer() {
 
-        testModern(ModernSerializer.INSTANCE.forContext(GameVersion.MAX));
+        Serializer<Component> ser = ModernSerializer.INSTANCE.forContext(GameVersion.MAX);
+        testModern(ser);
+
+
+        // Complex
+        Component cmp = Component.text("Hello")
+                .withColor(TextColor.GREEN)
+                .withBold(true)
+                .addChild(Component.translate("item.minecraft.diamond_sword")
+                        .withHoverEvent(HoverEvent.create(Component.text("Test"))));
+
+        ConfigSection serialized = ser.serialize(ConfigContext.INSTANCE, cmp).getOrThrow().asSection();
+
+        Component comp = ser.deserialize(ConfigContext.INSTANCE, serialized).getOrThrow();
+
+        Assertions.assertEquals(cmp, comp);
+
     }
 
     private void testModern(Serializer<Component> serializer) {

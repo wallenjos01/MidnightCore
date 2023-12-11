@@ -1,18 +1,26 @@
 package org.wallentines.mcore.util;
 
 import com.google.gson.JsonObject;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.wallentines.mcore.*;
+import org.wallentines.mcore.Entity;
+import org.wallentines.mcore.MidnightCoreAPI;
+import org.wallentines.mcore.Player;
+import org.wallentines.mcore.Server;
 import org.wallentines.mcore.text.*;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.midnightlib.math.Color;
@@ -55,8 +63,26 @@ public class ConversionUtil {
         }
 
         if(event.getType() == HoverEvent.Type.SHOW_ITEM) {
-            ItemStack out = validate((org.wallentines.mcore.ItemStack) event.getValue());
-            return new net.minecraft.network.chat.HoverEvent(net.minecraft.network.chat.HoverEvent.Action.SHOW_ITEM, new net.minecraft.network.chat.HoverEvent.ItemStackInfo(out));
+            HoverEvent.ItemInfo info = (HoverEvent.ItemInfo) event.getValue();
+
+            ItemStack is;
+            if(info.getItem() != null) {
+                is = validate(info.getItem());
+
+            } else {
+
+                Item it = RegistryUtil.registryOrThrow(Registries.ITEM).getOrThrow(ResourceKey.create(Registries.ITEM, toResourceLocation(info.id)));
+                is = new ItemStack(it, info.count);
+                if (info.getTag() != null) {
+                    try {
+                        is.setTag(TagParser.parseTag(info.getTag()));
+                    } catch (CommandSyntaxException ex) {
+                        throw new IllegalStateException("Unable to convert item tag!", ex);
+                    }
+                }
+            }
+
+            return new net.minecraft.network.chat.HoverEvent(net.minecraft.network.chat.HoverEvent.Action.SHOW_ITEM, new net.minecraft.network.chat.HoverEvent.ItemStackInfo(is));
         }
 
         if(event.getType() == HoverEvent.Type.SHOW_ENTITY) {

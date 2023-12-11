@@ -437,7 +437,7 @@ public class Component {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Component component = (Component) o;
-        return Objects.equals(color, component.color) &&
+        boolean out = Objects.equals(color, component.color) &&
                 Objects.equals(bold, component.bold) &&
                 Objects.equals(italic, component.italic) &&
                 Objects.equals(underlined, component.underlined) &&
@@ -449,7 +449,15 @@ public class Component {
                 Objects.equals(hoverEvent, component.hoverEvent) &&
                 Objects.equals(clickEvent, component.clickEvent) &&
                 Objects.equals(content, component.content) &&
-                Objects.equals(children, component.children);
+                children.size() == component.children.size();
+
+        if(!out) return false;
+
+        for(int i = 0 ; i < children.size() ; i++) {
+            if(!Objects.equals(children.get(i), component.children.get(i))) return false;
+        }
+
+        return true;
     }
 
     @Override

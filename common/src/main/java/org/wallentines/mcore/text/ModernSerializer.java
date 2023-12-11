@@ -8,7 +8,9 @@ import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.RegistryBase;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * A {@link VersionSerializer} which serializes components into maps in the modern component format
@@ -200,7 +202,7 @@ public class ModernSerializer implements VersionSerializer<Component> {
                 if(!child.isComplete()) {
                     return SerializeResult.failure("Unable to deserialize component extra! " + child.getError());
                 }
-                out.addChild(child.getOrThrow());
+                out = out.addChild(child.getOrThrow());
             }
         }
 

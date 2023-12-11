@@ -1,6 +1,5 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mdcfg.Functions;
 import org.wallentines.mdcfg.serializer.ContextSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;

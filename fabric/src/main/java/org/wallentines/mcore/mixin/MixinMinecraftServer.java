@@ -18,6 +18,7 @@ import org.wallentines.midnightlib.module.ModuleManager;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 
@@ -49,6 +50,7 @@ public abstract class MixinMinecraftServer implements Server {
     }
 
     public Collection<Player> mcore$getPlayers() {
+        if(playerList == null) return List.of();
         return playerList.getPlayers().stream().map(pl -> (Player) pl).toList();
     }
 

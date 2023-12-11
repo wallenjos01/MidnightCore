@@ -1,15 +1,16 @@
 package org.wallentines.mcore.text;
 
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.VersionSerializer;
 import org.wallentines.mcore.util.ItemUtil;
-import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 public class HoverEvent<T> {
@@ -34,12 +35,26 @@ public class HoverEvent<T> {
         return value;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HoverEvent<?> that = (HoverEvent<?>) o;
+        return Objects.equals(type, that.type) && Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, value);
+    }
+
     public static HoverEvent<Component> create(Component component) {
         return new HoverEvent<>(Type.SHOW_TEXT, component);
     }
 
-    public static HoverEvent<ItemStack> forItem(ItemStack itemStack) {
-        return new HoverEvent<>(Type.SHOW_ITEM, itemStack);
+    public static HoverEvent<ItemInfo> forItem(ItemStack itemStack) {
+        return new HoverEvent<>(Type.SHOW_ITEM, new ItemInfo(itemStack));
     }
 
     public static HoverEvent<EntityInfo> forEntity(EntityInfo entity) {
@@ -93,13 +108,13 @@ public class HoverEvent<T> {
 
 
     public static class Type<T> {
-        private final VersionSerializer<T> serializer;
+        private final ContextSerializer<T, GameVersion> serializer;
 
-        public Type(VersionSerializer<T> serializer) {
+        public Type(ContextSerializer<T, GameVersion> serializer) {
             this.serializer = serializer;
         }
 
-        public VersionSerializer<T> getSerializer() {
+        public ContextSerializer<T, GameVersion> getSerializer() {
             return serializer;
         }
 
@@ -109,7 +124,10 @@ public class HoverEvent<T> {
 
         public <O> SerializeResult<HoverEvent<T>> deserialize(SerializeContext<O> context, O value, GameVersion version) {
 
-            return getSerializer().deserialize(context, value, version).flatMap(this::create);
+            String contentName = version.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "contents" : "value";
+            O content = context.get(contentName, value);
+
+            return getSerializer().deserialize(context, content, version).flatMap(this::create);
         }
 
         /**
@@ -120,80 +138,75 @@ public class HoverEvent<T> {
         /**
          * Shows an item tooltip when a component is hovered over
          */
-        public static final HoverEvent.Type<ItemStack> SHOW_ITEM = register("show_item", new VersionSerializer<>() {
-            @Override
-            public <O> SerializeResult<O> serialize(SerializeContext<O> context, ItemStack value, GameVersion version) {
+        public static final HoverEvent.Type<ItemInfo> SHOW_ITEM = register("show_item", ObjectSerializer.createContextAware(
+                Identifier.serializer("minecraft").<ItemInfo, GameVersion>entry("id", (is, ver) -> is.id),
+                Serializer.INT.<ItemInfo, GameVersion>entry("count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? is.count : null).optional(),
+                Serializer.INT.<ItemInfo, GameVersion>entry("Count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? null : is.count).optional(),
+                Serializer.BYTE.<ItemInfo, GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.data).optional(),
+                Serializer.STRING.<ItemInfo, GameVersion>entry("tag", (is,ver) -> is.tag).optional(),
+                (ver, id, mCount, lCount, lData, tag) -> {
 
-                O out = context.toMap(new HashMap<>());
-                boolean modern = version.hasFeature(GameVersion.Feature.NAMESPACED_IDS);
-                boolean count = version.hasFeature(GameVersion.Feature.HOVER_CONTENTS);
+                    Integer count = ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? mCount : lCount;
+                    Byte data = lData == null || !ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : lData;
 
-                context.set("id", context.toString(value.getType().toString()), out);
-                context.set(count ? "count" : "Count", context.toNumber(value.getCount()), out);
-                ConfigSection tag = value.getTag();
-                if(tag != null) {
-                    context.set("tag", ConfigContext.INSTANCE.convert(context, tag), out);
-                }
-                if(!modern) {
-                    context.set("Damage", context.toNumber(value.getLegacyDataValue()), out);
-                    return SerializeResult.success(context.toString(ItemUtil.toNBTString(context, out)));
-                }
-
-                return SerializeResult.success(out);
-            }
-
-            @Override
-            public <O> SerializeResult<ItemStack> deserialize(SerializeContext<O> context, O value, GameVersion version) {
-                return SerializeResult.failure("show_item contents cannot be deserialized this way!");
-            }
-        });
+                    return new ItemInfo(id, count, tag, data);
+                })
+        );
 
         /**
          * Shows entity data when a component is hovered over
          */
-        public static final HoverEvent.Type<EntityInfo> SHOW_ENTITY = register("show_entity", new VersionSerializer<>() {
-            @Override
-            public <O> SerializeResult<O> serialize(SerializeContext<O> context, EntityInfo value, GameVersion version) {
-
-                O out = context.toMap(new HashMap<>());
-
-                SerializeResult<O> uuid = Serializer.UUID.serialize(context, value.uuid);
-                if(!uuid.isComplete()) {
-                    return SerializeResult.failure("Unable to serialize EntityInfo name! " + uuid.getError());
-                }
-                context.set("uuid", uuid.getOrThrow(), out);
-
-                if(value.type != null) {
-                    SerializeResult<O> type = Identifier.serializer("minecraft").serialize(context, value.type);
-                    if (!type.isComplete()) {
-                        return SerializeResult.failure("Unable to serialize EntityInfo type! " + type.getError());
-                    }
-                    context.set("type", type.getOrThrow(), out);
-                }
-
-                if(value.name != null) {
-
-                    SerializeResult<O> name = ModernSerializer.INSTANCE.serialize(context, value.name, version);
-                    if(!name.isComplete()) {
-                        return SerializeResult.failure("Unable to serialize EntityInfo name! " + name.getError());
-                    }
-                    context.set("name", context.toString(ItemUtil.toNBTString(context, name.getOrThrow())), out);
-                }
-
-                return SerializeResult.success(out);
-            }
-
-            @Override
-            public <O> SerializeResult<EntityInfo> deserialize(SerializeContext<O> context, O value, GameVersion version) {
-                return SerializeResult.failure("show_entity contents cannot be deserialized this way!");
-            }
-        });
+        public static final HoverEvent.Type<EntityInfo> SHOW_ENTITY = register("show_entity",
+                ObjectSerializer.createContextAware(
+                        Serializer.UUID.entry("uuid", (ei, ver) -> ei.uuid),
+                        Identifier.serializer("minecraft").<EntityInfo, GameVersion>entry("type", (ei, ver) -> ei.type).orElse(ver -> new Identifier("minecraft", "pig")),
+                        ModernSerializer.INSTANCE.entry("name", (ei, ver) -> ei.name),
+                        (version, uuid, identifier, component) -> new EntityInfo(component, identifier, uuid)
+                )
+        );
 
         /**
          * Shows an achievement name and description when a component is hovered over.
          * Not used since pre-1.12
          */
         public static final HoverEvent.Type<String> SHOW_ACHIEVEMENT = register("show_achievement", VersionSerializer.fromStatic(InlineSerializer.RAW));
+
+    }
+
+    public static class ItemInfo {
+        public final Identifier id;
+        public final Integer count;
+        public final Byte data;
+
+        private String tag;
+        private final ItemStack item;
+
+        public ItemInfo(Identifier id, Integer count, String tag, Byte data) {
+            this.id = id;
+            this.count = count;
+            this.tag = tag;
+            this.data = data;
+            this.item = null;
+        }
+
+        public ItemInfo(ItemStack itemStack) {
+            this.id = itemStack.getType();
+            this.count = itemStack.getCount();
+            this.data = itemStack.getLegacyDataValue();
+            this.item = itemStack;
+        }
+
+        @Nullable
+        public ItemStack getItem() {
+            return item;
+        }
+
+        public String getTag() {
+            if(tag == null && item != null && item.getTag() != null) {
+                tag = ItemUtil.toNBTString(ConfigContext.INSTANCE, item.getTag());
+            }
+            return tag;
+        }
 
     }
 
@@ -212,7 +225,7 @@ public class HoverEvent<T> {
 
     public static final StringRegistry<HoverEvent.Type<?>> TYPES = new StringRegistry<>();
 
-    private static <T> HoverEvent.Type<T> register(String id, VersionSerializer<T> serializer) {
+    private static <T> HoverEvent.Type<T> register(String id, ContextSerializer<T, GameVersion> serializer) {
         Type<T> type = new Type<>(serializer);
         HoverEvent.TYPES.register(id, type);
         return type;

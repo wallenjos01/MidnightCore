@@ -1,6 +1,9 @@
 package org.wallentines.mcore.text;
 
-import org.wallentines.mdcfg.serializer.*;
+import org.wallentines.mdcfg.serializer.InlineSerializer;
+import org.wallentines.mdcfg.serializer.SerializeContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.Serializer;
 
 public class InlineContentSerializer<T extends Content> implements Serializer<Content> {
 
