@@ -1,6 +1,9 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mcore.text.*;
+import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.LegacySerializer;
+import org.wallentines.mcore.text.ModernSerializer;
+import org.wallentines.mcore.text.TextColor;
 import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigObject;
@@ -13,6 +16,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,11 +102,21 @@ public interface ItemStack {
         setTag(tag);
     }
 
+
     /**
-     * Gets the display name of an item as it appears when hovering over it
+     * Gets the display name of an item as it appears when hovering over it, for the maximum supported version
      * @return The item's custom name if available, or a translate component
      */
     default Component getName() {
+        return getName(GameVersion.MAX);
+    }
+
+    /**
+     * Gets the display name of an item as it appears when hovering over it
+     * @param version The game version to interpret the item as coming from
+     * @return The item's custom name if available, or a translate component
+     */
+    default Component getName(GameVersion version) {
 
         ConfigSection tag = getTag();
         Component def = Component.translate(getTranslationKey()).withColor(getRarityColor());
@@ -116,8 +130,8 @@ public interface ItemStack {
         }
 
         SerializeResult<Component> comp;
-        if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS)) {
-            comp = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, display.getString("Name")));
+        if(version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS)) {
+            comp = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, display.getString("Name")), version);
         } else {
             comp = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(display.getString("Name")));
         }
@@ -152,18 +166,61 @@ public interface ItemStack {
      */
     Singleton<Factory> FACTORY = new Singleton<>();
 
-    Serializer<ItemStack> SERIALIZER = ObjectSerializer.create(
-            Identifier.serializer("minecraft").entry("type", ItemStack::getType),
-            NumberSerializer.forInt(1, 64).entry("count", ItemStack::getCount).orElse(1),
-            ConfigSection.SERIALIZER.entry("tag", ItemStack::getTag).optional(),
-            Serializer.BYTE.<ItemStack>entry("data", is -> {
-                if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-                    return null;
+    VersionSerializer<ItemStack> VERSION_SERIALIZER = new VersionSerializer<>() {
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> context, ItemStack value, GameVersion version) {
+
+            O out = context.toMap(new HashMap<>());
+
+            context.set("type", context.toString(value.getType().toString()), out);
+            context.set("count", context.toNumber(value.getCount()), out);
+            ConfigSection tag = value.getTag();
+            if(tag != null) {
+                context.set("tag", ConfigContext.INSTANCE.convert(context, tag), out);
+            }
+            if(!version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                context.set("Damage", context.toNumber(value.getLegacyDataValue()), out);
+            }
+
+            return SerializeResult.success(out);
+        }
+
+        @Override
+        public <O> SerializeResult<ItemStack> deserialize(SerializeContext<O> context, O value, GameVersion version) {
+
+            if(FACTORY.getOrNull() == null) {
+                return SerializeResult.failure("Unable to deserialize ItemStack! Factory is empty! Has MidnightCore been loaded yet?");
+            }
+
+            SerializeResult<Identifier> id = Identifier.serializer("minecraft").entry("type", ItemStack::getType).parse(context, value);
+            if(!id.isComplete()) {
+                return SerializeResult.failure("Unable to deserialize ItemStack ID! " + id.getError());
+            }
+
+            SerializeResult<Integer> count = NumberSerializer.forInt(1,64).entry("count", ItemStack::getCount).orElse(1).parse(context, value);
+            if(!count.isComplete()) {
+                return SerializeResult.failure("Unable to deserialize ItemStack count! " + count.getError());
+            }
+
+            SerializeResult<ConfigSection> tag = ConfigSection.SERIALIZER.entry("tag", ItemStack::getTag).optional().parse(context, value);
+            if(!tag.isComplete()) {
+                return SerializeResult.failure("Unable to deserialize ItemStack tag! " + tag.getError());
+            }
+
+            byte data = 0;
+            if(!version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                SerializeResult<Byte> damage = NumberSerializer.forByte((byte) 0,(byte) 15).entry("data", ItemStack::getLegacyDataValue).optional().parse(context, value);
+                if(!damage.isComplete()) {
+                    return SerializeResult.failure("Unable to deserialize ItemStack tag! " + damage.getError());
                 }
-                return is.getLegacyDataValue();
-            }).orElse((byte) 0),
-            (type, count, tag, data) -> FACTORY.get().build(type, count, tag, data)
-    );
+                data = damage.getOrThrow();
+            }
+
+            return SerializeResult.success(FACTORY.get().build(id.getOrThrow(), count.getOrThrow(), tag.getOrThrow(), data));
+        }
+    };
+
+    Serializer<ItemStack> SERIALIZER = VERSION_SERIALIZER.forCurrentVersion();
 
 
     /**

@@ -36,7 +36,6 @@ import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class AdapterImpl implements Adapter {
@@ -212,7 +211,7 @@ public class AdapterImpl implements Adapter {
 
     private IChatBaseComponent convert(Component component) {
 
-        SerializeResult<JsonElement> serialized = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component);
+        SerializeResult<JsonElement> serialized = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component, getGameVersion());
         if(!serialized.isComplete()) {
             MidnightCoreAPI.LOGGER.error("An error occurred while serializing a component! " + serialized.getError());
             return null;

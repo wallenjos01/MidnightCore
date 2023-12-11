@@ -6,15 +6,15 @@ import me.nullicorn.nedit.type.NBTCompound;
 import me.nullicorn.nedit.type.NBTList;
 import me.nullicorn.nedit.type.TagType;
 import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.Server;
-import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class NbtContext implements SerializeContext<Object> {
 

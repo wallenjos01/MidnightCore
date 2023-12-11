@@ -1,7 +1,10 @@
 package org.wallentines.mcore.util;
 
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.lang.*;
+import org.wallentines.mcore.lang.LangManager;
+import org.wallentines.mcore.lang.LangRegistry;
+import org.wallentines.mcore.lang.PlaceholderContent;
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.ClickEvent;
 import org.wallentines.mcore.text.Component;
@@ -47,7 +50,7 @@ public class TestUtil {
 
             pl.sendMessage(
                     Component.text(GameVersion.CURRENT_VERSION.get().getId() + " (" + GameVersion.CURRENT_VERSION.get().getProtocolVersion() + ") [" + srv.isDedicatedServer() + "]")
-                            .withHoverEvent(HoverEvent.createItemHover(is))
+                            .withHoverEvent(HoverEvent.forItem(is))
             );
 
             ItemStack hand = pl.getItem(Entity.EquipmentSlot.MAINHAND);
@@ -58,7 +61,7 @@ public class TestUtil {
             srv.submit(() -> {
                 pl.sendMessage(
                         Component.text("Submitted")
-                                .withHoverEvent(HoverEvent.createTextHover(Component.text("Hello").withColor(TextColor.GOLD)))
+                                .withHoverEvent(HoverEvent.create(Component.text("Hello").withColor(TextColor.GOLD)))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s ~ ~5 ~"))
                 );
             });

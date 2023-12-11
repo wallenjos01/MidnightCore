@@ -1,5 +1,6 @@
 package org.wallentines.mcore.lang;
 
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ConfigSerializer;
 import org.wallentines.mcore.text.Content;
@@ -7,7 +8,10 @@ import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.JSONCodec;
-import org.wallentines.mdcfg.serializer.*;
+import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.SerializeContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.types.Either;
 
 import java.io.BufferedReader;
@@ -114,7 +118,7 @@ public class UnresolvedComponent {
             }
 
             try {
-                SerializeResult<Component> base = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.loadConfig(toParse.toString()));
+                SerializeResult<Component> base = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.loadConfig(toParse.toString()), GameVersion.MAX);
                 if (base.isComplete()) {
                     return finalizeJSON(manager, finalContext, base.getOrThrow());
                 }

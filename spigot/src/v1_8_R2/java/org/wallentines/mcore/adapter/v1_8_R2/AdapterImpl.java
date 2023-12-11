@@ -23,8 +23,6 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.lang.reflect.Field;
-
 public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;

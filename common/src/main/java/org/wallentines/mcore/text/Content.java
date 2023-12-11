@@ -64,13 +64,6 @@ public abstract class Content {
         public int hashCode() {
             return Objects.hash(text);
         }
-
-        public static final Serializer<Text> SERIALIZER = ObjectSerializer.create(
-                Serializer.STRING.entry("text", con -> con.text),
-                Text::new
-        );
-
-        public static final InlineSerializer<Text> PLAIN_SERIALIZER = InlineSerializer.of(text -> text.text, Text::new);
     }
 
 
@@ -117,19 +110,6 @@ public abstract class Content {
             return Objects.hash(key, fallback, with);
         }
 
-        public static Serializer<Translate> serializer(Serializer<Component> serializer) {
-
-            return ObjectSerializer.create(
-                    Serializer.STRING.entry("translate", con -> con.key),
-                    Serializer.STRING.<Translate>entry("fallback", con -> con.fallback).optional(),
-                    serializer.listOf().<Translate>entry("with", con -> con.with).optional(),
-                    Translate::new
-            );
-        }
-
-        public static final InlineSerializer<Translate> PLAIN_SERIALIZER = InlineSerializer.of(
-                tra -> tra.fallback == null ? tra.key : tra.fallback,
-                txt -> { throw new IllegalStateException("Unable to deserialize a Translate component from plaintext!"); });
     }
 
 

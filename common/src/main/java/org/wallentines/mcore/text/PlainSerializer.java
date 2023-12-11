@@ -2,27 +2,27 @@ package org.wallentines.mcore.text;
 
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.Serializer;
+import org.wallentines.midnightlib.registry.RegistryBase;
 
 /**
- * A {@link ComponentSerializer} which serializes components into plain text, disregarding color or formatting information in the process
+ * A {@link Serializer} which serializes components into plain text, disregarding color or formatting information in the process
  */
-public class PlainSerializer extends ComponentSerializer {
+public class PlainSerializer implements Serializer<Component> {
 
     /**
      * The global plain serializer instance
      */
-    public static final PlainSerializer INSTANCE = new PlainSerializer();
+    public static final PlainSerializer INSTANCE = new PlainSerializer(LegacySerializer.CONTENT_SERIALIZERS);
+
+    private final RegistryBase<String, InlineContentSerializer<?>> serializers;
 
     /**
      * Constructs a new PlainSerializer with all the default content serializer types
+     * @param serializers The content serializers to use
      */
-    public PlainSerializer() {
-        contentSerializers.register("text",      new ContentSerializer<>(Content.Text.class, Content.Text.PLAIN_SERIALIZER));
-        contentSerializers.register("translate", new ContentSerializer<>(Content.Translate.class, Content.Translate.PLAIN_SERIALIZER));
-        contentSerializers.register("keybind",   new ContentSerializer<>(Content.Keybind.class, Content.Keybind.PLAIN_SERIALIZER));
-        contentSerializers.register("score",     new ContentSerializer<>(Content.Score.class, Content.Score.PLAIN_SERIALIZER));
-        contentSerializers.register("selector",  new ContentSerializer<>(Content.Selector.class, Content.Selector.PLAIN_SERIALIZER));
-        contentSerializers.register("nbt",       new ContentSerializer<>(Content.NBT.class, Content.NBT.PLAIN_SERIALIZER));
+    public PlainSerializer(RegistryBase<String, InlineContentSerializer<?>> serializers) {
+        this.serializers = serializers;
     }
 
     @Override
@@ -46,6 +46,16 @@ public class PlainSerializer extends ComponentSerializer {
         }
 
         return SerializeResult.success(context.toString(str.toString()));
+    }
+
+    public <O> SerializeResult<O> serializeContent(SerializeContext<O> context, Content value) {
+
+        InlineContentSerializer<?> ser = serializers.get(value.type);
+        if(ser == null) {
+            return SerializeResult.failure("Serializer for component contents with type " + value.type + " not found!");
+        }
+
+        return ser.serialize(context, value);
     }
 
     @Override

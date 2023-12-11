@@ -1,49 +1,54 @@
 package org.wallentines.mcore.text;
 
-import org.wallentines.mdcfg.serializer.SerializeContext;
-import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mcore.VersionSerializer;
+import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.math.Color;
+import org.wallentines.midnightlib.registry.RegistryBase;
+import org.wallentines.midnightlib.registry.StringRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 
 /**
- * A {@link ComponentSerializer} which serializes components into legacy Strings for clients/contexts which do not
+ * A {@link VersionSerializer} which serializes components into legacy Strings for clients/contexts which do not
  * support modern text components
  */
-public class LegacySerializer extends ComponentSerializer {
+public class LegacySerializer implements Serializer<Component> {
+
+
+    /**
+     * Contains serializers for the default content types
+     */
+    public static final StringRegistry<InlineContentSerializer<?>> CONTENT_SERIALIZERS = new StringRegistry<>();
 
     /**
      * A LegacySerializer instance which uses the color code character and does not support hex. For true legacy text
      */
-    public static final LegacySerializer INSTANCE = new LegacySerializer('\u00A7', false);
+    public static final LegacySerializer INSTANCE = new LegacySerializer('\u00A7', false, CONTENT_SERIALIZERS);
 
     /**
      * A LegacySerializer instance which uses an ampersand for color codes and has hex support. For text stored in
      * config files.
      */
-    public static final LegacySerializer CONFIG_INSTANCE = new LegacySerializer('&', true);
+    public static final LegacySerializer CONFIG_INSTANCE = new LegacySerializer('&', true, CONTENT_SERIALIZERS);
 
     private final Character colorChar;
     private final boolean hexSupport;
+    private final RegistryBase<String, InlineContentSerializer<?>> serializers;
 
     /**
      * Creates a LegacySerializer with the given color character, and optional rgb color support
      * @param colorChar The character which should prefix all color codes
      * @param hexSupport Whether hex color codes which appear after the color character (i.e. &#112233 if the color
      *                   character is '&') should be parsed or written.
+     * @param serializers The content serializers to use
      */
-    public LegacySerializer(Character colorChar, boolean hexSupport) {
+    public LegacySerializer(Character colorChar, boolean hexSupport, RegistryBase<String, InlineContentSerializer<?>> serializers) {
         this.colorChar = colorChar;
         this.hexSupport = hexSupport;
-
-        contentSerializers.register("text",      new ContentSerializer<>(Content.Text.class, Content.Text.PLAIN_SERIALIZER));
-        contentSerializers.register("translate", new ContentSerializer<>(Content.Translate.class, Content.Translate.PLAIN_SERIALIZER));
-        contentSerializers.register("keybind",   new ContentSerializer<>(Content.Keybind.class, Content.Keybind.PLAIN_SERIALIZER));
-        contentSerializers.register("score",     new ContentSerializer<>(Content.Score.class, Content.Score.PLAIN_SERIALIZER));
-        contentSerializers.register("selector",  new ContentSerializer<>(Content.Selector.class, Content.Selector.PLAIN_SERIALIZER));
-        contentSerializers.register("nbt",       new ContentSerializer<>(Content.NBT.class, Content.NBT.PLAIN_SERIALIZER));
+        this.serializers = serializers;
     }
 
     @Override
@@ -75,6 +80,16 @@ public class LegacySerializer extends ComponentSerializer {
         }
 
         return SerializeResult.success(context.toString(out.toString()));
+    }
+
+    private <O> SerializeResult<O> serializeContent(SerializeContext<O> context, Content value) {
+
+        InlineContentSerializer<?> ser = serializers.get(value.type);
+        if(ser == null) {
+            return SerializeResult.failure("Serializer for component contents with type " + value.type + " not found!");
+        }
+
+        return ser.serialize(context, value);
     }
 
     @Override
@@ -177,6 +192,23 @@ public class LegacySerializer extends ComponentSerializer {
         }
 
         return outComp;
+    }
+
+    private static <T extends Content> void register(String id, Class<T> clazz, Function<T, String> ser) {
+        InlineContentSerializer<T> out = new InlineContentSerializer<>(clazz, InlineSerializer.of(ser, str -> {
+            throw new IllegalStateException("Cannot deserialize component content from legacy text!");
+        }));
+        CONTENT_SERIALIZERS.register(id, out);
+    }
+
+    static {
+
+        register("text", Content.Text.class, txt -> txt.text);
+        register("translate", Content.Translate.class, tra -> tra.key);
+        register("keybind", Content.Keybind.class, key -> key.key);
+        register("score", Content.Score.class, score -> "");
+        register("selector", Content.Selector.class, sel -> "");
+        register("nbt", Content.NBT.class, nbt -> "");
     }
 
 }

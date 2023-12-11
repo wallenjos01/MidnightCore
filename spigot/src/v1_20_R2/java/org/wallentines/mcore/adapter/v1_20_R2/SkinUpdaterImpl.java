@@ -21,7 +21,10 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.SkinUpdater;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 
 public class SkinUpdaterImpl implements SkinUpdater {

@@ -4,6 +4,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.MinecraftServer;
 import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
@@ -31,7 +33,6 @@ public class Init implements ModInitializer {
 
     @Override
     public void onInitialize() {
-
 
         Server.RUNNING_SERVER.setEvent.register(this, srv -> {
             ConfigSection defaults = new ConfigSection();

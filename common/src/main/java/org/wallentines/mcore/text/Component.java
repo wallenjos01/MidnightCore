@@ -1,5 +1,6 @@
 package org.wallentines.mcore.text;
 
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.JSONCodec;
@@ -66,7 +67,7 @@ public class Component {
     /**
      * The event which occurs when a player hovers over the component
      */
-    public final HoverEvent hoverEvent;
+    public final HoverEvent<?> hoverEvent;
 
     /**
      * The event which occurs when a player clicks on the component
@@ -85,7 +86,7 @@ public class Component {
 
 
     private Component(Color color, Boolean bold, Boolean italic, Boolean underlined, Boolean strikethrough,
-                      Boolean obfuscated, Boolean reset, Identifier font, String insertion, HoverEvent hoverEvent,
+                      Boolean obfuscated, Boolean reset, Identifier font, String insertion, HoverEvent<?> hoverEvent,
                       ClickEvent clickEvent, Content content, Collection<Component> children) {
         this.color = color;
         this.bold = bold;
@@ -169,19 +170,37 @@ public class Component {
     }
 
     /**
-     * Converts the component to a ConfigSection in the component JSON format
+     * Converts the component to a ConfigSection in the component JSON format for the maximum supported game version
      * @return A ConfigSection representing the component
      */
     public ConfigSection toConfigSection() {
-        return ModernSerializer.INSTANCE.serialize(ConfigContext.INSTANCE, this).getOrThrow().asSection();
+        return ModernSerializer.INSTANCE.serialize(ConfigContext.INSTANCE, this, GameVersion.MAX).getOrThrow().asSection();
     }
 
     /**
-     * Converts the component to a JSON-encoded String
+     * Converts the component to a ConfigSection in the component JSON format for the given game version
+     * @param version The version to serialize the component for
+     * @return A ConfigSection representing the component
+     */
+    public ConfigSection toConfigSection(GameVersion version) {
+        return ModernSerializer.INSTANCE.serialize(ConfigContext.INSTANCE, this, version).getOrThrow().asSection();
+    }
+
+    /**
+     * Converts the component to a JSON-encoded String for the maximum supported game version
      * @return The component in JSON
      */
     public String toJSONString() {
         return JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, toConfigSection());
+    }
+
+    /**
+     * Converts the component to a JSON-encoded String format for the given game version
+     * @param version The version to serialize the component for
+     * @return The component in JSON
+     */
+    public String toJSONString(GameVersion version) {
+        return JSONCodec.minified().encodeToString(ConfigContext.INSTANCE, toConfigSection(version));
     }
 
     /**
@@ -316,7 +335,7 @@ public class Component {
      * @param hoverEvent The hoverEvent to set
      * @return A new component with the given hoverEvent
      */
-    public Component withHoverEvent(HoverEvent hoverEvent) {
+    public Component withHoverEvent(HoverEvent<?> hoverEvent) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
                 hoverEvent, clickEvent, content, children);
     }

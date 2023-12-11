@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.NBTContext;
@@ -23,7 +24,7 @@ public abstract class MixinFriendlyByteBuf {
 
         // Allow MidnightCore components to be sent directly without conversion
         if(component instanceof WrappedComponent) {
-            Tag out = ModernSerializer.INSTANCE.serialize(NBTContext.INSTANCE, ((WrappedComponent) component).internal).getOrThrow();
+            Tag out = ModernSerializer.INSTANCE.serialize(NBTContext.INSTANCE, ((WrappedComponent) component).internal, GameVersion.CURRENT_VERSION.get()).getOrThrow();
             writeNbt(out);
             cir.setReturnValue((FriendlyByteBuf) (Object) this);
         }

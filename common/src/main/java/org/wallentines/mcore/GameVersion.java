@@ -59,6 +59,9 @@ public class GameVersion {
      */
     public static final Singleton<GameVersion> CURRENT_VERSION = new DefaultedSingleton<>(new GameVersion("Unknown", 0));
 
+    public static final GameVersion VERSION_1_8 = new GameVersion("1.8", 47);
+    public static final GameVersion MAX = new GameVersion("Maximum", RELEASE_MAX_VERSION);
+
     public enum Feature {
 
 

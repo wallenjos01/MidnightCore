@@ -206,7 +206,7 @@ public class AdapterImpl implements Adapter {
 
     private IChatBaseComponent convert(Component component) {
 
-        SerializeResult<JsonElement> serialized = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component);
+        SerializeResult<JsonElement> serialized = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component, getGameVersion());
         if(!serialized.isComplete()) {
             MidnightCoreAPI.LOGGER.error("An error occurred while serializing a component! " + serialized.getError());
             return null;

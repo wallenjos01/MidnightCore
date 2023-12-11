@@ -1,14 +1,17 @@
 package org.wallentines.mcore.text;
 
+import org.wallentines.mcore.GameVersion;
+import org.wallentines.mcore.VersionSerializer;
 import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.Serializer;
 
 /**
- * A {@link ComponentSerializer} which serializes components into Strings optimized for config files.
+ * A {@link Serializer} which serializes components into Strings optimized for config files.
  */
-public class ConfigSerializer extends ComponentSerializer {
+public class ConfigSerializer implements Serializer<Component> {
 
     /**
      * The global instance of a ConfigSerializer
@@ -19,7 +22,7 @@ public class ConfigSerializer extends ComponentSerializer {
     public <O> SerializeResult<O> serialize(SerializeContext<O> context, Component value) {
 
         if(value.hasNonLegacyComponents()) {
-            return ModernSerializer.INSTANCE.serialize(context, value).flatMap(o -> context.toString(JSONCodec.minified().encodeToString(context, o)));
+            return ModernSerializer.INSTANCE.serialize(context, value, GameVersion.MAX).flatMap(o -> context.toString(JSONCodec.minified().encodeToString(context, o)));
         }
 
         return LegacySerializer.CONFIG_INSTANCE.serialize(context, value);
@@ -36,7 +39,7 @@ public class ConfigSerializer extends ComponentSerializer {
             if(stripped.charAt(0) == '{') {
                 try {
                     O sec = JSONCodec.minified().decode(context, stripped);
-                    return ModernSerializer.INSTANCE.deserialize(context, sec);
+                    return ModernSerializer.INSTANCE.forContext(GameVersion.MAX).deserialize(context, sec);
                 } catch (DecodeException ex) {
                     // Ignore
                 }
@@ -46,7 +49,7 @@ public class ConfigSerializer extends ComponentSerializer {
 
         } else {
 
-            return ModernSerializer.INSTANCE.deserialize(context, value);
+            return ModernSerializer.INSTANCE.deserialize(context, value, GameVersion.MAX);
         }
     }
 }

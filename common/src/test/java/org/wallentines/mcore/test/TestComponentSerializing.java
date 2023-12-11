@@ -2,12 +2,14 @@ package org.wallentines.mcore.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.text.*;
 import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.math.Color;
 
 import java.util.Arrays;
@@ -59,10 +61,10 @@ public class TestComponentSerializing {
     @Test
     public void testModernSerializer() {
 
-        testModern(ModernSerializer.INSTANCE);
+        testModern(ModernSerializer.INSTANCE.forContext(GameVersion.MAX));
     }
 
-    private void testModern(ComponentSerializer serializer) {
+    private void testModern(Serializer<Component> serializer) {
 
         // String
         ConfigPrimitive unparsedString = new ConfigPrimitive("Hello");

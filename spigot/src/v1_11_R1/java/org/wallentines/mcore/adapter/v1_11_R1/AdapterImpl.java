@@ -20,7 +20,6 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class AdapterImpl implements Adapter {

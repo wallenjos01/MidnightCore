@@ -1,8 +1,10 @@
 package org.wallentines.mcore.util;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
@@ -10,17 +12,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import org.wallentines.mcore.Entity;
-import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
-import org.wallentines.mcore.text.ClickEvent;
-import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.HoverEvent;
-import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mcore.*;
+import org.wallentines.mcore.text.*;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
+
+import java.util.Optional;
 
 public class ConversionUtil {
 
@@ -49,14 +47,34 @@ public class ConversionUtil {
      * @param event The HoverEvent to convert
      * @return A new Minecraft HoverEvent
      */
-    public static net.minecraft.network.chat.HoverEvent toMCHoverEvent(HoverEvent event) {
+    public static net.minecraft.network.chat.HoverEvent toMCHoverEvent(HoverEvent<?> event) {
 
-        JsonObject obj = HoverEvent.SERIALIZER.serialize(GsonContext.INSTANCE, event).getOrThrow().getAsJsonObject();
-        try {
-            return net.minecraft.network.chat.HoverEvent.CODEC.decode(JsonOps.INSTANCE, obj).getOrThrow(false, MidnightCoreAPI.LOGGER::error).getFirst();
-        } catch (Exception ex) {
-            throw new IllegalArgumentException("Don't know how to convert HoverEvent of type " + event.getAction().id + " to a Minecraft Hover event!", ex);
+        if(event.getType() == HoverEvent.Type.SHOW_TEXT) {
+            net.minecraft.network.chat.Component out = new WrappedComponent((Component) event.getValue());
+            return new net.minecraft.network.chat.HoverEvent(net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT, out);
         }
+
+        if(event.getType() == HoverEvent.Type.SHOW_ITEM) {
+            ItemStack out = validate((org.wallentines.mcore.ItemStack) event.getValue());
+            return new net.minecraft.network.chat.HoverEvent(net.minecraft.network.chat.HoverEvent.Action.SHOW_ITEM, new net.minecraft.network.chat.HoverEvent.ItemStackInfo(out));
+        }
+
+        if(event.getType() == HoverEvent.Type.SHOW_ENTITY) {
+            HoverEvent.EntityInfo info = (HoverEvent.EntityInfo) event.getValue();
+            net.minecraft.network.chat.HoverEvent.EntityTooltipInfo out = new net.minecraft.network.chat.HoverEvent.EntityTooltipInfo(
+                    BuiltInRegistries.ENTITY_TYPE.get(toResourceLocation(info.type)),
+                    info.uuid,
+                    Optional.ofNullable(info.name).map(WrappedComponent::new)
+            );
+            return new net.minecraft.network.chat.HoverEvent(net.minecraft.network.chat.HoverEvent.Action.SHOW_ENTITY, out);
+        }
+
+        if(event.getType() == HoverEvent.Type.SHOW_ACHIEVEMENT) {
+
+            throw new IllegalArgumentException("show_achievement hover events are not supported in this version!");
+        }
+
+        throw new IllegalArgumentException("Don't know how to convert HoverEvent of type " + event.getTypeId() + " to a Minecraft Hover event!");
     }
 
     /**
@@ -64,17 +82,30 @@ public class ConversionUtil {
      * @param event The HoverEvent to convert
      * @return A new MidnightCore HoverEvent
      */
-    public static HoverEvent toHoverEvent(net.minecraft.network.chat.HoverEvent event) {
+    public static HoverEvent<?> toHoverEvent(net.minecraft.network.chat.HoverEvent event) {
 
-        JsonElement serialized = net.minecraft.network.chat.HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, event).getOrThrow(false, MidnightCoreAPI.LOGGER::error);
-        if(!serialized.isJsonObject()) {
-            throw new IllegalArgumentException("Don't know how to convert HoverEvent of type " + event.getAction().getSerializedName() + " to a MidnightCore Hover event!");
+        net.minecraft.network.chat.HoverEvent.Action<?> act = event.getAction();
+        if(act == net.minecraft.network.chat.HoverEvent.Action.SHOW_TEXT) {
+            net.minecraft.network.chat.Component txt = (net.minecraft.network.chat.Component) event.getValue(act);
+            return HoverEvent.create(toComponent(txt));
         }
 
-        return new HoverEvent(
-                HoverEvent.Action.byId(event.getAction().getSerializedName()),
-                GsonContext.INSTANCE.convert(ConfigContext.INSTANCE, serialized.getAsJsonObject().getAsJsonObject("contents")).asSection()
-        );
+        if(act == net.minecraft.network.chat.HoverEvent.Action.SHOW_ITEM) {
+            net.minecraft.network.chat.HoverEvent.ItemStackInfo is = (net.minecraft.network.chat.HoverEvent.ItemStackInfo) event.getValue(act);
+            return HoverEvent.forItem((org.wallentines.mcore.ItemStack) (Object) is.getItemStack());
+        }
+
+        if(act == net.minecraft.network.chat.HoverEvent.Action.SHOW_ENTITY) {
+            net.minecraft.network.chat.HoverEvent.EntityTooltipInfo ent = (net.minecraft.network.chat.HoverEvent.EntityTooltipInfo) event.getValue(act);
+            HoverEvent.EntityInfo out = new HoverEvent.EntityInfo(
+                    ent.name.map(ConversionUtil::toComponent).orElse(null),
+                    toIdentifier(BuiltInRegistries.ENTITY_TYPE.getKey(ent.type)),
+                    ent.id
+            );
+            return HoverEvent.forEntity(out);
+        }
+
+        throw new IllegalStateException("Don't know how to turn Minecraft Hover event of type " + event.getAction().getSerializedName() + " to a MidnightCore hover event!");
     }
 
     /**
@@ -104,6 +135,15 @@ public class ConversionUtil {
                 ClickEvent.Action.byId(event.getAction().getSerializedName()),
                 event.getValue()
         );
+    }
+
+    public static Component toComponent(net.minecraft.network.chat.Component other) {
+        return ModernSerializer.INSTANCE.forCurrentVersion()
+                .deserialize(
+                        NBTContext.INSTANCE,
+                        ComponentSerialization.CODEC.encodeStart(NbtOps.INSTANCE, other)
+                                .getOrThrow(false, MidnightCoreAPI.LOGGER::error)
+                ).getOrThrow();
     }
 
     public static EquipmentSlot toMCEquipmentSlot(Entity.EquipmentSlot slot) {

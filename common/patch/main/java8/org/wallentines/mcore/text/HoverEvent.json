@@ -1,0 +1,14 @@
+[
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "SERIALIZER = new VersionSerializer<>() {",
+    "replace": "SERIALIZER = new VersionSerializer<HoverEvent<?>>() {"
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace_regex",
+    "find": "HoverEvent\\.Type<([A-Za-z]+)> ([A-Z_]+) = register\\(\"([a-z_]+)\", new VersionSerializer<>\\(\\) \\{",
+    "replace": "HoverEvent.Type<$1> $2 = register(\"$3\", new VersionSerializer<$1>() {"
+  }
+]
