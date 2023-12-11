@@ -2,7 +2,7 @@
   {
     "lines": [ "all" ],
     "type": "replace",
-    "find": "new VersionSerializer<>() {",
-    "replace": "new VersionSerializer<Color>() {"
+    "find": "new ContextSerializer<>() {",
+    "replace": "new ContextSerializer<Color, GameVersion>() {"
   }
 ]

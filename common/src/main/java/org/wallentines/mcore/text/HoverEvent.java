@@ -3,7 +3,6 @@ package org.wallentines.mcore.text;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
-import org.wallentines.mcore.VersionSerializer;
 import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -62,7 +61,7 @@ public class HoverEvent<T> {
     }
 
 
-    public static final VersionSerializer<HoverEvent<?>> SERIALIZER = new VersionSerializer<>() {
+    public static final ContextSerializer<HoverEvent<?>, GameVersion> SERIALIZER = new ContextSerializer<>() {
         @Override
         public <O> SerializeResult<O> serialize(SerializeContext<O> context, HoverEvent<?> event, GameVersion version) {
             return serializeGeneric(context, event, version);
@@ -169,7 +168,7 @@ public class HoverEvent<T> {
          * Shows an achievement name and description when a component is hovered over.
          * Not used since pre-1.12
          */
-        public static final HoverEvent.Type<String> SHOW_ACHIEVEMENT = register("show_achievement", VersionSerializer.fromStatic(InlineSerializer.RAW));
+        public static final HoverEvent.Type<String> SHOW_ACHIEVEMENT = register("show_achievement", ContextSerializer.fromStatic(InlineSerializer.RAW));
 
     }
 

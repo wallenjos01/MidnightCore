@@ -1,7 +1,6 @@
 package org.wallentines.mcore.text;
 
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.VersionSerializer;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -13,9 +12,9 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * A {@link VersionSerializer} which serializes components into maps in the modern component format
+ * A {@link ContextSerializer} which serializes components into maps in the modern component format
  */
-public class ModernSerializer implements VersionSerializer<Component> {
+public class ModernSerializer implements ContextSerializer<Component, GameVersion> {
 
     /**
      * Contains serializers for the default content types

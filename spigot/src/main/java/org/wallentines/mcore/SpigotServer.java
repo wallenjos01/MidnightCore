@@ -78,4 +78,9 @@ public class SpigotServer implements Server, Listener {
     public void submit(Runnable runnable) {
         Adapter.INSTANCE.get().runOnServer(runnable);
     }
+
+    @Override
+    public GameVersion getVersion() {
+        return Adapter.INSTANCE.get().getGameVersion();
+    }
 }

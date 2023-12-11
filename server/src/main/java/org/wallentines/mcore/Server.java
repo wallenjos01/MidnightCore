@@ -124,6 +124,12 @@ public interface Server {
     void submit(Runnable runnable);
 
     /**
+     * Gets the version of the game the server is running
+     * @return The server's game version
+     */
+    GameVersion getVersion();
+
+    /**
      * A singleton carrying a reference to the currently running server. This is populated as soon as the server
      * begins to start and reset when the server is done shutting down
      */

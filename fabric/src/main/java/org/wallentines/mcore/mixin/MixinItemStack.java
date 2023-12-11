@@ -1,10 +1,12 @@
 package org.wallentines.mcore.mixin;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
@@ -91,5 +93,9 @@ public abstract class MixinItemStack implements ItemStack {
 
         Integer color = ((net.minecraft.world.item.ItemStack) (Object) this).getRarity().color.getColor();
         return color == null ? Color.WHITE : new Color(color);
+    }
+
+    public GameVersion mcore$getVersion() {
+        return new GameVersion(SharedConstants.getCurrentVersion().getId(), SharedConstants.getProtocolVersion());
     }
 }

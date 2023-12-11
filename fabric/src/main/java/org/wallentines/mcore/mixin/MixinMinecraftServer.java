@@ -1,5 +1,6 @@
 package org.wallentines.mcore.mixin;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
@@ -9,6 +10,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
@@ -89,6 +91,10 @@ public abstract class MixinMinecraftServer implements Server {
     public void mcore$submit(Runnable runnable) {
         MinecraftServer server = (MinecraftServer) (Object) this;
         server.submit(runnable);
+    }
+
+    public GameVersion mcore$getVersion() {
+        return new GameVersion(SharedConstants.getCurrentVersion().getId(), SharedConstants.getProtocolVersion());
     }
 
     @Inject(method = "tickServer", at = @At("TAIL"))

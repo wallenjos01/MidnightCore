@@ -1,13 +1,12 @@
 package org.wallentines.mcore.text;
 
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.VersionSerializer;
 import org.wallentines.mdcfg.serializer.ContextSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 
 /**
- * A Special type of serializer for Content types. To be used within {@link org.wallentines.mcore.text.ComponentSerializer ComponentSerializers}
+ * A Special type of serializer for Content types. To be used within Component Serializers
  * @param <T>
  */
 public class ContentSerializer<T extends Content> implements ContextSerializer<Content, ContentSerializer.Context> {
@@ -43,9 +42,9 @@ public class ContentSerializer<T extends Content> implements ContextSerializer<C
     public static class Context {
 
         public final GameVersion version;
-        public final VersionSerializer<Component> serializer;
+        public final ContextSerializer<Component, GameVersion> serializer;
 
-        public Context(GameVersion version, VersionSerializer<Component> serializer) {
+        public Context(GameVersion version, ContextSerializer<Component, GameVersion> serializer) {
             this.version = version;
             this.serializer = serializer;
         }

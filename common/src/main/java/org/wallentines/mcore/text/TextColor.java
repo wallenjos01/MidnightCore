@@ -1,7 +1,7 @@
 package org.wallentines.mcore.text;
 
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.VersionSerializer;
+import org.wallentines.mdcfg.serializer.ContextSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.math.Color;
@@ -105,7 +105,7 @@ public final class TextColor {
         return version.hasFeature(GameVersion.Feature.RGB_TEXT) ? color.toHex() : toLegacyColor(color);
     }
 
-    public static final VersionSerializer<Color> SERIALIZER = new VersionSerializer<>() {
+    public static final ContextSerializer<Color, GameVersion> SERIALIZER = new ContextSerializer<>() {
         @Override
         public <O> SerializeResult<O> serialize(SerializeContext<O> context, Color value, GameVersion version) {
             return SerializeResult.success(context.toString(TextColor.serialize(value, version)));

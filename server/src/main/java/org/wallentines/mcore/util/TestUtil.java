@@ -40,16 +40,18 @@ public class TestUtil {
             pl.sendMessage(org.wallentines.mcore.text.Component.text("\u00BB Hello").withColor(TextColor.RED));
             pl.sendMessage(manager.component("test"));
 
-            ItemStack is = ItemStack.Builder.woolWithColor(TextColor.RED)
+            Server srv = pl.getServer();
+            GameVersion version = srv.getVersion();
+
+            ItemStack is = ItemStack.Builder.woolWithColor(version, TextColor.RED)
                     .withCount(13)
                     .withName(org.wallentines.mcore.text.Component.text("Test").withColor(TextColor.GREEN))
                     .withLore(Arrays.asList(org.wallentines.mcore.text.Component.text("Bruh")))
                     .build();
 
-            Server srv = Server.RUNNING_SERVER.get();
 
             pl.sendMessage(
-                    Component.text(GameVersion.CURRENT_VERSION.get().getId() + " (" + GameVersion.CURRENT_VERSION.get().getProtocolVersion() + ") [" + srv.isDedicatedServer() + "]")
+                    Component.text(version.getId() + " (" + version.getProtocolVersion() + ") [" + srv.isDedicatedServer() + "]")
                             .withHoverEvent(HoverEvent.forItem(is))
             );
 
@@ -121,10 +123,11 @@ public class TestUtil {
 
         try {
 
+            GameVersion version = pl.getServer().getVersion();
             InventoryGUI gui = InventoryGUI.FACTORY.get().build(Component.text("Hello"), 3);
 
-            gui.setItem(0, ItemStack.Builder.woolWithColor(TextColor.RED).withName(Component.text("Hello, World").withColor(TextColor.AQUA)).build(), null);
-            gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.glassWithColor(TextColor.GREEN), PlaceholderContent.component("%player_name%"), null), (cpl, cl) -> {
+            gui.setItem(0, ItemStack.Builder.woolWithColor(version, TextColor.RED).withName(Component.text("Hello, World").withColor(TextColor.AQUA)).build(), null);
+            gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.glassWithColor(version, TextColor.GREEN), PlaceholderContent.component("%player_name%"), null), (cpl, cl) -> {
                 cpl.sendMessage(Component.text(cl.name()));
                 gui.close(cpl);
             });gui.setItem(8, ItemStack.empty(), (cpl, cl) -> {
@@ -156,31 +159,32 @@ public class TestUtil {
     public static void equipCmd(Player pl) {
         try {
 
+            GameVersion version = pl.getServer().getVersion();
             ItemStack hat = ItemStack.Builder
-                    .of(new Identifier("minecraft", "leather_helmet"))
+                    .of(version, new Identifier("minecraft", "leather_helmet"))
                     .withEnchantment(new Identifier("minecraft", "respiration"), 3)
                     .withLegacyEnchantment(5, 3)
                     .build();
 
             ItemStack shirt = ItemStack.Builder
-                    .of(new Identifier("minecraft", "iron_chestplate"))
+                    .of(version, new Identifier("minecraft", "iron_chestplate"))
                     .withEnchantment(new Identifier("minecraft", "protection"), 5)
                     .withLegacyEnchantment(0, 5)
                     .build();
 
             ItemStack legs = ItemStack.Builder
-                    .of(new Identifier("minecraft", "golden_leggings"))
+                    .of(version, new Identifier("minecraft", "golden_leggings"))
                     .withEnchantment(new Identifier("minecraft", "unbreaking"), 3)
                     .withLegacyEnchantment(34, 3)
                     .build();
 
             ItemStack feet = ItemStack.Builder
-                    .of(new Identifier("minecraft", "diamond_boots"))
+                    .of(version, new Identifier("minecraft", "diamond_boots"))
                     .withEnchantment(new Identifier("minecraft", "feather_falling"), 4)
                     .withLegacyEnchantment(2, 4)
                     .build();
             ItemStack sword = ItemStack.Builder
-                    .of(new Identifier("minecraft", "stone_sword"))
+                    .of(version, new Identifier("minecraft", "stone_sword"))
                     .withEnchantment(new Identifier("minecraft", "sharpness"), 100)
                     .withLegacyEnchantment(16, 100)
                     .withName(Component.text("Test Sword").withColor(new Color(0xAF4EBE)))
@@ -192,10 +196,10 @@ public class TestUtil {
             pl.setItem(Entity.EquipmentSlot.FEET, feet);
             pl.setItem(Entity.EquipmentSlot.MAINHAND, sword);
 
-            if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.OFF_HAND)) {
+            if(version.hasFeature(GameVersion.Feature.OFF_HAND)) {
 
                 ItemStack cmd = ItemStack.Builder
-                        .of(new Identifier("minecraft", "command_block"))
+                        .of(version, new Identifier("minecraft", "command_block"))
                         .withName(Component.text("Hello").withColor(new Color(0x398F3C)))
                         .build();
 

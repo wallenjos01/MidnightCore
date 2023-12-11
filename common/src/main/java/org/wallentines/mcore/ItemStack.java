@@ -16,7 +16,6 @@ import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,12 +78,19 @@ public interface ItemStack {
      */
     String getTranslationKey();
 
+
+    /**
+     * Gets the version of the game this item is native to
+     * @return The item's game version.
+     */
+    GameVersion getVersion();
+
     /**
      * Makes an exact copy of this item stack
      * @return An exact copy
      */
     default ItemStack copy() {
-        return Builder.of(getType()).withCount(getCount()).withTag(getTag()).withDataValue(getLegacyDataValue()).build();
+        return Builder.of(getVersion(), getType()).withCount(getCount()).withTag(getTag()).withDataValue(getLegacyDataValue()).build();
     }
 
     /**
@@ -93,7 +99,7 @@ public interface ItemStack {
      */
     default void setName(Component component) {
         component = ItemUtil.applyItemNameBaseStyle(component);
-        String strName = GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
+        String strName = getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
                 component.toJSONString() :
                 component.toLegacyText();
 
@@ -157,7 +163,7 @@ public interface ItemStack {
      * @return An empty item stack
      */
     static ItemStack empty() {
-        return Builder.of(new Identifier("minecraft", "air")).build();
+        return Builder.of(GameVersion.MAX, new Identifier("minecraft", "air")).build();
     }
 
 
@@ -166,68 +172,21 @@ public interface ItemStack {
      */
     Singleton<Factory> FACTORY = new Singleton<>();
 
-    VersionSerializer<ItemStack> VERSION_SERIALIZER = new VersionSerializer<>() {
-        @Override
-        public <O> SerializeResult<O> serialize(SerializeContext<O> context, ItemStack value, GameVersion version) {
+    ContextSerializer<ItemStack, GameVersion> SERIALIZER =
 
-            O out = context.toMap(new HashMap<>());
-
-            context.set("type", context.toString(value.getType().toString()), out);
-            context.set("count", context.toNumber(value.getCount()), out);
-            ConfigSection tag = value.getTag();
-            if(tag != null) {
-                context.set("tag", ConfigContext.INSTANCE.convert(context, tag), out);
-            }
-            if(!version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-                context.set("Damage", context.toNumber(value.getLegacyDataValue()), out);
-            }
-
-            return SerializeResult.success(out);
-        }
-
-        @Override
-        public <O> SerializeResult<ItemStack> deserialize(SerializeContext<O> context, O value, GameVersion version) {
-
-            if(FACTORY.getOrNull() == null) {
-                return SerializeResult.failure("Unable to deserialize ItemStack! Factory is empty! Has MidnightCore been loaded yet?");
-            }
-
-            SerializeResult<Identifier> id = Identifier.serializer("minecraft").entry("type", ItemStack::getType).parse(context, value);
-            if(!id.isComplete()) {
-                return SerializeResult.failure("Unable to deserialize ItemStack ID! " + id.getError());
-            }
-
-            SerializeResult<Integer> count = NumberSerializer.forInt(1,64).entry("count", ItemStack::getCount).orElse(1).parse(context, value);
-            if(!count.isComplete()) {
-                return SerializeResult.failure("Unable to deserialize ItemStack count! " + count.getError());
-            }
-
-            SerializeResult<ConfigSection> tag = ConfigSection.SERIALIZER.entry("tag", ItemStack::getTag).optional().parse(context, value);
-            if(!tag.isComplete()) {
-                return SerializeResult.failure("Unable to deserialize ItemStack tag! " + tag.getError());
-            }
-
-            byte data = 0;
-            if(!version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-                SerializeResult<Byte> damage = NumberSerializer.forByte((byte) 0,(byte) 15).entry("data", ItemStack::getLegacyDataValue).optional().parse(context, value);
-                if(!damage.isComplete()) {
-                    return SerializeResult.failure("Unable to deserialize ItemStack tag! " + damage.getError());
-                }
-                data = damage.getOrThrow();
-            }
-
-            return SerializeResult.success(FACTORY.get().build(id.getOrThrow(), count.getOrThrow(), tag.getOrThrow(), data));
-        }
-    };
-
-    Serializer<ItemStack> SERIALIZER = VERSION_SERIALIZER.forCurrentVersion();
-
+            ObjectSerializer.createContextAware(
+                    Identifier.serializer("minecraft").entry("type", (is, ver) -> is.getType()),
+                    NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).orElse(v -> 1),
+                    ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getTag()).optional(),
+                    NumberSerializer.forByte((byte) 0,(byte) 15).<ItemStack, GameVersion>entry("data", (is,ver) -> is.getLegacyDataValue()).optional(),
+                    (ver, type, count, tag, data) -> FACTORY.get().build(type, count, tag, data, ver)
+            );
 
     /**
      * An interface to construct an item stack
      */
     interface Factory {
-        ItemStack build(Identifier type, int count, ConfigSection tag, byte legacyData);
+        ItemStack build(Identifier type, int count, ConfigSection tag, byte legacyData, GameVersion version);
     }
 
 
@@ -236,12 +195,14 @@ public interface ItemStack {
      */
     class Builder {
 
+        private final GameVersion version;
         private final Identifier id;
         private int count = 1;
         private ConfigSection tag = null;
         private byte dataValue = 0;
 
-        private Builder(Identifier id) {
+        private Builder(GameVersion version, Identifier id) {
+            this.version = version;
             this.id = id;
         }
 
@@ -295,7 +256,7 @@ public interface ItemStack {
          * @return A reference to self
          */
         public Builder withDataValue(byte dataValue) {
-            if(dataValue != 0 && GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+            if(dataValue != 0 && version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
                 MidnightCoreAPI.LOGGER.warn("ItemStack data value specified on a version which does not support it!");
             }
 
@@ -311,7 +272,7 @@ public interface ItemStack {
         public Builder withName(Component name) {
 
             name = ItemUtil.applyItemNameBaseStyle(name);
-            String strName = GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
+            String strName = version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
                     name.toJSONString() :
                     name.toLegacyText();
 
@@ -329,7 +290,7 @@ public interface ItemStack {
 
             List<String> loreList = lore.stream()
                 .map(ItemUtil::applyItemLoreBaseStyle)
-                .map(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
+                .map(version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
                         Component::toJSONString :
                         Component::toLegacyText
                     ).collect(Collectors.toList());
@@ -366,7 +327,7 @@ public interface ItemStack {
          * @return An exact copy of the Builder
          */
         public Builder copy() {
-            Builder out = new Builder(id);
+            Builder out = new Builder(version, id);
             out.count = count;
             out.tag = tag;
             out.dataValue = dataValue;
@@ -379,8 +340,19 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder of(Identifier id) {
-            return new Builder(id);
+            return new Builder(GameVersion.CURRENT_VERSION.get(), id);
         }
+
+        /**
+         * Constructs a new builder with the given type ID
+         * @param version The game version to make the item for
+         * @param id The type ID
+         * @return A new builder
+         */
+        public static Builder of(GameVersion version, Identifier id) {
+            return new Builder(version, id);
+        }
+
 
         /**
          * Constructs a new builder for a specific color of the item with the given ID
@@ -389,12 +361,23 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder ofColor(Color color, Identifier base) {
+            return ofColor(GameVersion.CURRENT_VERSION.get(), color, base);
+        }
+
+        /**
+         * Constructs a new builder for a specific color of the item with the given ID
+         * @param version The game version to make the item for
+         * @param color The color of item to build
+         * @param base The base ID of the item (i.e. wool for green_wool, concrete for red_concrete, etc.)
+         * @return A new builder
+         */
+        public static Builder ofColor(GameVersion version, Color color, Identifier base) {
 
             Builder out;
-            if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-                out = new Builder(new Identifier(base.getNamespace(), TextColor.toDyeColor(color) + "_" + base.getPath()));
+            if(version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                out = new Builder(version,new Identifier(base.getNamespace(), TextColor.toDyeColor(color) + "_" + base.getPath()));
             } else {
-                out = new Builder(base).withDataValue(TextColor.getLegacyDataValue(color));
+                out = new Builder(version,base).withDataValue(TextColor.getLegacyDataValue(color));
             }
 
             return out;
@@ -406,7 +389,17 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder woolWithColor(Color color) {
-            return ofColor(color, new Identifier("minecraft", "wool"));
+            return woolWithColor(GameVersion.CURRENT_VERSION.get(), color);
+        }
+
+        /**
+         * Constructs a new builder for a wool block with the given color
+         * @param version The game version to make the item for
+         * @param color The color of the wool block
+         * @return A new builder
+         */
+        public static Builder woolWithColor(GameVersion version, Color color) {
+            return ofColor(version, color, new Identifier("minecraft", "wool"));
         }
 
         /**
@@ -415,7 +408,17 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder glassWithColor(Color color) {
-            return ofColor(color, new Identifier("minecraft", "stained_glass"));
+            return glassWithColor(GameVersion.CURRENT_VERSION.get(), color);
+        }
+
+        /**
+         * Constructs a new builder for a stained glass block with the given color
+         * @param version The game version to make the item for
+         * @param color The color of the stained glass block
+         * @return A new builder
+         */
+        public static Builder glassWithColor(GameVersion version, Color color) {
+            return ofColor(version, color, new Identifier("minecraft", "stained_glass"));
         }
 
         /**
@@ -424,7 +427,17 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder glassPaneWithColor(Color color) {
-            return ofColor(color, new Identifier("minecraft", "stained_glass_pane"));
+            return glassPaneWithColor(GameVersion.CURRENT_VERSION.get(), color);
+        }
+
+        /**
+         * Constructs a new builder for a stained glass pane block with the given color
+         * @param version The game version to make the item for
+         * @param color The color of the stained glass pane block
+         * @return A new builder
+         */
+        public static Builder glassPaneWithColor(GameVersion version, Color color) {
+            return ofColor(version, color, new Identifier("minecraft", "stained_glass_pane"));
         }
 
         /**
@@ -433,7 +446,17 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder concreteWithColor(Color color) {
-            return ofColor(color, new Identifier("minecraft", "concrete"));
+            return concreteWithColor(GameVersion.CURRENT_VERSION.get(), color);
+        }
+
+        /**
+         * Constructs a new builder for a concrete block with the given color
+         * @param version The game version to make the item for
+         * @param color The color of the concrete block
+         * @return A new builder
+         */
+        public static Builder concreteWithColor(GameVersion version, Color color) {
+            return ofColor(version, color, new Identifier("minecraft", "concrete"));
         }
 
         /**
@@ -442,7 +465,17 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder concretePowderWithColor(Color color) {
-            return ofColor(color, new Identifier("minecraft", "concrete_powder"));
+            return concretePowderWithColor(GameVersion.CURRENT_VERSION.get(), color);
+        }
+
+        /**
+         * Constructs a new builder for a concrete powder block with the given color
+         * @param version The game version to make the item for
+         * @param color The color of the concrete powder block
+         * @return A new builder
+         */
+        public static Builder concretePowderWithColor(GameVersion version, Color color) {
+            return ofColor(version, color, new Identifier("minecraft", "concrete_powder"));
         }
 
         /**
@@ -451,9 +484,19 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder terracottaWithColor(Color color) {
+            return terracottaWithColor(GameVersion.CURRENT_VERSION.get(), color);
+        }
 
-            String id = GameVersion.CURRENT_VERSION.get().getProtocolVersion() >= 347 ? "terracotta" : "stained_hardened_clay";
-            return ofColor(color, new Identifier("minecraft", id));
+        /**
+         * Constructs a new builder for a terracotta block with the given color
+         * @param version The game version to make the item for
+         * @param color The color of the terracotta block
+         * @return A new builder
+         */
+        public static Builder terracottaWithColor(GameVersion version, Color color) {
+
+            String id = version.getProtocolVersion() >= 347 ? "terracotta" : "stained_hardened_clay";
+            return ofColor(version, color, new Identifier("minecraft", id));
         }
 
         /**
@@ -462,16 +505,26 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder headWithSkin(Skin skin) {
+            return headWithSkin(GameVersion.CURRENT_VERSION.get(), skin);
+        }
+
+        /**
+         * Constructs a new builder for a player head with the given skin
+         * @param version The game version to make the item for
+         * @param skin The skin to apply to the player head item
+         * @return A new builder
+         */
+        public static Builder headWithSkin(GameVersion version, Skin skin) {
 
             Builder out;
-            if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
-                out = new Builder(new Identifier("minecraft", "player_head"));
+            if(version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                out = new Builder(version, new Identifier("minecraft", "player_head"));
             } else {
-                out = new Builder(new Identifier("minecraft", "skull")).withDataValue((byte) 3);
+                out = new Builder(version, new Identifier("minecraft", "skull")).withDataValue((byte) 3);
             }
 
             ConfigObject uuid;
-            if(GameVersion.CURRENT_VERSION.get().hasFeature(GameVersion.Feature.INT_ARRAY_UUIDS)) {
+            if(version.hasFeature(GameVersion.Feature.INT_ARRAY_UUIDS)) {
                 int[] parts = ItemUtil.splitUUID(skin.getUUID());
                 uuid = new ConfigList().append(parts[0]).append(parts[1]).append(parts[2]).append(parts[3]);
             } else {
@@ -491,7 +544,7 @@ public interface ItemStack {
          * @return A new ItemStack
          */
         public ItemStack build() {
-            return FACTORY.get().build(id, count, tag, dataValue);
+            return FACTORY.get().build(id, count, tag, dataValue, version);
         }
     }
 

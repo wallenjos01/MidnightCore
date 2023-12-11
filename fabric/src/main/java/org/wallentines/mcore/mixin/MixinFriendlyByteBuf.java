@@ -1,5 +1,6 @@
 package org.wallentines.mcore.mixin;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -24,7 +25,13 @@ public abstract class MixinFriendlyByteBuf {
 
         // Allow MidnightCore components to be sent directly without conversion
         if(component instanceof WrappedComponent) {
-            Tag out = ModernSerializer.INSTANCE.serialize(NBTContext.INSTANCE, ((WrappedComponent) component).internal, GameVersion.CURRENT_VERSION.get()).getOrThrow();
+
+            Tag out = ModernSerializer.INSTANCE.serialize(
+                    NBTContext.INSTANCE,
+                    ((WrappedComponent) component).internal,
+                    new GameVersion(SharedConstants.getCurrentVersion().getId(), SharedConstants.getProtocolVersion())
+            ).getOrThrow();
+
             writeNbt(out);
             cir.setReturnValue((FriendlyByteBuf) (Object) this);
         }

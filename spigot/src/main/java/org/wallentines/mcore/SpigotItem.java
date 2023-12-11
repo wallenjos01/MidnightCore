@@ -85,6 +85,11 @@ public class SpigotItem implements ItemStack {
     }
 
     @Override
+    public GameVersion getVersion() {
+        return Adapter.INSTANCE.get().getGameVersion();
+    }
+
+    @Override
     public Color getRarityColor() {
         return Adapter.INSTANCE.get().getRarityColor(internal);
     }

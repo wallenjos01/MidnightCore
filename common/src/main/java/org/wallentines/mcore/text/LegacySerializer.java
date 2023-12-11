@@ -1,6 +1,5 @@
 package org.wallentines.mcore.text;
 
-import org.wallentines.mcore.VersionSerializer;
 import org.wallentines.mdcfg.serializer.InlineSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
@@ -15,7 +14,7 @@ import java.util.function.Function;
 
 
 /**
- * A {@link VersionSerializer} which serializes components into legacy Strings for clients/contexts which do not
+ * A {@link Serializer} which serializes components into legacy Strings for clients/contexts which do not
  * support modern text components
  */
 public class LegacySerializer implements Serializer<Component> {

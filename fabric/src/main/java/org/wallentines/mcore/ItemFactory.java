@@ -10,7 +10,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 public class ItemFactory implements ItemStack.Factory {
     @Override
-    public ItemStack build(Identifier type, int count, ConfigSection tag, byte legacyData) {
+    public ItemStack build(Identifier type, int count, ConfigSection tag, byte legacyData, GameVersion version) {
         if(legacyData != 0) {
             MidnightCoreAPI.LOGGER.warn("ItemStack data value requested for an unsupported version!");
         }

@@ -103,6 +103,11 @@ public class Common {
         }
 
         @Override
+        public GameVersion getVersion() {
+            return Common.VERSION;
+        }
+
+        @Override
         public Color getRarityColor() {
             return Color.WHITE;
         }
@@ -114,7 +119,7 @@ public class Common {
     static {
 
         GameVersion.CURRENT_VERSION.set(VERSION);
-        ItemStack.FACTORY.set(DummyItem::new);
+        ItemStack.FACTORY.set((id,count,tag,data,ver) -> new DummyItem(id,count,tag,data));
     }
 
 }

@@ -17,10 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.wallentines.mcore.Entity;
-import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.text.*;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.midnightlib.math.Color;
@@ -164,11 +161,12 @@ public class ConversionUtil {
     }
 
     public static Component toComponent(net.minecraft.network.chat.Component other) {
-        return ModernSerializer.INSTANCE.forCurrentVersion()
+        return ModernSerializer.INSTANCE
                 .deserialize(
                         NBTContext.INSTANCE,
                         ComponentSerialization.CODEC.encodeStart(NbtOps.INSTANCE, other)
-                                .getOrThrow(false, MidnightCoreAPI.LOGGER::error)
+                                .getOrThrow(false, MidnightCoreAPI.LOGGER::error),
+                        GameVersion.CURRENT_VERSION.get()
                 ).getOrThrow();
     }
 
