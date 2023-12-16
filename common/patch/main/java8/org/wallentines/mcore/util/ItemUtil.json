@@ -1,0 +1,14 @@
+[
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "new ContextSerializer<>() {",
+    "replace": "new ContextSerializer<UUID,GameVersion>() {"
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": ".toList()",
+    "replace": ".collect(java.util.stream.Collectors.toList())"
+  }
+]

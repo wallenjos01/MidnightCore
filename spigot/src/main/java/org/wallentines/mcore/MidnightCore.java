@@ -91,7 +91,6 @@ public class MidnightCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        MidnightCoreAPI.LOGGER.warn("MidnightCore is shutting down");
         Server server = Server.RUNNING_SERVER.getOrNull();
         if(server != null) {
             server.getModuleManager().unloadAll();

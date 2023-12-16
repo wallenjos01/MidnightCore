@@ -29,7 +29,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
     /**
      * A modern serializer instance containing only vanilla content types
      */
-    public static final ModernSerializer VANILLA = new ModernSerializer(CONTENT_SERIALIZERS.freeze());
+    public static final ModernSerializer VANILLA;
 
     private final RegistryBase<String, ContentSerializer<?>> registry;
 
@@ -287,6 +287,10 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
         ContentSerializer<T> out = new ContentSerializer<>(clazz, serializer);
         CONTENT_SERIALIZERS.register(id, out);
         return out;
+    }
+
+    static {
+        VANILLA = new ModernSerializer(CONTENT_SERIALIZERS.freeze());
     }
 
 }

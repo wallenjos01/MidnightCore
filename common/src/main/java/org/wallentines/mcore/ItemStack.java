@@ -172,15 +172,15 @@ public interface ItemStack {
      */
     Singleton<Factory> FACTORY = new Singleton<>();
 
-    ContextSerializer<ItemStack, GameVersion> SERIALIZER =
+    ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = ObjectSerializer.createContextAware(
+            Identifier.serializer("minecraft").entry("type", (is, ver) -> is.getType()),
+            NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).orElse(v -> 1),
+            ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getTag()).optional(),
+            NumberSerializer.forByte((byte) 0,(byte) 15).<ItemStack, GameVersion>entry("data", (is,ver) -> is.getLegacyDataValue()).optional(),
+            (ver, type, count, tag, data) -> FACTORY.get().build(type, count, tag, data, ver)
+    );
 
-            ObjectSerializer.createContextAware(
-                    Identifier.serializer("minecraft").entry("type", (is, ver) -> is.getType()),
-                    NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).orElse(v -> 1),
-                    ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getTag()).optional(),
-                    NumberSerializer.forByte((byte) 0,(byte) 15).<ItemStack, GameVersion>entry("data", (is,ver) -> is.getLegacyDataValue()).optional(),
-                    (ver, type, count, tag, data) -> FACTORY.get().build(type, count, tag, data, ver)
-            );
+    Serializer<ItemStack> SERIALIZER = VERSION_SERIALIZER.forContext(GameVersion.CURRENT_VERSION::get);
 
     /**
      * An interface to construct an item stack

@@ -1,15 +1,15 @@
 package org.wallentines.mcore.util;
 
+import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.TextColor;
 import org.wallentines.mdcfg.ConfigPrimitive;
+import org.wallentines.mdcfg.serializer.ContextSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * A utility class with many item-related functions
@@ -44,6 +44,46 @@ public class ItemUtil {
                 (long) ints[2] << 32 | (long) ints[3] & 0xFFFFFFFFL
         );
     }
+
+    public static final ContextSerializer<UUID, GameVersion> UUID_SERIALIZER = new ContextSerializer<>() {
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> serializeContext, UUID uuid, GameVersion version) {
+
+            if(version.hasFeature(GameVersion.Feature.INT_ARRAY_UUIDS)) {
+                List<O> out = Arrays.stream(splitUUID(uuid)).boxed().map(serializeContext::toNumber).toList();
+                return SerializeResult.success(serializeContext.toList(out));
+
+            } else {
+                return SerializeResult.success(serializeContext.toString(uuid.toString()));
+            }
+        }
+
+        @Override
+        public <O> SerializeResult<UUID> deserialize(SerializeContext<O> serializeContext, O o, GameVersion version) {
+
+            if(version.hasFeature(GameVersion.Feature.INT_ARRAY_UUIDS)) {
+                int[] arr = new int[4];
+                int index = 0;
+                Collection<O> os = serializeContext.asList(o);
+                if(os.size() != 4) {
+                    return SerializeResult.failure("Unable to deserialize UUID as an int-array! Array was not the right length");
+                }
+
+                for(O oo : os) {
+                    arr[index++] = serializeContext.asNumber(oo).intValue();
+                }
+                return SerializeResult.success(joinUUID(arr));
+
+            } else {
+                try {
+                    return SerializeResult.success(UUID.fromString(serializeContext.asString(o)));
+                } catch (IllegalArgumentException ex) {
+                    return SerializeResult.failure("Unable to read UUID from string! " + ex.getMessage());
+                }
+            }
+
+        }
+    };
 
     /**
      * Set italic to false on the component if unset, so components appear as intended on ItemStacks

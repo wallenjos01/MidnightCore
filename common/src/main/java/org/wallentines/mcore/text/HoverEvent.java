@@ -157,7 +157,7 @@ public class HoverEvent<T> {
          */
         public static final HoverEvent.Type<EntityInfo> SHOW_ENTITY = register("show_entity",
                 ObjectSerializer.createContextAware(
-                        Serializer.UUID.entry("uuid", (ei, ver) -> ei.uuid),
+                        ItemUtil.UUID_SERIALIZER.entry("id", (ei, ver) -> ei.uuid),
                         Identifier.serializer("minecraft").<EntityInfo, GameVersion>entry("type", (ei, ver) -> ei.type).orElse(ver -> new Identifier("minecraft", "pig")),
                         ModernSerializer.INSTANCE.entry("name", (ei, ver) -> ei.name),
                         (version, uuid, identifier, component) -> new EntityInfo(component, identifier, uuid)
