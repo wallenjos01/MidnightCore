@@ -98,6 +98,8 @@ public class PlaceholderContext {
      */
     public void addValue(Object object) {
 
+        if(object == null) return;
+
         if(object instanceof CustomPlaceholder) {
             CustomPlaceholder cpl = (CustomPlaceholder) object;
             customCache.putIfAbsent(cpl.getId(), cpl.getValue());

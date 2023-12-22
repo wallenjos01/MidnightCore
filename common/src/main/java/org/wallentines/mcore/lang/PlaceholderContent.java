@@ -96,7 +96,7 @@ public class PlaceholderContent extends Content {
 
         if(args != null) {
             for(Object o : args) {
-                ctx.addValue(o);
+                if(o != null) ctx.addValue(o);
             }
         }
 

@@ -15,6 +15,7 @@ import org.wallentines.mcore.CommandSender;
 import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.midnightlib.math.Vec3d;
@@ -47,7 +48,7 @@ public abstract class MixinCommandSourceStack implements CommandSender {
     }
 
     public void mcore$sendSuccess(Component message, boolean log) {
-        sendSuccess(() -> new WrappedComponent(message), log);
+        sendSuccess(() -> new WrappedComponent(ComponentResolver.resolveComponent(message, this, getPlayer())), log);
     }
 
     public void mcore$sendFailure(Component message) {
