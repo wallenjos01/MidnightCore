@@ -51,7 +51,7 @@ public class Init implements ModInitializer {
             MainCommandExecutor.register(server.getCommands().getDispatcher());
 
         });
-
+        
         // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepointModule.MODULE_INFO);

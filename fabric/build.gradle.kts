@@ -55,9 +55,9 @@ dependencies {
     api(project(":server"))
     api(project(":client"))
 
-    include(project(":common").setTransitive(false))
-    include(project(":server").setTransitive(false))
-    include(project(":client").setTransitive(false))
+    shadow(project(":common").setTransitive(false))
+    shadow(project(":server").setTransitive(false))
+    shadow(project(":client").setTransitive(false))
 
     // Minecraft
     minecraft("com.mojang:minecraft:1.20.4")
@@ -77,22 +77,21 @@ dependencies {
         modApi(include(fabricApi.module(mod, "0.91.1+1.20.4"))!!)
     }
 
-    // Shadowed Library Dependencies
-    shadow(libs.midnight.cfg) { isTransitive = false }
-    shadow(libs.midnight.cfg.json) { isTransitive = false }
-    shadow(libs.midnight.cfg.binary) { isTransitive = false }
-    shadow(libs.midnight.cfg.gson) { isTransitive = false }
-    shadow(libs.midnight.lib) { isTransitive = false }
-    shadow(libs.zstd.jni)
+    // Included Library Dependencies
+    modApi(libs.midnight.cfg)
+    modApi(libs.midnight.cfg.json)
+    modApi(libs.midnight.cfg.binary)
+    modApi(libs.midnight.cfg.gson)
+    modApi(libs.midnight.lib)
+    modApi(libs.zstd.jni)
 
-    modRuntimeOnly(libs.midnight.cfg) { isTransitive = false }
-    modRuntimeOnly(libs.midnight.cfg.json) { isTransitive = false }
-    modRuntimeOnly(libs.midnight.cfg.binary) { isTransitive = false }
-    modRuntimeOnly(libs.midnight.cfg.gson) { isTransitive = false }
-    modRuntimeOnly(libs.midnight.lib) { isTransitive = false }
-    modRuntimeOnly(libs.zstd.jni)
+    include(libs.midnight.cfg)
+    include(libs.midnight.cfg.json)
+    include(libs.midnight.cfg.binary)
+    include(libs.midnight.cfg.gson)
+    include(libs.midnight.lib)
+    include(libs.zstd.jni)
 
-    // Included Mod Dependencies
     modApi(include("org.wallentines:fabric-events:0.3.0-SNAPSHOT")!!)
     modApi(include("me.lucko:fabric-permissions-api:0.3-SNAPSHOT")!!)
 }

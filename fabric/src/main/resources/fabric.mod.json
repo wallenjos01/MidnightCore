@@ -19,14 +19,24 @@
         "midnightcore.mixins.json"
     ],
     "name": "MidnightCore",
-    "description": "such wow.",
+    "description": "A core library for Minecraft cross-platform plugins and mods",
     "contact": {
-        "homepage": "https://wallentines.org/"
+        "homepage": "https://github.com/wallenjos01/MidnightCore"
     },
     "authors": [
         {
             "name": "M1dnight_Ninja"
         }
     ],
+    "custom": {
+        "loom:injected_interfaces": {
+            "net.minecraft.class_1297": [ "org/wallentines/mcore/Entity" ],
+            "net.minecraft.class_1799": [ "org/wallentines/mcore/ItemStack" ],
+            "net.minecraft.class_3222": [
+                "org/wallentines/mcore/Player",
+                "org/wallentines/mcore/ScoreboardHolder"
+            ]
+        }
+    },
     "license": "LGPL"
 }
