@@ -52,7 +52,7 @@ public abstract class MixinCommandSourceStack implements CommandSender {
     }
 
     public void mcore$sendFailure(Component message) {
-        sendFailure(new WrappedComponent(message));
+        sendFailure(new WrappedComponent(ComponentResolver.resolveComponent(message, this, getPlayer())));
     }
 
     public String mcore$getLanguage() {
