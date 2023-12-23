@@ -35,7 +35,9 @@
             "net.minecraft.class_3222": [
                 "org/wallentines/mcore/Player",
                 "org/wallentines/mcore/ScoreboardHolder"
-            ]
+            ],
+            "net.minecraft.server.MinecraftServer": [ "org/wallentines/mcore/Server" ],
+            "net.minecraft.class_2168": [ "org/wallentines/mcore/CommandSender" ]
         }
     },
     "license": "LGPL"

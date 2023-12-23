@@ -26,15 +26,19 @@ tasks {
     build {
         dependsOn(shadowJar)
     }
-    shadowJar {
+    jar {
         archiveClassifier.set("dev")
-        configurations = listOf(project.configurations.shadow.get())
     }
     remapJar {
+        archiveClassifier.set("fabric")
         val id = project.properties["id"]
         archiveBaseName.set("${id}-${project.name}")
-        dependsOn(shadowJar)
-        inputFile.set(shadowJar.get().archiveFile)
+        inputFile.set(jar.get().archiveFile)
+    }
+    shadowJar {
+        archiveClassifier.set("")
+        configurations = listOf(project.configurations.shadow.get())
+        from(remapJar.get().archiveFile)
     }
 }
 
@@ -69,7 +73,6 @@ dependencies {
     // Fabric API
     val apiModules = listOf(
             "fabric-api-base",
-            "fabric-command-api-v2",
             "fabric-lifecycle-events-v1",
             "fabric-networking-api-v1"
     )
