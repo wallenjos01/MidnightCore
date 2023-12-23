@@ -2,7 +2,7 @@ plugins {
     id("midnightcore-build")
     id("midnightcore-publish")
     alias(libs.plugins.loom)
-    alias(libs.plugins.shadow)
+    //alias(libs.plugins.shadow)
 }
 
 
@@ -24,21 +24,16 @@ loom {
 
 tasks {
     build {
-        dependsOn(shadowJar)
+        dependsOn(remapJar)
     }
     jar {
         archiveClassifier.set("dev")
     }
     remapJar {
-        archiveClassifier.set("fabric")
+        archiveClassifier.set("")
         val id = project.properties["id"]
         archiveBaseName.set("${id}-${project.name}")
         inputFile.set(jar.get().archiveFile)
-    }
-    shadowJar {
-        archiveClassifier.set("")
-        configurations = listOf(project.configurations.shadow.get())
-        from(remapJar.get().archiveFile)
     }
 }
 
@@ -59,9 +54,9 @@ dependencies {
     api(project(":server"))
     api(project(":client"))
 
-    shadow(project(":common").setTransitive(false))
-    shadow(project(":server").setTransitive(false))
-    shadow(project(":client").setTransitive(false))
+    include(project(":common").setTransitive(false))
+    include(project(":server").setTransitive(false))
+    include(project(":client").setTransitive(false))
 
     // Minecraft
     minecraft("com.mojang:minecraft:1.20.4")
