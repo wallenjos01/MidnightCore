@@ -168,6 +168,16 @@ public class UnresolvedComponent {
         return "UnresolvedComponent{tryParseJSON=" + tryParseJSON + ",parts=" + parts + "}";
     }
 
+    public static UnresolvedComponent empty() {
+        return completed(Component.empty());
+    }
+
+    public static UnresolvedComponent completed(Component component) {
+        UnresolvedComponent out = new UnresolvedComponent(false);
+        out.completed = component;
+        return out;
+    }
+
     /**
      * Parses a String into an unresolved component that will not attempt to parse JSON strings.
      * @param str The String to parse
@@ -359,23 +369,9 @@ public class UnresolvedComponent {
             }
         }
 
-//        List<Component> parsed = inlined.stream().map(e -> {
-//            if(e.hasLeft()) {
-//                return ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(e.leftOrThrow())).getOrThrow();
-//            } else {
-//                return e.right();
-//            }
-//        }).toList();
-//
-//        if(parsed.isEmpty()) {
-//            return Component.empty();
-//        }
-//
-//        Component out = parsed.get(0);
-//
-//        for(int i = 1; i < parsed.size() ; i++) {
-//            out = out.addChild(parsed.get(i));
-//        }
+        if(out == null) {
+            return Component.empty();
+        }
 
         return out.toComponent();
     }
@@ -417,7 +413,6 @@ public class UnresolvedComponent {
 
         return out;
     }
-
 
     private SerializeResult<UnresolvedComponent> finish() {
 
