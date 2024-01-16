@@ -1,10 +1,7 @@
 package org.wallentines.mcore.lang;
 
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.ConfigSerializer;
-import org.wallentines.mcore.text.Content;
-import org.wallentines.mcore.text.ModernSerializer;
+import org.wallentines.mcore.text.*;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.codec.DecodeException;
 import org.wallentines.mdcfg.codec.JSONCodec;
@@ -278,7 +275,7 @@ public class UnresolvedComponent {
         }
     }
 
-    // Resolve all inline placeholders (placeholders which return a String)
+    // Resolve all placeholders
     private List<Either<String, Component>> resolvePlaceholders(PlaceholderManager manager, PlaceholderContext ctx) {
 
         List<Either<String, Component>> out = new ArrayList<>();
@@ -336,25 +333,51 @@ public class UnresolvedComponent {
 
     private Component resolveConfigText(List<Either<String, Component>> inlined) {
 
-        List<Component> parsed = inlined.stream().map(e -> {
-            if(e.hasLeft()) {
-                return ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(e.leftOrThrow())).getOrThrow();
+        MutableComponent out = null;
+        for(Either<String, Component> cmp : inlined) {
+
+            if(cmp.hasLeft()) {
+                MutableComponent text = MutableComponent.fromComponent(ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(cmp.leftOrThrow())).getOrThrow());
+                if(out == null) {
+                    out = text;
+                } else {
+                    out.addChild(text);
+                }
+
             } else {
-                return e.right();
+
+                MutableComponent next = MutableComponent.fromComponent(cmp.rightOrThrow());
+                if(out == null) {
+                    out = new MutableComponent(new Content.Text(""));
+                }
+
+                if(out.children.isEmpty()) {
+                    out.addChild(next);
+                } else {
+                    out.children.get(out.children.size() - 1).addChild(next);
+                }
             }
-        }).toList();
-
-        if(parsed.isEmpty()) {
-            return Component.empty();
         }
 
-        Component out = parsed.get(0);
+//        List<Component> parsed = inlined.stream().map(e -> {
+//            if(e.hasLeft()) {
+//                return ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(e.leftOrThrow())).getOrThrow();
+//            } else {
+//                return e.right();
+//            }
+//        }).toList();
+//
+//        if(parsed.isEmpty()) {
+//            return Component.empty();
+//        }
+//
+//        Component out = parsed.get(0);
+//
+//        for(int i = 1; i < parsed.size() ; i++) {
+//            out = out.addChild(parsed.get(i));
+//        }
 
-        for(int i = 1; i < parsed.size() ; i++) {
-            out = out.addChild(parsed.get(i));
-        }
-
-        return out;
+        return out.toComponent();
     }
 
 

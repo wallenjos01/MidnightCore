@@ -85,7 +85,7 @@ public class Component {
     public final List<Component> children;
 
 
-    private Component(Color color, Boolean bold, Boolean italic, Boolean underlined, Boolean strikethrough,
+    Component(Color color, Boolean bold, Boolean italic, Boolean underlined, Boolean strikethrough,
                       Boolean obfuscated, Boolean reset, Identifier font, String insertion, HoverEvent<?> hoverEvent,
                       ClickEvent clickEvent, Content content, Collection<Component> children) {
         this.color = color;
