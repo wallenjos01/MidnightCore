@@ -152,7 +152,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
 
     private <O> SerializeResult<Component> deserializeMap(SerializeContext<O> context, O value, GameVersion version) {
 
-        Component out = null;
+        MutableComponent out = null;
         for(String s : context.getOrderedKeys(value)) {
 
             ContentSerializer<?> ser = registry.get(s);
@@ -164,7 +164,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
                     return SerializeResult.failure("Unable to deserialize component contents! " + con.getError());
                 }
 
-                out = new Component(con.getOrThrow());
+                out = new MutableComponent(con.getOrThrow());
                 break;
             }
         }
@@ -173,24 +173,24 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
             return SerializeResult.failure("Unable to deserialize component contents! Could not find valid content type!");
         }
 
-        Component finalOut = out;
-        out = Serializer.STRING.deserialize(context, context.get("color", value)).get().map(clr -> {
-            if (clr.equals("reset")) {
-                return finalOut.withReset(true);
+        String color = Serializer.STRING.deserialize(context, context.get("color", value)).get().orElse(null);
+        if(color != null) {
+            if(color.equals("reset")) {
+                out.reset = true;
             } else {
-                return finalOut.withColor(TextColor.parse(clr));
+                out.color = TextColor.parse(color);
             }
-        }).orElse(out);
+        }
 
-        out = Serializer.BOOLEAN.deserialize(context, context.get("bold", value)).get().map(out::withBold).orElse(out);
-        out = Serializer.BOOLEAN.deserialize(context, context.get("italic", value)).get().map(out::withItalic).orElse(out);
-        out = Serializer.BOOLEAN.deserialize(context, context.get("underlined", value)).get().map(out::withUnderlined).orElse(out);
-        out = Serializer.BOOLEAN.deserialize(context, context.get("strikethrough", value)).get().map(out::withStrikethrough).orElse(out);
-        out = Serializer.BOOLEAN.deserialize(context, context.get("obfuscated", value)).get().map(out::withObfuscated).orElse(out);
-        out = Identifier.serializer("minecraft").deserialize(context, context.get("font", value)).get().map(out::withFont).orElse(out);
-        out = Serializer.STRING.deserialize(context, context.get("insertion", value)).get().map(out::withInsertion).orElse(out);
-        out = HoverEvent.SERIALIZER.deserialize(context, context.get("hoverEvent", value), version).get().map(out::withHoverEvent).orElse(out);
-        out = ClickEvent.SERIALIZER.deserialize(context, context.get("clickEvent", value)).get().map(out::withClickEvent).orElse(out);
+        out.bold = Serializer.BOOLEAN.deserialize(context, context.get("bold", value)).get().orElse(null);
+        out.italic = Serializer.BOOLEAN.deserialize(context, context.get("italic", value)).get().orElse(null);
+        out.underlined = Serializer.BOOLEAN.deserialize(context, context.get("underlined", value)).get().orElse(null);
+        out.strikethrough = Serializer.BOOLEAN.deserialize(context, context.get("strikethrough", value)).get().orElse(null);
+        out.obfuscated = Serializer.BOOLEAN.deserialize(context, context.get("obfuscated", value)).get().orElse(null);
+        out.font = Identifier.serializer("minecraft").deserialize(context, context.get("font", value)).get().orElse(null);
+        out.insertion = Serializer.STRING.deserialize(context, context.get("insertion", value)).get().orElse(null);
+        out.hoverEvent = HoverEvent.SERIALIZER.deserialize(context, context.get("hoverEvent", value), version).get().orElse(null);
+        out.clickEvent = ClickEvent.SERIALIZER.deserialize(context, context.get("clickEvent", value)).get().orElse(null);
 
         O extra = context.get("extra", value);
         if(context.isList(extra)) {
@@ -201,11 +201,11 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
                 if(!child.isComplete()) {
                     return SerializeResult.failure("Unable to deserialize component extra! " + child.getError());
                 }
-                out = out.addChild(child.getOrThrow());
+                out.children.add(MutableComponent.fromComponent(child.getOrThrow()));
             }
         }
 
-        return SerializeResult.success(out);
+        return SerializeResult.success(out.toComponent());
     }
 
     public static final ContentSerializer<Content.Text> TEXT = register("text", Content.Text.class,
