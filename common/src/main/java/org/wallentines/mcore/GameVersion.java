@@ -62,54 +62,54 @@ public class GameVersion {
     public static final GameVersion VERSION_1_8 = new GameVersion("1.8", 47);
     public static final GameVersion MAX = new GameVersion("Maximum", RELEASE_MAX_VERSION);
 
-    public enum Feature {
+    public static class Feature {
 
 
         /**
          * Starting in 1.16 (20w17a), Text component support full RGB colors
          */
-        RGB_TEXT(713),
+        public static final Feature RGB_TEXT = new Feature(713);
 
         /**
          * Starting in 1.16 (20w17a), Hover events started using the field "contents" rather than "value"
          */
-        HOVER_CONTENTS(713),
+        public static final Feature HOVER_CONTENTS = new Feature(713);
 
         /**
          * Starting in 1.16 (20w12a), When UUIDs are stored in NBT, they are stored as arrays of integers rather than strings
          */
-        INT_ARRAY_UUIDS(707),
+        public static final Feature INT_ARRAY_UUIDS = new Feature(707);
 
         /**
          * Starting in 1.13 (17w47a), Items no longer have numeric IDs (1=stone, 2=grass, etc.) and use namespaced IDs
          * (minecraft:stone, minecraft:grass) exclusively
          */
-        NAMESPACED_IDS(346),
+        public static final Feature NAMESPACED_IDS = new Feature(346);
 
         /**
          * Starting in 1.13 (?), Items now use components for their custom names rather than legacy text
          */
-        ITEM_NAME_COMPONENTS(346),
+        public static final Feature ITEM_NAME_COMPONENTS = new Feature(346);
 
         /**
          * In 1.12 (17w16a), The keybind component type was added
          */
-        KEY_BIND_COMPONENT(322),
+        public static final Feature KEY_BIND_COMPONENT = new Feature(322);
 
         /**
          * In 1.12, The show_achievement action in Hover events was removed
          */
-        HOVER_SHOW_ACHIEVEMENT(0, 316),
+        public static final Feature HOVER_SHOW_ACHIEVEMENT = new Feature(0, 316);
 
         /**
          * In 1.9, the offhand slot was added
          */
-        OFF_HAND(49),
+        public static final Feature OFF_HAND = new Feature(49);
 
         /**
          * In 1.20.2, A new network protocol state called "Configuration" was added.
          */
-        CONFIGURATION_PROTOCOL(764, -1, 144);
+        public static final Feature CONFIGURATION_PROTOCOL = new Feature(764, -1, 144);
 
 
         public final int minVersion;

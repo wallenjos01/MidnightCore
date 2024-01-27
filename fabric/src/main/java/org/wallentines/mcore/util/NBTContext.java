@@ -161,7 +161,7 @@ public class NBTContext implements SerializeContext<Tag> {
     @Override
     public Tag toList(Collection<Tag> list) {
         if(list == null) return null;
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             return new ListTag();
         }
 
@@ -253,5 +253,20 @@ public class NBTContext implements SerializeContext<Tag> {
         if(!isMap(object)) return null;
         if(value != null) ((CompoundTag) object).put(key, value);
         return object;
+    }
+
+    @Override
+    public boolean supportsMeta(Tag tag) {
+        return false;
+    }
+
+    @Override
+    public String getMetaProperty(Tag tag, String s) {
+        return null;
+    }
+
+    @Override
+    public void setMetaProperty(Tag tag, String s, String s1) {
+
     }
 }

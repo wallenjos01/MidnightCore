@@ -148,6 +148,21 @@ public class YamlContext implements SerializeContext<Object> {
         return value;
     }
 
+    @Override
+    public boolean supportsMeta(Object o) {
+        return false;
+    }
+
+    @Override
+    public String getMetaProperty(Object o, String s) {
+        return null;
+    }
+
+    @Override
+    public void setMetaProperty(Object o, String s, String s1) {
+
+    }
+
     private Object serializeObject(Object o) {
         if(isMap(o)) {
             return asMap(o);

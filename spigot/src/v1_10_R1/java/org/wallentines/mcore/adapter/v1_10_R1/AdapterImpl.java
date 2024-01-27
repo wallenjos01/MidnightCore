@@ -2,7 +2,6 @@ package org.wallentines.mcore.adapter.v1_10_R1;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import me.nullicorn.nedit.type.NBTCompound;
 import net.minecraft.server.v1_10_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
@@ -16,7 +15,6 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -190,13 +188,12 @@ public class AdapterImpl implements Adapter {
     
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        NBTCompound converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
-        return NbtContext.INSTANCE.convert(ConfigContext.INSTANCE, converted).asSection();
+        return NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         return NbtContext.toMojang(
-                (NBTCompound) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
+                section,
                 NBTCompressedStreamTools::a);
     }
 

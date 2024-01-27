@@ -2,7 +2,6 @@ package org.wallentines.mcore.adapter.v1_17_R1;
 
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
-import me.nullicorn.nedit.type.NBTCompound;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTCompressedStreamTools;
@@ -31,7 +30,6 @@ import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.GsonContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.math.Color;
@@ -199,13 +197,12 @@ public class AdapterImpl implements Adapter {
 
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        NBTCompound converted = NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
-        return NbtContext.INSTANCE.convert(ConfigContext.INSTANCE, converted).asSection();
+        return NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         return NbtContext.toMojang(
-                (NBTCompound) ConfigContext.INSTANCE.convert(NbtContext.INSTANCE, section),
+                section,
                 NBTCompressedStreamTools::a);
     }
 

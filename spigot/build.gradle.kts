@@ -117,8 +117,6 @@ dependencies {
     shadow(libs.midnight.lib) { isTransitive = false }
     shadow(libs.zstd.jni)
 
-    shadow(libs.nullicorn.nedit) { isTransitive = false }
-
 
     "shadow8"(libs.slf4j.simple)
 
