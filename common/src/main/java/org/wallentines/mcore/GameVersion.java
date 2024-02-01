@@ -111,25 +111,30 @@ public class GameVersion {
          */
         public static final Feature CONFIGURATION_PROTOCOL = new Feature(764, -1, 144);
 
+        /**
+         * In 1.20.5, Cookies and server transfer packets were added.
+         */
+        public static final Feature TRANSFER_PACKETS = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 171);
+
 
         public final int minVersion;
         public final int maxVersion;
         public final int minSnapshotVersion;
         public final int maxSnapshotVersion;
 
-        Feature(int minVersion) {
+        public Feature(int minVersion) {
             this(minVersion, -1, 1, -1);
         }
 
-        Feature(int minVersion, int maxVersion) {
+        public Feature(int minVersion, int maxVersion) {
             this(minVersion, maxVersion, maxVersion >= 0 ? -1 : 1, -1);
         }
 
-        Feature(int minVersion, int maxVersion, int minSnapshotVersion) {
+        public Feature(int minVersion, int maxVersion, int minSnapshotVersion) {
             this(minVersion, maxVersion, minSnapshotVersion, -1);
         }
 
-        Feature(int minVersion, int maxVersion, int minSnapshotVersion, int maxSnapshotVersion) {
+        public Feature(int minVersion, int maxVersion, int minSnapshotVersion, int maxSnapshotVersion) {
             this.minVersion = minVersion;
             this.maxVersion = maxVersion >= 0 ? maxVersion : RELEASE_MAX_VERSION;
             this.minSnapshotVersion = minSnapshotVersion >= 0 ? RELEASE_MAX_VERSION + minSnapshotVersion : Integer.MAX_VALUE;
