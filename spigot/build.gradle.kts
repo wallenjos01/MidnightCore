@@ -114,6 +114,7 @@ dependencies {
     shadow(libs.midnight.cfg.json) { isTransitive = false }
     shadow(libs.midnight.cfg.gson) { isTransitive = false }
     shadow(libs.midnight.cfg.binary) { isTransitive = false }
+    shadow(libs.midnight.cfg.nbt) { isTransitive = false }
     shadow(libs.midnight.lib) { isTransitive = false }
     shadow(libs.zstd.jni)
 

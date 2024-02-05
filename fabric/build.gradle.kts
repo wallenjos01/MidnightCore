@@ -80,6 +80,7 @@ dependencies {
     modApi(libs.midnight.cfg.json)
     modApi(libs.midnight.cfg.binary)
     modApi(libs.midnight.cfg.gson)
+    modApi(libs.midnight.cfg.nbt)
     modApi(libs.midnight.lib)
     modApi(libs.zstd.jni)
 
@@ -87,6 +88,7 @@ dependencies {
     include(libs.midnight.cfg.json)
     include(libs.midnight.cfg.binary)
     include(libs.midnight.cfg.gson)
+    include(libs.midnight.cfg.nbt)
     include(libs.midnight.lib)
     include(libs.zstd.jni)
 
