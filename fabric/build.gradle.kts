@@ -2,7 +2,6 @@ plugins {
     id("midnightcore-build")
     id("midnightcore-publish")
     alias(libs.plugins.loom)
-    //alias(libs.plugins.shadow)
 }
 
 
@@ -59,11 +58,11 @@ dependencies {
     include(project(":client").setTransitive(false))
 
     // Minecraft
-    minecraft("com.mojang:minecraft:1.20.4")
+    minecraft("com.mojang:minecraft:24w05b")
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
-    modImplementation("net.fabricmc:fabric-loader:0.15.0")
+    modImplementation("net.fabricmc:fabric-loader:0.15.6")
 
     // Fabric API
     val apiModules = listOf(
@@ -72,7 +71,7 @@ dependencies {
             "fabric-networking-api-v1"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.91.1+1.20.4"))!!)
+        modApi(include(fabricApi.module(mod, "0.95.5+1.20.5"))!!)
     }
 
     // Included Library Dependencies

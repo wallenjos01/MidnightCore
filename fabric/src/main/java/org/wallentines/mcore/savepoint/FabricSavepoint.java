@@ -2,6 +2,7 @@ package org.wallentines.mcore.savepoint;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.server.commands.EffectCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.phys.Vec3;
@@ -36,8 +37,9 @@ public class FabricSavepoint extends Savepoint {
             Vec3 pos = spl.position();
             spl.load((CompoundTag) ConfigContext.INSTANCE.convert(NBTContext.INSTANCE, nbt));
             spl.setPos(pos);
+
             for(MobEffectInstance inst : spl.getActiveEffects()) {
-                spl.connection.send(new ClientboundUpdateMobEffectPacket(spl.getId(), inst));
+                spl.connection.send(new ClientboundUpdateMobEffectPacket(spl.getId(), inst, false));
             }
         }
         if(gameMode != null) {

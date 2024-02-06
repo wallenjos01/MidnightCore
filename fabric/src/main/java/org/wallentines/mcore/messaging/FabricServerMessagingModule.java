@@ -1,10 +1,8 @@
 package org.wallentines.mcore.messaging;
 
 import io.netty.buffer.ByteBuf;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.*;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
@@ -13,7 +11,7 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
-public class FabricServerMessagingModule extends ServerMessagingModule {
+public class FabricServerMessagingModule extends ServerMessagingModule implements ServerPlayNetworking.PlayPayloadHandler<MidnightPayload> {
 
     @Override
     public boolean initialize(ConfigSection section, Server data) {
@@ -27,7 +25,7 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
     @Override
     public void sendPacket(Player player, Identifier packetId, ByteBuf data) {
 
-        ServerPlayNetworking.send(ConversionUtil.validate(player), ConversionUtil.toResourceLocation(packetId), PacketByteBufs.copy(data));
+        ServerPlayNetworking.send(ConversionUtil.validate(player), new MidnightPayload(packetId, PacketByteBufs.copy(data)));
     }
 
     @Override
@@ -37,14 +35,18 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
 
     @Override
     protected void doRegister(Identifier packetId) {
-        ServerPlayNetworking.registerGlobalReceiver(ConversionUtil.toResourceLocation(packetId), (server, player, listener, buf, responseSender) ->
-                handlePacket((Player) player, packetId, buf));
+
+
+        CustomPacketPayload.Type<MidnightPayload> type = MidnightPayload.type(ConversionUtil.toResourceLocation(packetId));
+        PayloadTypeRegistry.playC2S().register(type, MidnightPayload.codec(type));
+
+        ServerPlayNetworking.registerGlobalReceiver(type, this);
     }
 
     @Override
     protected void doRegisterLogin(Identifier packetId) {
         ServerLoginNetworking.registerGlobalReceiver(ConversionUtil.toResourceLocation(packetId), (server, listener, understood, buf, synchronizer, responseSender) ->
-                handleLoginPacket(new FabricServerLoginNegotiator(listener, responseSender), packetId, buf));
+                handleLoginPacket(new FabricServerLoginNegotiator(listener, (LoginPacketSender) responseSender), packetId, buf));
     }
 
     @Override
@@ -58,4 +60,9 @@ public class FabricServerMessagingModule extends ServerMessagingModule {
     }
 
     public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricServerMessagingModule::new, ID, DEFAULT_CONFIG);
+
+    @Override
+    public void receive(MidnightPayload payload, ServerPlayNetworking.Context context) {
+        handlePacket(context.player(), ConversionUtil.toIdentifier(payload.type().id()), payload.getBuffer());
+    }
 }
