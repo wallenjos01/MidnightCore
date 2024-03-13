@@ -104,6 +104,9 @@ public class FabricInventoryGUI extends InventoryGUI {
         public void update() {
 
             Player spl = player.get();
+            if(spl == null || !spl.isOnline()) {
+                return;
+            }
 
             int stateId = incrementStateId();
 
@@ -116,8 +119,6 @@ public class FabricInventoryGUI extends InventoryGUI {
                     setItem(i, stateId, ConversionUtil.validate(is));
                 }
             }
-
-            broadcastFullState();
         }
 
         @Override
@@ -133,7 +134,7 @@ public class FabricInventoryGUI extends InventoryGUI {
         @Override
         public void clicked(int slot, int button, net.minecraft.world.inventory.ClickType clickType, net.minecraft.world.entity.player.Player player) {
 
-            if(player.level().isClientSide) return;
+            if(player.level().isClientSide || slot < 0 || slot >= items.length) return;
             FabricInventoryGUI.this.onClick(slot, (ServerPlayer) player, getActionType(button, clickType));
         }
 

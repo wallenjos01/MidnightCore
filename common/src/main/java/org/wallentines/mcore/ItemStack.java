@@ -796,6 +796,17 @@ public interface ItemStack {
          * @return A new builder
          */
         public static Builder headWithSkin(GameVersion version, Skin skin) {
+            return headWithSkin(version, skin, false);
+        }
+
+        /**
+         * Constructs a new builder for a player head with the given skin
+         * @param version The game version to make the item for
+         * @param skin The skin to apply to the player head item
+         * @param includeSignature Whether the skin signature should be included on 1.20.5+
+         * @return A new builder
+         */
+        public static Builder headWithSkin(GameVersion version, Skin skin, boolean includeSignature) {
 
             Builder out;
             if(version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
@@ -819,7 +830,7 @@ public interface ItemStack {
                         .with("properties", new ConfigList().append(new ConfigSection()
                                 .with("name", "textures")
                                 .with("value", skin.getValue())
-                                .with("signature", skin.getSignature())
+                                .with("signature", includeSignature ? skin.getSignature() : null)
                         )));
 
             } else {
