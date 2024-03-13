@@ -2,7 +2,9 @@ package org.wallentines.mcore.messaging;
 
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.*;
+import net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
@@ -36,9 +38,12 @@ public class FabricServerMessagingModule extends ServerMessagingModule implement
     @Override
     protected void doRegister(Identifier packetId) {
 
+        ResourceLocation id = ConversionUtil.toResourceLocation(packetId);
+        CustomPacketPayload.Type<MidnightPayload> type = MidnightPayload.type(id);
 
-        CustomPacketPayload.Type<MidnightPayload> type = MidnightPayload.type(ConversionUtil.toResourceLocation(packetId));
-        PayloadTypeRegistry.playC2S().register(type, MidnightPayload.codec(type));
+        if (PayloadTypeRegistryImpl.PLAY_C2S.get(id) == null) {
+            PayloadTypeRegistry.playC2S().register(type, MidnightPayload.codec(type));
+        }
 
         ServerPlayNetworking.registerGlobalReceiver(type, this);
     }
@@ -51,6 +56,7 @@ public class FabricServerMessagingModule extends ServerMessagingModule implement
 
     @Override
     protected void doUnregister(Identifier packetId) {
+
         ServerPlayNetworking.unregisterGlobalReceiver(ConversionUtil.toResourceLocation(packetId));
     }
 
