@@ -3,7 +3,6 @@ package org.wallentines.mcore.messaging;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.LoginPacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.wallentines.mcore.mixin.AccessorLoginPacketHandler;
 import org.wallentines.mcore.text.Component;

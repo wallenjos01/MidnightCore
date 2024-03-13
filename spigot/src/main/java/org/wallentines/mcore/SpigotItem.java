@@ -20,20 +20,6 @@ public class SpigotItem implements ItemStack {
         this.id = getItemId(this.internal);
     }
 
-//    public SpigotItem(Identifier id, int count, ConfigSection tag, byte data) {
-//
-//        internal = Adapter.INSTANCE.get().buildItem(id, count, data);
-//        if(internal == null || (internal.getType() == Material.AIR && !id.toString().equals("minecraft:air"))) {
-//            throw new IllegalArgumentException("Could not find an item with ID " + id + "!");
-//        }
-//
-//        this.id = getItemId(internal);
-//
-//        if(tag != null) {
-//            Adapter.INSTANCE.get().setTag(internal, tag);
-//        }
-//    }
-
     private static Identifier getItemId(org.bukkit.inventory.ItemStack internal) {
 
         if(internal == null || internal.getType() == Material.AIR) {

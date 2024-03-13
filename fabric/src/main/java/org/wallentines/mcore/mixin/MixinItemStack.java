@@ -6,7 +6,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;

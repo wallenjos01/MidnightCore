@@ -1,13 +1,10 @@
 package org.wallentines.mcore.text;
 
-import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.util.ItemUtil;
-import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.*;
-import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
@@ -157,20 +154,6 @@ public class HoverEvent<T> {
                         .build()
         ));
 
-
-        //ObjectSerializer.createContextAware(
-        //                Identifier.serializer("minecraft").<ItemInfo, GameVersion>entry("id", (is, ver) -> is.id),
-        //                Serializer.INT.<ItemInfo, GameVersion>entry("count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? is.count : null).optional(),
-        //                Serializer.INT.<ItemInfo, GameVersion>entry("Count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? null : is.count).optional(),
-        //                Serializer.BYTE.<ItemInfo, GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.data).optional(),
-        //                Serializer.STRING.<ItemInfo, GameVersion>entry("tag", (is,ver) -> is.tag).optional(),
-        //                (ver, id, mCount, lCount, lData, tag) -> {
-        //
-        //                    Integer count = ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? mCount : lCount;
-        //                    Byte data = lData == null || !ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : lData;
-        //
-        //                    return new ItemInfo(id, count, tag, data);
-        //                }
 
         /**
          * Shows entity data when a component is hovered over

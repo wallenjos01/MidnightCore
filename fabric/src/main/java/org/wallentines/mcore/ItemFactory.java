@@ -3,22 +3,15 @@ package org.wallentines.mcore;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wallentines.mcore.util.ComponentUtil;
-import org.wallentines.mcore.util.ConfigOps;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.RegistryUtil;
-import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
-
-import java.util.Map;
 
 public class ItemFactory implements ItemStack.Factory {
 

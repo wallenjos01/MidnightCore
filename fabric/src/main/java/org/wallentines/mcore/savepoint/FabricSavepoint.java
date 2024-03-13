@@ -2,7 +2,6 @@ package org.wallentines.mcore.savepoint;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
-import net.minecraft.server.commands.EffectCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.phys.Vec3;
