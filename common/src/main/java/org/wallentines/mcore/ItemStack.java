@@ -1,5 +1,6 @@
 package org.wallentines.mcore;
 
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.LegacySerializer;
 import org.wallentines.mcore.text.ModernSerializer;
@@ -15,9 +16,8 @@ import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * A data type representing a Minecraft item-stack
@@ -39,8 +39,12 @@ public interface ItemStack {
     /**
      * Returns the NBT tag of the item stack
      * @return The NBT tag of the item stack
+     * @deprecated Use getCustomData() instead
      */
-    ConfigSection getTag();
+    @Deprecated
+    default ConfigSection getTag() {
+        return getCustomData();
+    }
 
     /**
      * Returns the legacy data value of an item (may not work properly on versions >= 1.13)
@@ -57,8 +61,74 @@ public interface ItemStack {
     /**
      * Changes the NBT tag of the item
      * @param tag the new NBT tag
+     * @deprecated Use setCustomData() or fillCustomData() instead
      */
-    void setTag(ConfigSection tag);
+    @Deprecated
+    default void setTag(ConfigSection tag) {
+        setCustomData(tag);
+    }
+
+    /**
+     * Loads structured component data for the given ID
+     * @param id The component ID
+     * @param config The component config
+     */
+    void loadComponent(Identifier id, ConfigObject config);
+
+
+    /**
+     * Loads structured component data for the given ID
+     * @param set The components to load
+     */
+    default void loadComponents(ComponentPatchSet set) {
+        for(Identifier id : set.components.keySet()) {
+            loadComponent(id, set.components.get(id));
+        }
+        for(Identifier id : set.removedComponents) {
+            removeComponent(id);
+        }
+    }
+
+    /**
+     * Saves a structured component to a config object
+     * @param id The component ID
+     * @return The component config
+     */
+    @Nullable
+    ConfigObject saveComponent(Identifier id);
+
+    /**
+     * Removes the component with the given ID from the item
+     * @param id The ID of the component to remove
+     */
+    void removeComponent(Identifier id);
+
+    /**
+     * Gets a list of ids for the components on this item
+     * @return A list of ids
+     */
+    Stream<Identifier> getComponentIds();
+
+
+    @Nullable
+    default ConfigSection getCustomData() {
+        ConfigObject obj = saveComponent(CUSTOM_DATA_COMPONENT);
+        if(obj == null || !obj.isSection()) return null;
+        return obj.asSection();
+    }
+
+    default void setCustomData(ConfigSection section) {
+        loadComponent(CUSTOM_DATA_COMPONENT, section);
+    }
+
+    default void fillCustomData(ConfigSection section) {
+
+        ConfigSection obj = getCustomData();
+        if(obj == null) obj = new ConfigSection();
+
+        obj.asSection().fillOverwrite(section);
+        setCustomData(obj);
+    }
 
     /**
      * Increases the amount of items in the stack by the given amount.
@@ -90,7 +160,11 @@ public interface ItemStack {
      * @return An exact copy
      */
     default ItemStack copy() {
-        return Builder.of(getVersion(), getType()).withCount(getCount()).withTag(getTag()).withDataValue(getLegacyDataValue()).build();
+        return Builder.of(getVersion(), getType())
+                .withCount(getCount())
+                .withComponents(ComponentPatchSet.fromItem(this))
+                .withDataValue(getLegacyDataValue())
+                .build();
     }
 
     /**
@@ -103,43 +177,66 @@ public interface ItemStack {
                 component.toJSONString() :
                 component.toLegacyText();
 
-        ConfigSection tag = getTag();
-        tag.getOrCreateSection("display").set("Name", strName);
-        setTag(tag);
+        if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+
+            loadComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(strName));
+
+        } else {
+
+            ConfigSection tag = getTag();
+            tag.getOrCreateSection("display").set("Name", strName);
+            setTag(tag);
+        }
     }
 
 
     /**
-     * Gets the display name of an item as it appears when hovering over it, for the maximum supported version
-     * @return The item's custom name if available, or a translate component
+     * Gets the encoded display name of the item
+     * @return The item's display name
      */
-    default Component getName() {
-        return getName(GameVersion.MAX);
+    default String getStringName() {
+
+        if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+
+            ConfigObject obj = saveComponent(CUSTOM_NAME_COMPONENT);
+            if(obj == null) return null;
+
+            return obj.asString();
+
+        } else {
+
+            ConfigSection tag = getTag();
+            if (tag == null || !tag.has("display")) {
+                return null;
+            }
+
+            ConfigSection display = tag.getSection("display");
+            if (!display.hasString("Name")) {
+                return null;
+            }
+
+            return display.getString("Name");
+        }
     }
 
     /**
      * Gets the display name of an item as it appears when hovering over it
-     * @param version The game version to interpret the item as coming from
      * @return The item's custom name if available, or a translate component
      */
-    default Component getName(GameVersion version) {
+    default Component getName() {
 
-        ConfigSection tag = getTag();
         Component def = Component.translate(getTranslationKey()).withColor(getRarityColor());
-        if(tag == null || !tag.has("display")) {
-            return def;
-        }
 
-        ConfigSection display = tag.getSection("display");
-        if(!display.hasString("Name")) {
+        String name = getStringName();
+        if(name == null) {
             return def;
         }
 
         SerializeResult<Component> comp;
-        if(version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS)) {
-            comp = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, display.getString("Name")), version);
+        if(getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS)) {
+            comp = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, name), getVersion());
         } else {
-            comp = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(display.getString("Name")));
+            comp = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(name));
         }
 
         if(comp.isComplete()) {
@@ -172,21 +269,122 @@ public interface ItemStack {
      */
     Singleton<Factory> FACTORY = new Singleton<>();
 
-    ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = ObjectSerializer.createContextAware(
-            Identifier.serializer("minecraft").entry("type", (is, ver) -> is.getType()),
-            NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).orElse(v -> 1),
+    Identifier CUSTOM_DATA_COMPONENT = new Identifier("minecraft", "custom_data");
+    Identifier CUSTOM_NAME_COMPONENT = new Identifier("minecraft", "custom_name");
+    Identifier LORE_COMPONENT = new Identifier("minecraft", "lore");
+    Identifier ENCHANTMENT_COMPONENT = new Identifier("minecraft", "enchantments");
+    Identifier PROFILE_COMPONENT = new Identifier("minecraft", "enchantments");
+
+
+    ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = ContextObjectSerializer.create(
+            Identifier.serializer("minecraft").<ItemStack, GameVersion>entry("id", (is, ver) -> is.getType()).acceptKey("type").optional(),
+            NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).acceptKey("Count").orElse(v -> 1),
+            NumberSerializer.forByte((byte) 0,(byte) 15).<ItemStack, GameVersion>entry("data", (is,ver) -> is.getLegacyDataValue()).acceptKey("Damage").optional(),
             ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getTag()).optional(),
-            NumberSerializer.forByte((byte) 0,(byte) 15).<ItemStack, GameVersion>entry("data", (is,ver) -> is.getLegacyDataValue()).optional(),
-            (ver, type, count, tag, data) -> FACTORY.get().build(type, count, tag, data, ver)
+            ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is,ver) -> ComponentPatchSet.fromItem(is)).optional(),
+            (ver, type, count, data, tag, components) ->
+                new Builder(ver, type)
+                        .withCount(count)
+                        .withDataValue(data)
+                        .withCustomData(tag)
+                        .withComponents(components)
+                        .build()
     );
 
+
     Serializer<ItemStack> SERIALIZER = VERSION_SERIALIZER.forContext(GameVersion.CURRENT_VERSION::get);
+
+
+
 
     /**
      * An interface to construct an item stack
      */
     interface Factory {
-        ItemStack build(Identifier type, int count, ConfigSection tag, byte legacyData, GameVersion version);
+        ItemStack buildLegacy(Identifier id, int count, byte damage, ConfigSection tag, GameVersion version);
+        ItemStack buildTagged(Identifier id, int count, ConfigSection tag, GameVersion version);
+        ItemStack buildStructured(Identifier id, int count, ComponentPatchSet components, GameVersion version);
+    }
+
+
+    class ComponentPatchSet {
+        public final HashMap<Identifier, ConfigObject> components = new HashMap<>();
+        public final Set<Identifier> removedComponents = new HashSet<>();
+
+        public ConfigObject get(Identifier id) {
+            if(removedComponents.contains(id)) return null;
+            return components.get(id);
+        }
+
+        public void set(Identifier id, ConfigObject obj) {
+
+            if(obj == null) {
+                clear(id);
+                return;
+            }
+
+            components.put(id, obj);
+            removedComponents.remove(id);
+        }
+
+        public void clear(Identifier id) {
+            components.remove(id);
+        }
+
+        public void remove(Identifier id) {
+            components.remove(id);
+            removedComponents.add(id);
+        }
+
+        public void add(ComponentPatchSet other) {
+            for(Identifier id : other.components.keySet()) {
+                set(id, other.components.get(id));
+            }
+            for(Identifier id : other.removedComponents) {
+                remove(id);
+            }
+        }
+
+        public ComponentPatchSet copy() {
+            ComponentPatchSet out = new ComponentPatchSet();
+            for(Identifier id : components.keySet()) {
+                out.components.put(id, out.components.get(id).copy());
+            }
+            out.removedComponents.addAll(removedComponents);
+            return out;
+        }
+
+
+        public static ComponentPatchSet fromItem(ItemStack is) {
+            ComponentPatchSet out = new ComponentPatchSet();
+            is.getComponentIds().forEach(id -> out.set(id, is.saveComponent(id)));
+            return out;
+        }
+
+        public static final Serializer<ComponentPatchSet> SERIALIZER = ConfigObject.SERIALIZER.mapOf().map(set -> {
+
+            Map<String, ConfigObject> out = new HashMap<>();
+            for(Identifier s : set.components.keySet()) {
+                out.put(s.toString(), set.components.get(s));
+            }
+            for(Identifier s : set.removedComponents) {
+                out.put("!" + s.toString(), new ConfigSection());
+            }
+
+            return out;
+        }, map -> {
+
+            ComponentPatchSet out = new ComponentPatchSet();
+            for(String s : map.keySet()) {
+                if(s.startsWith("!")) {
+                    out.removedComponents.add(Identifier.parseOrDefault(s.substring(1), "minecraft"));
+                } else {
+                    out.components.put(Identifier.parseOrDefault(s, "minecraft"), map.get(s));
+                }
+            }
+
+            return out;
+        });
     }
 
 
@@ -198,20 +396,22 @@ public interface ItemStack {
         private final GameVersion version;
         private final Identifier id;
         private int count = 1;
-        private ConfigSection tag = null;
         private byte dataValue = 0;
+        private ComponentPatchSet components = new ComponentPatchSet();
 
         private Builder(GameVersion version, Identifier id) {
             this.version = version;
             this.id = id;
         }
 
-        private ConfigSection getOrCreateTag() {
-
-            if(this.tag == null) {
-                this.tag = new ConfigSection();
+        private ConfigSection getCustomData() {
+            ConfigObject obj = components.get(CUSTOM_DATA_COMPONENT);
+            if(obj == null || !obj.isSection()) {
+                ConfigSection out = new ConfigSection();
+                components.set(CUSTOM_DATA_COMPONENT, out);
+                return out;
             }
-            return this.tag;
+            return obj.asSection();
         }
 
         /**
@@ -229,9 +429,9 @@ public interface ItemStack {
          * @param tag The new NBT tag of the item stack
          * @return A reference to self
          */
+        @Deprecated
         public Builder setTag(ConfigSection tag) {
-            this.tag = tag;
-            return this;
+            return withCustomData(tag);
         }
 
         /**
@@ -239,14 +439,60 @@ public interface ItemStack {
          * @param tag The new NBT tag of the item stack
          * @return A reference to self
          */
+        @Deprecated
         public Builder withTag(ConfigSection tag) {
+            return fillCustomData(tag);
+        }
 
-            if(tag == null) {
-                this.tag = null;
-                return this;
+        /**
+         * Sets the value of the component with the given ID
+         * @param id The component ID
+         * @param value The serialized value of the component config
+         * @return A reference to self
+         */
+        public Builder withComponent(Identifier id, @Nullable ConfigObject value) {
+            components.set(id, value);
+            return this;
+        }
+
+        /**
+         * Sets the components of the item to the given components
+         * @param patches The item's new components
+         * @return A reference to self
+         */
+        public Builder withComponents(@Nullable ComponentPatchSet patches) {
+            if(patches != null) {
+                components = patches;
             }
+            return this;
+        }
 
-            getOrCreateTag().fillOverwrite(tag);
+        /**
+         * Adds the given components to the item
+         * @param patches The item's extra components
+         * @return A reference to self
+         */
+        public Builder addComponents(ComponentPatchSet patches) {
+            this.components.add(patches);
+            return this;
+        }
+
+        /**
+         * Changes the custom data component of the item stack to be built
+         * @param customData The new custom data component of the item stack
+         * @return A reference to self
+         */
+        public Builder withCustomData(@Nullable ConfigSection customData) {
+            return withComponent(CUSTOM_DATA_COMPONENT, customData);
+        }
+
+        /**
+         * Adds the given data to the custom data component of the item stack to be built
+         * @param customData The new custom data component of the item stack
+         * @return A reference to self
+         */
+        public Builder fillCustomData(ConfigSection customData) {
+            getCustomData().fillOverwrite(customData);
             return this;
         }
 
@@ -255,7 +501,8 @@ public interface ItemStack {
          * @param dataValue The new NBT tag of the item stack
          * @return A reference to self
          */
-        public Builder withDataValue(byte dataValue) {
+        public Builder withDataValue(@Nullable Byte dataValue) {
+            if(dataValue == null) return this;
             if(dataValue != 0 && version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
                 MidnightCoreAPI.LOGGER.warn("ItemStack data value specified on a version which does not support it!");
             }
@@ -276,7 +523,11 @@ public interface ItemStack {
                     name.toJSONString() :
                     name.toLegacyText();
 
-            getOrCreateTag().getOrCreateSection("display").set("Name", strName);
+            if (version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+                return withComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(strName));
+            }
+
+            getCustomData().getOrCreateSection("display").set("Name", strName);
             return this;
         }
 
@@ -288,32 +539,60 @@ public interface ItemStack {
          */
         public Builder withLore(Collection<Component> lore) {
 
-            List<String> loreList = lore.stream()
-                .map(ItemUtil::applyItemLoreBaseStyle)
-                .map(version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
-                        Component::toJSONString :
-                        Component::toLegacyText
-                    ).collect(Collectors.toList());
+            ConfigList list = new ConfigList();
+            for(Component cmp : lore) {
+                cmp = ItemUtil.applyItemLoreBaseStyle(cmp);
+                String str = version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
+                        cmp.toJSONString() :
+                        cmp.toLegacyText();
 
-            getOrCreateTag().getOrCreateSection("display").set("Lore", ConfigList.of(loreList));
+                list.add(str);
+            }
+
+            if(version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+                return withComponent(LORE_COMPONENT, list);
+            }
+
+            getCustomData().getOrCreateSection("display").set("Lore", list);
             return this;
         }
 
 
         public Builder withEnchantment(Identifier id, int level) {
 
-            ConfigSection tag = getOrCreateTag();
-            if(!tag.hasList("Enchantments")) {
-                tag.set("Enchantments", new ConfigList());
+            if(!version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                return this;
             }
 
-            tag.getList("Enchantments").add(new ConfigSection().with("id", id.toString()).with("lvl", level));
+            if (version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+
+                ConfigObject obj = components.get(ENCHANTMENT_COMPONENT);
+                if(obj == null || !obj.isSection()) {
+                    obj = new ConfigSection();
+                    components.set(ENCHANTMENT_COMPONENT, obj);
+                }
+
+                obj.asSection().getOrCreateSection("levels").set(id.toString(), level);
+
+            } else {
+
+                ConfigSection tag = getCustomData();
+                if(!tag.hasList("Enchantments")) {
+                    tag.set("Enchantments", new ConfigList());
+                }
+                tag.getList("Enchantments").add(new ConfigSection().with("id", id.toString()).with("lvl", level));
+            }
+
             return this;
         }
 
         public Builder withLegacyEnchantment(int id, int level) {
 
-            ConfigSection tag = getOrCreateTag();
+            if(version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                return this;
+            }
+
+            ConfigSection tag = getCustomData();
             if(!tag.hasList("ench")) {
                 tag.set("ench", new ConfigList());
             }
@@ -327,10 +606,12 @@ public interface ItemStack {
          * @return An exact copy of the Builder
          */
         public Builder copy() {
+
             Builder out = new Builder(version, id);
             out.count = count;
-            out.tag = tag;
             out.dataValue = dataValue;
+            out.components = components.copy();
+
             return out;
         }
 
@@ -495,7 +776,7 @@ public interface ItemStack {
          */
         public static Builder terracottaWithColor(GameVersion version, Color color) {
 
-            String id = version.getProtocolVersion() >= 347 ? "terracotta" : "stained_hardened_clay";
+            String id = version.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? "terracotta" : "stained_hardened_clay";
             return ofColor(version, color, new Identifier("minecraft", id));
         }
 
@@ -531,11 +812,25 @@ public interface ItemStack {
                 uuid = new ConfigPrimitive(skin.getUUID().toString());
             }
 
-            ConfigSection skullOwner = new ConfigSection()
-                .with("Id", uuid)
-                .with("Properties", new ConfigSection().with("textures", new ConfigList().append(new ConfigSection().with("Value", skin.getValue()))));
+            if(version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
-            out.getOrCreateTag().set("SkullOwner", skullOwner);
+                out.withComponent(PROFILE_COMPONENT, new ConfigSection()
+                        .with("id", uuid)
+                        .with("properties", new ConfigList().append(new ConfigSection()
+                                .with("name", "textures")
+                                .with("value", skin.getValue())
+                                .with("signature", skin.getSignature())
+                        )));
+
+            } else {
+                out.getCustomData().set("SkullOwner", new ConfigSection()
+                        .with("Id", uuid)
+                        .with("Properties", new ConfigSection()
+                                .with("textures", new ConfigList()
+                                        .append(new ConfigSection()
+                                                .with("Value", skin.getValue())))));
+            }
+
             return out;
         }
 
@@ -544,7 +839,21 @@ public interface ItemStack {
          * @return A new ItemStack
          */
         public ItemStack build() {
-            return FACTORY.get().build(id, count, tag, dataValue, version);
+
+            if(version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+                return FACTORY.get().buildStructured(id, count, components, version);
+            } else {
+
+                ConfigObject obj = components.get(CUSTOM_DATA_COMPONENT);
+                ConfigSection customData = obj == null || !obj.isSection() ? null : obj.asSection();
+
+                if(version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                    return FACTORY.get().buildTagged(id, count, customData, version);
+
+                } else {
+                    return FACTORY.get().buildLegacy(id, count, dataValue, customData, version);
+                }
+            }
         }
     }
 

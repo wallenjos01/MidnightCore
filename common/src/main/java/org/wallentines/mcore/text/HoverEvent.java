@@ -4,7 +4,10 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.util.ItemUtil;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.*;
+import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
@@ -52,8 +55,8 @@ public class HoverEvent<T> {
         return new HoverEvent<>(Type.SHOW_TEXT, component);
     }
 
-    public static HoverEvent<ItemInfo> forItem(ItemStack itemStack) {
-        return new HoverEvent<>(Type.SHOW_ITEM, new ItemInfo(itemStack));
+    public static HoverEvent<ItemStack> forItem(ItemStack itemStack) {
+        return new HoverEvent<>(Type.SHOW_ITEM, itemStack);
     }
 
     public static HoverEvent<EntityInfo> forEntity(EntityInfo entity) {
@@ -137,26 +140,43 @@ public class HoverEvent<T> {
         /**
          * Shows an item tooltip when a component is hovered over
          */
-        public static final HoverEvent.Type<ItemInfo> SHOW_ITEM = register("show_item", ObjectSerializer.createContextAware(
-                Identifier.serializer("minecraft").<ItemInfo, GameVersion>entry("id", (is, ver) -> is.id),
-                Serializer.INT.<ItemInfo, GameVersion>entry("count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? is.count : null).optional(),
-                Serializer.INT.<ItemInfo, GameVersion>entry("Count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? null : is.count).optional(),
-                Serializer.BYTE.<ItemInfo, GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.data).optional(),
-                Serializer.STRING.<ItemInfo, GameVersion>entry("tag", (is,ver) -> is.tag).optional(),
-                (ver, id, mCount, lCount, lData, tag) -> {
+        public static final HoverEvent.Type<ItemStack> SHOW_ITEM = register("show_item", ContextObjectSerializer.create(
+                Identifier.serializer("minecraft").entry("id", (is, ver) -> is.getType()),
+                Serializer.INT.<ItemStack,GameVersion>entry(ver ->
+                        ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "count" : "Count",
+                        (is,ver) -> is.getCount()).orElse(ctx -> 1),
+                Serializer.BYTE.<ItemStack,GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.getLegacyDataValue()).optional(),
+                ConfigSection.SERIALIZER.<ItemStack,GameVersion>entry("tag", (is, ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : is.getCustomData()).optional(),
+                ItemStack.ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is, ver) -> ver .hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? ItemStack.ComponentPatchSet.fromItem(is) : null).optional(),
+                (ver, id, count, data, tag, components) ->
+                    ItemStack.Builder.of(ver, id)
+                        .withCount(count)
+                        .withDataValue(data)
+                        .withCustomData(tag)
+                        .withComponents(components)
+                        .build()
+        ));
 
-                    Integer count = ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? mCount : lCount;
-                    Byte data = lData == null || !ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : lData;
 
-                    return new ItemInfo(id, count, tag, data);
-                })
-        );
+        //ObjectSerializer.createContextAware(
+        //                Identifier.serializer("minecraft").<ItemInfo, GameVersion>entry("id", (is, ver) -> is.id),
+        //                Serializer.INT.<ItemInfo, GameVersion>entry("count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? is.count : null).optional(),
+        //                Serializer.INT.<ItemInfo, GameVersion>entry("Count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? null : is.count).optional(),
+        //                Serializer.BYTE.<ItemInfo, GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.data).optional(),
+        //                Serializer.STRING.<ItemInfo, GameVersion>entry("tag", (is,ver) -> is.tag).optional(),
+        //                (ver, id, mCount, lCount, lData, tag) -> {
+        //
+        //                    Integer count = ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? mCount : lCount;
+        //                    Byte data = lData == null || !ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : lData;
+        //
+        //                    return new ItemInfo(id, count, tag, data);
+        //                }
 
         /**
          * Shows entity data when a component is hovered over
          */
         public static final HoverEvent.Type<EntityInfo> SHOW_ENTITY = register("show_entity",
-                ObjectSerializer.createContextAware(
+                ContextObjectSerializer.create(
                         ItemUtil.UUID_SERIALIZER.entry("id", (ei, ver) -> ei.uuid),
                         Identifier.serializer("minecraft").<EntityInfo, GameVersion>entry("type", (ei, ver) -> ei.type).orElse(ver -> new Identifier("minecraft", "pig")),
                         ModernSerializer.INSTANCE.entry("name", (ei, ver) -> ei.name),
@@ -169,43 +189,6 @@ public class HoverEvent<T> {
          * Not used since pre-1.12
          */
         public static final HoverEvent.Type<String> SHOW_ACHIEVEMENT = register("show_achievement", ContextSerializer.fromStatic(InlineSerializer.RAW));
-
-    }
-
-    public static class ItemInfo {
-        public final Identifier id;
-        public final Integer count;
-        public final Byte data;
-
-        private String tag;
-        private final ItemStack item;
-
-        public ItemInfo(Identifier id, Integer count, String tag, Byte data) {
-            this.id = id;
-            this.count = count;
-            this.tag = tag;
-            this.data = data;
-            this.item = null;
-        }
-
-        public ItemInfo(ItemStack itemStack) {
-            this.id = itemStack.getType();
-            this.count = itemStack.getCount();
-            this.data = itemStack.getLegacyDataValue();
-            this.item = itemStack;
-        }
-
-        @Nullable
-        public ItemStack getItem() {
-            return item;
-        }
-
-        public String getTag() {
-            if(tag == null && item != null && item.getTag() != null) {
-                tag = ItemUtil.toNBTString(ConfigContext.INSTANCE, item.getTag());
-            }
-            return tag;
-        }
 
     }
 

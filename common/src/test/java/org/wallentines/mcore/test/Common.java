@@ -2,9 +2,12 @@ package org.wallentines.mcore.test;
 
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
+import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
+
+import java.util.stream.Stream;
 
 public class Common {
 
@@ -88,6 +91,26 @@ public class Common {
         }
 
         @Override
+        public void loadComponent(Identifier id, ConfigObject config) {
+            
+        }
+
+        @Override
+        public ConfigObject saveComponent(Identifier id) {
+            return null;
+        }
+
+        @Override
+        public void removeComponent(Identifier id) {
+
+        }
+
+        @Override
+        public Stream<Identifier> getComponentIds() {
+            return null;
+        }
+
+        @Override
         public void grow(int amount) {
             setCount(count + amount);
         }
@@ -119,7 +142,22 @@ public class Common {
     static {
 
         GameVersion.CURRENT_VERSION.set(VERSION);
-        ItemStack.FACTORY.set((id,count,tag,data,ver) -> new DummyItem(id,count,tag,data));
+        ItemStack.FACTORY.set(new ItemStack.Factory() {
+            @Override
+            public ItemStack buildLegacy(Identifier id, int count, byte damage, ConfigSection tag, GameVersion version) {
+                return new DummyItem(id,count,tag,damage);
+            }
+
+            @Override
+            public ItemStack buildTagged(Identifier id, int count, ConfigSection tag, GameVersion version) {
+                return new DummyItem(id,count,tag,(byte)0);
+            }
+
+            @Override
+            public ItemStack buildStructured(Identifier id, int count, ItemStack.ComponentPatchSet components, GameVersion version) {
+                return new DummyItem(id,count,null,(byte)0);
+            }
+        });
     }
 
 }

@@ -58,7 +58,7 @@ dependencies {
     include(project(":client").setTransitive(false))
 
     // Minecraft
-    minecraft("com.mojang:minecraft:24w05b")
+    minecraft("com.mojang:minecraft:24w10a")
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
