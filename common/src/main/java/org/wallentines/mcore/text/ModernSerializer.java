@@ -216,7 +216,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
     );
 
     public static final ContentSerializer<Content.Translate> TRANSLATE = register("translate", Content.Translate.class,
-            ObjectSerializer.createContextAware(
+            ContextObjectSerializer.create(
                     Serializer.STRING.entry("translate", (translate, c) -> translate.key),
                     Serializer.STRING.<Content.Translate, ContentSerializer.Context>entry("fallback", (translate, context) -> translate.fallback).optional(),
                     ContentSerializer.COMPONENT.listOf().<Content.Translate>entry("with", (translate, context) -> translate.with).optional(),
@@ -253,7 +253,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
     );
 
     public static final ContentSerializer<Content.NBT> NBT = register("nbt", Content.NBT.class,
-            ObjectSerializer.createContextAware(
+            ContextObjectSerializer.create(
                     Serializer.STRING.entry("nbt", (nbt, ctx) -> nbt.path),
                     Serializer.BOOLEAN.<Content.NBT, ContentSerializer.Context>entry("interpret", (nbt, ctx) -> nbt.interpret).optional(),
                     ContentSerializer.COMPONENT.<Content.NBT>entry("separator", (nbt, ctx) -> nbt.separator).optional(),

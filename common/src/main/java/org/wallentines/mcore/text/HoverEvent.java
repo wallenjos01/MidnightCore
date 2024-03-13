@@ -137,7 +137,7 @@ public class HoverEvent<T> {
         /**
          * Shows an item tooltip when a component is hovered over
          */
-        public static final HoverEvent.Type<ItemInfo> SHOW_ITEM = register("show_item", ObjectSerializer.createContextAware(
+        public static final HoverEvent.Type<ItemInfo> SHOW_ITEM = register("show_item", ContextObjectSerializer.create(
                 Identifier.serializer("minecraft").<ItemInfo, GameVersion>entry("id", (is, ver) -> is.id),
                 Serializer.INT.<ItemInfo, GameVersion>entry("count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? is.count : null).optional(),
                 Serializer.INT.<ItemInfo, GameVersion>entry("Count", (is,ver) -> ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? null : is.count).optional(),
@@ -156,7 +156,7 @@ public class HoverEvent<T> {
          * Shows entity data when a component is hovered over
          */
         public static final HoverEvent.Type<EntityInfo> SHOW_ENTITY = register("show_entity",
-                ObjectSerializer.createContextAware(
+                ContextObjectSerializer.create(
                         ItemUtil.UUID_SERIALIZER.entry("id", (ei, ver) -> ei.uuid),
                         Identifier.serializer("minecraft").<EntityInfo, GameVersion>entry("type", (ei, ver) -> ei.type).orElse(ver -> new Identifier("minecraft", "pig")),
                         ModernSerializer.INSTANCE.entry("name", (ei, ver) -> ei.name),

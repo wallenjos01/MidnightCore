@@ -172,7 +172,7 @@ public interface ItemStack {
      */
     Singleton<Factory> FACTORY = new Singleton<>();
 
-    ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = ObjectSerializer.createContextAware(
+    ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = ContextObjectSerializer.create(
             Identifier.serializer("minecraft").entry("type", (is, ver) -> is.getType()),
             NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).orElse(v -> 1),
             ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getTag()).optional(),

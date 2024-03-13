@@ -12,7 +12,8 @@ import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Registry;
-import org.wallentines.midnightlib.requirement.RequirementType;
+import org.wallentines.midnightlib.requirement.CheckType;
+import org.wallentines.midnightlib.requirement.Requirement;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
 import java.io.File;
@@ -157,7 +158,7 @@ public interface Server {
     /**
      * The global file codec registry. Contains a JSON codec, and YAML on Spigot
      */
-    Registry<RequirementType<Player>> REQUIREMENT_REGISTRY = new Registry<>(MidnightCoreAPI.MOD_ID);
+    Registry<CheckType<Player>> REQUIREMENT_REGISTRY = Requirement.defaultRegistry(MidnightCoreAPI.MOD_ID);
 
 
 }

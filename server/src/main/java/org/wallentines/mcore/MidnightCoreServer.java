@@ -4,14 +4,18 @@ import org.wallentines.mcore.lang.LangContent;
 import org.wallentines.mcore.lang.LangManager;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.requirement.CooldownRequirement;
+import org.wallentines.mcore.requirement.PlayerCheck;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.math.Region;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
-import org.wallentines.midnightlib.requirement.RequirementType;
+import org.wallentines.midnightlib.requirement.CheckType;
+import org.wallentines.midnightlib.requirement.StringCheck;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 import org.wallentines.midnightlib.types.Singleton;
 
@@ -77,13 +81,16 @@ public class MidnightCoreServer {
         LangContent.registerPlaceholders(manager);
     }
 
-    static void registerRequirements(Registry<RequirementType<Player>> registry) {
+    static void registerRequirements(Registry<CheckType<Player>> registry) {
 
-        registry.register(new Identifier(MidnightCoreAPI.MOD_ID, "cooldown"), new CooldownRequirement<>());
-        registry.register(new Identifier(MidnightCoreAPI.MOD_ID, "permission"), (pl,obj,req) -> pl.hasPermission(obj.asString()));
-        registry.register(new Identifier(MidnightCoreAPI.MOD_ID, "world"), (pl,obj,req) -> pl.getLocation().dimension.equals(Identifier.parseOrDefault(obj.asString(), "minecraft")));
-        registry.register(new Identifier(MidnightCoreAPI.MOD_ID, "region"), (pl,obj,req) -> Region.parse(obj.asString()).isWithin(pl.getPosition()));
-        registry.register(new Identifier(MidnightCoreAPI.MOD_ID, "locale"), (pl,obj,req) -> obj.asString().contains("_") ? pl.getLanguage().equals(obj.asString()) : pl.getLanguage().startsWith(obj.asString()));
+        registry.register("cooldown", CooldownRequirement.type());
+        registry.register("permission", PlayerCheck.create(Serializer.STRING, "value", Player::hasPermission));
+        registry.register("world", PlayerCheck.create(Identifier.serializer("minecraft"), "value", (pl, id) -> pl.getDimensionId().equals(id)));
+        registry.register("region", PlayerCheck.create(Region.SERIALIZER, "value", (pl, reg) -> reg.isWithin(pl.getPosition())));
+        registry.register("locale", PlayerCheck.create(Serializer.STRING, "value", (pl, str) -> str.contains("_") ? pl.getLanguage().equals(str) : pl.getLanguage().startsWith(str)));
+        registry.register("username", StringCheck.type(Player::getUsername));
+        registry.register("uuid", StringCheck.type(pl -> pl.getUUID().toString()));
+        registry.register("game_mode", StringCheck.type(pl -> pl.getGameMode().getId()));
 
     }
 

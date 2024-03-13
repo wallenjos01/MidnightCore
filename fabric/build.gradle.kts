@@ -2,7 +2,6 @@ plugins {
     id("midnightcore-build")
     id("midnightcore-publish")
     alias(libs.plugins.loom)
-    //alias(libs.plugins.shadow)
 }
 
 
@@ -92,8 +91,12 @@ dependencies {
     include(libs.midnight.lib)
     include(libs.zstd.jni)
 
-    modApi(include("org.wallentines:fabric-events:0.3.0-SNAPSHOT")!!)
-    modApi(include("me.lucko:fabric-permissions-api:0.3-SNAPSHOT")!!)
+    include(modApi("org.wallentines:fabric-events:0.3.0-SNAPSHOT") {
+        isTransitive = false
+    })
+    include(modApi("me.lucko:fabric-permissions-api:0.3-SNAPSHOT") {
+        isTransitive = false
+    })
 }
 
 
