@@ -81,11 +81,20 @@ public class SpigotItem implements ItemStack {
 
     @Override
     public @Nullable ConfigSection getCustomData() {
+        if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+            ConfigObject obj = saveComponent(CUSTOM_DATA_COMPONENT);
+            if(obj == null || !obj.isSection()) return null;
+            return obj.asSection();
+        }
         return Adapter.INSTANCE.get().getTag(internal);
     }
 
     @Override
     public void setCustomData(ConfigSection section) {
+        if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+            loadComponent(CUSTOM_DATA_COMPONENT, section);
+            return;
+        }
         Adapter.INSTANCE.get().setTag(internal, section);
     }
 

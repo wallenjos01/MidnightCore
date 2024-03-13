@@ -71,7 +71,7 @@ dependencies {
             "fabric-networking-api-v1"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.95.5+1.20.5"))!!)
+        modApi(include(fabricApi.module(mod, "0.96.9+1.20.5"))!!)
     }
 
     // Included Library Dependencies

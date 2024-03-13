@@ -1,62 +1,36 @@
 package org.wallentines.mcore;
 
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
-import org.wallentines.fbev.player.ContainerClickEvent;
-import org.wallentines.fbev.player.ContainerCloseEvent;
-import org.wallentines.fbev.player.PlayerLeaveEvent;
-import org.wallentines.mcore.mixin.AccessorServerPlayer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.ConversionUtil;
-import org.wallentines.midnightlib.event.Event;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FabricInventoryGUI extends InventoryGUI {
 
-    private final HashMap<WrappedPlayer, ChestMenu> players = new HashMap<>();
+    private final List<Menu> open = new ArrayList<>();
 
     public FabricInventoryGUI(Component title, int rows) {
         super(title, rows);
-
-        Event.register(ContainerClickEvent.class, this, ev -> {
-
-            Player pl = (Player) ev.getPlayer();
-            if(!players.containsKey(pl.wrap())) return;
-            ev.setCancelled(true);
-
-            int slot = ev.getSlot();
-
-            ev.getPlayer().server.submit(() -> onClick(slot, pl, getActionType(ev.getClickType(), ev.getAction())));
-        });
-
-        Event.register(ContainerCloseEvent.class, this, ev -> {
-            Player pl = (Player) ev.getPlayer();
-            if(!players.containsKey(pl.wrap())) return;
-            close(pl);
-        });
-
-        Event.register(PlayerLeaveEvent.class, this, ev -> {
-            Player pl = (Player) ev.getPlayer();
-            if(!players.containsKey(pl.wrap())) return;
-            close(pl);
-        });
-
     }
 
     @Override
     public void update() {
 
-        for(WrappedPlayer wpl : players.keySet()) {
-            doUpdate(ConversionUtil.validate(wpl.get()));
+        open.removeIf(m -> m.player.get() == null);
+        for(Menu m : open) {
+            m.update();
         }
-
     }
 
     @Override
@@ -68,50 +42,31 @@ public class FabricInventoryGUI extends InventoryGUI {
         if(spl.containerMenu != spl.inventoryMenu) {
             spl.closeContainer();
         }
+        spl.openMenu(new MenuProvider() {
+            @Override
+            public @NotNull net.minecraft.network.chat.Component getDisplayName() {
+                return new WrappedComponent(FabricInventoryGUI.this.title);
+            }
 
-        SimpleContainer inv = new SimpleContainer(size);
-        ChestMenu handler = createScreen(size / 9, spl, inv);
+            @Nullable
+            @Override
+            public AbstractContainerMenu createMenu(int id, Inventory inventory, net.minecraft.world.entity.player.Player player) {
 
-        spl.connection.send(new ClientboundOpenScreenPacket(handler.containerId, handler.getType(), WrappedComponent.resolved(title, (Player) spl)));
-        spl.containerMenu = handler;
+                if(!(player instanceof ServerPlayer spl)) return null;
+                Menu out = new Menu(id, spl);
+                open.add(out);
 
-        players.put(player.wrap(), handler);
-        doUpdate(spl);
-
-        ((AccessorServerPlayer) player).callInitMenu(handler);
+                return out;
+            }
+        });
     }
 
     @Override
     protected void doClose(Player player) {
 
         ServerPlayer pl = ConversionUtil.validate(player);
-        players.remove(player.wrap());
         if(pl != null && pl.containerMenu != pl.inventoryMenu) {
             pl.closeContainer();
-        }
-
-    }
-
-    private void doUpdate(ServerPlayer player) {
-
-        ChestMenu menu = players.get(((Player) player).wrap());
-        if(menu == null) {
-            doOpen((Player) player);
-            doUpdate(player);
-            return;
-        }
-
-        for(int i = 0 ; i < items.length ; i++) {
-
-            if(items[i] == null) continue;
-
-            org.wallentines.mcore.ItemStack is = items[i].getItem((Player) player);
-            if(is == null) {
-                continue;
-            }
-
-            ItemStack mis = ConversionUtil.validate(is);
-            menu.getContainer().setItem(i, mis);
         }
     }
 
@@ -127,18 +82,71 @@ public class FabricInventoryGUI extends InventoryGUI {
         };
     }
 
-    private ChestMenu createScreen(int rows, ServerPlayer player, Container inv) {
+    private class Menu extends AbstractContainerMenu {
 
-        ((AccessorServerPlayer) player).callNextContainerCounter();
-        int syncId = ((AccessorServerPlayer) player).getContainerCounter();
+        private final WrappedPlayer player;
 
-        return switch (rows) {
-            case 1 -> new ChestMenu(MenuType.GENERIC_9x1, syncId, player.getInventory(), inv, rows);
-            case 2 -> new ChestMenu(MenuType.GENERIC_9x2, syncId, player.getInventory(), inv, rows);
-            case 3 -> new ChestMenu(MenuType.GENERIC_9x3, syncId, player.getInventory(), inv, rows);
-            case 4 -> new ChestMenu(MenuType.GENERIC_9x4, syncId, player.getInventory(), inv, rows);
-            case 5 -> new ChestMenu(MenuType.GENERIC_9x5, syncId, player.getInventory(), inv, rows);
-            default -> new ChestMenu(MenuType.GENERIC_9x6, syncId, player.getInventory(), inv, rows);
-        };
+        Menu(int id, ServerPlayer spl) {
+            super(getMenuType(FabricInventoryGUI.this.size / 9), id);
+
+            this.player = new WrappedPlayer(spl);
+
+            Container container = new SimpleContainer(FabricInventoryGUI.this.size);
+            for(int i = 0 ; i < FabricInventoryGUI.this.size ; i++) {
+                int row = i / 9;
+                int col = i % 9;
+                addSlot(new Slot(container, i, row, col));
+            }
+
+            update();
+        }
+
+        public void update() {
+
+            Player spl = player.get();
+
+            int stateId = incrementStateId();
+
+            for(int i = 0 ; i < FabricInventoryGUI.this.size ; i++) {
+                Entry ent = FabricInventoryGUI.this.items[i];
+                if(ent == null) continue;
+
+                org.wallentines.mcore.ItemStack is = ent.getItem(spl);
+                if(is != null) {
+                    setItem(i, stateId, ConversionUtil.validate(is));
+                }
+            }
+
+            broadcastFullState();
+        }
+
+        @Override
+        public @NotNull ItemStack quickMoveStack(net.minecraft.world.entity.player.Player player, int i) {
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public boolean stillValid(net.minecraft.world.entity.player.Player player) {
+            return true;
+        }
+
+        @Override
+        public void clicked(int slot, int button, net.minecraft.world.inventory.ClickType clickType, net.minecraft.world.entity.player.Player player) {
+
+            if(player.level().isClientSide) return;
+            FabricInventoryGUI.this.onClick(slot, (ServerPlayer) player, getActionType(button, clickType));
+        }
+
+        private static MenuType<?> getMenuType(int rows) {
+            return switch (rows) {
+                case 1 -> MenuType.GENERIC_9x1;
+                case 2 -> MenuType.GENERIC_9x2;
+                case 3 -> MenuType.GENERIC_9x3;
+                case 4 -> MenuType.GENERIC_9x4;
+                case 5 -> MenuType.GENERIC_9x5;
+                default -> MenuType.GENERIC_9x6;
+            };
+        }
+
     }
 }
