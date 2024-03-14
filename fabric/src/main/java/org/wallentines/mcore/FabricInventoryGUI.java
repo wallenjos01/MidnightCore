@@ -45,7 +45,7 @@ public class FabricInventoryGUI extends InventoryGUI {
         spl.openMenu(new MenuProvider() {
             @Override
             public @NotNull net.minecraft.network.chat.Component getDisplayName() {
-                return new WrappedComponent(FabricInventoryGUI.this.title);
+                return WrappedComponent.resolved(FabricInventoryGUI.this.title, spl);
             }
 
             @Nullable
