@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AccessorLoginPacketHandler",
+    "AccessorPacketListener",
     "AccessorPlayer",
     "AccessorPlayerAdvancements",
     "AccessorPlayerList",
@@ -14,6 +15,7 @@
     "MixinItemStack",
     "MixinMinecraftServer",
     "MixinPlayerAdvancements",
+    "MixinServerConfigPacketListener",
     "MixinServerPlayer",
     "MixinServerScoreboard"
   ],

@@ -10,6 +10,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.wallentines.mcore.*;
@@ -209,6 +210,20 @@ public class ConversionUtil {
             throw new IllegalArgumentException("Attempt to access non-Minecraft Player!");
         }
         return spl;
+    }
+
+
+    /**
+     * Validates that the given configuring player is actually a Minecraft ServerConfigurationPacketListenerImpl
+     * @param player The configuring player to check
+     * @return The player casted to a ServerConfigurationPacketListenerImpl
+     */
+    public static ServerConfigurationPacketListenerImpl validate(ConfiguringPlayer player) {
+
+        if(!(player instanceof ServerConfigurationPacketListenerImpl cpl)) {
+            throw new IllegalArgumentException("Attempt to access non-Minecraft Player!");
+        }
+        return cpl;
     }
 
     /**

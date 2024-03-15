@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
+import org.wallentines.mcore.adapter.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.math.Color;
