@@ -19,7 +19,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class FabricServerMessagingModule extends ServerMessagingModule implements ServerPlayNetworking.PlayPayloadHandler<MidnightPayload>, ServerConfigurationNetworking.ConfigurationPacketHandler<MidnightPayload> {
+public class FabricServerMessagingModule extends ServerMessagingModule implements
+        ServerPlayNetworking.PlayPayloadHandler<MidnightPayload>,
+        ServerConfigurationNetworking.ConfigurationPacketHandler<MidnightPayload> {
 
     private static final Map<Identifier, CustomPacketPayload.Type<MidnightPayload>> TYPES = new HashMap<>();
 
