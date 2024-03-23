@@ -21,7 +21,15 @@ publishing {
     }
 
     if (project.hasProperty("pubUrl")) {
-        repositories.maven(project.properties["pubUrl"] as String) {
+
+        var url: String = project.properties["pubUrl"] as String
+        url += if(GradleVersion.version(version as String).isSnapshot) {
+            "snapshots"
+        } else {
+            "releases"
+        }
+
+        repositories.maven(url) {
             name = "pub"
             credentials(PasswordCredentials::class.java)
         }
