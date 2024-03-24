@@ -38,6 +38,7 @@ tasks {
 
 
 repositories {
+    mavenLocal()
     maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
         name = "sonatype-oss-snapshots1"
         mavenContent { snapshotsOnly() }

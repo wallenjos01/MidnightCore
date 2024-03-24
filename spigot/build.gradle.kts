@@ -4,28 +4,21 @@ import org.jetbrains.kotlin.parsing.parseBoolean
 
 plugins {
     id("midnightcore-build")
+    id("midnightcore-shadow")
+    id("midnightcore-multi-version")
     id("midnightcore-publish")
-    alias(libs.plugins.multiversion)
-    alias(libs.plugins.patch)
-    alias(libs.plugins.shadow)
-}
-
-
-// MultiVersion
-multiVersion {
-    defaultVersion(17)
-    additionalVersions(8)
-}
-
-patch {
-    patchSet("java8", sourceSets["main"], sourceSets["main"].java, multiVersion.getCompileTask(8))
 }
 
 repositories {
+    mavenLocal()
+    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://libraries.minecraft.net/")
 }
 
-configurations.create("shadow17").extendsFrom(configurations.shadow.get())
+configurations.create("shadow17"){
+    extendsFrom(configurations.shadow.get())
+}
+
 configurations.create("shadow8") {
     extendsFrom(configurations.shadow.get())
     attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 8)

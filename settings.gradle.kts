@@ -1,8 +1,9 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
+        maven("https://plugins.gradle.org/m2/")
         maven("https://maven.fabricmc.net/")
-        mavenLocal()
+        maven("https://maven.wallentines.org/plugins")
     }
 
     includeBuild("gradle/plugins")

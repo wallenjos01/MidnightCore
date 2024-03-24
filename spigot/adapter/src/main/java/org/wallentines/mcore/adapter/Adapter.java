@@ -179,6 +179,7 @@ public interface Adapter {
     void kickPlayer(Player player, Component message);
 
     default String getTranslationKey(ItemStack itemStack) {
+
         return itemStack.getTranslationKey();
     }
 

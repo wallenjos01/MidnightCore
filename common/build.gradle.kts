@@ -1,23 +1,7 @@
 plugins {
     id("midnightcore-build")
+    id("midnightcore-multi-version")
     id("midnightcore-publish")
-    alias(libs.plugins.multiversion)
-    alias(libs.plugins.patch)
-}
-
-multiVersion {
-    defaultVersion(17)
-    additionalVersions(8)
-}
-
-patch {
-    patchSet("java8", sourceSets["main"], sourceSets["main"].java, multiVersion.getCompileTask(8))
-}
-
-repositories {
-    mavenCentral()
-    maven("https://maven.wallentines.org/")
-    mavenLocal()
 }
 
 dependencies {

@@ -1,0 +1,11 @@
+[
+  {
+    "lines": [
+      {
+        "find": "return itemStack.getTranslationKey();"
+      }
+    ],
+    "type": "set",
+    "value": "throw new java.lang.UnsupportedOperationException();"
+  }
+]

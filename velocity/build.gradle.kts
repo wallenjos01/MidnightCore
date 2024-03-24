@@ -1,16 +1,7 @@
 plugins {
     id("midnightcore-build")
+    id("midnightcore-shadow")
     id("midnightcore-publish")
-    alias(libs.plugins.shadow)
-}
-
-tasks {
-    build {
-        dependsOn(shadowJar)
-    }
-    shadowJar {
-        configurations = listOf(project.configurations.shadow.get())
-    }
 }
 
 repositories {
@@ -19,7 +10,7 @@ repositories {
 
 dependencies {
 
-    implementation("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
+    implementation("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
 
     api(project(":common"))
     api(project(":proxy"))
