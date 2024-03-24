@@ -110,7 +110,7 @@ public class MidnightCore extends JavaPlugin {
         MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.set(Paths.get("plugins"));
 
         // Factories
-        ItemStack.FACTORY.set((type,count,tag,data,ver) -> new SpigotItem(type,count,tag,data));
+        ItemStack.FACTORY.set(new SpigotItem.Factory());
         InventoryGUI.FACTORY.set(SpigotInventoryGUI::new);
         CustomScoreboard.FACTORY.set(SpigotScoreboard::new);
 

@@ -3,6 +3,7 @@ package org.wallentines.mcore.adapter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -99,7 +100,10 @@ public class GenericAdapter implements Adapter {
 
     @Override
     public ItemStack buildItem(Identifier id, int count, byte data) {
-        return null;
+        Material mat = Material.getMaterial(id.toString());
+        if(mat == null) return new ItemStack(Material.AIR);
+
+        return new ItemStack(mat, count);
     }
 
     @Override

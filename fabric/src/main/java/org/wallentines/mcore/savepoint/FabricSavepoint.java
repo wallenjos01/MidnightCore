@@ -36,8 +36,9 @@ public class FabricSavepoint extends Savepoint {
             Vec3 pos = spl.position();
             spl.load((CompoundTag) ConfigContext.INSTANCE.convert(NBTContext.INSTANCE, nbt));
             spl.setPos(pos);
+
             for(MobEffectInstance inst : spl.getActiveEffects()) {
-                spl.connection.send(new ClientboundUpdateMobEffectPacket(spl.getId(), inst));
+                spl.connection.send(new ClientboundUpdateMobEffectPacket(spl.getId(), inst, false));
             }
         }
         if(gameMode != null) {

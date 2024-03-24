@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -136,14 +137,24 @@ public interface Adapter {
      * @param itemStack The item stack to update
      * @param tag The tag to set
      */
-    void setTag(ItemStack itemStack, ConfigSection tag);
+    default void setTag(ItemStack itemStack, ConfigSection tag) { }
 
     /**
      * Retrieves the NBT tag of an Item Stack
      * @param itemStack The item stack to lookup
      * @return The item stack's tag
      */
-    ConfigSection getTag(ItemStack itemStack);
+    default @Nullable ConfigSection getTag(ItemStack itemStack) {
+        return null;
+    }
+
+    default @Nullable ConfigObject saveComponent(ItemStack is, Identifier component) {
+        return null;
+    }
+
+    default void loadComponent(ItemStack is, Identifier component, ConfigObject value) { }
+
+    default void removeComponent(ItemStack is, Identifier component) { }
 
     /**
      * Ensures the given ItemStack is backed by a real Minecraft item

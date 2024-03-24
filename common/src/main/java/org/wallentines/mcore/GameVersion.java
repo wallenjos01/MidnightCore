@@ -116,6 +116,11 @@ public class GameVersion {
          */
         public static final Feature TRANSFER_PACKETS = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 171);
 
+        /**
+         * In 1.20.5, Item components were added to replace NBT tags
+         */
+        public static final Feature ITEM_COMPONENTS = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 178);
+
 
         public final int minVersion;
         public final int maxVersion;

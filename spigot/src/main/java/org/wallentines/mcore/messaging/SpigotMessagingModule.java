@@ -15,7 +15,6 @@ import org.wallentines.midnightlib.registry.Identifier;
 public class SpigotMessagingModule extends ServerMessagingModule implements PluginMessageListener {
 
 
-
     @Override
     public boolean initialize(ConfigSection section, Server data) {
         return true;
@@ -46,9 +45,19 @@ public class SpigotMessagingModule extends ServerMessagingModule implements Plug
         spl.getInternal().sendPluginMessage(plugin, channelId, data.array());
     }
 
+    @Override
+    protected void sendPacket(ConfiguringPlayer player, Identifier packetId, ByteBuf data) {
+        throw new IllegalStateException("Sending config messages is not available on Spigot!");
+    }
+
 
     @Override
     public boolean supportsLoginQuery() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsConfigMessaging() {
         return false;
     }
 
@@ -64,12 +73,24 @@ public class SpigotMessagingModule extends ServerMessagingModule implements Plug
     }
 
     @Override
+    protected void doRegisterConfig(Identifier packetId) {
+        throw new IllegalStateException("Registering config messages is not available on Spigot!");
+    }
+
+    @Override
     protected void doUnregister(Identifier packetId) {
         Bukkit.getMessenger().unregisterIncomingPluginChannel(MidnightCore.getPlugin(MidnightCore.class), packetId.toString());
     }
 
     @Override
-    protected void doUnregisterLogin(Identifier packetId) { }
+    protected void doUnregisterLogin(Identifier packetId) {
+
+    }
+
+    @Override
+    protected void doUnregisterConfig(Identifier packetId) {
+
+    }
 
     @Override
     public void onPluginMessageReceived(@NotNull String channel, @NotNull org.bukkit.entity.Player player, @NotNull byte[] data) {
@@ -79,7 +100,7 @@ public class SpigotMessagingModule extends ServerMessagingModule implements Plug
 
     }
 
-    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(SpigotMessagingModule::new, ID, DEFAULT_CONFIG);
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(SpigotMessagingModule::new, ID, new ConfigSection());
 
 
 }

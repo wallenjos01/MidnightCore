@@ -53,8 +53,6 @@ public abstract class MixinEntity implements Entity {
 
     @Shadow public abstract String getStringUUID();
 
-    @Shadow public abstract void setItemSlot(net.minecraft.world.entity.EquipmentSlot par1, net.minecraft.world.item.ItemStack par2);
-
     @Shadow public abstract CommandSourceStack createCommandSourceStack();
 
 
@@ -159,7 +157,7 @@ public abstract class MixinEntity implements Entity {
 
         net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
         if(self instanceof LivingEntity le) {
-            return (ItemStack) (Object) le.getItemBySlot(ConversionUtil.toMCEquipmentSlot(slot));
+            return le.getItemBySlot(ConversionUtil.toMCEquipmentSlot(slot));
         }
 
         return null;
@@ -167,8 +165,11 @@ public abstract class MixinEntity implements Entity {
 
     public void mcore$setItem(Entity.EquipmentSlot slot, ItemStack item) {
 
-        net.minecraft.world.item.ItemStack is = ConversionUtil.validate(item);
-        setItemSlot(ConversionUtil.toMCEquipmentSlot(slot), is);
+        net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
+        if(self instanceof LivingEntity le) {
+            net.minecraft.world.item.ItemStack is = ConversionUtil.validate(item);
+            le.setItemSlot(ConversionUtil.toMCEquipmentSlot(slot), is);
+        }
 
     }
 
