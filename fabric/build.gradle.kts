@@ -58,11 +58,11 @@ dependencies {
     include(project(":client").setTransitive(false))
 
     // Minecraft
-    minecraft("com.mojang:minecraft:24w11a")
+    minecraft("com.mojang:minecraft:24w12a")
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
-    modImplementation("net.fabricmc:fabric-loader:0.15.6")
+    modImplementation("net.fabricmc:fabric-loader:0.15.7")
 
     // Fabric API
     val apiModules = listOf(
@@ -71,7 +71,7 @@ dependencies {
             "fabric-networking-api-v1"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.96.10+1.20.5"))!!)
+        modApi(include(fabricApi.module(mod, "0.96.12+1.20.5"))!!)
     }
 
     // Included Library Dependencies

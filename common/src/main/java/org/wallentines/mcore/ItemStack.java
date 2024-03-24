@@ -842,7 +842,6 @@ public interface ItemStack {
                                                 .with("Value", skin.getValue())))));
             }
 
-            out.getOrCreateTag().set("SkullOwner", skullOwner);
             return out;
         }
 

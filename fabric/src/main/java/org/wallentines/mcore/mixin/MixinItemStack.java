@@ -124,7 +124,7 @@ public abstract class MixinItemStack implements ItemStack {
 
     public Color mcore$getRarityColor() {
 
-        Integer color = ((net.minecraft.world.item.ItemStack) (Object) this).getRarity().color.getColor();
+        Integer color = ((net.minecraft.world.item.ItemStack) (Object) this).getRarity().color().getColor();
         return color == null ? Color.WHITE : new Color(color);
     }
 
