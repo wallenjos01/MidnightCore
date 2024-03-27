@@ -29,19 +29,19 @@ on it.
 - To start using it, add the following to your `build.gradle.kts` file:
 ```
 repositories {
-    maven("https://maven.wallentines.org/")
+    maven("https://maven.wallentines.org/releases")
     maven("https://oss.sonatype.org/content/repositories/snapshots") // For Fabric servers, required for fabric-permissions-api
 }
 dependencies {
-    compileOnly("org.wallentines:midnightcore-common:2.0.0-pre4")
+    compileOnly("org.wallentines:midnightcore-common:2.0.0-pre6")
     
-    compileOnly("org.wallentines:midnightcore-server:2.0.0-pre4") // For servers
-    compileOnly("org.wallentines:midnightcore-client:2.0.0-pre4") // For clients
-    compileOnly("org.wallentines:midnightcore-proxy:2.0.0-pre4") // For proxies
+    compileOnly("org.wallentines:midnightcore-server:2.0.0-pre6") // For servers
+    compileOnly("org.wallentines:midnightcore-client:2.0.0-pre6") // For clients
+    compileOnly("org.wallentines:midnightcore-proxy:2.0.0-pre6") // For proxies
     
-    compileOnly("org.wallentines:midnightcore-fabric:2.0.0-pre4") // For Fabric servers and clients
-    compileOnly("org.wallentines:midnightcore-spigot:2.0.0-pre4") // For Spigot servers
-    compileOnly("org.wallentines:midnightcore-velocity:2.0.0-pre4") // For Velocity proxies
+    compileOnly("org.wallentines:midnightcore-fabric:2.0.0-pre6") // For Fabric servers and clients
+    compileOnly("org.wallentines:midnightcore-spigot:2.0.0-pre6") // For Spigot servers
+    compileOnly("org.wallentines:midnightcore-velocity:2.0.0-pre6") // For Velocity proxies
 }
 ```
 - As shown above, the library is divided into three layers: Common, Environment, and Target
