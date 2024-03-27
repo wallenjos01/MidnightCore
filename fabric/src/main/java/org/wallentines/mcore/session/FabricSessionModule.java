@@ -1,13 +1,10 @@
 package org.wallentines.mcore.session;
 
-import org.wallentines.fbev.player.PlayerJoinEvent;
-import org.wallentines.fbev.player.PlayerLeaveEvent;
-import org.wallentines.mcore.Player;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 public class FabricSessionModule extends SessionModule {
@@ -16,13 +13,15 @@ public class FabricSessionModule extends SessionModule {
     public boolean initialize(ConfigSection section, Server data) {
         if(!super.initialize(section, data)) return false;
 
-        Event.register(PlayerLeaveEvent.class, this, 10, ev -> {
-            Session sess = getPlayerSession((Player) ev.getPlayer());
-            if(sess != null) sess.removePlayer((Player) ev.getPlayer());
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            loadRecovery(handler.getPlayer());
         });
-        Event.register(PlayerJoinEvent.class, this, 20, ev -> {
-            loadRecovery((Player) ev.getPlayer());
+
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            Session sess = getPlayerSession(handler.getPlayer());
+            if(sess != null) sess.removePlayer(handler.getPlayer());
         });
+
 
         return true;
     }

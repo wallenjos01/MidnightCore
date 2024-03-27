@@ -92,9 +92,6 @@ dependencies {
     include(libs.midnight.lib)
     include(libs.zstd.jni)
 
-    include(modApi("org.wallentines:fabric-events:0.3.0-SNAPSHOT") {
-        isTransitive = false
-    })
     include(modApi("me.lucko:fabric-permissions-api:0.3-SNAPSHOT") {
         isTransitive = false
     })

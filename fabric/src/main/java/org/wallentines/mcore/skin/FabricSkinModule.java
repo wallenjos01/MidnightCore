@@ -1,6 +1,8 @@
 package org.wallentines.mcore.skin;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
+import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -10,7 +12,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.wallentines.fbev.player.PlayerPreJoinEvent;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
@@ -19,7 +20,6 @@ import org.wallentines.mcore.util.AuthUtil;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.MojangUtil;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.util.*;
@@ -38,10 +38,12 @@ public class FabricSkinModule extends SkinModule {
         boolean offlineModeSkins = section.getBoolean("get_skins_in_offline_mode");
 
         for(Player player : data.getPlayers()) {
-            onLogin(player, offlineModeSkins);
+            onLogin(ConversionUtil.validate(player).getGameProfile(), offlineModeSkins);
         }
 
-        Event.register(PlayerPreJoinEvent.class, this, 10, ev -> onLogin((Player) ev.getPlayer(), offlineModeSkins));
+        ServerConfigurationConnectionEvents.BEFORE_CONFIGURE.register((handler, server) -> {
+            onLogin(handler.getOwner(), offlineModeSkins);
+        });
 
         return true;
     }
@@ -130,15 +132,14 @@ public class FabricSkinModule extends SkinModule {
 
     }
 
-    private void onLogin(Player player, boolean offlineModeSkins) {
+    private void onLogin(GameProfile profile, boolean offlineModeSkins) {
 
         MinecraftServer mc = ConversionUtil.validate(server);
-        ServerPlayer spl = ConversionUtil.validate(player);
-        loginSkins.put(spl.getUUID(), AuthUtil.getProfileSkin(spl.getGameProfile()));
+        loginSkins.put(profile.getId(), AuthUtil.getProfileSkin(profile));
         if(offlineModeSkins && !mc.usesAuthentication()) {
-            MojangUtil.getSkinByNameAsync(spl.getGameProfile().getName()).thenAccept(skin -> {
-                loginSkins.put(spl.getUUID(), skin);
-                setSkin((Player) spl, skin);
+            MojangUtil.getSkinByNameAsync(profile.getName()).thenAccept(skin -> {
+                loginSkins.put(profile.getId(), skin);
+                setSkin(mc.getPlayer(profile.getId()), skin);
             });
         }
     }

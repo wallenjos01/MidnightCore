@@ -1,9 +1,9 @@
 package org.wallentines.mcore.savepoint;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import org.wallentines.fbev.player.PlayerLeaveEvent;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
@@ -12,7 +12,6 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.mdcfg.serializer.Serializer;
-import org.wallentines.midnightlib.event.Event;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.util.EnumSet;
@@ -75,7 +74,9 @@ public class FabricSavepointModule extends SavepointModule {
     @Override
     public boolean initialize(ConfigSection section, Server data) {
 
-        Event.register(PlayerLeaveEvent.class, this, 100, ev -> clearSavepoints((Player) ev.getPlayer()));
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            clearSavepoints(handler.getPlayer());
+        });
 
         return true;
     }
