@@ -24,8 +24,18 @@ dependencies {
 }
 
 tasks.withType<Jar>() {
-    val id = project.properties["id"]
-    archiveBaseName = "${id}-${project.name}"
+
+    if(rootProject == project) {
+        archiveBaseName.set(project.name)
+    } else {
+        var name = project.name
+        var currentParent = project.parent
+        while(currentParent != rootProject) {
+            name = currentParent!!.name + "-" + name
+            currentParent = currentParent.parent
+        }
+        archiveBaseName.set(rootProject.name + "-" + name)
+    }
 }
 
 tasks.withType<Test>() {
