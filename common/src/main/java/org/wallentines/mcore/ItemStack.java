@@ -172,16 +172,21 @@ public interface ItemStack {
      * @param component The new display name
      */
     default void setName(Component component) {
-        component = ItemUtil.applyItemNameBaseStyle(component);
-        String strName = getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
-                component.toJSONString() :
-                component.toLegacyText();
 
         if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
-            loadComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(strName));
+            if(getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENT)) {
+                loadComponent(ITEM_NAME_COMPONENT, new ConfigPrimitive(component.toJSONString()));
+            } else {
+                loadComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(ItemUtil.applyItemNameBaseStyle(component).toJSONString()));
+            }
 
         } else {
+
+            component = ItemUtil.applyItemNameBaseStyle(component);
+            String strName = getVersion().hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES) ?
+                    component.toJSONString() :
+                    component.toLegacyText();
 
             ConfigSection tag = getTag();
             tag.getOrCreateSection("display").set("Name", strName);
@@ -199,6 +204,9 @@ public interface ItemStack {
         if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
             ConfigObject obj = saveComponent(CUSTOM_NAME_COMPONENT);
+            if(obj == null && getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENT)) {
+                obj = saveComponent(ITEM_NAME_COMPONENT);
+            }
             if(obj == null) return null;
 
             return obj.asString();
@@ -233,7 +241,7 @@ public interface ItemStack {
         }
 
         SerializeResult<Component> comp;
-        if(getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS)) {
+        if(getVersion().hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
             comp = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, name), getVersion());
         } else {
             comp = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(name));
@@ -271,9 +279,10 @@ public interface ItemStack {
 
     Identifier CUSTOM_DATA_COMPONENT = new Identifier("minecraft", "custom_data");
     Identifier CUSTOM_NAME_COMPONENT = new Identifier("minecraft", "custom_name");
+    Identifier ITEM_NAME_COMPONENT = new Identifier("minecraft", "item_name");
     Identifier LORE_COMPONENT = new Identifier("minecraft", "lore");
     Identifier ENCHANTMENT_COMPONENT = new Identifier("minecraft", "enchantments");
-    Identifier PROFILE_COMPONENT = new Identifier("minecraft", "enchantments");
+    Identifier PROFILE_COMPONENT = new Identifier("minecraft", "profile");
 
 
     ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = ContextObjectSerializer.create(
@@ -518,14 +527,19 @@ public interface ItemStack {
          */
         public Builder withName(Component name) {
 
+            if (version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+
+                if(version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENT)) {
+                    return withComponent(ITEM_NAME_COMPONENT, new ConfigPrimitive(name.toJSONString()));
+                } else {
+                    return withComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(ItemUtil.applyItemNameBaseStyle(name).toJSONString()));
+                }
+            }
+
             name = ItemUtil.applyItemNameBaseStyle(name);
-            String strName = version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
+            String strName = version.hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES) ?
                     name.toJSONString() :
                     name.toLegacyText();
-
-            if (version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
-                return withComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(strName));
-            }
 
             getCustomData().getOrCreateSection("display").set("Name", strName);
             return this;
@@ -542,7 +556,7 @@ public interface ItemStack {
             ConfigList list = new ConfigList();
             for(Component cmp : lore) {
                 cmp = ItemUtil.applyItemLoreBaseStyle(cmp);
-                String str = version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENTS) ?
+                String str = version.hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES) ?
                         cmp.toJSONString() :
                         cmp.toLegacyText();
 

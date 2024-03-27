@@ -8,15 +8,15 @@ import org.wallentines.mdcfg.ConfigObject;
 public class ComponentUtil {
 
     public static <T> ConfigObject encode(DataComponentType<T> type, T value) {
-        return type.codecOrThrow().encodeStart(ConfigOps.INSTANCE, value).getOrThrow(false, MidnightCoreAPI.LOGGER::error);
+        return type.codecOrThrow().encodeStart(ConfigOps.INSTANCE, value).getOrThrow();
     }
 
     public static <T> ConfigObject encodeTyped(TypedDataComponent<T> type) {
-        return type.encodeValue(ConfigOps.INSTANCE).getOrThrow(false, MidnightCoreAPI.LOGGER::error);
+        return type.encodeValue(ConfigOps.INSTANCE).getOrThrow();
     }
 
     public static <T> T decode(DataComponentType<T> type, ConfigObject value) {
-        return type.codecOrThrow().decode(ConfigOps.INSTANCE, value).getOrThrow(false, MidnightCoreAPI.LOGGER::error).getFirst();
+        return type.codecOrThrow().decode(ConfigOps.INSTANCE, value).getOrThrow().getFirst();
     }
 
     public static <T> TypedDataComponent<T> decodeTyped(DataComponentType<T> type, ConfigObject value) {

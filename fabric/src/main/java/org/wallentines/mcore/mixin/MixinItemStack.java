@@ -50,7 +50,8 @@ public abstract class MixinItemStack implements ItemStack {
             MidnightCoreAPI.LOGGER.warn("Component type " + id + " is not registered!");
             return;
         }
-        set(type, type.codecOrThrow().decode(ConfigOps.INSTANCE, config).getOrThrow(false, MidnightCoreAPI.LOGGER::error).getFirst());
+
+        set(type, type.codecOrThrow().decode(ConfigOps.INSTANCE, config).getOrThrow().getFirst());
     }
 
     public ConfigObject mcore$saveComponent(Identifier id) {

@@ -44,6 +44,15 @@ public class GameVersion {
         return protocolVersion;
     }
 
+
+    public boolean isSnapshot() {
+        return protocolVersion > RELEASE_MAX_VERSION;
+    }
+
+    public int getSnapshotVersion() {
+        return protocolVersion - RELEASE_MAX_VERSION;
+    }
+
     /**
      * Checks whether this GameVersion supports a particular {@link Feature Feature}
      * @param feature The feature to check
@@ -89,7 +98,7 @@ public class GameVersion {
         /**
          * Starting in 1.13 (?), Items now use components for their custom names rather than legacy text
          */
-        public static final Feature ITEM_NAME_COMPONENTS = new Feature(346);
+        public static final Feature COMPONENT_ITEM_NAMES = new Feature(346);
 
         /**
          * In 1.12 (17w16a), The keybind component type was added
@@ -120,6 +129,11 @@ public class GameVersion {
          * In 1.20.5, Item components were added to replace NBT tags
          */
         public static final Feature ITEM_COMPONENTS = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 178);
+
+        /**
+         * In 24w13a, the item_name item component was added
+         */
+        public static final Feature ITEM_NAME_COMPONENT = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 182);
 
 
         public final int minVersion;

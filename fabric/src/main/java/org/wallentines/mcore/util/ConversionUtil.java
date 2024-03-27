@@ -120,7 +120,7 @@ public class ConversionUtil {
         JsonObject obj = ClickEvent.SERIALIZER.serialize(GsonContext.INSTANCE, event).getOrThrow().getAsJsonObject();
 
         try {
-            return net.minecraft.network.chat.ClickEvent.CODEC.decode(JsonOps.INSTANCE, obj).getOrThrow(false, MidnightCoreAPI.LOGGER::error).getFirst();
+            return net.minecraft.network.chat.ClickEvent.CODEC.decode(JsonOps.INSTANCE, obj).getOrThrow().getFirst();
         } catch (Exception ex) {
             throw new IllegalArgumentException("Don't know how to convert ClickEvent of type " + event.getAction().id + " to a Minecraft Click event!", ex);
         }
@@ -144,7 +144,7 @@ public class ConversionUtil {
                 .deserialize(
                         NBTContext.INSTANCE,
                         ComponentSerialization.CODEC.encodeStart(NbtOps.INSTANCE, other)
-                                .getOrThrow(false, MidnightCoreAPI.LOGGER::error),
+                                .getOrThrow(),
                         GameVersion.CURRENT_VERSION.get()
                 ).getOrThrow();
     }
