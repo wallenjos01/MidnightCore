@@ -7,6 +7,7 @@ plugins {
 dependencies {
 
     api(libs.midnight.cfg)
+    api(libs.midnight.cfg.sql)
     api(libs.midnight.cfg.json)
     api(libs.midnight.cfg.nbt)
     api(libs.midnight.lib)

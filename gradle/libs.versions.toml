@@ -18,6 +18,7 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jun
 netty-buffer = { module = "io.netty:netty-buffer", version.ref = "netty" }
 netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
 midnight-cfg = { module = "org.wallentines:midnightcfg-api", version.ref="mdcfg" }
+midnight-cfg-sql = { module = "org.wallentines:midnightcfg-api-sql", version.ref="mdcfg" }
 midnight-cfg-json = { module = "org.wallentines:midnightcfg-codec-json", version.ref="mdcfg" }
 midnight-cfg-gson = { module = "org.wallentines:midnightcfg-codec-gson", version.ref="mdcfg" }
 midnight-cfg-binary = { module = "org.wallentines:midnightcfg-codec-binary", version.ref="mdcfg" }

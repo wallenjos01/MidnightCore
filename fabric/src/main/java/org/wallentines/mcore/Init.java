@@ -18,6 +18,7 @@ import org.wallentines.mcore.session.FabricSessionModule;
 import org.wallentines.mcore.session.SessionModule;
 import org.wallentines.mcore.skin.FabricSkinModule;
 import org.wallentines.mcore.skin.SkinModule;
+import org.wallentines.mcore.sql.ServerSQLModule;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.BinaryCodec;
@@ -60,6 +61,7 @@ public class Init implements ModInitializer {
         ServerModule.REGISTRY.register(SessionModule.ID, FabricSessionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerMessagingModule.ID, FabricServerMessagingModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(ServerSQLModule.ID, ServerSQLModule.MODULE_INFO);
 
     }
 
