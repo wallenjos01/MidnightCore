@@ -137,6 +137,12 @@ public class PlaceholderManager {
                         Component.empty() :
                         Component.translate(ctx.getParameter().text())));
 
+        // %env<JAVA_HOME>% -> /path/to/java/bin
+        registerSupplier("env", PlaceholderSupplier.inline(ctx ->
+                ctx.getParameter() == null ?
+                        "" :
+                        System.getenv(ctx.getParameter().allText())));
+
     }
 
     static {
