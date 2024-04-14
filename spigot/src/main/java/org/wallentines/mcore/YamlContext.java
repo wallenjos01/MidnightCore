@@ -3,6 +3,7 @@ package org.wallentines.mcore;
 import org.bukkit.configuration.ConfigurationSection;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 
 public class YamlContext implements SerializeContext<Object> {
@@ -25,7 +26,12 @@ public class YamlContext implements SerializeContext<Object> {
     }
 
     @Override
+    public ByteBuffer asBlob(Object object) {
+        return isBlob(object) ? (ByteBuffer) object : null;
+    }
+
     @SuppressWarnings("unchecked")
+    @Override
     public Collection<Object> asList(Object object) {
         return isList(object) ? (Collection<Object>) object : null;
     }
@@ -60,28 +66,15 @@ public class YamlContext implements SerializeContext<Object> {
     }
 
     @Override
-    public boolean isString(Object object) {
-        return object instanceof String;
-    }
-
-    @Override
-    public boolean isNumber(Object object) {
-        return object instanceof Number;
-    }
-
-    @Override
-    public boolean isBoolean(Object object) {
-        return object instanceof Boolean;
-    }
-
-    @Override
-    public boolean isList(Object object) {
-        return object instanceof Collection;
-    }
-
-    @Override
-    public boolean isMap(Object object) {
-        return object instanceof ConfigurationSection || object instanceof Map;
+    public Type getType(Object object) {
+        if(object == null) return Type.NULL;
+        if(object instanceof String) return Type.STRING;
+        if(object instanceof Number) return Type.NUMBER;
+        if(object instanceof Boolean) return Type.BOOLEAN;
+        if(object instanceof ByteBuffer) return Type.BLOB;
+        if(object instanceof Collection) return Type.LIST;
+        if(object instanceof ConfigurationSection || object instanceof Map) return Type.MAP;
+        return Type.UNKNOWN;
     }
 
     @SuppressWarnings("unchecked")
@@ -119,6 +112,12 @@ public class YamlContext implements SerializeContext<Object> {
     }
 
     @Override
+    public Object toBlob(ByteBuffer object) {
+        return object;
+        //return Base64.getEncoder().encode(object).asCharBuffer().toString();
+    }
+
+    @Override
     public Object toList(Collection<Object> list) {
 
         List<Object> out = new ArrayList<>();
@@ -134,6 +133,11 @@ public class YamlContext implements SerializeContext<Object> {
         LinkedHashMap<String, Object> sec = new LinkedHashMap<>();
         map.forEach((key, value) -> sec.put(key, serializeObject(value)));
         return sec;
+    }
+
+    @Override
+    public Object nullValue() {
+        return null;
     }
 
     @SuppressWarnings("unchecked")

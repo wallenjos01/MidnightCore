@@ -25,7 +25,7 @@ configurations.create("shadow8") {
 }
 
 tasks.named<Jar>("java8Jar") {
-    val id = project.properties["id"]
+    val id = rootProject.name
     archiveBaseName = "${id}-${project.name}"
 }
 
@@ -122,7 +122,7 @@ tasks.withType<ProcessResources>() {
     filesMatching("plugin.yml") {
         expand(mapOf(
                 Pair("version", project.version as String),
-                Pair("id", project.properties["id"] as String)
+                Pair("id", rootProject.name)
         ))
     }
 }

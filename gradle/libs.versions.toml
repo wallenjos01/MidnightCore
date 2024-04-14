@@ -1,7 +1,7 @@
 [versions]
 junit = "5.9.1"
 netty = "4.1.94.Final"
-mdcfg = "2.2.0"
+mdcfg = "2.3.0-SNAPSHOT"
 mdlib = "1.6.0"
 slf4j = "2.0.7"
 jbr-anno = "24.0.1"

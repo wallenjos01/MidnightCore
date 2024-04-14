@@ -4,6 +4,9 @@ plugins {
     alias(libs.plugins.loom)
 }
 
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
 
 loom {
     runs {
@@ -30,7 +33,7 @@ tasks {
     }
     remapJar {
         archiveClassifier.set("")
-        val id = project.properties["id"]
+        val id = rootProject.name
         archiveBaseName.set("${id}-${project.name}")
         inputFile.set(jar.get().archiveFile)
     }
@@ -59,11 +62,11 @@ dependencies {
     include(project(":client").setTransitive(false))
 
     // Minecraft
-    minecraft("com.mojang:minecraft:24w13a")
+    minecraft("com.mojang:minecraft:1.20.5-pre1")
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
-    modImplementation("net.fabricmc:fabric-loader:0.15.7")
+    modImplementation("net.fabricmc:fabric-loader:0.15.9")
 
     // Fabric API
     val apiModules = listOf(
@@ -72,7 +75,7 @@ dependencies {
             "fabric-networking-api-v1"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.96.12+1.20.5"))!!)
+        modApi(include(fabricApi.module(mod, "0.96.15+1.20.5"))!!)
     }
 
     // Included Library Dependencies
@@ -102,7 +105,7 @@ tasks.withType<ProcessResources>() {
     filesMatching("fabric.mod.json") {
         expand(mapOf(
                 Pair("version", project.version as String),
-                Pair("id", project.properties["id"] as String)
+                Pair("id", rootProject.name)
         ))
     }
 }

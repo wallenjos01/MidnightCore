@@ -16,6 +16,6 @@ tasks {
 }
 
 tasks.withType<ShadowJar>() {
-    val id = project.properties["id"]
+    val id = rootProject.name
     archiveBaseName = "${id}-${project.name}"
 }

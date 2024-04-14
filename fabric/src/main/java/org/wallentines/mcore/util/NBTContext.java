@@ -1,9 +1,15 @@
 package org.wallentines.mcore.util;
 
 import net.minecraft.nbt.*;
+import org.wallentines.mdcfg.ByteBufferInputStream;
 import org.wallentines.mdcfg.Tuples;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -55,6 +61,12 @@ public class NBTContext implements SerializeContext<Tag> {
     }
 
     @Override
+    public ByteBuffer asBlob(Tag object) {
+        if(!isBlob(object)) return null;
+        return ByteBuffer.wrap(((ByteArrayTag) object).getAsByteArray());
+    }
+
+    @Override
     public Collection<Tag> asList(Tag object) {
 
         return isList(object) ? new ArrayList<>((CollectionTag<?>) object) : null;
@@ -73,41 +85,17 @@ public class NBTContext implements SerializeContext<Tag> {
     }
 
     @Override
-    public boolean isString(Tag object) {
-        if(object == null) return false;
-        return object.getType() == StringTag.TYPE;
-    }
+    public Type getType(Tag object) {
 
-    @Override
-    public boolean isNumber(Tag object) {
-        if(object == null) return false;
-        return object.getType() == IntTag.TYPE ||
-                object.getType() == LongTag.TYPE ||
-                object.getType() == ShortTag.TYPE ||
-                object.getType() == ByteTag.TYPE ||
-                object.getType() == FloatTag.TYPE ||
-                object.getType() == DoubleTag.TYPE;
-    }
-
-    @Override
-    public boolean isBoolean(Tag object) {
-        if(object == null) return false;
-        return object.getType() == ByteTag.TYPE;
-    }
-
-    @Override
-    public boolean isList(Tag object) {
-        if(object == null) return false;
-        return object.getType() == ListTag.TYPE ||
-                object.getType() == IntArrayTag.TYPE ||
-                object.getType() == LongArrayTag.TYPE ||
-                object.getType() == ByteArrayTag.TYPE;
-    }
-
-    @Override
-    public boolean isMap(Tag object) {
-        if(object == null) return false;
-        return object.getType() == CompoundTag.TYPE;
+        return switch (object.getId()) {
+            case Tag.TAG_END -> Type.NULL;
+            case Tag.TAG_BYTE, Tag.TAG_SHORT, Tag.TAG_INT, Tag.TAG_LONG, Tag.TAG_FLOAT, Tag.TAG_DOUBLE -> Type.NUMBER;
+            case Tag.TAG_BYTE_ARRAY -> Type.BLOB;
+            case Tag.TAG_STRING -> Type.STRING;
+            case Tag.TAG_LIST, Tag.TAG_INT_ARRAY, Tag.TAG_LONG_ARRAY -> Type.LIST;
+            case Tag.TAG_COMPOUND -> Type.MAP;
+            default -> Type.UNKNOWN;
+        };
     }
 
     @Override
@@ -156,6 +144,28 @@ public class NBTContext implements SerializeContext<Tag> {
     public Tag toBoolean(Boolean object) {
         if(object == null) return null;
         return ByteTag.valueOf(object);
+    }
+
+    @Override
+    public Tag toBlob(ByteBuffer object) {
+        if(object.hasArray()) {
+            return new ByteArrayTag(object.array());
+        }
+
+        try(OutputStream os = new ByteArrayOutputStream();
+            InputStream is = new ByteBufferInputStream(object)) {
+
+            byte[] copyBuffer = new byte[1024];
+            int read;
+            while((read = is.read(copyBuffer)) != -1) {
+                os.write(copyBuffer, 0, read);
+            }
+
+            return new ByteArrayTag(copyBuffer);
+
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Unable to copy blob!", ex);
+        }
     }
 
     @Override
@@ -211,6 +221,11 @@ public class NBTContext implements SerializeContext<Tag> {
             if(v != null) tag.put(k,v);
         });
         return tag;
+    }
+
+    @Override
+    public Tag nullValue() {
+        return EndTag.INSTANCE;
     }
 
     @Override

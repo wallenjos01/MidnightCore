@@ -32,7 +32,7 @@ tasks.withType<ProcessResources>() {
     filesMatching("velocity-plugin.json") {
         expand(mapOf(
                 Pair("version", project.version as String),
-                Pair("id", project.properties["id"] as String)
+                Pair("id", rootProject.name)
         ))
     }
 }
