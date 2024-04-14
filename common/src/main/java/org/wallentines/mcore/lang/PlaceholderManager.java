@@ -1,6 +1,7 @@
 package org.wallentines.mcore.lang;
 
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.ComponentUtil;
 import org.wallentines.midnightlib.registry.StringRegistry;
@@ -142,6 +143,8 @@ public class PlaceholderManager {
                 ctx.getParameter() == null ?
                         "" :
                         System.getenv(ctx.getParameter().allText())));
+
+        registerSupplier("global_config_dir", PlaceholderSupplier.inline(ctx -> MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.get().toString()));
 
     }
 

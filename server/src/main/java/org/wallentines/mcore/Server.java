@@ -152,6 +152,7 @@ public interface Server {
         manager.registerSupplier("server_modules_loaded", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getModuleManager().getCount() + "", "0")));
         manager.registerSupplier("server_player_count", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getPlayers().size() + "", "0")));
         manager.registerSupplier("server_modules_registered", PlaceholderSupplier.inline(ctx -> ServerModule.REGISTRY.getSize() + ""));
+        manager.registerSupplier("server_config_dir", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getConfigDirectory().toString(), "")));
 
     }
 

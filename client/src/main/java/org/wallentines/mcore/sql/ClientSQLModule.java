@@ -12,5 +12,5 @@ public class ClientSQLModule extends SQLModule implements ClientModule {
         return true;
     }
 
-    public static final ModuleInfo<Client, ClientModule> MODULE_INFO = new ModuleInfo<Client, ClientModule>(ClientSQLModule::new, ID, new ConfigSection()).dependsOn(SQLModule.ID);
+    public static final ModuleInfo<Client, ClientModule> MODULE_INFO = new ModuleInfo<>(ClientSQLModule::new, ID, DEFAULT_CONFIG);
 }

@@ -1,9 +1,6 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mcore.lang.LangContent;
-import org.wallentines.mcore.lang.LangManager;
-import org.wallentines.mcore.lang.LangRegistry;
-import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.requirement.CooldownRequirement;
 import org.wallentines.mcore.requirement.PlayerCheck;
 import org.wallentines.mdcfg.ConfigObject;
@@ -30,6 +27,7 @@ public class MidnightCoreServer {
     private final boolean testCommand;
 
     private final FileWrapper<ConfigObject> config;
+    private final File dataDirectory;
 
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
             .with("register_test_command", false);
@@ -58,15 +56,15 @@ public class MidnightCoreServer {
 
         }
 
-        File configDir = directory.toFile();
-        if(!configDir.isDirectory() && !configDir.mkdirs()) {
+        dataDirectory = directory.toFile();
+        if(!dataDirectory.isDirectory() && !dataDirectory.mkdirs()) {
             throw new IllegalStateException("Unable to create config directory!");
         }
 
         langManager = new LangManager(langDefaults, langDirectory.toFile());
         langManager.saveLanguageDefaults("en_us", langDefaults);
 
-        this.config = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "config", directory.toFile(), defaultConfig);
+        this.config = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "config", dataDirectory, defaultConfig);
         testCommand = config.getRoot().asSection().getBoolean("register_test_command");
 
         config.save();
@@ -79,6 +77,9 @@ public class MidnightCoreServer {
         Server.registerPlaceholders(manager);
         Entity.registerPlaceholders(manager);
         LangContent.registerPlaceholders(manager);
+
+        manager.registerSupplier("mcore_config_dir", PlaceholderSupplier.inline(ctx -> INSTANCE.get().dataDirectory.toString()));
+
     }
 
     static void registerRequirements(Registry<CheckType<Player>> registry) {

@@ -12,5 +12,5 @@ public class ProxySQLModule extends SQLModule implements ProxyModule {
         return true;
     }
 
-    public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<Proxy, ProxyModule>(ProxySQLModule::new, ID, new ConfigSection()).dependsOn(SQLModule.ID);
+    public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<>(ProxySQLModule::new, ID, DEFAULT_CONFIG);
 }
