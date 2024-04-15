@@ -11,15 +11,19 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public abstract class SQLModule {
 
     protected DriverRepository repo;
+    protected Executor executor;
     protected final StringRegistry<DatabasePreset> presets = new StringRegistry<>();
 
-    protected void init(ConfigSection config) {
+    protected void init(ConfigSection config, Executor executor) {
 
         presets.clear();
+        this.executor = executor;
 
         Map<String, DriverRepository.DriverSpec> drivers = new HashMap<>(DriverRepository.DEFAULT_DRIVERS);
         ConfigSection driverSec = config.getSection("additional_drivers");
@@ -71,16 +75,16 @@ public abstract class SQLModule {
         return presets.getIds();
     }
 
-    public SQLConnection connect(ConnectionSpec spec) {
-        return repo.getDriver(spec.driver).create(spec.url + "/" + spec.database, spec.username, spec.password, spec.parameters);
+    public CompletableFuture<SQLConnection> connect(ConnectionSpec spec) {
+        return CompletableFuture.supplyAsync(() -> repo.getDriver(spec.driver).create(spec.url + "/" + spec.database, spec.username, spec.password, spec.tablePrefix, spec.parameters));
     }
 
-    public SQLConnection connect(DatabasePreset preset, ConfigSection config) {
+    public CompletableFuture<SQLConnection> connect(DatabasePreset preset, ConfigSection config) {
         ConnectionSpec spec = preset.finalize(config).getOrThrow();
         return connect(spec);
     }
 
-    public SQLConnection connect(ConfigSection config) {
+    public CompletableFuture<SQLConnection> connect(ConfigSection config) {
         String preset = config.getOrDefault("preset", "default");
         return connect(getPreset(preset), config);
     }

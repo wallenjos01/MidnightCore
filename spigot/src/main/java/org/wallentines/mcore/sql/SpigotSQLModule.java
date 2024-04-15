@@ -1,5 +1,7 @@
 package org.wallentines.mcore.sql;
 
+import io.netty.util.concurrent.ThreadPerTaskExecutor;
+import org.bukkit.Bukkit;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
 import org.wallentines.mcore.lang.UnresolvedComponent;
@@ -7,15 +9,16 @@ import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
-public class ServerSQLModule extends SQLModule implements ServerModule {
+public class SpigotSQLModule extends SQLModule implements ServerModule {
+
     @Override
     public boolean initialize(ConfigSection config, Server data) {
 
-        init(config);
+        init(config, new ThreadPerTaskExecutor(Thread::new));
         return true;
     }
 
-    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(ServerSQLModule::new, ID, DEFAULT_CONFIG.copy()
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(SpigotSQLModule::new, ID, DEFAULT_CONFIG.copy()
             .with("presets", new ConfigSection()
                     .with("default", new DatabasePreset(
                             UnresolvedComponent.completed(Component.text("h2")),
@@ -23,6 +26,8 @@ public class ServerSQLModule extends SQLModule implements ServerModule {
                             null,
                             null,
                             null,
+                            null,
                             new ConfigSection()
-            ), DatabasePreset.SERIALIZER)));
+                    ), DatabasePreset.SERIALIZER)));
+
 }

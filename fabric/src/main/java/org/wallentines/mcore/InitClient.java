@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 import org.wallentines.mcore.extension.ClientExtensionModule;
 import org.wallentines.mcore.messaging.ClientMessagingModule;
 import org.wallentines.mcore.messaging.FabricClientMessagingModule;
-import org.wallentines.mcore.sql.ClientSQLModule;
+import org.wallentines.mcore.sql.FabricClientSQLModule;
 
 @Environment(EnvType.CLIENT)
 public class InitClient implements ClientModInitializer {
@@ -15,7 +15,7 @@ public class InitClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientModule.REGISTRY.register(ClientMessagingModule.ID, FabricClientMessagingModule.MODULE_INFO);
         ClientModule.REGISTRY.register(ClientExtensionModule.ID, ClientExtensionModule.MODULE_INFO);
-        ClientModule.REGISTRY.register(ClientSQLModule.ID, ClientSQLModule.MODULE_INFO);
+        ClientModule.REGISTRY.register(FabricClientSQLModule.ID, FabricClientSQLModule.MODULE_INFO);
     }
 
 }
