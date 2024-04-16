@@ -58,10 +58,8 @@ public class DatabasePreset {
             }
         }
 
-        for(String s : new String[] {"driver", "url", "database"}) {
-            if (values.get(s) == null) {
-                return SerializeResult.failure("Unable to finalize database connection spec! Missing required key " + s);
-            }
+        if (values.get("driver") == null || values.get("url") == null) {
+            return SerializeResult.failure("Unable to finalize database connection spec! Must have at least driver and url!");
         }
 
         ConfigSection params = section.getOrCreateSection("params");

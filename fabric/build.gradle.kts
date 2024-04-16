@@ -40,14 +40,6 @@ tasks {
 }
 
 
-repositories {
-    mavenLocal()
-    maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-        name = "sonatype-oss-snapshots1"
-        mavenContent { snapshotsOnly() }
-    }
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
-}
 
 
 dependencies {
@@ -95,7 +87,7 @@ dependencies {
     include(libs.midnight.lib)
     include(libs.zstd.jni)
 
-    include(modApi("me.lucko:fabric-permissions-api:0.3-SNAPSHOT") {
+    include(modApi("me.lucko:fabric-permissions-api:0.3.1") {
         isTransitive = false
     })
 }

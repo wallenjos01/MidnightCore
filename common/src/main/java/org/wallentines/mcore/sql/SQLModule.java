@@ -76,7 +76,14 @@ public abstract class SQLModule {
     }
 
     public CompletableFuture<SQLConnection> connect(ConnectionSpec spec) {
-        return CompletableFuture.supplyAsync(() -> repo.getDriver(spec.driver).create(spec.url + "/" + spec.database, spec.username, spec.password, spec.tablePrefix, spec.parameters));
+
+        String combinedUrl = spec.url;
+        if(spec.database != null) {
+            combinedUrl += "/" + spec.database;
+        }
+
+        final String finalUrl = combinedUrl;
+        return CompletableFuture.supplyAsync(() -> repo.getDriver(spec.driver).create(finalUrl, spec.username, spec.password, spec.tablePrefix, spec.parameters));
     }
 
     public CompletableFuture<SQLConnection> connect(DatabasePreset preset, ConfigSection config) {
