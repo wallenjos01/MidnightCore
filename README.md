@@ -137,6 +137,7 @@ the server is available
 ### Modules
 - Each `Server` has a `ModuleRegistry` containing `ServerModule` instances.
 - Additional `ServerModule` types can be created and registered to `ServerModule.REGISTRY`
+- Module configuration can be found in a file called `modules.json(.yml)` in the server configuration directory.
 - A few modules are enabled by default:
   - `midnightcore:skin`
     - Allows mods to change player skins. 
@@ -154,6 +155,21 @@ the server is available
     - Establishes a standard for querying clients for optional extensions
     - Extensions are implemented on the server using the `ServerExtension` interface
     - Requires `midnightcore:messaging` to be loaded
+  - `midnightcore:sql`
+    - Allows server admins to specify SQL configurations which other mods can access.
+    - Allows mods to easily connect to SQL servers without additional configuration.
+    - SQL configurations are stored as "presets," which can be expanded or altered by consumers of the module.
+    - Preset configuration options are:
+      - `driver`: The JDBC driver to use. Included drivers are: `h2`, `sqlite`, `mysql`, and `mariadb`
+      - `url`: The url (or file path) of the database
+      - `database`: (Optional) A value to be appended to the end of the url, after a trailing slash. Designed to be set 
+in configurations for other mods.
+      - `username`: (Optional) The database username.
+      - `password`: (Optional) The database username.
+      - `table_prefix`: (Optional) A value to prepend to all tables created by the connection. Designed to be set
+        in configurations for other mods.
+      - `params`: (Optional) A section of key-value pairs which are passed to the database driver when connecting to a
+database.
 
 ### Inventory GUIs
 - Servers can create custom Inventory GUIs and send them to clients
