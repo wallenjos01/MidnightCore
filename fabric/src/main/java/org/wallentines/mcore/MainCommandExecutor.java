@@ -6,7 +6,6 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.resources.ResourceLocation;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.ConversionUtil;

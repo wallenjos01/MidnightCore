@@ -54,8 +54,6 @@ public class Init implements ModInitializer {
 
         });
 
-        System.out.println(SharedConstants.getProtocolVersion());
-
         // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepointModule.MODULE_INFO);
@@ -90,12 +88,8 @@ public class Init implements ModInitializer {
                         .map(con -> con.getMetadata().getVersion().getFriendlyString())
                         .orElse("Unknown")));
 
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            Server.START_EVENT.invoke((Server) server);
-        });
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            Server.STOP_EVENT.invoke((Server) server);
-        });
+        ServerLifecycleEvents.SERVER_STARTED.register(Server.START_EVENT::invoke);
+        ServerLifecycleEvents.SERVER_STOPPING.register(Server.STOP_EVENT::invoke);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> Server.RUNNING_SERVER.reset());
 
 
