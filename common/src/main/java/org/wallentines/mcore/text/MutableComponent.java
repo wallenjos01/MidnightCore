@@ -2,6 +2,7 @@ package org.wallentines.mcore.text;
 
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
+import org.wallentines.midnightlib.types.Either;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,7 @@ public class MutableComponent {
     /**
      * The 'extra' components as children of the component
      */
-    public final List<MutableComponent> children = new ArrayList<>();
+    public final List<Either<Component, MutableComponent>> children = new ArrayList<>();
 
     public MutableComponent(Content content) {
         this.content = content;
@@ -90,18 +91,30 @@ public class MutableComponent {
         out.insertion = other.insertion;
         out.hoverEvent = other.hoverEvent;
         out.clickEvent = other.clickEvent;
-        other.children.stream().map(MutableComponent::fromComponent).forEach(out.children::add);
+        other.children.forEach(out::addChild);
 
         return out;
     }
 
+    public static MutableComponent empty() {
+        return new MutableComponent(new Content.Text(""));
+    }
+
+    public static MutableComponent text(String text) {
+        return new MutableComponent(new Content.Text(text));
+    }
+
     public Component toComponent() {
 
-        return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion, hoverEvent, clickEvent, content, children.stream().map(MutableComponent::toComponent).toList());
+        return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion, hoverEvent, clickEvent, content, children.stream().map(e -> e.leftOrGet(MutableComponent::toComponent)).toList());
     }
 
     public void addChild(MutableComponent cmp) {
-        this.children.add(cmp);
+        this.children.add(Either.right(cmp));
+    }
+
+    public void addChild(Component cmp) {
+        this.children.add(Either.left(cmp));
     }
 
 }
