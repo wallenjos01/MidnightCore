@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.server.MinecraftServer;
 import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
@@ -96,6 +97,9 @@ public class Init implements ModInitializer {
             Server.STOP_EVENT.invoke((Server) server);
         });
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> Server.RUNNING_SERVER.reset());
+
+
+        ServerSideArgumentInfo.register(IdentifierArgument.class, ResourceLocationArgument.id());
 
     }
 }

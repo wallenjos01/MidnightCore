@@ -9,6 +9,7 @@
     "AccessorPlayer",
     "AccessorPlayerAdvancements",
     "AccessorPlayerList",
+    "MixinClientboundCommandsPacket",
     "MixinCommandSourceStack",
     "MixinComponentSerialization",
     "MixinEntity",
