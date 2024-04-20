@@ -5,10 +5,8 @@ import com.mojang.brigadier.context.CommandContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
-import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.midnightlib.registry.Identifier;
 
 public class MainCommandExecutor {
@@ -21,13 +19,13 @@ public class MainCommandExecutor {
                 .then(Commands.literal("module")
                     .then(Commands.literal("load")
                         .then(Commands.argument("module", IdentifierArgument.MCORE)
-                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ServerModule.REGISTRY.getIds().stream().map(ConversionUtil::toResourceLocation), builder))
+                            .suggests((ctx, builder) -> IdentifierArgument.MCORE.suggest(ServerModule.REGISTRY.getIds().stream(), builder))
                             .executes(MainCommandExecutor::moduleLoadCommand)
                         )
                     )
                     .then(Commands.literal("unload")
                         .then(Commands.argument("module", IdentifierArgument.MCORE)
-                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ctx.getSource().getServer().getModuleManager().getLoadedModuleIds().stream().map(ConversionUtil::toResourceLocation), builder))
+                            .suggests((ctx, builder) -> IdentifierArgument.MCORE.suggest(ctx.getSource().getServer().getModuleManager().getLoadedModuleIds().stream(), builder))
                             .executes(MainCommandExecutor::moduleUnloadCommand)
                         )
                     )
@@ -36,19 +34,19 @@ public class MainCommandExecutor {
                             .executes(ctx -> moduleReloadCommand(ctx, null))
                         )
                         .then(Commands.argument("module", IdentifierArgument.MCORE)
-                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ctx.getSource().getServer().getModuleManager().getLoadedModuleIds().stream().map(ConversionUtil::toResourceLocation), builder))
+                            .suggests((ctx, builder) -> IdentifierArgument.MCORE.suggest(ctx.getSource().getServer().getModuleManager().getLoadedModuleIds().stream(), builder))
                             .executes(ctx -> moduleReloadCommand(ctx, ctx.getArgument("module", Identifier.class)))
                         )
                     )
                     .then(Commands.literal("enable")
                         .then(Commands.argument("module", IdentifierArgument.MCORE)
-                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ServerModule.REGISTRY.getIds().stream().map(ConversionUtil::toResourceLocation), builder))
+                            .suggests((ctx, builder) -> IdentifierArgument.MCORE.suggest(ServerModule.REGISTRY.getIds().stream(), builder))
                             .executes(MainCommandExecutor::moduleEnableCommand)
                         )
                     )
                     .then(Commands.literal("disable")
                         .then(Commands.argument("module", IdentifierArgument.MCORE)
-                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(ServerModule.REGISTRY.getIds().stream().map(ConversionUtil::toResourceLocation), builder))
+                            .suggests((ctx, builder) -> IdentifierArgument.MCORE.suggest(ctx.getSource().getServer().getModuleManager().getLoadedModuleIds().stream(), builder))
                             .executes(MainCommandExecutor::moduleDisableCommand)
                         )
                     )
@@ -57,7 +55,7 @@ public class MainCommandExecutor {
                     )
                 )
                 .then(Commands.literal("reload")
-                        .executes(MainCommandExecutor::reloadCommand)
+                    .executes(MainCommandExecutor::reloadCommand)
                 )
         );
 
