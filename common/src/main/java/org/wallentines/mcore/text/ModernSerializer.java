@@ -201,7 +201,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
                 if(!child.isComplete()) {
                     return SerializeResult.failure("Unable to deserialize component extra! " + child.getError());
                 }
-                out.children.add(MutableComponent.fromComponent(child.getOrThrow()));
+                out.addChild(child.getOrThrow());
             }
         }
 

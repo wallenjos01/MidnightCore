@@ -364,7 +364,7 @@ public class UnresolvedComponent {
                 if(out.children.isEmpty()) {
                     out.addChild(next);
                 } else {
-                    out.children.get(out.children.size() - 1).addChild(next);
+                    out.getChild(out.children.size() - 1).addChild(next);
                 }
             }
         }

@@ -109,6 +109,15 @@ public class MutableComponent {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion, hoverEvent, clickEvent, content, children.stream().map(e -> e.leftOrGet(MutableComponent::toComponent)).toList());
     }
 
+    public MutableComponent getChild(int index) {
+        return children.get(index).rightOrGet(c -> {
+
+            MutableComponent out = MutableComponent.fromComponent(c);
+            children.set(index, Either.right(out));
+            return out;
+        });
+    }
+
     public void addChild(MutableComponent cmp) {
         this.children.add(Either.right(cmp));
     }
