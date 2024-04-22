@@ -1,4 +1,4 @@
-package org.wallentines.mcore.messaging;
+package org.wallentines.mcore.pluginmsg;
 
 import io.netty.buffer.ByteBuf;
 import org.wallentines.mcore.Client;
@@ -11,7 +11,7 @@ import org.wallentines.midnightlib.registry.Registry;
 /**
  * A module for sending custom packets to servers and handling custom packets sent from servers.
  */
-public abstract class ClientMessagingModule implements ClientModule {
+public abstract class ClientPluginMessageModule implements ClientModule {
 
     protected final Registry<PacketHandler<Client>> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
     protected final Registry<ClientLoginPacketHandler> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
@@ -81,6 +81,6 @@ public abstract class ClientMessagingModule implements ClientModule {
         return out;
     }
 
-    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "messaging");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "plugin_message");
 
 }

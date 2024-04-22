@@ -1,4 +1,4 @@
-package org.wallentines.mcore.messaging;
+package org.wallentines.mcore.pluginmsg;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

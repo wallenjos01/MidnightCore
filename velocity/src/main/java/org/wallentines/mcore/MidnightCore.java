@@ -7,7 +7,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.wallentines.mcore.extension.VelocityExtensionModule;
 import org.wallentines.mcore.lang.PlaceholderManager;
-import org.wallentines.mcore.messaging.VelocityMessagingModule;
+import org.wallentines.mcore.pluginmsg.VelocityPluginMessageModule;
 import org.wallentines.mcore.sql.VelocitySQLModule;
 import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.codec.JSONCodec;
@@ -30,7 +30,7 @@ public class MidnightCore {
         this.server = server;
 
         // Register default modules.
-        ProxyModule.tryRegister(VelocityMessagingModule.ID, VelocityMessagingModule.MODULE_INFO);
+        ProxyModule.tryRegister(VelocityPluginMessageModule.ID, VelocityPluginMessageModule.MODULE_INFO);
         ProxyModule.tryRegister(VelocityExtensionModule.ID, VelocityExtensionModule.MODULE_INFO);
         ProxyModule.tryRegister(VelocitySQLModule.ID, VelocitySQLModule.MODULE_INFO);
 

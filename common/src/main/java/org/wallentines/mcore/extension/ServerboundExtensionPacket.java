@@ -2,7 +2,7 @@ package org.wallentines.mcore.extension;
 
 import io.netty.buffer.ByteBuf;
 import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.messaging.Packet;
+import org.wallentines.mcore.pluginmsg.Packet;
 import org.wallentines.mcore.util.PacketBufferUtil;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.registry.Identifier;

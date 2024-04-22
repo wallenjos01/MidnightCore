@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.messaging.ServerMessagingModule;
+import org.wallentines.mcore.pluginmsg.ServerPluginMessageModule;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
 import java.lang.ref.WeakReference;
@@ -41,7 +41,7 @@ public class SpigotExtensionModule extends ServerExtensionModule {
 
     }
 
-    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<Server, ServerModule>(SpigotExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ServerMessagingModule.ID);
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<Server, ServerModule>(SpigotExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ServerPluginMessageModule.ID);
 
 
 }

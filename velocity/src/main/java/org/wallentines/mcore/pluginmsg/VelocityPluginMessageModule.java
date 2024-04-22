@@ -1,4 +1,4 @@
-package org.wallentines.mcore.messaging;
+package org.wallentines.mcore.pluginmsg;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
@@ -16,7 +16,7 @@ import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
 
-public class VelocityMessagingModule extends ProxyMessagingModule {
+public class VelocityPluginMessageModule extends ProxyPluginMessageModule {
 
     private VelocityProxy proxy;
 
@@ -101,6 +101,6 @@ public class VelocityMessagingModule extends ProxyMessagingModule {
                 Unpooled.wrappedBuffer(event.getContents()));
     }
 
-    public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<>(VelocityMessagingModule::new, ProxyMessagingModule.ID, new ConfigSection());
+    public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<>(VelocityPluginMessageModule::new, ID, new ConfigSection());
 
 }

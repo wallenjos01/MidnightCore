@@ -1,4 +1,4 @@
-package org.wallentines.mcore.messaging;
+package org.wallentines.mcore.pluginmsg;
 
 import com.velocitypowered.api.proxy.LoginPhaseConnection;
 import io.netty.buffer.ByteBuf;

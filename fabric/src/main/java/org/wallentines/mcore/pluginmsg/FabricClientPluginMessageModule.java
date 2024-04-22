@@ -1,4 +1,4 @@
-package org.wallentines.mcore.messaging;
+package org.wallentines.mcore.pluginmsg;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,7 +19,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.CLIENT)
-public class FabricClientMessagingModule extends ClientMessagingModule implements ClientPlayNetworking.PlayPayloadHandler<MidnightPayload> {
+public class FabricClientPluginMessageModule extends ClientPluginMessageModule implements ClientPlayNetworking.PlayPayloadHandler<MidnightPayload> {
 
     @Override
     public void registerPacketHandler(Identifier id, PacketHandler<Client> handler) {
@@ -57,7 +57,7 @@ public class FabricClientMessagingModule extends ClientMessagingModule implement
         });
     }
 
-    public static final ModuleInfo<Client, ClientModule> MODULE_INFO = new ModuleInfo<>(FabricClientMessagingModule::new, ClientMessagingModule.ID, new ConfigSection());
+    public static final ModuleInfo<Client, ClientModule> MODULE_INFO = new ModuleInfo<>(FabricClientPluginMessageModule::new, ClientPluginMessageModule.ID, new ConfigSection());
 
 
     @Override

@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.lang.CustomPlaceholder;
-import org.wallentines.mcore.messaging.ServerMessagingModule;
+import org.wallentines.mcore.pluginmsg.ServerPluginMessageModule;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigSection;
@@ -24,7 +24,7 @@ public abstract class ServerExtensionModule implements ServerModule {
     private final ModuleManager<ServerExtensionModule, ServerExtension> manager = new ModuleManager<>();
     private final HashMap<UUID, Map<Identifier, Version>> enabledExtensions = new HashMap<>();
     private Set<Identifier> requiredExtensions = Set.of();
-    private ServerMessagingModule smm;
+    private ServerPluginMessageModule smm;
     private ClientboundExtensionPacket cachedPacket;
     private Server server;
 
@@ -34,7 +34,7 @@ public abstract class ServerExtensionModule implements ServerModule {
 
         this.server = data;
 
-        ServerMessagingModule mod = data.getModuleManager().getModule(ServerMessagingModule.class);
+        ServerPluginMessageModule mod = data.getModuleManager().getModule(ServerPluginMessageModule.class);
         if(mod == null) {
             MidnightCoreAPI.LOGGER.warn("Unable to initialize extension module! No valid messaging module was found!");
             return false;

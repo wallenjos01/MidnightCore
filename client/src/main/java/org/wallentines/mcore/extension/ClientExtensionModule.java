@@ -5,7 +5,7 @@ import io.netty.buffer.Unpooled;
 import org.wallentines.mcore.Client;
 import org.wallentines.mcore.ClientModule;
 import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mcore.messaging.ClientMessagingModule;
+import org.wallentines.mcore.pluginmsg.ClientPluginMessageModule;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -21,12 +21,12 @@ import java.util.List;
 public class ClientExtensionModule implements ClientModule {
 
     private final ModuleManager<ClientExtensionModule, ClientExtension> manager = new ModuleManager<>();
-    private ClientMessagingModule cmm;
+    private ClientPluginMessageModule cmm;
 
     @Override
     public boolean initialize(ConfigSection section, Client data) {
 
-        cmm = data.getModuleManager().getModule(ClientMessagingModule.class);
+        cmm = data.getModuleManager().getModule(ClientPluginMessageModule.class);
         if(cmm == null) {
             MidnightCoreAPI.LOGGER.warn("Unable to initialize client extension module! The client messaging module is required!");
             return false;
@@ -76,6 +76,6 @@ public class ClientExtensionModule implements ClientModule {
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
             .with("extensions", new ConfigSection());
 
-    public static final ModuleInfo<Client, ClientModule> MODULE_INFO = new ModuleInfo<Client, ClientModule>(ClientExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ClientMessagingModule.ID);
+    public static final ModuleInfo<Client, ClientModule> MODULE_INFO = new ModuleInfo<Client, ClientModule>(ClientExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ClientPluginMessageModule.ID);
 
 }

@@ -1,10 +1,8 @@
-package org.wallentines.mcore.messaging;
+package org.wallentines.mcore.pluginmsg;
 
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.*;
-import net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import org.wallentines.mcore.ConfiguringPlayer;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
@@ -15,11 +13,9 @@ import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-public class FabricServerMessagingModule extends ServerMessagingModule implements
+public class FabricServerPluginMessageModule extends ServerPluginMessageModule implements
         ServerPlayNetworking.PlayPayloadHandler<MidnightPayload>,
         ServerConfigurationNetworking.ConfigurationPacketHandler<MidnightPayload> {
 
@@ -106,6 +102,6 @@ public class FabricServerMessagingModule extends ServerMessagingModule implement
         handleConfigPacket((ConfiguringPlayer) context.networkHandler(), ConversionUtil.toIdentifier(payload.type().id()), payload.getBuffer());
     }
 
-    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricServerMessagingModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(FabricServerPluginMessageModule::new, ID, new ConfigSection());
 
 }

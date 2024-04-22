@@ -6,7 +6,7 @@ import org.wallentines.mcore.Proxy;
 import org.wallentines.mcore.ProxyModule;
 import org.wallentines.mcore.VelocityPlayer;
 import org.wallentines.mcore.VelocityProxy;
-import org.wallentines.mcore.messaging.ProxyMessagingModule;
+import org.wallentines.mcore.pluginmsg.ProxyPluginMessageModule;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 
@@ -34,6 +34,6 @@ public class VelocityExtensionModule extends ProxyExtensionModule {
         onFinishLogin(new VelocityPlayer(event.getPlayer(), proxy));
     }
 
-    public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<Proxy, ProxyModule>(VelocityExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ProxyMessagingModule.ID);
+    public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<Proxy, ProxyModule>(VelocityExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ProxyPluginMessageModule.ID);
 
 }

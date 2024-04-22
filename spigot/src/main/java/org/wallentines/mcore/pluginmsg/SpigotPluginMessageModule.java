@@ -1,4 +1,4 @@
-package org.wallentines.mcore.messaging;
+package org.wallentines.mcore.pluginmsg;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -12,7 +12,7 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
-public class SpigotMessagingModule extends ServerMessagingModule implements PluginMessageListener {
+public class SpigotPluginMessageModule extends ServerPluginMessageModule implements PluginMessageListener {
 
 
     @Override
@@ -100,7 +100,7 @@ public class SpigotMessagingModule extends ServerMessagingModule implements Plug
 
     }
 
-    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(SpigotMessagingModule::new, ID, new ConfigSection());
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(SpigotPluginMessageModule::new, ID, new ConfigSection());
 
 
 }

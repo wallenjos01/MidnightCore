@@ -1,4 +1,4 @@
-package org.wallentines.mcore.messaging;
+package org.wallentines.mcore.pluginmsg;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -13,7 +13,7 @@ import org.wallentines.midnightlib.registry.Registry;
 /**
  * A module for sending custom packets to players and servers.
  */
-public abstract class ProxyMessagingModule implements ProxyModule {
+public abstract class ProxyPluginMessageModule implements ProxyModule {
 
     protected final Registry<PacketHandler<ProxyPlayer>> playerHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
     protected final Registry<PacketHandler<ProxyPlayer>> serverHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
@@ -106,6 +106,6 @@ public abstract class ProxyMessagingModule implements ProxyModule {
         return true;
     }
 
-    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "messaging");
+    public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "plugin_message");
 
 }

@@ -4,7 +4,7 @@ import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Proxy;
 import org.wallentines.mcore.ProxyModule;
 import org.wallentines.mcore.ProxyPlayer;
-import org.wallentines.mcore.messaging.ProxyMessagingModule;
+import org.wallentines.mcore.pluginmsg.ProxyPluginMessageModule;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -24,7 +24,7 @@ public abstract class ProxyExtensionModule implements ProxyModule {
     @Override
     public boolean initialize(ConfigSection section, Proxy data) {
 
-        ProxyMessagingModule mod = data.getModuleManager().getModule(ProxyMessagingModule.class);
+        ProxyPluginMessageModule mod = data.getModuleManager().getModule(ProxyPluginMessageModule.class);
 
         if(mod == null) {
             MidnightCoreAPI.LOGGER.warn("Unable to enable Extension module! The messaging module is required!");
