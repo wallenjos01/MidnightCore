@@ -10,11 +10,7 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.EventHandler;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Consumer;
 

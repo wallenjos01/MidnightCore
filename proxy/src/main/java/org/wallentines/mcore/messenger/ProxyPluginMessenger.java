@@ -28,18 +28,19 @@ public class ProxyPluginMessenger extends PluginMessenger {
 
     @Override
     public void publish(String channel, ByteBuf message) {
-        publish(new Packet(channel, namespace, message));
+        publish(null, new Packet(channel, namespace, message));
     }
 
     @Override
     public void queue(String channel, ByteBuf message) {
-        publish(new Packet(channel, namespace, message).queued());
+        publish(null, new Packet(channel, namespace, message).queued());
     }
 
-    private void publish(Packet packet) {
+    private void publish(ProxyServer sender, Packet packet) {
 
         // Forward
         for(ForwardInfo inf : servers.values()) {
+            if(inf.server == sender) continue;
             if(Objects.equals(namespace, inf.namespace)) {
                 inf.forward(packet);
             }
@@ -52,10 +53,11 @@ public class ProxyPluginMessenger extends PluginMessenger {
         module.registerServerHandler(MESSAGE_ID, (pl, payload) -> {
 
             Packet pck = readPacket(payload);
+            ProxyServer server = pl.getServer();
             if(pck.channel.equals(REGISTER_CHANNEL)) {
 
                 // Handle Registration
-                servers.put(pl.getServer(), new ForwardInfo(pl.getServer(), pck.namespace, pck.flags));
+                servers.put(server, new ForwardInfo(server, pck.namespace, pck.flags));
                 return;
             }
 
@@ -63,7 +65,7 @@ public class ProxyPluginMessenger extends PluginMessenger {
                 handler.accept(pck);
             }
 
-            publish(pck);
+            publish(server, pck);
         });
 
     }

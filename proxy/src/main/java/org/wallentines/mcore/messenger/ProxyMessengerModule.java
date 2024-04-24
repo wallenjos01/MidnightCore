@@ -16,6 +16,11 @@ public class ProxyMessengerModule extends MessengerModule implements ProxyModule
         return super.init(config);
     }
 
+    @Override
+    public void disable() {
+        shutdown();
+    }
+
     public Proxy getProxy() {
         return proxy;
     }

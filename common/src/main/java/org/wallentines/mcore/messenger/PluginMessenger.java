@@ -4,6 +4,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.util.PacketBufferUtil;
+import org.wallentines.midnightlib.event.EventHandler;
+import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import javax.crypto.*;
@@ -17,12 +19,22 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * A messenger which uses plugin messages to communicate across traditional Minecraft proxies
+ */
 public abstract class PluginMessenger implements Messenger {
 
+    /**
+     * The ID of the plugin message type used by this messenger
+     */
     public static final Identifier MESSAGE_ID = new Identifier(MidnightCoreAPI.MOD_ID, "msg");
-    public static final String REGISTER_CHANNEL = "msg";
 
-    private final Map<String, MessageHandler> handlers;
+    /**
+     * The message channel used to register a server on the proxy
+     */
+    public static final String REGISTER_CHANNEL = "__mcore_register";
+
+    private final Map<String, HandlerList<Message>> handlers;
     private final SecretKey encryptionKey;
     private final EnumSet<Flag> flags;
     protected final String namespace;
@@ -42,10 +54,9 @@ public abstract class PluginMessenger implements Messenger {
 
         registerHandler(pck -> {
 
-            MessageHandler handler = handlers.get(pck.channel);
+            HandlerList<Message> list = handlers.get(pck.channel);
 
-            if(handler == null) {
-                MidnightCoreAPI.LOGGER.error("Received message for unknown channel! (" + pck.channel + ")");
+            if(list == null) {
                 return;
             }
 
@@ -54,23 +65,30 @@ public abstract class PluginMessenger implements Messenger {
                 return;
             }
 
-            handler.handle(this, pck.channel, pck.payload);
+            list.invoke(pck.toMessage());
         });
     }
 
     protected abstract void registerHandler(Consumer<Packet> handler);
 
     @Override
-    public void unsubscribe(String channel) {
-        handlers.remove(channel);
+    public void unsubscribe(Object listener, String channel) {
+        handlers.computeIfPresent(channel, (k,v) -> {
+            v.unregisterAll(listener);
+            return v;
+        });
     }
 
     @Override
-    public void subscribe(String channel, MessageHandler handler) {
+    public void subscribe(Object listener, String channel, EventHandler<Message> handler) {
         if(handlers.containsKey(channel)) {
             MidnightCoreAPI.LOGGER.warn("Re-registered messenger channel " + channel);
         }
-        handlers.put(channel, handler);
+        handlers.compute(channel, (k,v) -> {
+            if(v == null) v = new HandlerList<>();
+            v.register(listener, handler);
+            return v;
+        });
     }
 
 
@@ -136,7 +154,9 @@ public abstract class PluginMessenger implements Messenger {
         }
     }
 
-
+    /**
+     * Flags encoded in message packets
+     */
     public enum Flag {
         ENCRYPTED(0b00000001),
         NAMESPACED(0b00000010),
@@ -193,6 +213,11 @@ public abstract class PluginMessenger implements Messenger {
             outFlags.add(Flag.QUEUE);
 
             return new Packet(channel, namespace, outFlags, payload);
+        }
+
+        public Message toMessage() {
+
+            return new Message(PluginMessenger.this, channel, payload);
         }
 
         @Override

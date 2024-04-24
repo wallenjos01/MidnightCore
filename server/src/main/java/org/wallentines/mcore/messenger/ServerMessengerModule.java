@@ -15,6 +15,11 @@ public class ServerMessengerModule extends MessengerModule implements ServerModu
         return super.init(config);
     }
 
+    @Override
+    public void disable() {
+        shutdown();
+    }
+
     public Server getServer() {
         return server;
     }

@@ -4,10 +4,18 @@ import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
+/**
+ * A module which allows the server to send messages to other servers running MidnightCore
+ */
 public abstract class MessengerModule {
 
     private Messenger messenger;
 
+    /**
+     * Initializes the module by creating a messenger from the given configuration
+     * @param data The messenger configuration
+     * @return Whether initialization was successful
+     */
     protected boolean init(ConfigSection data) {
 
         String type = data.getString("type");
