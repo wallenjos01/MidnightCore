@@ -99,20 +99,9 @@ public class ServerPluginMessenger extends PluginMessenger {
                 // Read secret key
                 String secretKeyPath = params.getOrDefault("key_path", "secret.key");
                 File file = server.getConfigDirectory().resolve(secretKeyPath).toFile();
-                try(FileInputStream fis = new FileInputStream(file);
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                key = readKey(file);
 
-                    byte[] buffer = new byte[1024];
-                    int read;
-                    while((read = fis.read(buffer)) != -1) {
-                        bos.write(buffer, 0, read);
-                    }
-
-                    key = new SecretKeySpec(bos.toByteArray(), "AES");
-                } catch (IOException ex) {
-                    MidnightCoreAPI.LOGGER.error("Unable to read encryption key for messenger!");
-                    return null;
-                }
+                if(key == null) return null;
             }
 
             return new ServerPluginMessenger(mod, parent, key, namespace);

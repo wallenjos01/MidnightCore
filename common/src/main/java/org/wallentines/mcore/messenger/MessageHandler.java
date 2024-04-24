@@ -4,6 +4,6 @@ import io.netty.buffer.ByteBuf;
 
 public interface MessageHandler {
 
-    void handle(Messenger messenger, String channel, String namespace, ByteBuf data);
+    void handle(Messenger messenger, String channel, ByteBuf data);
 
 }

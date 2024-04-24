@@ -11,11 +11,7 @@ import org.wallentines.midnightlib.event.EventHandler;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.function.Consumer;
@@ -32,22 +28,20 @@ public class ProxyPluginMessenger extends PluginMessenger {
 
     @Override
     public void publish(String channel, ByteBuf message) {
-        publish(channel, message, false);
+        publish(new Packet(channel, namespace, message));
     }
 
     @Override
     public void queue(String channel, ByteBuf message) {
-        publish(channel, message, true);
+        publish(new Packet(channel, namespace, message).queued());
     }
 
-    private void publish(String channel, ByteBuf message, boolean queue) {
+    private void publish(Packet packet) {
 
         // Forward
         for(ForwardInfo inf : servers.values()) {
-
-            if(inf.namespace == null || inf.namespace.equals(namespace)) {
-                Packet out = new Packet(channel, namespace, inf.flags, message);
-                inf.forward(out, queue);
+            if(Objects.equals(namespace, inf.namespace)) {
+                inf.forward(packet);
             }
         }
     }
@@ -60,17 +54,16 @@ public class ProxyPluginMessenger extends PluginMessenger {
             Packet pck = readPacket(payload);
             if(pck.channel.equals(REGISTER_CHANNEL)) {
 
-                // Handle
+                // Handle Registration
                 servers.put(pl.getServer(), new ForwardInfo(pl.getServer(), pck.namespace, pck.flags));
                 return;
             }
 
-            if(namespace == null || namespace.equals(pck.namespace)) {
+            if(Objects.equals(namespace, pck.namespace)) {
                 handler.accept(pck);
             }
 
-            publish(pck.channel, pck.payload, pck.flags.contains(Flag.QUEUE));
-
+            publish(pck);
         });
 
     }
@@ -97,10 +90,10 @@ public class ProxyPluginMessenger extends PluginMessenger {
             };
         }
 
-        public void forward(Packet pck, boolean queue) {
+        public void forward(Packet pck) {
 
             if(server.getPlayers().isEmpty()) {
-                if(!queue) {
+                if(!pck.flags.contains(Flag.QUEUE)) {
                     return;
                 }
                 if(this.queue.isEmpty()) {
@@ -141,18 +134,9 @@ public class ProxyPluginMessenger extends PluginMessenger {
                 String secretKeyPath = params.getOrDefault("key_path", "secret.key");
                 File file = proxy.getConfigDirectory().resolve(secretKeyPath).toFile();
                 if(file.exists()) {
-                    try(FileInputStream fis = new FileInputStream(file);
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                    key = readKey(file);
+                    if(key == null) return null;
 
-                        byte[] buffer = new byte[1024];
-                        int read;
-                        while((read = fis.read(buffer)) != -1) {
-                            bos.write(buffer, 0, read);
-                        }
-                    } catch (IOException ex) {
-                        MidnightCoreAPI.LOGGER.error("Unable to read encryption key for messenger!");
-                        return null;
-                    }
                 } else {
                     try {
                         KeyGenerator gen = KeyGenerator.getInstance("AES");

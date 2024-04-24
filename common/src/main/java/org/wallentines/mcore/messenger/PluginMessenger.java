@@ -7,7 +7,10 @@ import org.wallentines.mcore.util.PacketBufferUtil;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -46,12 +49,12 @@ public abstract class PluginMessenger implements Messenger {
                 return;
             }
 
-            if(namespace != null && !Objects.equals(pck.namespace, namespace)) {
+            if(!Objects.equals(pck.namespace, namespace)) {
                 MidnightCoreAPI.LOGGER.warn("Received a message with mismatched namespace! (" + pck.namespace + ")");
                 return;
             }
 
-            handler.handle(this, pck.channel, pck.namespace, pck.payload);
+            handler.handle(this, pck.channel, pck.payload);
         });
     }
 
@@ -113,6 +116,23 @@ public abstract class PluginMessenger implements Messenger {
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException |
                  IllegalBlockSizeException | ShortBufferException | BadPaddingException | IOException e) {
             throw new RuntimeException("Unable to decrypt message!", e);
+        }
+    }
+
+    protected static SecretKey readKey(File file) {
+        try(FileInputStream fis = new FileInputStream(file);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while((read = fis.read(buffer)) != -1) {
+                bos.write(buffer, 0, read);
+            }
+
+            return new SecretKeySpec(bos.toByteArray(), "AES");
+        } catch (IOException ex) {
+            MidnightCoreAPI.LOGGER.error("Unable to read encryption key!");
+            return null;
         }
     }
 
