@@ -1,5 +1,7 @@
 package org.wallentines.mcore;
 
+import org.wallentines.midnightlib.event.HandlerList;
+
 import java.net.InetSocketAddress;
 import java.util.Collection;
 
@@ -31,5 +33,12 @@ public interface ProxyServer {
      * @return A list of online players
      */
     Collection<ProxyPlayer> getPlayers();
+
+
+    /**
+     * Gets an event called when a player connects
+     * @return The server's connect event
+     */
+    HandlerList<ProxyPlayer> connectEvent();
 
 }

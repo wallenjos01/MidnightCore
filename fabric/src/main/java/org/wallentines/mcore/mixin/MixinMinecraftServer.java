@@ -34,6 +34,10 @@ public abstract class MixinMinecraftServer implements Server {
     private final HandlerList<Server> mcore$tickEvent = new HandlerList<>();
     @Unique
     private final HandlerList<Server> mcore$stopEvent = new SingletonHandlerList<>();
+    @Unique
+    private final HandlerList<Player> mcore$joinEvent = new HandlerList<>();
+    @Unique
+    private final HandlerList<Player> mcore$leaveEvent = new HandlerList<>();
 
     @Shadow private PlayerList playerList;
 
@@ -44,11 +48,11 @@ public abstract class MixinMinecraftServer implements Server {
 
 
     public Player mcore$getPlayer(UUID uuid) {
-        return (Player) playerList.getPlayer(uuid);
+        return playerList.getPlayer(uuid);
     }
 
     public Player mcore$findPlayer(String name) {
-        return (Player) playerList.getPlayerByName(name);
+        return playerList.getPlayerByName(name);
     }
 
     public Collection<Player> mcore$getPlayers() {
@@ -85,6 +89,14 @@ public abstract class MixinMinecraftServer implements Server {
 
     public HandlerList<Server> mcore$shutdownEvent() {
         return mcore$stopEvent;
+    }
+
+    public HandlerList<Player> mcore$joinEvent() {
+        return mcore$joinEvent;
+    }
+
+    public HandlerList<Player> mcore$leaveEvent() {
+        return mcore$leaveEvent;
     }
 
     @Intrinsic(displace = true)

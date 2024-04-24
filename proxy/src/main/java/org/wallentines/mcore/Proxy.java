@@ -80,6 +80,28 @@ public interface Proxy {
     }
 
 
+
+    /**
+     * An event fired when a player joins the proxy
+     * @return The proxy's shutdown event
+     */
+    HandlerList<ProxyPlayer> joinEvent();
+
+
+    /**
+     * An event fired when a player leaves the proxy
+     * @return The proxy's shutdown event
+     */
+    HandlerList<ProxyPlayer> leaveEvent();
+
+
+    /**
+     * An event fired when a player transfers to another server
+     * @return The proxy's shutdown event
+     */
+    HandlerList<Transfer> transferEvent();
+
+
     /**
      * An event fired when the proxy shuts down
      * @return The proxy's shutdown event
@@ -90,5 +112,16 @@ public interface Proxy {
      * Contains the running proxy. Will be populated as soon as the proxy starts up.
      */
     Singleton<Proxy> RUNNING_PROXY = new Singleton<>();
+
+
+    class Transfer {
+        public final ProxyPlayer player;
+        public final ProxyServer previousServer;
+
+        public Transfer(ProxyPlayer player, ProxyServer previousServer) {
+            this.player = player;
+            this.previousServer = previousServer;
+        }
+    }
 
 }

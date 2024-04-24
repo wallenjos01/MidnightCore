@@ -119,6 +119,19 @@ public interface Server {
     HandlerList<Server> shutdownEvent();
 
     /**
+     * Called when a player joins the game
+     * @return The server's join event
+     */
+    HandlerList<Player> joinEvent();
+
+    /**
+     * Called when a player leaves the game
+     * @return The server's leave event
+     */
+    HandlerList<Player> leaveEvent();
+
+
+    /**
      * Submits some code to be run on synchronously on the server thread
      * @param runnable The code to run
      */
