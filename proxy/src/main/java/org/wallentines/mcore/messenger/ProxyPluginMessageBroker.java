@@ -124,7 +124,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     public static final Factory FACTORY = (msg) -> {
 
         if(!(msg instanceof ProxyMessengerModule)) {
-            throw new IllegalStateException("Unable to create plugin message broker! Plugin message module is unloaded!");
+            throw new IllegalStateException("Unable to create plugin message broker! Proxy messenger required!");
         }
 
         Proxy prx = ((ProxyMessengerModule) msg).getProxy();

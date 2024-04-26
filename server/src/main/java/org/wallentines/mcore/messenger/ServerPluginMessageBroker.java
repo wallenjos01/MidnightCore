@@ -83,7 +83,7 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
     public static final Factory FACTORY = (msg) -> {
 
         if(!(msg instanceof ServerMessengerModule)) {
-            throw new IllegalStateException("Unable to create plugin message broker! Plugin message module is unloaded!");
+            throw new IllegalStateException("Unable to create plugin message broker! Server messenger required!");
         }
 
         Server srv = ((ServerMessengerModule) msg).getServer();
