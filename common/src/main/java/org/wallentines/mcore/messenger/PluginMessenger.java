@@ -68,6 +68,11 @@ public class PluginMessenger implements Messenger {
         });
     }
 
+    @Override
+    public void shutdown() {
+        broker.shutdown();
+    }
+
     public static class Type implements MessengerType {
 
         private final PluginMessageBroker.Factory factory;

@@ -10,7 +10,6 @@ import org.wallentines.midnightlib.event.EventHandler;
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.function.Consumer;
 
 public class ServerPluginMessageBroker extends PluginMessageBroker {
 
@@ -65,11 +64,12 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
     }
 
     @Override
-    public void shutdown() {
+    public void onShutdown() {
 
         ByteBuf payload = Unpooled.buffer();
         payload.writeByte(UNREGISTER);
         send(new Packet(REGISTER_CHANNEL, key != null, null, payload).queued());
+
     }
 
     @Override

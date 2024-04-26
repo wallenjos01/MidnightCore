@@ -37,6 +37,7 @@ public abstract class PluginMessageBroker {
     private PluginMessenger nullNamespace;
     private final Map<String, PluginMessenger> messengersByNamespace;
     protected final Consumer<Packet> packetHandler;
+    private boolean isShutdown;
 
     protected PluginMessageBroker() {
         this.messengersByNamespace = new HashMap<>();
@@ -79,8 +80,14 @@ public abstract class PluginMessageBroker {
         return messengersByNamespace.get(namespace);
     }
 
-    public abstract void shutdown();
+    public void shutdown() {
+        if(isShutdown) return;
+        isShutdown = true;
 
+        onShutdown();
+    }
+
+    protected abstract void onShutdown();
 
     private static ByteBuf decrypt(ByteBuf buffer, SecretKey key) {
 

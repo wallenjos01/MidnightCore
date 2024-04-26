@@ -83,7 +83,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     }
 
     @Override
-    public void shutdown() {
+    public void onShutdown() {
         infosByServer.clear();
     }
 
