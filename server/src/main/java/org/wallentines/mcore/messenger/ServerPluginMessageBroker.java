@@ -20,6 +20,7 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
     private final Queue<Packet> queue = new ArrayDeque<>();
 
     public ServerPluginMessageBroker(Server server, ServerPluginMessageModule module) {
+        super();
         this.server = server;
         this.module = module;
 
@@ -29,6 +30,10 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
             }
             server.joinEvent().unregisterAll(this);
         };
+
+        module.registerPacketHandler(MESSAGE_ID, (pl, buf) -> {
+            packetHandler.accept(readPacket(buf));
+        });
     }
 
     @Override
@@ -68,22 +73,18 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
     }
 
     @Override
-    protected void setupHandler(Consumer<Packet> handler) {
-
-        module.registerPacketHandler(MESSAGE_ID, (pl, buf) -> {
-            handler.accept(readPacket(buf));
-        });
-    }
-
-    @Override
     protected File getKeyFile() {
         return server.getConfigDirectory().resolve("MidnightCore").resolve("messenger.key").toFile();
     }
 
 
-    public static final Factory FACTORY = () -> {
+    public static final Factory FACTORY = (msg) -> {
 
-        Server srv = Server.RUNNING_SERVER.get();
+        if(!(msg instanceof ServerMessengerModule)) {
+            throw new IllegalStateException("Unable to create plugin message broker! Plugin message module is unloaded!");
+        }
+
+        Server srv = ((ServerMessengerModule) msg).getServer();
         ServerPluginMessageModule pm = srv.getModuleManager().getModule(ServerPluginMessageModule.class);
 
         if(pm == null) {

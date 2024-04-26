@@ -81,7 +81,7 @@ public class PluginMessenger implements Messenger {
         public Messenger create(MessengerModule module, ConfigSection params) {
 
             return new PluginMessenger(
-                    brokers.computeIfAbsent(module, k -> factory.create()),
+                    brokers.computeIfAbsent(module, k -> factory.create(module)),
                     params.getOrDefault("encrypt", false),
                     params.getOrDefault("namespace", (String) null)
             );

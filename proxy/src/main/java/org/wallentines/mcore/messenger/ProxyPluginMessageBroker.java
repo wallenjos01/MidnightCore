@@ -12,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.function.Consumer;
 
 public class ProxyPluginMessageBroker extends PluginMessageBroker {
 
@@ -25,31 +24,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     public ProxyPluginMessageBroker(Proxy proxy, ProxyPluginMessageModule module) {
         this.proxy = proxy;
         this.module = module;
-    }
 
-    @Override
-    protected void send(Packet packet) {
-
-        Set<String> servers;
-        if(packet.namespace == null) {
-            servers = rootNamespace;
-        } else {
-            servers = serversByNamespace.get(packet.namespace);
-        }
-
-        for(String s : servers) {
-            ForwardInfo fi = infosByServer.get(s);
-            module.sendServerMessage(fi.server, packet.forFlags(fi.flags));
-        }
-    }
-
-    @Override
-    public void shutdown() {
-        infosByServer.clear();
-    }
-
-    @Override
-    protected void setupHandler(Consumer<Packet> handler) {
 
         module.registerServerHandler(MESSAGE_ID, (player, payload) -> {
 
@@ -82,13 +57,34 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
             }
 
             // Handle
-            handler.accept(packet);
+            packetHandler.accept(packet);
 
             // Forward
             send(packet);
 
         });
 
+    }
+
+    @Override
+    protected void send(Packet packet) {
+
+        Set<String> servers;
+        if(packet.namespace == null) {
+            servers = rootNamespace;
+        } else {
+            servers = serversByNamespace.get(packet.namespace);
+        }
+
+        for(String s : servers) {
+            ForwardInfo fi = infosByServer.get(s);
+            module.sendServerMessage(fi.server, packet.forFlags(fi.flags));
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        infosByServer.clear();
     }
 
     @Override
@@ -124,9 +120,13 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         }
     }
 
-    public static final Factory FACTORY = () -> {
+    public static final Factory FACTORY = (msg) -> {
 
-        Proxy prx = Proxy.RUNNING_PROXY.get();
+        if(!(msg instanceof ProxyMessengerModule)) {
+            throw new IllegalStateException("Unable to create plugin message broker! Plugin message module is unloaded!");
+        }
+
+        Proxy prx = ((ProxyMessengerModule) msg).getProxy();
         ProxyPluginMessageModule pm = prx.getModuleManager().getModule(ProxyPluginMessageModule.class);
 
         if(pm == null) {

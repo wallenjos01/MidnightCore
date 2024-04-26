@@ -31,14 +31,25 @@ public abstract class MessengerModule {
         for(String key : sec.getKeys()) {
             ConfigSection messenger = sec.getSection(key);
 
-            String type = sec.getString("type");
+            if(!messenger.hasString("type")) {
+                MidnightCoreAPI.LOGGER.error("Missing required key type for messenger " + key + "!");
+            }
+
+            String type = messenger.getString("type");
             MessengerType mt = MessengerType.REGISTRY.get(type);
             if(mt == null) {
                 MidnightCoreAPI.LOGGER.error("Unable to find messenger type " + type + "!");
                 return false;
             }
 
-            Messenger msg = mt.create(this, messenger);
+            Messenger msg;
+            try {
+                msg = mt.create(this, messenger);
+            } catch (Throwable th) {
+                MidnightCoreAPI.LOGGER.error("An error occurred while creating messenger " + key + "!", th);
+                return false;
+            }
+
             if(msg == null) {
                 MidnightCoreAPI.LOGGER.error("Unable to create messenger for " + type + "!");
                 return false;
@@ -52,7 +63,7 @@ public abstract class MessengerModule {
     }
 
     protected void shutdown() {
-        if(!initialized) throw new IllegalStateException("Attempt to shutdown before module was initialized!");
+        
         for(Messenger msg : messengers.values()) {
             msg.shutdown();
         }

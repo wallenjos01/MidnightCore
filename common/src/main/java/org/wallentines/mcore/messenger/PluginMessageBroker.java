@@ -36,16 +36,17 @@ public abstract class PluginMessageBroker {
     protected SecretKey key;
     private PluginMessenger nullNamespace;
     private final Map<String, PluginMessenger> messengersByNamespace;
+    protected final Consumer<Packet> packetHandler;
 
     protected PluginMessageBroker() {
         this.messengersByNamespace = new HashMap<>();
 
-        setupHandler(pck -> {
+        this.packetHandler = pck -> {
             PluginMessenger messenger = getMessenger(pck.namespace);
             if(messenger == null) return;
 
             messenger.handle(pck);
-        });
+        };
     }
 
     public void send(String channel, boolean encrypt, String namespace, ByteBuf message, boolean queue) {
@@ -80,8 +81,6 @@ public abstract class PluginMessageBroker {
 
     public abstract void shutdown();
 
-
-    protected abstract void setupHandler(Consumer<Packet> handler);
 
     private static ByteBuf decrypt(ByteBuf buffer, SecretKey key) {
 
@@ -278,7 +277,7 @@ public abstract class PluginMessageBroker {
     }
 
     public interface Factory {
-        PluginMessageBroker create();
+        PluginMessageBroker create(MessengerModule module);
     }
 
 }
