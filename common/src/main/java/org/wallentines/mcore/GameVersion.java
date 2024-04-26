@@ -133,7 +133,7 @@ public class GameVersion {
         /**
          * In 24w13a, the item_name item component was added
          */
-        public static final Feature ITEM_NAME_COMPONENT = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 182);
+        public static final Feature ITEM_NAME_OVERRIDE = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 182);
 
 
         public final int minVersion;

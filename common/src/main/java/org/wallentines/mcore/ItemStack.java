@@ -175,7 +175,7 @@ public interface ItemStack {
 
         if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
-            if(getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENT)) {
+            if(getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_OVERRIDE)) {
                 loadComponent(ITEM_NAME_COMPONENT, new ConfigPrimitive(component.toJSONString()));
             } else {
                 loadComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(ItemUtil.applyItemNameBaseStyle(component).toJSONString()));
@@ -204,7 +204,7 @@ public interface ItemStack {
         if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
             ConfigObject obj = saveComponent(CUSTOM_NAME_COMPONENT);
-            if(obj == null && getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENT)) {
+            if(obj == null && getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_OVERRIDE)) {
                 obj = saveComponent(ITEM_NAME_COMPONENT);
             }
             if(obj == null) return null;
@@ -529,7 +529,7 @@ public interface ItemStack {
 
             if (version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
-                if(version.hasFeature(GameVersion.Feature.ITEM_NAME_COMPONENT)) {
+                if(version.hasFeature(GameVersion.Feature.ITEM_NAME_OVERRIDE)) {
                     return withComponent(ITEM_NAME_COMPONENT, new ConfigPrimitive(name.toJSONString()));
                 } else {
                     return withComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(ItemUtil.applyItemNameBaseStyle(name).toJSONString()));

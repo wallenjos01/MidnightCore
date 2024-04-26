@@ -187,14 +187,22 @@ public class AdapterImpl implements Adapter {
     @Override
     public void loadComponent(ItemStack is, Identifier component, ConfigObject value) {
 
+
         net.minecraft.world.item.ItemStack item = reflector.getHandle(is);
         DataComponentType<?> type = BuiltInRegistries.as.a(new MinecraftKey(component.getNamespace(), component.getPath())); // DATA_COMPONENT_TYPE, get
         if(type == null) {
             MidnightCoreAPI.LOGGER.warn("Unknown component type " + component + "!");
             return;
         }
+
+        JsonElement json = ConfigContext.INSTANCE.convert(GsonContext.INSTANCE, value);
+        loadComponent(item, type, json);
+    }
+
+    private <T> void loadComponent(net.minecraft.world.item.ItemStack item, DataComponentType<T> type, JsonElement element) {
+
         // set, codecOrThrow
-        item.a(type, type.c().decode(JsonOps.INSTANCE, ConfigContext.INSTANCE.convert(GsonContext.INSTANCE, value)).getOrThrow().getFirst());
+        item.b(type, type.c().decode(JsonOps.INSTANCE, element).getOrThrow().getFirst());
     }
 
     @Override
