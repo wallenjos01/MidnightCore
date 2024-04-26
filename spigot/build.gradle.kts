@@ -15,79 +15,44 @@ repositories {
     maven("https://libraries.minecraft.net/")
 }
 
-configurations.create("shadow17"){
-    extendsFrom(configurations.shadow.get())
-}
-
-configurations.create("shadow8") {
-    extendsFrom(configurations.shadow.get())
-    attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 8)
-}
-
-tasks.named<Jar>("java8Jar") {
-    val id = rootProject.name
-    archiveBaseName = "${id}-${project.name}"
-}
-
-tasks.shadowJar {
-    archiveClassifier.set("1.17-1.20")
-    configurations = listOf(project.configurations["shadow17"])
-}
-
-val java8ShadowJar = tasks.register<ShadowJar>("java8ShadowJar") {
-    archiveClassifier.set("1.8-1.16")
-    configurations = listOf(project.configurations["shadow8"])
-
-    dependsOn(tasks.processResources)
-
-    from(sourceSets["java8"].output)
-    from(tasks.processResources.get().destinationDir)
-}
-
-
-tasks.build {
-    dependsOn(tasks.shadowJar)
-    dependsOn(java8ShadowJar)
-}
+setupShadow(21, "1.20.5")
+setupShadow(17, "1.17-1.20.4")
+setupShadow(8, "1.8-1.16")
 
 // Versions compiled against Java 8
-val legacyVersions = listOf(
-        VersionInfo("1_8_R1","1.8"),
-        VersionInfo("1_8_R2","1.8.3"),
-        VersionInfo("1_8_R3","1.8.8"),
-        VersionInfo("1_9_R1","1.9"),
-        VersionInfo("1_9_R2","1.9.4"),
-        VersionInfo("1_10_R1","1.10.2"),
-        VersionInfo("1_11_R1","1.11.2"),
-        VersionInfo("1_12_R1","1.12.2"),
-        VersionInfo("1_13_R1","1.13"),
-        VersionInfo("1_13_R2","1.13.1"),
-        VersionInfo("1_13_R2v2","1.13.2"),
-        VersionInfo("1_14_R1","1.14.4"),
-        VersionInfo("1_15_R1","1.15.2"),
-        VersionInfo("1_16_R1","1.16.1"),
-        VersionInfo("1_16_R2","1.16.2"),
-        VersionInfo("1_16_R3","1.16.4")
+val versions = listOf(
+        VersionInfo("1_8_R1","1.8", 8),
+        VersionInfo("1_8_R2","1.8.3", 8),
+        VersionInfo("1_8_R3","1.8.8", 8),
+        VersionInfo("1_9_R1","1.9", 8),
+        VersionInfo("1_9_R2","1.9.4", 8),
+        VersionInfo("1_10_R1","1.10.2", 8),
+        VersionInfo("1_11_R1","1.11.2", 8),
+        VersionInfo("1_12_R1","1.12.2", 8),
+        VersionInfo("1_13_R1","1.13", 8),
+        VersionInfo("1_13_R2","1.13.1", 8),
+        VersionInfo("1_13_R2v2","1.13.2", 8),
+        VersionInfo("1_14_R1","1.14.4", 8),
+        VersionInfo("1_15_R1","1.15.2", 8),
+        VersionInfo("1_16_R1","1.16.1", 8),
+        VersionInfo("1_16_R2","1.16.2", 8),
+        VersionInfo("1_16_R3","1.16.4", 8),
+        VersionInfo("1_17_R1","1.17.1", 17),
+        VersionInfo("1_18_R1","1.18", 17),
+        VersionInfo("1_18_R2","1.18.2", 17),
+        VersionInfo("1_19_R1","1.19", 17),
+        VersionInfo("1_19_R1v2","1.19.2", 17),
+        VersionInfo("1_19_R2","1.19.3", 17),
+        VersionInfo("1_19_R3","1.19.4", 17),
+        VersionInfo("1_20_R1","1.20.1", 17),
+        VersionInfo("1_20_R2","1.20.2", 17),
+        VersionInfo("1_20_R3","1.20.4", 17),
+        VersionInfo("1_20_R4","1.20.5", 21),
 )
-for(version in legacyVersions) {
-    setupVersion(version, 8)
-}
 
-// Versions compiled against Java 17
-val modernVersions = listOf(
-        VersionInfo("1_17_R1","1.17.1"),
-        VersionInfo("1_18_R1","1.18"),
-        VersionInfo("1_18_R2","1.18.2"),
-        VersionInfo("1_19_R1","1.19"),
-        VersionInfo("1_19_R1v2","1.19.2"),
-        VersionInfo("1_19_R2","1.19.3"),
-        VersionInfo("1_19_R3","1.19.4"),
-        VersionInfo("1_20_R1","1.20.1"),
-        VersionInfo("1_20_R2","1.20.2"),
-        VersionInfo("1_20_R3","1.20.4"),
-)
-for(version in modernVersions) {
-    setupVersion(version, 17)
+
+for(version in versions) {
+    setupVersion(version)
 }
 
 
@@ -128,7 +93,34 @@ tasks.withType<ProcessResources>() {
 }
 
 
-fun setupVersion(version: VersionInfo, javaVersion: Int) {
+fun setupShadow(javaVersion: Int, classifier: String) {
+
+    configurations.create("shadow${javaVersion}") {
+        extendsFrom(configurations.shadow.get())
+        attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, javaVersion)
+    }
+
+    val task = tasks.register<ShadowJar>("java${javaVersion}ShadowJar") {
+        archiveClassifier.set(classifier)
+        configurations = listOf(project.configurations["shadow${javaVersion}"])
+
+        dependsOn(tasks.processResources)
+
+        from(sourceSets["java${javaVersion}"].output)
+        from(tasks.processResources.get().destinationDir)
+    }
+
+    tasks.build {
+        dependsOn(task)
+    }
+
+}
+
+
+fun setupVersion(version: VersionInfo) {
+
+    val javaVersion: Int = version.javaVersion
+
     val set = sourceSets.create("v${version.name}")
     tasks.named<JavaCompile>("compileV${version.name}Java") {
         javaCompiler.set(project.javaToolchains.compilerFor {
@@ -136,24 +128,13 @@ fun setupVersion(version: VersionInfo, javaVersion: Int) {
         })
     }
 
-    if(javaVersion == 8) {
-        tasks.named<Jar>("java8Jar") {
-            from(set.output)
-        }
-    } else {
-        tasks.jar {
-            from(set.output)
-        }
-    }
+    multiVersion.getJarTask(javaVersion).from(set.output)
 
     dependencies {
-        if(javaVersion == 8) {
-            "java8CompileOnly"(set.output)
-            "shadow8"(set.output)
-        } else {
-            compileOnly(set.output)
-            "shadow17"(set.output)
-        }
+
+        "java${javaVersion}CompileOnly"(set.output)
+        "shadow${javaVersion}"(set.output)
+
         "v${version.name}Implementation"("org.spigotmc:spigot-api:${version.version}-R0.1-SNAPSHOT")
         "v${version.name}Implementation"("org.spigotmc:spigot:${version.version}-R0.1-SNAPSHOT")
 
@@ -177,4 +158,4 @@ fun setupVersion(version: VersionInfo, javaVersion: Int) {
     }
 }
 
-class VersionInfo(val name: String, val version: String)
+class VersionInfo(val name: String, val version: String, val javaVersion: Int)

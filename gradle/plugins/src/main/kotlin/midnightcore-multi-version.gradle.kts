@@ -6,8 +6,8 @@ plugins {
 }
 
 multiVersion {
-    defaultVersion(17)
-    additionalVersions(8)
+    defaultVersion(21)
+    additionalVersions(17, 8)
 }
 
 patch {

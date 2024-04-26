@@ -4,9 +4,9 @@ plugins {
     alias(libs.plugins.loom)
 }
 
-java {
+/*java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-}
+}*/
 
 loom {
     runs {
