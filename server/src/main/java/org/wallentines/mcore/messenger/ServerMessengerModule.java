@@ -28,5 +28,5 @@ public class ServerMessengerModule extends MessengerModule implements ServerModu
         MessengerType.REGISTRY.register("plugin_message", new PluginMessenger.Type(ServerPluginMessageBroker.FACTORY));
     }
 
-    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(ServerMessengerModule::new, MessengerModule.ID, new ConfigSection());
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<>(ServerMessengerModule::new, MessengerModule.ID, DEFAULT_CONFIG);
 }

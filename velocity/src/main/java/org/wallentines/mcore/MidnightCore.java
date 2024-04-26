@@ -7,6 +7,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.wallentines.mcore.extension.VelocityExtensionModule;
 import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.messenger.ProxyMessengerModule;
 import org.wallentines.mcore.pluginmsg.VelocityPluginMessageModule;
 import org.wallentines.mcore.sql.VelocitySQLModule;
 import org.wallentines.mdcfg.codec.BinaryCodec;
@@ -33,6 +34,7 @@ public class MidnightCore {
         ProxyModule.tryRegister(VelocityPluginMessageModule.ID, VelocityPluginMessageModule.MODULE_INFO);
         ProxyModule.tryRegister(VelocityExtensionModule.ID, VelocityExtensionModule.MODULE_INFO);
         ProxyModule.tryRegister(VelocitySQLModule.ID, VelocitySQLModule.MODULE_INFO);
+        ProxyModule.tryRegister(ProxyMessengerModule.ID, ProxyMessengerModule.MODULE_INFO);
 
         ProxyPlayer.registerPlaceholders(PlaceholderManager.INSTANCE);
     }
