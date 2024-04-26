@@ -106,7 +106,7 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
         // The remaining packets should only be sent to the updated player
         epl.c.b(respawn);
-        epl.c.b(new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.n, 0.0f));
+        epl.c.b(new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.o, 0.0f)); // LEVEL_CHUNKS_LOAD_START (13)
         epl.c.b(position);
         epl.c.b(equip);
         epl.c.b(exp);

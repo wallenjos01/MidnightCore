@@ -69,6 +69,7 @@ dependencies {
 
     // Shadowed Library Dependencies
     shadow(libs.midnight.cfg) { isTransitive = false }
+    shadow(libs.midnight.cfg.sql) { isTransitive = false }
     shadow(libs.midnight.cfg.json) { isTransitive = false }
     shadow(libs.midnight.cfg.gson) { isTransitive = false }
     shadow(libs.midnight.cfg.binary) { isTransitive = false }
