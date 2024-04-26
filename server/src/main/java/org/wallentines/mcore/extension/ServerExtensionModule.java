@@ -9,17 +9,17 @@ import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.Version;
+import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
  * A module for loading optional extensions and declaring them to clients who join the server
  */
-public abstract class ServerExtensionModule implements ServerModule {
+public class ServerExtensionModule implements ServerModule {
 
     private final ModuleManager<ServerExtensionModule, ServerExtension> manager = new ModuleManager<>();
     private final HashMap<UUID, Map<Identifier, Version>> enabledExtensions = new HashMap<>();
@@ -56,7 +56,8 @@ public abstract class ServerExtensionModule implements ServerModule {
         // If the server does not support login query or the delay option is enabled, packets will be sent during the
         // play state, right when a player joins the game
         if (!mod.supportsLoginQuery() || section.getBoolean("delay_send")) {
-            registerJoinListener(pl -> smm.sendPacket(pl, cachedPacket));
+
+            server.joinEvent().register(this, pl -> smm.sendPacket(pl, cachedPacket));
         } else {
             mod.registerLoginPacketHandler(ServerboundExtensionPacket.ID, (negotiator, buffer) -> {
                 Component kick = handleResponse(negotiator.getPlayerUUID(), negotiator.getPlayerName(), buffer);
@@ -140,13 +141,6 @@ public abstract class ServerExtensionModule implements ServerModule {
     }
 
     /**
-     * Registers an event which calls the given consumer when a player joins the server and their connection has
-     * transitioned into the play state
-     * @param player The function to call when a player joins
-     */
-    protected abstract void registerJoinListener(Consumer<Player> player);
-
-    /**
      * Returns the server which loaded this extension
      * @return The running server
      */
@@ -160,6 +154,11 @@ public abstract class ServerExtensionModule implements ServerModule {
             .with("delay_send", false)
             .with("extensions", new ConfigSection())
             .with("required_extensions", new ConfigList());
+
+
+    public static final ModuleInfo<Server, ServerModule> MODULE_INFO = new ModuleInfo<Server, ServerModule>(ServerExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ServerPluginMessageModule.ID);
+
+
 
 
 }

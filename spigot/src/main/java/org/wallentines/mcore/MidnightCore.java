@@ -6,7 +6,6 @@ import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.Adapters;
 import org.wallentines.mcore.adapter.GenericAdapter;
 import org.wallentines.mcore.extension.ServerExtensionModule;
-import org.wallentines.mcore.extension.SpigotExtensionModule;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
@@ -123,7 +122,7 @@ public class MidnightCore extends JavaPlugin {
         // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, SpigotSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerPluginMessageModule.ID, SpigotPluginMessageModule.MODULE_INFO);
-        ServerModule.REGISTRY.register(ServerExtensionModule.ID, SpigotExtensionModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(ServerExtensionModule.ID, ServerExtensionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, SpigotSessionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SQLModule.ID, SpigotSQLModule.MODULE_INFO);

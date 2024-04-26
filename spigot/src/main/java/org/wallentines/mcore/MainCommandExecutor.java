@@ -89,7 +89,7 @@ public class MainCommandExecutor extends BukkitCommand {
                         sender.sendMessage(ChatColor.RED + "Usage: /mcore module disable <[module]>");
                         return;
                     }
-                    MainCommand.executeEnableModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeDisableModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
                     return;
                 case "list":
                     MainCommand.executeListModules(server, cmp -> sendMessage(sender, cmp));

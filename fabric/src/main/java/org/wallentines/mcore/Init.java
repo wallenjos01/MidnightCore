@@ -6,7 +6,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.server.MinecraftServer;
-import org.wallentines.mcore.extension.FabricServerExtensionModule;
 import org.wallentines.mcore.extension.ServerExtensionModule;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderManager;
@@ -60,7 +59,7 @@ public class Init implements ModInitializer {
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepointModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, FabricSessionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerPluginMessageModule.ID, FabricServerPluginMessageModule.MODULE_INFO);
-        ServerModule.REGISTRY.register(ServerExtensionModule.ID, FabricServerExtensionModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(ServerExtensionModule.ID, ServerExtensionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(FabricServerSQLModule.ID, FabricServerSQLModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.MODULE_INFO);
 
