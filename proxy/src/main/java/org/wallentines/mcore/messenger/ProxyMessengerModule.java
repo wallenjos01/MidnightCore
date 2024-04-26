@@ -26,6 +26,6 @@ public class ProxyMessengerModule extends MessengerModule implements ProxyModule
     }
 
     static {
-        MessengerType.REGISTRY.register("plugin_message", ProxyPluginMessenger.Type.INSTANCE);
+        MessengerType.REGISTRY.register("plugin_message", new PluginMessenger.Type(ProxyPluginMessageBroker.FACTORY));
     }
 }
