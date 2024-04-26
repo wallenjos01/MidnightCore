@@ -78,6 +78,33 @@ public abstract class ProxyPluginMessageModule implements ProxyModule {
         this.loginHandlers.register(id, handler);
     }
 
+
+    /**
+     * Unregisters a handler for custom packets sent from clients
+     * @param id The ID of the packet to handle
+     */
+    public void unregisterPlayerHandler(Identifier id) {
+        this.playerHandlers.remove(id);
+    }
+
+    /**
+     * Unregisters a handler for custom packets sent from servers during the play phase
+     * @param id The ID of the packet to handle
+     */
+    public void unregisterServerHandler(Identifier id) {
+        this.serverHandlers.remove(id);
+    }
+
+    /**
+     * Unregisters a handler for custom packets sent from servers during the server's login phase. Unhandled packets will
+     * not be sent to players, as they have already left the login phase.
+     * @param id The ID of the packet to handle
+     */
+    public void unregisterLoginHandler(Identifier id) {
+        this.loginHandlers.remove(id);
+    }
+
+
     protected boolean handle(ProxyPlayer player, Identifier id, ByteBuf buffer) {
         return handleGeneric(player, playerHandlers, id, buffer);
     }

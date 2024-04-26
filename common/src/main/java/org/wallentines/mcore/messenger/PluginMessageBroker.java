@@ -36,18 +36,10 @@ public abstract class PluginMessageBroker {
     protected SecretKey key;
     private PluginMessenger nullNamespace;
     private final Map<String, PluginMessenger> messengersByNamespace;
-    protected final Consumer<Packet> packetHandler;
     private boolean isShutdown;
 
     protected PluginMessageBroker() {
         this.messengersByNamespace = new HashMap<>();
-
-        this.packetHandler = pck -> {
-            PluginMessenger messenger = getMessenger(pck.namespace);
-            if(messenger == null) return;
-
-            messenger.handle(pck);
-        };
     }
 
     public void send(String channel, boolean encrypt, String namespace, ByteBuf message, boolean queue) {
@@ -57,6 +49,14 @@ public abstract class PluginMessageBroker {
         send(out);
     }
     protected abstract void send(Packet packet);
+
+    protected void handle(Packet packet) {
+
+        PluginMessenger messenger = getMessenger(packet.namespace);
+        if(messenger == null) return;
+
+        messenger.handle(packet);
+    }
 
     public void register(PluginMessenger messenger) {
 

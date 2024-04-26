@@ -57,7 +57,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
             }
 
             // Handle
-            packetHandler.accept(packet);
+            handle(packet);
 
             // Forward
             send(packet);
@@ -85,6 +85,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     @Override
     public void onShutdown() {
         infosByServer.clear();
+        module.unregisterServerHandler(MESSAGE_ID);
     }
 
     @Override

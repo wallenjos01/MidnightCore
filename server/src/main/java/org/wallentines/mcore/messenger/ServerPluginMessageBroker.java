@@ -31,7 +31,7 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
         };
 
         module.registerPacketHandler(MESSAGE_ID, (pl, buf) -> {
-            packetHandler.accept(readPacket(buf));
+            handle(readPacket(buf));
         });
     }
 
@@ -69,6 +69,8 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
         ByteBuf payload = Unpooled.buffer();
         payload.writeByte(UNREGISTER);
         send(new Packet(REGISTER_CHANNEL, key != null, null, payload).queued());
+
+        module.unregisterPacketHandler(MESSAGE_ID);
 
     }
 

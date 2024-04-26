@@ -99,6 +99,34 @@ public abstract class ServerPluginMessageModule implements ServerModule {
     }
 
     /**
+     * Unregisters a custom Packet handler.
+     * @param packetId The packet type's ID
+     */
+    public void unregisterPacketHandler(Identifier packetId) {
+        handlers.remove(packetId);
+        doRegister(packetId);
+    }
+
+    /**
+     * Registers a custom Packet handler for packets sent during the login state.
+     * @param packetId The packet type's ID
+     */
+    public void unregisterLoginPacketHandler(Identifier packetId) {
+        loginHandlers.remove(packetId);
+        doRegisterLogin(packetId);
+    }
+
+
+    /**
+     * Registers a custom Packet handler for packets sent during the login state.
+     * @param packetId The packet type's ID
+     */
+    public void unregisterConfigPacketHandler(Identifier packetId) {
+        loginHandlers.remove(packetId);
+        doRegisterConfig(packetId);
+    }
+
+    /**
      * Determines whether this module supports sending messages during the login phase. Will be false on Spigot servers.
      * @return Whether this module supports sending custom login packets.
      */
