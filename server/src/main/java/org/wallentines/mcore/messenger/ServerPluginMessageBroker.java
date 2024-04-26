@@ -30,9 +30,7 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
             server.joinEvent().unregisterAll(this);
         };
 
-        module.registerPacketHandler(MESSAGE_ID, (pl, buf) -> {
-            handle(readPacket(buf));
-        });
+        module.registerPacketHandler(MESSAGE_ID, (pl, buf) -> handle(readPacket(buf)));
     }
 
     @Override
