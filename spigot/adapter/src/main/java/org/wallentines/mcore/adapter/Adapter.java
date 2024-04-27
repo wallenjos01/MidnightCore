@@ -2,8 +2,11 @@ package org.wallentines.mcore.adapter;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
+import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigObject;
@@ -148,12 +151,29 @@ public interface Adapter {
         return null;
     }
 
+    /**
+     * Saves the structured component on the given ItemStack with the given ID
+     * @param is The ItemStack to lookup
+     * @param component The component to save
+     * @return A ConfigObject, or null if the ItemStack does not have a component with that ID
+     */
     default @Nullable ConfigObject saveComponent(ItemStack is, Identifier component) {
         return null;
     }
 
+    /**
+     * Loads a structured component with the given ID and configuration onto the ItemStack
+     * @param is The ItemStack to load a component for
+     * @param component The component ID
+     * @param value The component configuration
+     */
     default void loadComponent(ItemStack is, Identifier component, ConfigObject value) { }
 
+    /**
+     * Removes the structured component with the given ID from the ItemStack
+     * @param is The ItemStack to load
+     * @param component The ID of the component to remove
+     */
     default void removeComponent(ItemStack is, Identifier component) { }
 
     /**
@@ -178,12 +198,32 @@ public interface Adapter {
      */
     void kickPlayer(Player player, Component message);
 
+    /**
+     * Gets the translation key for the given ItemStack's item type
+     * @param itemStack The item to lookup
+     * @return A translation key (i.e. "item.minecraft.apple")
+     */
     default String getTranslationKey(ItemStack itemStack) {
 
         return itemStack.getTranslationKey();
     }
 
+    /**
+     * Gets the color associates with the given ItemStack's item rarity
+     * @param itemStack The ItemStack to lookup
+     * @return A Color
+     */
     Color getRarityColor(ItemStack itemStack);
+
+
+    default void setObjectiveName(Objective objective, Component component) {
+        objective.setDisplayName(component.toLegacyText());
+    }
+
+    default void setTeamPrefix(Team team, Component component) {
+        MidnightCoreAPI.LOGGER.warn("Why");
+        team.setPrefix(component.toLegacyText());
+    }
 
 
     /**

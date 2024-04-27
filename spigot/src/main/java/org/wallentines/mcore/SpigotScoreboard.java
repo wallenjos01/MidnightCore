@@ -2,6 +2,7 @@ package org.wallentines.mcore;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.*;
+import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -83,8 +84,7 @@ public class SpigotScoreboard extends CustomScoreboard {
 
             @SuppressWarnings("deprecation")
             Objective obj = board.registerNewObjective(objectiveId, "dummy");
-            //Objective obj = board.registerNewObjective(objectiveId, Criteria.DUMMY, "");
-            obj.setDisplayName(ComponentResolver.resolveComponent(title, player).toLegacyText());
+            Adapter.INSTANCE.get().setObjectiveName(obj, ComponentResolver.resolveComponent(title, player));
             obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
             for(int i = 0 ; i < 15 ; i++) {
@@ -109,7 +109,7 @@ public class SpigotScoreboard extends CustomScoreboard {
                 throw new IllegalStateException("Attempt to update scoreboard before initialization!");
             }
 
-            obj.setDisplayName(ComponentResolver.resolveComponent(title, player).toLegacyText());
+            Adapter.INSTANCE.get().setObjectiveName(obj, ComponentResolver.resolveComponent(title, player));
         }
 
         void updateLine(int line) {
@@ -131,7 +131,7 @@ public class SpigotScoreboard extends CustomScoreboard {
             if(entries[line] == null) {
                 board.resetScores(playerName);
             } else {
-                team.setPrefix(ComponentResolver.resolveComponent(entries[line], player).toLegacyText());
+                Adapter.INSTANCE.get().setTeamPrefix(team, ComponentResolver.resolveComponent(entries[line], player));
                 obj.getScore(playerName).setScore(line);
             }
         }

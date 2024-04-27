@@ -146,7 +146,8 @@ public class TestUtil {
             CustomScoreboard board = CustomScoreboard.FACTORY.get().create(Component.text("Test").withColor(TextColor.RED).withBold(true));
 
             board.setLine(13, Component.text("Hello"));
-            board.setLine(1, PlaceholderContent.component("%player_name%"));
+            board.setLine(3, PlaceholderContent.component("%player_name%"));
+            board.setLine(1, Component.text("Color").withColor(new Color(0x58BE44)));
             board.setLine(0, Component.text("Zero").withColor(TextColor.AQUA).withItalic(true));
 
             board.addViewer(pl);

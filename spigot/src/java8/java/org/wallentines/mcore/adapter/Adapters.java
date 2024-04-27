@@ -46,7 +46,7 @@ public class Adapters {
             case "v1_16_R3":
                 return new org.wallentines.mcore.adapter.v1_16_R3.AdapterImpl();
             default:
-                return new GenericAdapter(plugin);
+                return null;
         }
     }
 

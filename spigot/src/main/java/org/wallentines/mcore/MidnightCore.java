@@ -31,30 +31,46 @@ import java.nio.file.Paths;
 public class MidnightCore extends JavaPlugin {
 
 
-    @Override
-    public void onEnable() {
+    private Adapter initAdapter() {
 
         // Find Adapter
         String apiVersion = Bukkit.getServer().getClass().getPackage().getName().replace(".",",").split(",")[3];
 
-        Adapter adapter;
-        try {
-            adapter = Adapters.findAdapter(apiVersion, this);
-        } catch (Exception ex) {
-            MidnightCoreAPI.LOGGER.error("Unable to find version adapter! Some features will not work!", ex);
+        Adapter adapter = Adapters.findAdapter(apiVersion, this);
+        if (adapter == null) {
+            MidnightCoreAPI.LOGGER.warn("MidnightCore does not fully support this version! Certain functions may not work correctly.");
             adapter = new GenericAdapter(this);
         }
 
+        // Initialize Adapter
         try {
-            if(!adapter.initialize()) {
-                adapter = new GenericAdapter(this);
-                adapter.initialize();
+            if(adapter.initialize()) {
+                return adapter;
             }
+        } catch (Exception ex) {
+            // Ignore
+        }
+
+        adapter = new GenericAdapter(this);
+        if(!adapter.initialize()) {
+            throw new IllegalStateException("Failed to enable generic adapter!");
+        }
+        return adapter;
+
+    }
+
+
+    @Override
+    public void onEnable() {
+
+        Adapter adapter;
+        try {
+            adapter = initAdapter();
         } catch (Exception ex) {
             MidnightCoreAPI.LOGGER.error("Unable to enable version adapter! Plugin will be disabled!", ex);
             Bukkit.getPluginManager().disablePlugin(this);
+            return;
         }
-
 
         // Adapter and version
         Adapter.INSTANCE.set(adapter);
