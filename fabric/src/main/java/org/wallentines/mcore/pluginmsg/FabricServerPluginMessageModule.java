@@ -3,23 +3,24 @@ package org.wallentines.mcore.pluginmsg;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import org.wallentines.mcore.ConfiguringPlayer;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
-import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class FabricServerPluginMessageModule extends ServerPluginMessageModule implements
         ServerPlayNetworking.PlayPayloadHandler<MidnightPayload>,
         ServerConfigurationNetworking.ConfigurationPacketHandler<MidnightPayload> {
 
     private static final Map<Identifier, CustomPacketPayload.Type<MidnightPayload>> TYPES = new HashMap<>();
+    private static final Set<Identifier> PLAY = new HashSet<>();
+    private static final Set<Identifier> CONFIG = new HashSet<>();
 
     private static CustomPacketPayload.Type<MidnightPayload> getPayloadType(Identifier id) {
         return TYPES.computeIfAbsent(id, key -> {
@@ -41,12 +42,20 @@ public class FabricServerPluginMessageModule extends ServerPluginMessageModule i
     @Override
     public void sendPacket(Player player, Identifier packetId, ByteBuf data) {
 
+        if(PLAY.add(packetId)) {
+            CustomPacketPayload.Type<MidnightPayload> type = MidnightPayload.type(ConversionUtil.toResourceLocation(packetId));
+            PayloadTypeRegistry.playS2C().register(type, MidnightPayload.codec(type));
+        }
         ServerPlayNetworking.send(ConversionUtil.validate(player), new MidnightPayload(packetId, PacketByteBufs.copy(data)));
     }
 
     @Override
     protected void sendPacket(ConfiguringPlayer player, Identifier packetId, ByteBuf data) {
 
+        if(CONFIG.add(packetId)) {
+            CustomPacketPayload.Type<MidnightPayload> type = MidnightPayload.type(ConversionUtil.toResourceLocation(packetId));
+            PayloadTypeRegistry.configurationS2C().register(type, MidnightPayload.codec(type));
+        }
         ServerConfigurationNetworking.send(ConversionUtil.validate(player), new MidnightPayload(packetId, PacketByteBufs.copy(data)));
     }
 

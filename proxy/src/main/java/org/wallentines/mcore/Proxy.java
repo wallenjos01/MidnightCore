@@ -15,6 +15,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * An interface representing a Proxy
@@ -41,10 +42,16 @@ public interface Proxy {
     ProxyPlayer getPlayer(UUID uuid);
 
     /**
-     * Gets a collection of all players connected to the proxy
-     * @return A collection of players
+     * Gets a stream of all players connected to the proxy
+     * @return A stream of players
      */
-    Collection<ProxyPlayer> getPlayers();
+    Stream<ProxyPlayer> getPlayers();
+
+    /**
+     * Gets the number of players connected to the proxy
+     * @return The number of online players
+     */
+    int getPlayerCount();
 
     /**
      * Gets the server with the given name
@@ -83,23 +90,25 @@ public interface Proxy {
 
     /**
      * An event fired when a player joins the proxy
-     * @return The proxy's shutdown event
+     * @return The proxy's join event
      */
     HandlerList<ProxyPlayer> joinEvent();
 
 
+
+    /**
+     * An event fired when a player connects to a backend server
+     * @return The proxy's shutdown event
+     */
+    HandlerList<Connection> connectEvent();
+
+
     /**
      * An event fired when a player leaves the proxy
-     * @return The proxy's shutdown event
+     * @return The proxy's leave event
      */
     HandlerList<ProxyPlayer> leaveEvent();
 
-
-    /**
-     * An event fired when a player transfers to another server
-     * @return The proxy's shutdown event
-     */
-    HandlerList<Transfer> transferEvent();
 
 
     /**
@@ -114,12 +123,14 @@ public interface Proxy {
     Singleton<Proxy> RUNNING_PROXY = new Singleton<>();
 
 
-    class Transfer {
+    class Connection {
         public final ProxyPlayer player;
+        public final ProxyServer server;
         public final ProxyServer previousServer;
 
-        public Transfer(ProxyPlayer player, ProxyServer previousServer) {
+        public Connection(ProxyPlayer player, ProxyServer server, ProxyServer previousServer) {
             this.player = player;
+            this.server = server;
             this.previousServer = previousServer;
         }
     }

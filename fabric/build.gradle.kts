@@ -1,12 +1,11 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("midnightcore-build")
     id("midnightcore-publish")
+    id("midnightcore-shadow")
     alias(libs.plugins.loom)
 }
-
-/*java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-}*/
 
 loom {
     runs {
@@ -24,22 +23,28 @@ loom {
 }
 
 
+val finalShadow = tasks.register<ShadowJar>("finalShadow") {
+    dependsOn(tasks.remapJar)
+    val id = rootProject.name
+    archiveClassifier.set("")
+    archiveBaseName.set("${id}-${project.name}")
+    configurations = listOf(project.configurations["shadow"])
+    from(tasks.remapJar)
+}
+
+
 tasks {
     build {
-        dependsOn(remapJar)
+        dependsOn(finalShadow)
     }
     jar {
         archiveClassifier.set("dev")
     }
     remapJar {
-        archiveClassifier.set("")
-        val id = rootProject.name
-        archiveBaseName.set("${id}-${project.name}")
+        archiveClassifier.set("remap")
         inputFile.set(jar.get().archiveFile)
     }
 }
-
-
 
 
 dependencies {
@@ -49,9 +54,9 @@ dependencies {
     api(project(":server"))
     api(project(":client"))
 
-    include(project(":common").setTransitive(false))
-    include(project(":server").setTransitive(false))
-    include(project(":client").setTransitive(false))
+    shadow(project(":common").setTransitive(false))
+    shadow(project(":server").setTransitive(false))
+    shadow(project(":client").setTransitive(false))
 
     // Minecraft
     minecraft("com.mojang:minecraft:1.20.5")
@@ -73,6 +78,7 @@ dependencies {
 
     // Included Library Dependencies
     modApi(libs.midnight.cfg)
+    modApi(libs.midnight.cfg.sql)
     modApi(libs.midnight.cfg.json)
     modApi(libs.midnight.cfg.binary)
     modApi(libs.midnight.cfg.gson)
@@ -81,6 +87,7 @@ dependencies {
     modApi(libs.zstd.jni)
 
     include(libs.midnight.cfg)
+    include(libs.midnight.cfg.sql)
     include(libs.midnight.cfg.json)
     include(libs.midnight.cfg.binary)
     include(libs.midnight.cfg.gson)

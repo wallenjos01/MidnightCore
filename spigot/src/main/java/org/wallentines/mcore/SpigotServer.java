@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.midnightlib.event.HandlerList;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SpigotServer implements Server, Listener {
 
@@ -22,8 +24,9 @@ public class SpigotServer implements Server, Listener {
     private final HandlerList<Player> joinEvent = new HandlerList<>();
     private final HandlerList<Player> leaveEvent = new HandlerList<>();
 
-    public SpigotServer() {
+    public SpigotServer(MidnightCore plugin) {
         Adapter.INSTANCE.get().addTickListener(() -> tickEvent.invoke(this));
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
@@ -45,8 +48,13 @@ public class SpigotServer implements Server, Listener {
     }
 
     @Override
-    public Collection<Player> getPlayers() {
-        return Bukkit.getOnlinePlayers().stream().map(pl -> (Player) new SpigotPlayer(this, pl)).collect(Collectors.toList());
+    public Stream<Player> getPlayers() {
+        return Bukkit.getOnlinePlayers().stream().map(pl -> (Player) new SpigotPlayer(this, pl));
+    }
+
+    @Override
+    public int getPlayerCount() {
+        return Bukkit.getOnlinePlayers().size();
     }
 
     @Override

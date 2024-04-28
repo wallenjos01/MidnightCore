@@ -5,6 +5,7 @@ import org.wallentines.midnightlib.event.HandlerList;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 public class VelocityServer implements ProxyServer {
 
@@ -33,8 +34,13 @@ public class VelocityServer implements ProxyServer {
     }
 
     @Override
-    public Collection<ProxyPlayer> getPlayers() {
-        return server.getPlayersConnected().stream().map(pl -> proxy.getPlayer(pl.getUniqueId())).toList();
+    public Stream<ProxyPlayer> getPlayers() {
+        return server.getPlayersConnected().stream().map(pl -> proxy.getPlayer(pl.getUniqueId()));
+    }
+
+    @Override
+    public int getPlayerCount() {
+        return server.getPlayersConnected().size();
     }
 
     @Override

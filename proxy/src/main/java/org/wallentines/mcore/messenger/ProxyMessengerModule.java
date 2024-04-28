@@ -14,7 +14,7 @@ public class ProxyMessengerModule extends MessengerModule implements ProxyModule
     public boolean initialize(ConfigSection config, Proxy data) {
 
         this.proxy = data;
-        return super.init(config);
+        return super.init(config, ProxyPluginMessageBroker.FACTORY);
     }
 
     @Override
@@ -26,9 +26,14 @@ public class ProxyMessengerModule extends MessengerModule implements ProxyModule
         return proxy;
     }
 
-    static {
-        MessengerType.REGISTRY.register("plugin_message", new PluginMessenger.Type(ProxyPluginMessageBroker.FACTORY));
-    }
-
-    public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<>(ProxyMessengerModule::new, MessengerModule.ID, DEFAULT_CONFIG.with("enabled", true));
+    public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<>(
+            ProxyMessengerModule::new,
+            MessengerModule.ID,
+            DEFAULT_CONFIG
+                    .copy()
+                    .with("enabled", true)
+                    .with("broker", new ConfigSection()
+                            .with("persistent_registration", true)
+                    )
+    );
 }

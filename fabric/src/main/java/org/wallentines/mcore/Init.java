@@ -2,6 +2,7 @@ package org.wallentines.mcore;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
@@ -54,6 +55,8 @@ public class Init implements ModInitializer {
 
         });
 
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> Server.RUNNING_SERVER.get().leaveEvent().invoke(handler.getPlayer()));
+
         // Default Modules
         ServerModule.REGISTRY.register(SkinModule.ID, FabricSkinModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SavepointModule.ID, FabricSavepointModule.MODULE_INFO);
@@ -61,7 +64,7 @@ public class Init implements ModInitializer {
         ServerModule.REGISTRY.register(ServerPluginMessageModule.ID, FabricServerPluginMessageModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerExtensionModule.ID, ServerExtensionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(FabricServerSQLModule.ID, FabricServerSQLModule.MODULE_INFO);
-        ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.STARTUP_REGISTER);
 
     }
 

@@ -4,6 +4,7 @@ import org.wallentines.midnightlib.event.HandlerList;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 /**
  * Represents a backend server registered on the proxy
@@ -32,7 +33,13 @@ public interface ProxyServer {
      * Gets a list of players connected to this server
      * @return A list of online players
      */
-    Collection<ProxyPlayer> getPlayers();
+    Stream<ProxyPlayer> getPlayers();
+
+    /**
+     * Gets the number of players on this backend server
+     * @return The number of online players
+     */
+    int getPlayerCount();
 
 
     /**

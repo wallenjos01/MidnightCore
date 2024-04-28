@@ -46,11 +46,9 @@ public abstract class ServerPluginMessageModule implements ServerModule {
      */
     public void sendPacket(Player player, Packet packet) {
 
-        player.getServer().submit(() -> {
-            ByteBuf out = Unpooled.buffer();
-            packet.write(out);
-            sendPacket(player, packet.getId(), out);
-        });
+        ByteBuf out = Unpooled.buffer();
+        packet.write(out);
+        sendPacket(player, packet.getId(), out);
     }
 
     /**
@@ -60,11 +58,9 @@ public abstract class ServerPluginMessageModule implements ServerModule {
      */
     public void sendPacket(ConfiguringPlayer player, Packet packet) {
 
-        player.getServer().submit(() -> {
-            ByteBuf out = Unpooled.buffer();
-            packet.write(out);
-            sendPacket(player, packet.getId(), out);
-        });
+        ByteBuf out = Unpooled.buffer();
+        packet.write(out);
+        sendPacket(player, packet.getId(), out);
     }
 
     /**

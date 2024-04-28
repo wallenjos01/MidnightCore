@@ -12,7 +12,7 @@ import org.wallentines.midnightlib.module.ModuleInfo;
 
 public class VelocityExtensionModule extends ProxyExtensionModule {
 
-    private Proxy proxy;
+    private VelocityProxy proxy;
     @Override
     public boolean initialize(ConfigSection section, Proxy data) {
 
@@ -31,7 +31,7 @@ public class VelocityExtensionModule extends ProxyExtensionModule {
      */
     @Subscribe
     public void onLogin(LoginEvent event) {
-        onFinishLogin(new VelocityPlayer(event.getPlayer(), proxy));
+        onFinishLogin(proxy.getPlayer(event.getPlayer()));
     }
 
     public static final ModuleInfo<Proxy, ProxyModule> MODULE_INFO = new ModuleInfo<Proxy, ProxyModule>(VelocityExtensionModule::new, ID, DEFAULT_CONFIG).dependsOn(ProxyPluginMessageModule.ID);

@@ -30,10 +30,7 @@ public class SpigotSkinModule extends SkinModule {
 
         offlineModeSkins = section.getBoolean("get_skins_in_offline_mode");
 
-        for(Player player : data.getPlayers()) {
-            handleLogin(player);
-        }
-
+        data.getPlayers().forEach(this::handleLogin);
         server.joinEvent().register(this, this::handleLogin);
 
         return true;

@@ -39,9 +39,7 @@ public abstract class SkinModule implements ServerModule {
 
     @Override
     public void disable() {
-        for(Player player : server.getPlayers()) {
-            resetSkin(player);
-        }
+        server.getPlayers().forEach(this::resetSkin);
     }
 
     public abstract void forceUpdate(Player player);

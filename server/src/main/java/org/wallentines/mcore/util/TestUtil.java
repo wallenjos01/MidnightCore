@@ -5,6 +5,8 @@ import org.wallentines.mcore.lang.LangManager;
 import org.wallentines.mcore.lang.LangRegistry;
 import org.wallentines.mcore.lang.PlaceholderContent;
 import org.wallentines.mcore.lang.UnresolvedComponent;
+import org.wallentines.mcore.messenger.Messenger;
+import org.wallentines.mcore.messenger.ServerMessengerModule;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.text.ClickEvent;
 import org.wallentines.mcore.text.Component;
@@ -211,5 +213,33 @@ public class TestUtil {
             MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
         }
     }
+
+    public static void messengerCmd(Player pl) {
+        try {
+
+            ServerMessengerModule mod = pl.getServer().getModuleManager().getModule(ServerMessengerModule.class);
+            if(mod == null) {
+                pl.sendMessage(Component.text("The messenger module is unloaded!").withColor(TextColor.RED));
+                return;
+            }
+
+            Messenger messenger = mod.getMessenger();
+
+            messenger.unsubscribe(pl, "_test");
+            messenger.subscribe(pl, "_test", msg -> {
+                pl.sendMessage(Component.text("[Test Message] " + msg.payloadAsString()));
+                MidnightCoreAPI.LOGGER.info("[Test Message] " + msg.payloadAsString());
+            });
+
+            messenger.publish("_test", "Hello, World");
+            messenger.queue("_test", "Queued Message");
+
+            pl.sendMessage(Component.text("Sent test message"));
+
+        } catch (Throwable th) {
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
+        }
+    }
+
 
 }

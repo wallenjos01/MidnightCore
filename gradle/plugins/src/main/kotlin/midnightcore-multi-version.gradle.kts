@@ -11,5 +11,6 @@ multiVersion {
 }
 
 patch {
+    patchSet("java17", sourceSets["main"], sourceSets["main"].java, multiVersion.getCompileTask(17))
     patchSet("java8", sourceSets["main"], sourceSets["main"].java, multiVersion.getCompileTask(8))
 }

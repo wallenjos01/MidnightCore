@@ -20,6 +20,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * An interface representing a running server
@@ -44,7 +45,14 @@ public interface Server {
      * Gets a list of all players on the server
      * @return A list of all players on the server
      */
-    Collection<Player> getPlayers();
+    Stream<Player> getPlayers();
+
+    /**
+     * Gets the number of online players
+     * @return The number of online players
+     */
+    int getPlayerCount();
+
 
     /**
      * Runs a command as the server console
@@ -163,7 +171,7 @@ public interface Server {
     static void registerPlaceholders(PlaceholderManager manager) {
 
         manager.registerSupplier("server_modules_loaded", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getModuleManager().getCount() + "", "0")));
-        manager.registerSupplier("server_player_count", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getPlayers().size() + "", "0")));
+        manager.registerSupplier("server_player_count", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getPlayerCount() + "", "0")));
         manager.registerSupplier("server_modules_registered", PlaceholderSupplier.inline(ctx -> ServerModule.REGISTRY.getSize() + ""));
         manager.registerSupplier("server_config_dir", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Server.class, srv -> srv.getConfigDirectory().toString(), "")));
 

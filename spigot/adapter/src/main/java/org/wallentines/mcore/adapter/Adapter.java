@@ -221,7 +221,6 @@ public interface Adapter {
     }
 
     default void setTeamPrefix(Team team, Component component) {
-        MidnightCoreAPI.LOGGER.warn("Why");
         team.setPrefix(component.toLegacyText());
     }
 

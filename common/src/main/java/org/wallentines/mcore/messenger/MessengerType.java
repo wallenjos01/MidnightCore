@@ -18,6 +18,14 @@ public interface MessengerType {
 
 
     /**
+     * Determines whether this messenger type requires the plugin message broker.
+     * @return Whether the messenger needs the plugin message broker.
+     */
+    default boolean usesPluginMessageBroker() {
+        return false;
+    }
+
+    /**
      * A registry of messenger types available to the messenger module
      */
     StringRegistry<MessengerType> REGISTRY = new StringRegistry<>();

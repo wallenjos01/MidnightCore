@@ -19,10 +19,9 @@ import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleManager;
 
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
+import java.util.stream.Stream;
 
 @Mixin(MinecraftServer.class)
 @Implements(@Interface(iface=Server.class, prefix = "mcore$"))
@@ -55,9 +54,13 @@ public abstract class MixinMinecraftServer implements Server {
         return playerList.getPlayerByName(name);
     }
 
-    public Collection<Player> mcore$getPlayers() {
-        if(playerList == null) return List.of();
-        return playerList.getPlayers().stream().map(pl -> (Player) pl).toList();
+    public Stream<Player> mcore$getPlayers() {
+        if(playerList == null) return Stream.empty();
+        return playerList.getPlayers().stream().map(pl -> (Player) pl);
+    }
+
+    public int mcore$getPlayerCount() {
+        return playerList.getPlayerCount();
     }
 
     public void mcore$runCommand(String command, boolean quiet) {

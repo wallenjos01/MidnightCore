@@ -10,13 +10,15 @@ import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
+import java.util.stream.Stream;
+
 /**
  * A module for sending custom packets to players and servers.
  */
 public abstract class ProxyPluginMessageModule implements ProxyModule {
 
     protected final Registry<PacketHandler<ProxyPlayer>> playerHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
-    protected final Registry<PacketHandler<ProxyPlayer>> serverHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    protected final Registry<PacketHandler<ServerMessage>> serverHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
     protected final Registry<PacketHandler<ProxyPlayer>> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
 
     /**
@@ -37,14 +39,29 @@ public abstract class ProxyPluginMessageModule implements ProxyModule {
 
     /**
      * Sends a custom packet to a server. This will not work if the server has no player connected to it.
-     * @param server The server to send a packet to
+     * @param server A player on the server to send a packet to
      * @param packet The packet to send
      */
-    public void sendServerMessage(ProxyServer server, Packet packet) {
+/*
+    public void sendServerMessage(ProxyPlayer server, Packet packet) {
         ByteBuf out = Unpooled.buffer();
         packet.write(out);
         sendServerMessage(server, packet.getId(), out);
     }
+*/
+
+    /**
+     * Sends a custom packet to a server. This will not work if the server has no player connected to it.
+     * @param server The server to send a packet to
+     * @param packet The packet to send
+     */
+    public void sendServerMessage(ProxyServer server, Packet packet) {
+
+        ByteBuf out = Unpooled.buffer();
+        packet.write(out);
+        sendServerMessage(server, packet.getId(), out);
+    }
+
 
 
     protected abstract void sendPlayerMessage(ProxyPlayer player, Identifier id, ByteBuf out);
@@ -64,7 +81,7 @@ public abstract class ProxyPluginMessageModule implements ProxyModule {
      * @param id The ID of the packet to handle
      * @param handler The packet handler
      */
-    public void registerServerHandler(Identifier id, PacketHandler<ProxyPlayer> handler) {
+    public void registerServerHandler(Identifier id, PacketHandler<ServerMessage> handler) {
         this.serverHandlers.register(id, handler);
     }
 
@@ -113,8 +130,8 @@ public abstract class ProxyPluginMessageModule implements ProxyModule {
         handleGeneric(player, loginHandlers, id, buffer);
     }
 
-    protected boolean handleServer(ProxyPlayer server, Identifier id, ByteBuf buffer) {
-        return handleGeneric(server, serverHandlers, id, buffer);
+    protected boolean handleServer(ProxyPlayer player, ProxyServer server, Identifier id, ByteBuf buffer) {
+        return handleGeneric(new ServerMessage(player, server), serverHandlers, id, buffer);
     }
 
     private <T> boolean handleGeneric(T data, Registry<PacketHandler<T>> registry, Identifier id, ByteBuf buffer) {
@@ -134,5 +151,7 @@ public abstract class ProxyPluginMessageModule implements ProxyModule {
     }
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "plugin_message");
+
+    public record ServerMessage(ProxyPlayer player, ProxyServer server) { }
 
 }

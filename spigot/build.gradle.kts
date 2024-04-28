@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.parsing.parseBoolean
 
 plugins {
@@ -76,9 +75,6 @@ dependencies {
     shadow(libs.midnight.cfg.nbt) { isTransitive = false }
     shadow(libs.midnight.lib) { isTransitive = false }
     shadow(libs.zstd.jni)
-
-
-    "shadow8"(libs.slf4j.simple)
 
     compileOnly("org.spigotmc:spigot-api:1.20.2-R0.1-SNAPSHOT")
     testImplementation("org.yaml:snakeyaml:2.2")

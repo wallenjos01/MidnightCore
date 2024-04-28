@@ -37,8 +37,8 @@ public class FabricSkinModule extends SkinModule {
 
         boolean offlineModeSkins = section.getBoolean("get_skins_in_offline_mode");
 
-        for(Player player : data.getPlayers()) {
-            onLogin(ConversionUtil.validate(player).getGameProfile(), offlineModeSkins);
+        for(ServerPlayer spl : ConversionUtil.validate(data).getPlayerList().getPlayers()) {
+            onLogin(spl.getGameProfile(), offlineModeSkins);
         }
 
         ServerConfigurationConnectionEvents.BEFORE_CONFIGURE.register((handler, server) -> {

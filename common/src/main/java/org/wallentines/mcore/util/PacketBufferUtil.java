@@ -3,6 +3,8 @@ package org.wallentines.mcore.util;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -127,6 +129,18 @@ public class PacketBufferUtil {
         }
 
         return string;
+    }
+
+
+    public static byte[] getBytes(ByteBuf buf) {
+
+        if(buf.hasArray()) return buf.array();
+        try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            buf.readBytes(bos, buf.readableBytes());
+            return bos.toByteArray();
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Unable to extract bytes from " + buf + "!");
+        }
     }
 
 }

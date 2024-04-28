@@ -16,6 +16,7 @@
     "MixinItemStack",
     "MixinMinecraftServer",
     "MixinPlayerAdvancements",
+    "MixinPlayerList",
     "MixinServerConfigPacketListener",
     "MixinServerPlayer",
     "MixinServerScoreboard"

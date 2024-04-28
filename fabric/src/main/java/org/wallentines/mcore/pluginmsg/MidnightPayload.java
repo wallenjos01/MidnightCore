@@ -1,7 +1,7 @@
 package org.wallentines.mcore.pluginmsg;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -33,15 +33,15 @@ public class MidnightPayload implements CustomPacketPayload {
         return buffer;
     }
 
-    public static StreamCodec<RegistryFriendlyByteBuf, MidnightPayload> codec(CustomPacketPayload.Type<MidnightPayload> type) {
+    public static StreamCodec<FriendlyByteBuf, MidnightPayload> codec(CustomPacketPayload.Type<MidnightPayload> type) {
         return new StreamCodec<>() {
             @Override
-            public @NotNull MidnightPayload decode(RegistryFriendlyByteBuf object) {
-                return new MidnightPayload(type, object);
+            public @NotNull MidnightPayload decode(FriendlyByteBuf object) {
+                return new MidnightPayload(type, object.readRetainedSlice(object.readableBytes()));
             }
 
             @Override
-            public void encode(RegistryFriendlyByteBuf object, MidnightPayload obj) {
+            public void encode(FriendlyByteBuf object, MidnightPayload obj) {
                 object.writeBytes(obj.buffer);
             }
         };

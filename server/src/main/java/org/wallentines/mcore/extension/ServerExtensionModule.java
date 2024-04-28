@@ -69,9 +69,7 @@ public class ServerExtensionModule implements ServerModule {
         }
 
         // Since modules can be loaded after startup, all online players (if any) should be queried as soon as the module loads
-        for(Player pl : server.getPlayers()) {
-            smm.sendPacket(pl, cachedPacket);
-        }
+        server.getPlayers().forEach(pl -> smm.sendPacket(pl, cachedPacket));
 
         return true;
     }
@@ -112,7 +110,7 @@ public class ServerExtensionModule implements ServerModule {
 
     private Component handleResponse(UUID playerId, String username, ByteBuf response) {
 
-        if(response == null || response.writerIndex() == 0) {
+        if(response == null || response.readableBytes() == 0) {
             MidnightCoreAPI.LOGGER.info("Player " + username + " ignored extension packet");
             return null;
         }

@@ -4,6 +4,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.util.PacketBufferUtil;
+import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.serializer.NumberSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import javax.crypto.*;
@@ -23,27 +26,24 @@ public abstract class PluginMessageBroker {
      */
     public static final Identifier MESSAGE_ID = new Identifier(MidnightCoreAPI.MOD_ID, "msg");
 
-    /**
-     * The message channel used to register a server on the proxy
-     */
-    protected static final String REGISTER_CHANNEL = "__mcore_register";
-
     protected static final byte REGISTER = 0;
     protected static final byte UNREGISTER = 1;
+    protected static final byte REQUEST = 2;
+    protected static final byte ONLINE = 3;
 
 
     protected SecretKey key;
-    private PluginMessenger nullNamespace;
-    private final Map<String, PluginMessenger> messengersByNamespace;
+
+    protected final List<PluginMessenger> messengers;
     private boolean isShutdown;
 
     protected PluginMessageBroker() {
-        this.messengersByNamespace = new HashMap<>();
+        messengers = new ArrayList<>();
     }
 
     public void send(String channel, boolean encrypt, String namespace, ByteBuf message, boolean queue) {
         Packet out = new PluginMessageBroker.Packet(channel, encrypt, namespace, message);
-        if(queue) out.queued();
+        if(queue) out = out.queued();
 
         send(out);
     }
@@ -51,10 +51,11 @@ public abstract class PluginMessageBroker {
 
     protected void handle(Packet packet) {
 
-        PluginMessenger messenger = getMessenger(packet.namespace);
-        if(messenger == null) return;
-
-        messenger.handle(packet);
+        for(PluginMessenger msg : messengers) {
+            if(Objects.equals(msg.namespace, packet.namespace)) {
+                msg.handle(packet);
+            }
+        }
     }
 
     public void register(PluginMessenger messenger) {
@@ -66,17 +67,7 @@ public abstract class PluginMessageBroker {
             }
         }
 
-        if(messenger.namespace == null) {
-            nullNamespace = messenger;
-            return;
-        }
-
-        messengersByNamespace.put(messenger.namespace, messenger);
-    }
-
-    public PluginMessenger getMessenger(String namespace) {
-        if(namespace == null) return nullNamespace;
-        return messengersByNamespace.get(namespace);
+        messengers.add(messenger);
     }
 
     public void shutdown() {
@@ -158,7 +149,8 @@ public abstract class PluginMessageBroker {
     public enum Flag {
         ENCRYPTED(0b00000001),
         NAMESPACED(0b00000010),
-        QUEUE(0b00000100);
+        QUEUE(0b00000100),
+        SYSTEM(0b00001000);
 
         final byte mask;
 
@@ -168,12 +160,12 @@ public abstract class PluginMessageBroker {
 
         public static EnumSet<Flag> unpack(byte flags) {
 
-            List<Flag> flag = new ArrayList<>();
+            EnumSet<Flag> out = EnumSet.noneOf(Flag.class);
             for(Flag f : values()) {
-                if((flags & f.mask) == 1) flag.add(ENCRYPTED);
+                if((flags & f.mask) == f.mask) out.add(f);
             }
 
-            return EnumSet.copyOf(flag);
+            return out;
         }
 
         public static byte pack(EnumSet<Flag> flags) {
@@ -185,6 +177,8 @@ public abstract class PluginMessageBroker {
             return out;
         }
 
+        public static final Serializer<EnumSet<Flag>> SERIALIZER = Serializer.BYTE.map(Flag::pack, Flag::unpack);
+
     }
 
     protected class Packet implements org.wallentines.mcore.pluginmsg.Packet {
@@ -193,6 +187,8 @@ public abstract class PluginMessageBroker {
         protected final ByteBuf payload;
         protected final String namespace;
         protected final EnumSet<Flag> flags;
+        protected byte systemChannel = -1;
+
         public Packet(String channel, boolean encrypt, String namespace, ByteBuf payload) {
             this.channel = channel;
             this.namespace = namespace;
@@ -210,6 +206,15 @@ public abstract class PluginMessageBroker {
             this.flags = flags;
         }
 
+        Packet(byte systemChannel, ByteBuf payload) {
+            this.channel = null;
+            this.payload = payload;
+            this.namespace = null;
+            this.flags = EnumSet.of(Flag.SYSTEM);
+            if(key != null) flags.add(Flag.ENCRYPTED);
+            this.systemChannel = systemChannel;
+        }
+
         public Packet queued() {
 
             flags.add(Flag.QUEUE);
@@ -217,6 +222,9 @@ public abstract class PluginMessageBroker {
         }
 
         public Packet forFlags(EnumSet<Flag> flags) {
+            if(flags.contains(Flag.SYSTEM)) {
+                throw new IllegalArgumentException("SYSTEM packets may only be used internally!");
+            }
             return new Packet(channel, namespace, payload, flags);
         }
 
@@ -246,7 +254,13 @@ public abstract class PluginMessageBroker {
             if(flags.contains(Flag.NAMESPACED)) {
                 PacketBufferUtil.writeUtf(real, namespace, 255);
             }
-            PacketBufferUtil.writeUtf(real, channel, 255);
+
+            if(flags.contains(Flag.SYSTEM)) {
+                buffer.writeByte(systemChannel);
+            } else {
+                PacketBufferUtil.writeUtf(real, channel, 255);
+            }
+
             if(payload == null) {
                 PacketBufferUtil.writeVarInt(real, 0);
             } else {
@@ -276,14 +290,23 @@ public abstract class PluginMessageBroker {
             ns = PacketBufferUtil.readUtf(buffer, 255);
         }
 
-        String channel = PacketBufferUtil.readUtf(buffer, 255);
+        String channel = null;
+        byte systemChannel = -1;
+        if(flags.contains(Flag.SYSTEM)) {
+            systemChannel = buffer.readByte();
+        } else {
+            channel = PacketBufferUtil.readUtf(buffer, 255);
+        }
         int length = PacketBufferUtil.readVarInt(buffer);
 
-        return new Packet(channel, ns, buffer.readRetainedSlice(length), flags);
+        Packet out = new Packet(channel, ns, buffer.readRetainedSlice(length), flags);
+        out.systemChannel = systemChannel;
+
+        return out;
     }
 
     public interface Factory {
-        PluginMessageBroker create(MessengerModule module);
+        PluginMessageBroker create(MessengerModule module, ConfigSection config);
     }
 
 }

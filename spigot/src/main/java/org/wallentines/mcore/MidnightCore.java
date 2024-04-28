@@ -77,7 +77,7 @@ public class MidnightCore extends JavaPlugin {
         GameVersion.CURRENT_VERSION.set(adapter.getGameVersion());
 
         // Create server
-        SpigotServer server = new SpigotServer();
+        SpigotServer server = new SpigotServer(this);
 
         Server.RUNNING_SERVER.resetEvent.register(this, ev -> {
             MidnightCoreAPI.LOGGER.warn("Running server was reset!");
@@ -142,7 +142,7 @@ public class MidnightCore extends JavaPlugin {
         ServerModule.REGISTRY.register(SavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, SpigotSessionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SQLModule.ID, SpigotSQLModule.MODULE_INFO);
-        ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.MODULE_INFO);
+        ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.ALWAYS_REGISTER);
 
         PlaceholderManager.INSTANCE.registerSupplier("midnightcore_version", PlaceholderSupplier.inline(ctx -> getPlugin(MidnightCore.class).getDescription().getVersion()));
 

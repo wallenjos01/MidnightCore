@@ -1,6 +1,8 @@
 package org.wallentines.mcore.messenger;
 
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.MidnightCoreAPI;
+import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -13,6 +15,7 @@ import java.util.Map;
 public abstract class MessengerModule {
 
     private final Map<String, Messenger> messengers;
+    private PluginMessageBroker broker;
     private boolean initialized;
 
     protected MessengerModule() {
@@ -24,7 +27,7 @@ public abstract class MessengerModule {
      * @param data The messenger configuration
      * @return Whether initialization was successful
      */
-    protected boolean init(ConfigSection data) {
+    protected boolean init(ConfigSection data, PluginMessageBroker.Factory factory) {
 
         ConfigSection sec = data.getSection("messengers");
 
@@ -40,6 +43,11 @@ public abstract class MessengerModule {
             if(mt == null) {
                 MidnightCoreAPI.LOGGER.error("Unable to find messenger type " + type + "!");
                 return false;
+            }
+
+            // Create a plugin message broker only if necessary
+            if(mt.usesPluginMessageBroker() && broker == null) {
+                broker = factory.create(this, data.getOptional("broker").map(ConfigObject::asSection).orElse(new ConfigSection()));
             }
 
             Messenger msg;
@@ -68,10 +76,18 @@ public abstract class MessengerModule {
             msg.shutdown();
         }
 
+        if(broker != null) {
+            broker.shutdown();
+        }
+
         messengers.clear();
         initialized = false;
     }
 
+    @Nullable
+    public PluginMessageBroker getPluginMessageBroker() {
+        return broker;
+    }
 
     public Messenger getMessenger() {
         return getMessenger(null);
@@ -86,6 +102,7 @@ public abstract class MessengerModule {
     }
 
     static {
+        MessengerType.REGISTRY.register("plugin_message", PluginMessenger.TYPE);
         MessengerType.REGISTRY.register("composite", CompositeMessenger.TYPE);
     }
 

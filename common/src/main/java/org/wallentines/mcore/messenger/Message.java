@@ -2,6 +2,8 @@ package org.wallentines.mcore.messenger;
 
 import io.netty.buffer.ByteBuf;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -42,6 +44,23 @@ public final class Message {
     public ByteBuf payload() {
         return payload;
     }
+
+    public String payloadAsString() {
+
+        if(payload.hasArray()) {
+            return new String(payload.array());
+        }
+
+        try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+
+            payload.readBytes(bos, payload.readableBytes());
+            return bos.toString();
+
+        } catch (IOException ex) {
+            throw new RuntimeException("Unable to read payload as a string!");
+        }
+    }
+
 
     @Override
     public boolean equals(Object o) {

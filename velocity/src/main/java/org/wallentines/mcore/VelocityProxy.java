@@ -1,9 +1,8 @@
 package org.wallentines.mcore;
 
-import com.google.common.eventbus.Subscribe;
+import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
-import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -14,6 +13,7 @@ import org.wallentines.midnightlib.module.ModuleManager;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class VelocityProxy implements Proxy {
 
@@ -25,8 +25,8 @@ public class VelocityProxy implements Proxy {
     private final ModuleManager<Proxy, ProxyModule> modules = new ModuleManager<>();
     private final HandlerList<Proxy> onShutdown = new SingletonHandlerList<>();
     private final HandlerList<ProxyPlayer> onJoin = new HandlerList<>();
+    private final HandlerList<Connection> onConnect = new HandlerList<>();
     private final HandlerList<ProxyPlayer> onLeave = new HandlerList<>();
-    private final HandlerList<Transfer> onTransfer = new HandlerList<>();
 
     public VelocityProxy(MidnightCore plugin, ProxyServer server) {
         this.server = server;
@@ -55,19 +55,18 @@ public class VelocityProxy implements Proxy {
         return playerCache.computeIfAbsent(uuid, (k) -> server.getPlayer(uuid).map(player -> new VelocityPlayer(player, this)).orElse(null));
     }
 
-    private VelocityPlayer getPlayer(Player player) {
+    public VelocityPlayer getPlayer(Player player) {
         return playerCache.computeIfAbsent(player.getUniqueId(), k -> new VelocityPlayer(player, this));
     }
 
     @Override
-    public Collection<ProxyPlayer> getPlayers() {
+    public Stream<ProxyPlayer> getPlayers() {
+        return server.getAllPlayers().stream().map(this::getPlayer);
+    }
 
-        List<ProxyPlayer> players = new ArrayList<>(server.getPlayerCount());
-        for(Player player : server.getAllPlayers()) {
-            getPlayer(player.getUniqueId());
-        }
-
-        return players;
+    @Override
+    public int getPlayerCount() {
+        return server.getPlayerCount();
     }
 
     @Override
@@ -75,7 +74,7 @@ public class VelocityProxy implements Proxy {
         return serverCache.computeIfAbsent(name, (k) -> server.getServer(name).map(server -> new VelocityServer(server, this)).orElse(null));
     }
 
-    private VelocityServer getServer(RegisteredServer server) {
+    public VelocityServer getServer(RegisteredServer server) {
         return serverCache.computeIfAbsent(server.getServerInfo().getName(), k -> new VelocityServer(server, this));
     }
 
@@ -85,13 +84,13 @@ public class VelocityProxy implements Proxy {
     }
 
     @Override
-    public HandlerList<ProxyPlayer> leaveEvent() {
-        return onLeave;
+    public HandlerList<Connection> connectEvent() {
+        return onConnect;
     }
 
     @Override
-    public HandlerList<Transfer> transferEvent() {
-        return onTransfer;
+    public HandlerList<ProxyPlayer> leaveEvent() {
+        return onLeave;
     }
 
     public ProxyServer getInternal() {
@@ -107,27 +106,32 @@ public class VelocityProxy implements Proxy {
      * @param ignoredEvent The fired event.
      */
     @Subscribe
-    private void onShutdown(ProxyShutdownEvent ignoredEvent) {
+    public void onShutdown(ProxyShutdownEvent ignoredEvent) {
         onShutdown.invoke(this);
     }
 
     @Subscribe
-    private void onLeave(DisconnectEvent event) {
+    public void onLeave(DisconnectEvent event) {
         onLeave.invoke(getPlayer(event.getPlayer().getUniqueId()));
     }
 
     @Subscribe
-    private void onConnected(ServerConnectedEvent event) {
-        ProxyPlayer pl = getPlayer(event.getPlayer());
-        event.getPreviousServer().ifPresentOrElse(srv -> {
-            onTransfer.invoke(new Transfer(
-                    pl,
-                    getServer(srv)));
-        }, () -> {
-            onJoin.invoke(pl);
-        });
+    public void onConnected(ServerConnectedEvent event) {
 
-        getServer(event.getServer()).connectEvent().invoke(pl);
+        ProxyPlayer pl = getPlayer(event.getPlayer());
+        if(event.getPreviousServer().isEmpty()) {
+            onJoin.invoke(pl);
+        }
+
+        org.wallentines.mcore.ProxyServer srv = getServer(event.getServer());
+        Connection conn = new Connection(
+                pl,
+                srv,
+                event.getPreviousServer().map(this::getServer).orElse(null));
+
+        onConnect.invoke(conn);
+        srv.connectEvent().invoke(pl);
+
     }
 
 }
