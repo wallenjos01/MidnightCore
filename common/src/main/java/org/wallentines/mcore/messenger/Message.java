@@ -14,6 +14,7 @@ public final class Message {
     private final Messenger parent;
     private final String channel;
     private final ByteBuf payload;
+    private String message;
 
     public Message(Messenger parent, String channel, ByteBuf payload) {
         this.parent = parent;
@@ -42,18 +43,23 @@ public final class Message {
      * @return The message content
      */
     public ByteBuf payload() {
-        return payload;
+        return payload.asReadOnly();
     }
 
     public String payloadAsString() {
 
+        if(message == null) message = readPayload();
+        return message;
+    }
+
+    private String readPayload() {
         if(payload.hasArray()) {
             return new String(payload.array());
         }
 
         try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 
-            payload.readBytes(bos, payload.readableBytes());
+            payload().readBytes(bos, payload.readableBytes());
             return bos.toString();
 
         } catch (IOException ex) {

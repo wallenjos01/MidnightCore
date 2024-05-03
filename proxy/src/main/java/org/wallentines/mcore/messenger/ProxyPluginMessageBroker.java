@@ -100,6 +100,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         Serializer<ForwardInfo> ser = ForwardInfo.SERIALIZER.forContext(proxy);
         for(ConfigObject obj : root.values()) {
             ser.deserialize(ConfigContext.INSTANCE, obj).get().ifPresent(fi -> {
+                fi.persisted = true;
                 forwarders.put(fi.server.getName(), fi);
             });
         }
@@ -109,9 +110,9 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
 
         ForwardInfo info = forwarders.get(server.getName());
 
-        if(info == null) {
+        if(info == null || info.persisted) {
             module.sendServerMessage(server, new Packet(REQUEST, null));
-            return;
+            if(info == null) return;
         }
 
         while(!info.queue.isEmpty()) {
@@ -201,6 +202,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         final Queue<Packet> queue = new ArrayDeque<>();
         final Map<String, EnumSet<Flag>> flagsByNamespace = new HashMap<>();
         EnumSet<Flag> rootNamespace;
+        boolean persisted = false;
 
         ForwardInfo(ProxyServer server) {
             this.server = server;
