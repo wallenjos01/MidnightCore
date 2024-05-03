@@ -5,7 +5,6 @@ import io.netty.buffer.Unpooled;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.util.PacketBufferUtil;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.serializer.NumberSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -17,6 +16,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public abstract class PluginMessageBroker {
@@ -26,10 +28,10 @@ public abstract class PluginMessageBroker {
      */
     public static final Identifier MESSAGE_ID = new Identifier(MidnightCoreAPI.MOD_ID, "msg");
 
-    protected static final byte REGISTER = 0;
-    protected static final byte UNREGISTER = 1;
-    protected static final byte REQUEST = 2;
-    protected static final byte ONLINE = 3;
+    protected static final byte REGISTER = 1;
+    protected static final byte UNREGISTER = 2;
+    protected static final byte REQUEST = 3;
+    protected static final byte ONLINE = 4;
 
 
     protected SecretKey key;
@@ -37,16 +39,15 @@ public abstract class PluginMessageBroker {
     protected final List<PluginMessenger> messengers;
     private boolean isShutdown;
 
-    protected PluginMessageBroker() {
+    protected PluginMessageBroker(boolean encrypt) {
         messengers = new ArrayList<>();
+        if(encrypt) key = readKey(getKeyFile());
     }
 
-    public void send(String channel, boolean encrypt, String namespace, ByteBuf message, boolean queue) {
-        Packet out = new PluginMessageBroker.Packet(channel, encrypt, namespace, message);
-        if(queue) out = out.queued();
-
-        send(out);
+    public void send(String channel, String namespace, int ttl, ByteBuf message) {
+        send(new PluginMessageBroker.Packet(channel, key != null, namespace, ttl, message));
     }
+
     protected abstract void send(Packet packet);
 
     protected void handle(Packet packet) {
@@ -59,14 +60,6 @@ public abstract class PluginMessageBroker {
     }
 
     public void register(PluginMessenger messenger) {
-
-        if(messenger.encrypt && key == null) {
-            key = readKey(getKeyFile());
-            if(key == null) {
-                return;
-            }
-        }
-
         messengers.add(messenger);
     }
 
@@ -186,52 +179,65 @@ public abstract class PluginMessageBroker {
         protected final String channel;
         protected final ByteBuf payload;
         protected final String namespace;
-        protected final EnumSet<Flag> flags;
-        protected byte systemChannel = -1;
+        protected final Instant sent;
+        protected final boolean encrypt;
+        protected final int ttl;
+        protected final byte systemChannel;
 
-        public Packet(String channel, boolean encrypt, String namespace, ByteBuf payload) {
-            this.channel = channel;
-            this.namespace = namespace;
-            this.payload = payload;
-
-            this.flags = EnumSet.noneOf(Flag.class);
-            if(encrypt) flags.add(Flag.ENCRYPTED);
-            if(namespace != null) flags.add(Flag.NAMESPACED);
+        public Packet(String channel, boolean encrypt, String namespace, int ttl, ByteBuf payload) {
+            this(channel, encrypt, namespace, ttl, payload, Instant.now(Clock.systemUTC()));
         }
 
-        public Packet(String channel, String namespace, ByteBuf payload, EnumSet<Flag> flags) {
+        private Packet(String channel, boolean encrypt, String namespace, int ttl, ByteBuf payload, Instant sent) {
             this.channel = channel;
-            this.namespace = namespace;
+            this.sent = sent;
             this.payload = payload;
-            this.flags = flags;
+            this.namespace = namespace;
+            this.encrypt = encrypt;
+            this.ttl = ttl;
+            this.systemChannel = -1;
         }
 
-        Packet(byte systemChannel, ByteBuf payload) {
+
+        private Packet(byte systemChannel, boolean encrypt, ByteBuf payload, Instant sent) {
             this.channel = null;
+            this.sent = sent;
             this.payload = payload;
             this.namespace = null;
-            this.flags = EnumSet.of(Flag.SYSTEM);
-            if(key != null) flags.add(Flag.ENCRYPTED);
+            this.ttl = 0;
+            this.encrypt = encrypt;
             this.systemChannel = systemChannel;
         }
 
-        public Packet queued() {
-
-            flags.add(Flag.QUEUE);
-            return this;
+        Packet(byte systemChannel, ByteBuf payload) {
+            this(systemChannel, key != null, payload, Instant.now(Clock.systemUTC()));
         }
 
-        public Packet forFlags(EnumSet<Flag> flags) {
-            if(flags.contains(Flag.SYSTEM)) {
-                throw new IllegalArgumentException("SYSTEM packets may only be used internally!");
-            }
-            return new Packet(channel, namespace, payload, flags);
+        public boolean isSystemMessage() {
+            return systemChannel > 0;
         }
-
 
         public Message toMessage(PluginMessenger messenger) {
 
             return new Message(messenger, channel, payload);
+        }
+
+        public Packet encrypted(boolean encrypt) {
+            if(this.encrypt == encrypt) return this;
+            return new Packet(channel, encrypt, namespace, ttl, payload, sent);
+        }
+
+        public EnumSet<Flag> getFlags() {
+            EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
+            if(namespace != null) flags.add(Flag.NAMESPACED);
+            if(encrypt) flags.add(Flag.ENCRYPTED);
+            if(ttl > 0) flags.add(Flag.QUEUE);
+            if(systemChannel > 0) flags.add(Flag.SYSTEM);
+            return flags;
+        }
+
+        public boolean isExpired() {
+            return ttl > 0 && sent.plus(ttl, ChronoUnit.MILLIS).isBefore(Instant.now(Clock.systemUTC()));
         }
 
         @Override
@@ -242,25 +248,45 @@ public abstract class PluginMessageBroker {
         @Override
         public void write(ByteBuf buffer) {
 
+
+            // Setup encryption buffer if necessary
             ByteBuf real;
-            if(!flags.contains(Flag.ENCRYPTED) || buffer.hasArray()) {
+            if(!encrypt || buffer.hasArray()) {
                 real = buffer;
             } else {
                 real = Unpooled.buffer();
             }
 
-            real.writeByte(Flag.pack(flags));
+
+            // Flags
+            real.writeByte(Flag.pack(getFlags()));
             int startIndex = real.writerIndex();
-            if(flags.contains(Flag.NAMESPACED)) {
+
+            // Sent
+            real.writeLong(sent.toEpochMilli());
+
+            // TTL
+            if(ttl > 0) {
+                real.writeInt(ttl);
+            }
+
+            // Namespace
+            if(namespace != null) {
                 PacketBufferUtil.writeUtf(real, namespace, 255);
             }
 
-            if(flags.contains(Flag.SYSTEM)) {
+            // Channel
+            if(systemChannel > 0) {
                 buffer.writeByte(systemChannel);
             } else {
-                PacketBufferUtil.writeUtf(real, channel, 255);
+                if(channel == null) {
+                    PacketBufferUtil.writeVarInt(real, 0);
+                } else {
+                    PacketBufferUtil.writeUtf(real, channel, 255);
+                }
             }
 
+            // Payload
             if(payload == null) {
                 PacketBufferUtil.writeVarInt(real, 0);
             } else {
@@ -268,7 +294,8 @@ public abstract class PluginMessageBroker {
                 real.writeBytes(payload);
             }
 
-            if(flags.contains(Flag.ENCRYPTED)) {
+            // Encryption
+            if(encrypt) {
                 real = encrypt(real, key, startIndex);
             }
 
@@ -281,26 +308,49 @@ public abstract class PluginMessageBroker {
 
     protected Packet readPacket(ByteBuf buffer) {
 
+        // Flags
         EnumSet<Flag> flags = Flag.unpack(buffer.readByte());
-        if(flags.contains(Flag.ENCRYPTED)) {
+
+        // Decrypt
+        boolean encrypt = flags.contains(Flag.ENCRYPTED);
+        if(encrypt) {
             buffer = decrypt(buffer, key);
         }
+
+        // Timestamp
+        Instant sent = Instant.ofEpochSecond(buffer.readLong());
+
+        // TTL
+        int ttl = 0;
+        if (flags.contains(Flag.QUEUE)) {
+            ttl = buffer.readInt();
+        }
+
+        // Namespace
         String ns = null;
         if(flags.contains(Flag.NAMESPACED)) {
             ns = PacketBufferUtil.readUtf(buffer, 255);
         }
 
+        // Channel
         String channel = null;
-        byte systemChannel = -1;
+        byte systemChannel = 0;
         if(flags.contains(Flag.SYSTEM)) {
             systemChannel = buffer.readByte();
         } else {
             channel = PacketBufferUtil.readUtf(buffer, 255);
         }
-        int length = PacketBufferUtil.readVarInt(buffer);
 
-        Packet out = new Packet(channel, ns, buffer.readRetainedSlice(length), flags);
-        out.systemChannel = systemChannel;
+        // Payload
+        int length = PacketBufferUtil.readVarInt(buffer);
+        ByteBuf payload = buffer.readRetainedSlice(length);
+
+        Packet out;
+        if(systemChannel > 0) {
+            out = new Packet(systemChannel, encrypt, payload, sent);
+        } else {
+            out = new Packet(channel, encrypt, ns, ttl, payload, sent);
+        }
 
         return out;
     }

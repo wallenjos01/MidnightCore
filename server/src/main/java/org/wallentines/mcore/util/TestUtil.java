@@ -231,8 +231,7 @@ public class TestUtil {
                 MidnightCoreAPI.LOGGER.info("[Test Message] " + msg.payloadAsString());
             });
 
-            messenger.publish("_test", "Hello, World");
-            messenger.queue("_test", "Queued Message");
+            messenger.publish("_test", 10000, "Hello, World");
 
             pl.sendMessage(Component.text("Sent test message"));
 

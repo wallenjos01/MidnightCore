@@ -15,15 +15,11 @@ public class PluginMessenger implements Messenger {
 
     private final PluginMessageBroker broker;
     private final Map<String, HandlerList<Message>> handlers;
-    protected final boolean encrypt;
-    protected final boolean allowQueued;
     protected final String namespace;
 
-    protected PluginMessenger(PluginMessageBroker broker, boolean encrypt, boolean allowQueued, String namespace) {
+    protected PluginMessenger(PluginMessageBroker broker, String namespace) {
         this.handlers = new HashMap<>();
-        this.encrypt = encrypt;
         this.namespace = namespace;
-        this.allowQueued = allowQueued;
         this.broker = broker;
 
         broker.register(this);
@@ -31,7 +27,7 @@ public class PluginMessenger implements Messenger {
 
     void handle(PluginMessageBroker.Packet pck) {
 
-        if(pck.flags.contains(PluginMessageBroker.Flag.SYSTEM)) {
+        if(pck.isSystemMessage()) {
             MidnightCoreAPI.LOGGER.warn("Attempt to handle system message!");
             return;
         }
@@ -50,12 +46,12 @@ public class PluginMessenger implements Messenger {
 
     @Override
     public void publish(String channel, ByteBuf message) {
-        broker.send(channel, encrypt, namespace, message, false);
+        publish(channel, 0, message);
     }
 
     @Override
-    public void queue(String channel, ByteBuf message) {
-        broker.send(channel, encrypt, namespace, message, true);
+    public void publish(String channel, int ttl, ByteBuf message) {
+        broker.send(channel, namespace, ttl, message);
     }
 
     @Override
@@ -75,14 +71,6 @@ public class PluginMessenger implements Messenger {
         });
     }
 
-    public EnumSet<PluginMessageBroker.Flag> getFlags() {
-        EnumSet<PluginMessageBroker.Flag> out = EnumSet.noneOf(PluginMessageBroker.Flag.class);
-        if(encrypt) out.add(PluginMessageBroker.Flag.ENCRYPTED);
-        if(allowQueued) out.add(PluginMessageBroker.Flag.QUEUE);
-        if(namespace != null) out.add(PluginMessageBroker.Flag.NAMESPACED);
-        return out;
-    }
-
     public static final MessengerType TYPE = new MessengerType() {
 
         @Override
@@ -93,8 +81,6 @@ public class PluginMessenger implements Messenger {
 
             return new PluginMessenger(
                     broker,
-                    params.getOrDefault("encrypt", false),
-                    params.getOrDefault("allow_queued", true),
                     params.getOrDefault("namespace", (String) null)
             );
         }

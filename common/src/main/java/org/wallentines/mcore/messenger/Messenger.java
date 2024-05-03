@@ -44,19 +44,21 @@ public interface Messenger {
     }
 
     /**
-     * Sends a message with the given bytes to the given channel, or queues it if it cannot be sent immediately
+     * Sends a message with the given bytes to the given channel
      * @param channel The channel to publish to
+     * @param ttl how long the message should live before being considered expired
      * @param message The message's data
      */
-    void queue(String channel, ByteBuf message);
+    void publish(String channel, int ttl, ByteBuf message);
 
     /**
-     * Sends a message with the given bytes to the given channel, or queues it if it cannot be sent immediately
+     * Sends a message with the given bytes to the given channel
      * @param channel The channel to publish to
+     * @param ttl how long the message should live before being considered expired
      * @param message The message's data
      */
-    default void queue(String channel, String message) {
-        queue(channel, Unpooled.wrappedBuffer(message.getBytes(StandardCharsets.UTF_8)));
+    default void publish(String channel, int ttl, String message) {
+        publish(channel, ttl, Unpooled.wrappedBuffer(message.getBytes(StandardCharsets.UTF_8)));
     }
 
     /**

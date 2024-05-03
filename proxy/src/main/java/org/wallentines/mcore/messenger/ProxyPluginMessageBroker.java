@@ -26,7 +26,9 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     private final Map<String, ForwardInfo> forwarders = new HashMap<>();
     private final boolean enablePersistence;
 
-    public ProxyPluginMessageBroker(Proxy proxy, ProxyPluginMessageModule module, boolean enablePersistence) {
+    public ProxyPluginMessageBroker(Proxy proxy, ProxyPluginMessageModule module, boolean encrypt, boolean enablePersistence) {
+        super(encrypt);
+
         this.proxy = proxy;
         this.module = module;
         this.enablePersistence = enablePersistence;
@@ -40,21 +42,27 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
             ProxyServer server = msg.server();
             Packet packet = readPacket(payload);
 
-            if(packet.flags.contains(Flag.SYSTEM)) {
+            if(packet.isSystemMessage()) {
 
                 switch (packet.systemChannel) {
                     case REGISTER: {
+
+                        boolean enc = packet.payload.readBoolean();
+                        boolean root = packet.payload.readBoolean();
                         int messengers = PacketBufferUtil.readVarInt(packet.payload);
-                        ForwardInfo info = new ForwardInfo(server);
+
+                        List<String> namespaces = new ArrayList<>();
+
                         for(int i = 0 ; i < messengers ; i++) {
                             EnumSet<Flag> flags = Flag.unpack(packet.payload.readByte());
                             if(flags.contains(Flag.NAMESPACED)) {
                                 String namespace = PacketBufferUtil.readUtf(packet.payload);
-                                info.flagsByNamespace.put(namespace, flags);
-                            } else {
-                                info.rootNamespace = flags;
+                                namespaces.add(namespace);
                             }
                         }
+
+                        ForwardInfo info = new ForwardInfo(server, enc, root, namespaces);
+
                         forwarders.put(server.getName(), info);
                         break;
                     }
@@ -70,6 +78,8 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
                 }
                 return;
             }
+
+            if(packet.isExpired()) return;
 
             if(!forwarders.containsKey(server.getName())) {
                 module.sendServerMessage(server, new Packet(REQUEST, null));
@@ -118,11 +128,9 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         while(!info.queue.isEmpty()) {
 
             Packet packet = info.queue.remove();
-            EnumSet<Flag> flags = info.getFlags(packet.namespace);
-            if(flags == null) {
-                continue;
-            }
-            module.sendServerMessage(info.server, info.queue.remove().forFlags(flags));
+            if(packet.isExpired()) continue;
+
+            module.sendServerMessage(info.server, packet);
         }
 
     }
@@ -136,19 +144,16 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
 
         for(ForwardInfo fi : forwarders.values()) {
 
-            if(fi.server == sender) continue;
-
-            EnumSet<Flag> flags = fi.getFlags(packet.namespace);
-            if(flags == null) {
-                continue;
-            }
+            Packet toSend = packet.encrypted(fi.encrypt);
+            if(fi.server == sender || !fi.hasNamespace(toSend.namespace)) continue;
 
             if(fi.server.getPlayerCount() == 0) {
-                if(packet.flags.contains(Flag.QUEUE) && flags.contains(Flag.QUEUE)) {
-                    fi.queue.add(packet);
+                if(toSend.ttl > 0 && !toSend.isExpired()) {
+                    fi.queue.add(toSend);
                 }
             } else {
-                module.sendServerMessage(fi.server, packet.forFlags(flags));
+                flushQueue(sender);
+                module.sendServerMessage(fi.server, toSend);
             }
         }
     }
@@ -199,18 +204,23 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     private static class ForwardInfo {
 
         final ProxyServer server;
-        final Queue<Packet> queue = new ArrayDeque<>();
-        final Map<String, EnumSet<Flag>> flagsByNamespace = new HashMap<>();
-        EnumSet<Flag> rootNamespace;
+        final boolean encrypt;
+        final Set<String> namespaces;
+        final boolean rootNamespace;
         boolean persisted = false;
 
-        ForwardInfo(ProxyServer server) {
+        final Queue<Packet> queue = new ArrayDeque<>();
+
+        ForwardInfo(ProxyServer server, boolean encrypt, boolean rootNamespace, Collection<String> namespace) {
             this.server = server;
+            this.encrypt = encrypt;
+            this.namespaces = Set.copyOf(namespace);
+            this.rootNamespace = rootNamespace;
         }
 
-        EnumSet<Flag> getFlags(String namespace) {
+        boolean hasNamespace(String namespace) {
             if(namespace == null) return rootNamespace;
-            return flagsByNamespace.get(namespace);
+            return namespaces.contains(namespace);
         }
 
 
@@ -229,14 +239,10 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
 
         static final ContextSerializer<ForwardInfo, Proxy> SERIALIZER = ContextObjectSerializer.create(
                 SERVER.entry("server", (fi, ctx) -> fi.server),
-                Flag.SERIALIZER.mapOf().<ForwardInfo, Proxy>entry("namespaces", (fi, ctx) -> fi.flagsByNamespace).optional(),
-                Flag.SERIALIZER.<ForwardInfo, Proxy>entry("root", (fi, ctx) -> fi.rootNamespace).optional(),
-                (ctx, svr, ns, root) -> {
-                    ForwardInfo fi = new ForwardInfo(svr);
-                    fi.flagsByNamespace.putAll(ns);
-                    fi.rootNamespace = root;
-                    return fi;
-                }
+                Serializer.BOOLEAN.entry("encrypt", (fi, ctx) -> fi.encrypt),
+                Serializer.BOOLEAN.entry("root", (fi, ctx) -> fi.rootNamespace),
+                Serializer.STRING.listOf().entry("namespaces", (fi, ctx) -> fi.namespaces),
+                (ctx, server, enc, root, ns) -> new ForwardInfo(server, enc, root, ns)
         );
 
     }
@@ -254,7 +260,11 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
             throw new IllegalStateException("Unable to create plugin message broker! Plugin message module is unloaded!");
         }
 
-        return new ProxyPluginMessageBroker(prx, pm, cfg.getOrDefault("persistent_registration", true));
+        return new ProxyPluginMessageBroker(
+                prx,
+                pm,
+                cfg.getOrDefault("encrypt", true),
+                cfg.getOrDefault("persistence", true));
     };
 
 }

@@ -9,6 +9,8 @@ import org.wallentines.mdcfg.serializer.InlineSerializer;
 
 import java.io.File;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 public class ServerPluginMessageBroker extends PluginMessageBroker {
@@ -18,8 +20,8 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
     private final Queue<Packet> queue = new ArrayDeque<>();
     private boolean firstSend = false;
 
-    private ServerPluginMessageBroker(Server server, ServerPluginMessageModule module, RegisterTime registerTime) {
-        super();
+    private ServerPluginMessageBroker(Server server, ServerPluginMessageModule module, boolean encrypt, RegisterTime registerTime) {
+        super(encrypt);
         this.server = server;
         this.module = module;
 
@@ -49,7 +51,6 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
 
                 }
 
-
                 while(!queue.isEmpty()) {
                     module.sendPacket(pl, queue.remove());
                 }
@@ -60,12 +61,13 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
         module.registerPacketHandler(MESSAGE_ID, (pl, buf) -> {
 
             Packet pck = readPacket(buf);
-            if(pck.flags.contains(Flag.SYSTEM)) {
+            if(pck.isSystemMessage()) {
                 if(pck.systemChannel == REQUEST) {
                     send(new Packet(REGISTER, writeRegistration()));
                 }
                 return;
             }
+            if(pck.isExpired()) return;
 
             handle(pck);
         });
@@ -75,12 +77,23 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
 
         ByteBuf payload = Unpooled.buffer();
 
-        PacketBufferUtil.writeVarInt(payload, messengers.size());
+        boolean rootNamespace = false;
+        List<String> namespaces = new ArrayList<>();
+
         for(PluginMessenger mess : messengers) {
-            payload.writeByte(Flag.pack(mess.getFlags()));
-            if(mess.namespace != null) {
-                PacketBufferUtil.writeUtf(payload, mess.namespace);
+            if(mess.namespace == null) {
+                rootNamespace = true;
+            } else {
+                namespaces.add(mess.namespace);
             }
+        }
+
+        payload.writeBoolean(key != null);
+        payload.writeBoolean(rootNamespace);
+
+        PacketBufferUtil.writeVarInt(payload, messengers.size());
+        for(String s : namespaces) {
+            PacketBufferUtil.writeUtf(payload, s);
         }
 
         return payload;
@@ -95,7 +108,8 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
     protected void send(Packet packet) {
 
         if(server.getPlayerCount() == 0) {
-            if(packet.flags.contains(Flag.QUEUE)) {
+            queue.removeIf(Packet::isExpired);
+            if(packet.ttl > 0) {
                 queue.add(packet);
             }
             return;
@@ -135,7 +149,7 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
             throw new IllegalStateException("Unable to create plugin message broker! Plugin message module is unloaded!");
         }
 
-        return new ServerPluginMessageBroker(srv, pm, time);
+        return new ServerPluginMessageBroker(srv, pm, cfg.getOrDefault("encrypt", false), time);
     };
 
     private enum RegisterTime {

@@ -36,8 +36,8 @@ public class CompositeMessenger implements Messenger {
     }
 
     @Override
-    public void queue(String channel, ByteBuf message) {
-        for(Messenger m : messengers) m.queue(channel, message);
+    public void publish(String channel, int ttl, ByteBuf message) {
+        for(Messenger m : messengers) m.publish(channel, ttl, message);
     }
 
     public static final MessengerType TYPE = (module, params) -> new CompositeMessenger(module, params.getList("messengers", Serializer.STRING));
