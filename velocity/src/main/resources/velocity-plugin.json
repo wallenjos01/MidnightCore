@@ -1,13 +1,11 @@
 {
-  "id":"midnightcore",
-  "name":"MidnightCore",
-  "version":"2.0.0-SNAPSHOT",
-  "url":"",
+  "id": "${id}",
+  "name": "MidnightCore",
+  "version": "${version}",
+  "url": "",
   "authors": [
-    "M1dnight_Ninja"
+    "wallenjos01"
   ],
-  "dependencies":[
-
-  ],
-  "main":"org.wallentines.mcore.MidnightCore"
+  "dependencies": [ ],
+  "main": "org.wallentines.mcore.MidnightCore"
 }

@@ -11,6 +11,21 @@ plugins {
     id("fabric-loom")
 }
 
+loom {
+    runs {
+        getByName("client") {
+            runDir = "run/client"
+            ideConfigGenerated(false)
+            client()
+        }
+        getByName("server") {
+            runDir = "run/server"
+            ideConfigGenerated(false)
+            server()
+        }
+    }
+}
+
 val archiveName: String = Common.getArchiveName(project, rootProject)
 
 val finalShadow = tasks.register<ShadowJar>("finalShadow") {

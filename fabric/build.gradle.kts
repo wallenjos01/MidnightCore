@@ -7,50 +7,7 @@ plugins {
     id("mod-fabric")
 }
 
-loom {
-    runs {
-        getByName("client") {
-            runDir = "run/client"
-            ideConfigGenerated(false)
-            client()
-        }
-        getByName("server") {
-            runDir = "run/server"
-            ideConfigGenerated(false)
-            server()
-        }
-    }
-}
-
-
 Common.setupResources(project, rootProject, "fabric.mod.json")
-
-/*
-
-val finalShadow = tasks.register<ShadowJar>("finalShadow") {
-    dependsOn(tasks.remapJar)
-    val id = rootProject.name
-    archiveClassifier.set("")
-    archiveBaseName.set("${id}-${project.name}")
-    configurations = listOf(project.configurations["shadow"])
-    from(tasks.remapJar)
-}
-
-
-tasks {
-    build {
-        dependsOn(finalShadow)
-    }
-    jar {
-        archiveClassifier.set("dev")
-    }
-    remapJar {
-        archiveClassifier.set("remap")
-        inputFile.set(jar.get().archiveFile)
-    }
-}
-*/
-
 
 dependencies {
 
@@ -81,7 +38,11 @@ dependencies {
         modApi(include(fabricApi.module(mod, "0.97.8+1.20.6"))!!)
     }
 
-    // Included Library Dependencies
+    include(modApi("me.lucko:fabric-permissions-api:0.3.1") {
+        isTransitive = false
+    })
+
+    // Shadowed Library Dependencies
     modApi(libs.midnight.cfg)
     modApi(libs.midnight.cfg.sql)
     modApi(libs.midnight.cfg.json)
@@ -91,28 +52,13 @@ dependencies {
     modApi(libs.midnight.lib)
     modApi(libs.zstd.jni)
 
-    include(libs.midnight.cfg)
-    include(libs.midnight.cfg.sql)
-    include(libs.midnight.cfg.json)
-    include(libs.midnight.cfg.binary)
-    include(libs.midnight.cfg.gson)
-    include(libs.midnight.cfg.nbt)
-    include(libs.midnight.lib)
-    include(libs.zstd.jni)
+    shadow(libs.midnight.cfg) { isTransitive = false }
+    shadow(libs.midnight.cfg.sql) { isTransitive = false }
+    shadow(libs.midnight.cfg.json) { isTransitive = false }
+    shadow(libs.midnight.cfg.binary) { isTransitive = false }
+    shadow(libs.midnight.cfg.gson) { isTransitive = false }
+    shadow(libs.midnight.cfg.nbt) { isTransitive = false }
+    shadow(libs.midnight.lib) { isTransitive = false }
+    shadow(libs.zstd.jni) { isTransitive = false }
 
-    include(modApi("me.lucko:fabric-permissions-api:0.3.1") {
-        isTransitive = false
-    })
 }
-
-/*
-
-tasks.withType<ProcessResources>() {
-    filesMatching("fabric.mod.json") {
-        expand(mapOf(
-                Pair("version", project.version as String),
-                Pair("id", rootProject.name)
-        ))
-    }
-}
-*/

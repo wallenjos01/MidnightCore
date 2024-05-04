@@ -1,6 +1,5 @@
 import build.plugin.Common
 import build.plugin.MultiShadow
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.parsing.parseBoolean
 
 plugins {
@@ -87,44 +86,8 @@ dependencies {
     java21CompileOnly("org.spigotmc:spigot-api:1.20.6-R0.1-SNAPSHOT")
 
     compileOnly(libs.jetbrains.annotations)
-
-    //testImplementation("org.yaml:snakeyaml:2.2")
 }
 
-/*tasks.withType<ProcessResources>() {
-    filesMatching("plugin.yml") {
-        expand(mapOf(
-                Pair("version", project.version as String),
-                Pair("id", rootProject.name)
-        ))
-    }
-}*/
-
-
-/*
-fun setupShadow(javaVersion: Int, classifier: String) {
-
-    configurations.create("shadow${javaVersion}") {
-        extendsFrom(configurations.shadow.get())
-        attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, javaVersion)
-    }
-
-    val task = tasks.register<ShadowJar>("java${javaVersion}ShadowJar") {
-        archiveClassifier.set(classifier)
-        configurations = listOf(project.configurations["shadow${javaVersion}"])
-
-        dependsOn(tasks.processResources)
-
-        from(sourceSets["java${javaVersion}"].output)
-        from(tasks.processResources.get().destinationDir)
-    }
-
-    tasks.build {
-        dependsOn(task)
-    }
-
-}
-*/
 
 
 fun setupVersion(version: VersionInfo) {
