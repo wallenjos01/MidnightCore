@@ -11,6 +11,8 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -32,7 +34,7 @@ public class MojangUtil {
     public static UUID getUUID(String playerName) {
 
         try {
-            URL url = new URL(String.format(UUID_URL, playerName));
+            URL url = new URI(String.format(UUID_URL, playerName)).toURL();
 
             ConfigSection sec = makeHttpRequest(url);
             if(sec == null) {
@@ -44,7 +46,7 @@ public class MojangUtil {
 
             return UUID.fromString(id);
 
-        } catch(IOException | IllegalArgumentException ex) {
+        } catch(IOException | URISyntaxException | IllegalArgumentException ex) {
             MidnightCoreAPI.LOGGER.error("An exception occurred while looking a player's UUID!", ex);
         }
 
@@ -69,7 +71,7 @@ public class MojangUtil {
     public static PlayerData getPlayerData(UUID playerId) {
 
         try {
-            URL url = new URL(String.format(SKIN_URL, playerId.toString().replace("-", "")));
+            URL url = new URI(String.format(SKIN_URL, playerId.toString().replace("-", ""))).toURL();
             ConfigSection sec = makeHttpRequest(url);
             if(sec == null) {
                 return new PlayerData(playerId, null, null);
@@ -92,7 +94,7 @@ public class MojangUtil {
 
             return new PlayerData(playerId, username, skin);
 
-        } catch(IOException | IllegalArgumentException ex) {
+        } catch(IOException | URISyntaxException | IllegalArgumentException ex) {
             MidnightCoreAPI.LOGGER.error("An exception occurred while looking a player's UUID!", ex);
         }
 

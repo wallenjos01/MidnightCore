@@ -1,8 +1,12 @@
+import build.plugin.Common
+
 plugins {
-    id("midnightcore-build")
-    id("midnightcore-shadow")
-    id("midnightcore-publish")
+    id("mod-build")
+    id("mod-shadow")
+    id("mod-publish")
 }
+
+Common.setupResources(project, rootProject, "velocity-plugin.json")
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
@@ -28,7 +32,7 @@ dependencies {
     shadow(libs.zstd.jni)
 
 }
-
+/*
 tasks.withType<ProcessResources>() {
     filesMatching("velocity-plugin.json") {
         expand(mapOf(
@@ -36,4 +40,4 @@ tasks.withType<ProcessResources>() {
                 Pair("id", rootProject.name)
         ))
     }
-}
+}*/

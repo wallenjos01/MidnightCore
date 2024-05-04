@@ -1,6 +1,6 @@
 plugins {
-    id("midnightcore-build")
-    id("midnightcore-publish")
+    id("mod-build")
+    id("mod-publish")
 }
 
 dependencies {

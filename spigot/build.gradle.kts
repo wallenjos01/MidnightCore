@@ -1,11 +1,13 @@
+import build.plugin.Common
+import build.plugin.MultiShadow
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.parsing.parseBoolean
 
 plugins {
-    id("midnightcore-build")
-    id("midnightcore-shadow")
-    id("midnightcore-multi-version")
-    id("midnightcore-publish")
+    id("mod-build")
+    id("mod-shadow")
+    id("mod-multi-version")
+    id("mod-publish")
 }
 
 repositories {
@@ -14,9 +16,13 @@ repositories {
     maven("https://libraries.minecraft.net/")
 }
 
-setupShadow(21, "1.20.5")
-setupShadow(17, "1.17-1.20.4")
-setupShadow(8, "1.8-1.16")
+Common.setupResources(project, rootProject, "plugin.yml")
+MultiShadow.setupShadow(project, multiVersion, 17, "1.17-1.20.4")
+MultiShadow.setupShadow(project, multiVersion, 8, "1.8-1.16")
+
+tasks.shadowJar {
+    archiveClassifier.set("1.20.5-1.20.6")
+}
 
 // Versions compiled against Java 8
 val versions = listOf(
@@ -82,19 +88,20 @@ dependencies {
 
     compileOnly(libs.jetbrains.annotations)
 
-    testImplementation("org.yaml:snakeyaml:2.2")
+    //testImplementation("org.yaml:snakeyaml:2.2")
 }
 
-tasks.withType<ProcessResources>() {
+/*tasks.withType<ProcessResources>() {
     filesMatching("plugin.yml") {
         expand(mapOf(
                 Pair("version", project.version as String),
                 Pair("id", rootProject.name)
         ))
     }
-}
+}*/
 
 
+/*
 fun setupShadow(javaVersion: Int, classifier: String) {
 
     configurations.create("shadow${javaVersion}") {
@@ -117,6 +124,7 @@ fun setupShadow(javaVersion: Int, classifier: String) {
     }
 
 }
+*/
 
 
 fun setupVersion(version: VersionInfo) {
@@ -133,7 +141,12 @@ fun setupVersion(version: VersionInfo) {
     dependencies {
 
         "java${javaVersion}CompileOnly"(set.output)
-        "shadow${javaVersion}"(set.output)
+
+        if(javaVersion == multiVersion.defaultVersion) {
+            shadow(set.output)
+        } else {
+            "shadow${javaVersion}"(set.output)
+        }
 
         "v${version.name}CompileOnly"("org.spigotmc:spigot-api:${version.version}-R0.1-SNAPSHOT")
         "v${version.name}CompileOnly"("org.spigotmc:spigot:${version.version}-R0.1-SNAPSHOT")

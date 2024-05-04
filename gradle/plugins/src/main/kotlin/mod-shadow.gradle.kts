@@ -1,4 +1,4 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import build.plugin.Common
 
 plugins {
     id("java")
@@ -15,7 +15,11 @@ tasks {
     }
 }
 
-tasks.withType<ShadowJar>() {
-    val id = rootProject.name
-    archiveBaseName = "${id}-${project.name}"
+tasks.shadowJar {
+    archiveBaseName.set(Common.getArchiveName(project, rootProject))
+    archiveClassifier.set("")
+}
+
+tasks.jar{
+    archiveClassifier.set("partial")
 }

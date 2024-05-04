@@ -1,10 +1,10 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import build.plugin.Common
 
 plugins {
-    id("midnightcore-build")
-    id("midnightcore-publish")
-    id("midnightcore-shadow")
-    alias(libs.plugins.loom)
+    id("mod-build")
+    id("mod-publish")
+    id("mod-shadow")
+    id("mod-fabric")
 }
 
 loom {
@@ -22,6 +22,10 @@ loom {
     }
 }
 
+
+Common.setupResources(project, rootProject, "fabric.mod.json")
+
+/*
 
 val finalShadow = tasks.register<ShadowJar>("finalShadow") {
     dependsOn(tasks.remapJar)
@@ -45,6 +49,7 @@ tasks {
         inputFile.set(jar.get().archiveFile)
     }
 }
+*/
 
 
 dependencies {
@@ -59,11 +64,11 @@ dependencies {
     shadow(project(":client").setTransitive(false))
 
     // Minecraft
-    minecraft("com.mojang:minecraft:1.20.5")
+    minecraft("com.mojang:minecraft:1.20.6")
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
-    modImplementation("net.fabricmc:fabric-loader:0.15.10")
+    modImplementation("net.fabricmc:fabric-loader:0.15.11")
 
     // Fabric API
     val apiModules = listOf(
@@ -73,7 +78,7 @@ dependencies {
             "fabric-command-api-v2"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.97.0+1.20.5"))!!)
+        modApi(include(fabricApi.module(mod, "0.97.8+1.20.6"))!!)
     }
 
     // Included Library Dependencies
@@ -100,6 +105,7 @@ dependencies {
     })
 }
 
+/*
 
 tasks.withType<ProcessResources>() {
     filesMatching("fabric.mod.json") {
@@ -109,3 +115,4 @@ tasks.withType<ProcessResources>() {
         ))
     }
 }
+*/

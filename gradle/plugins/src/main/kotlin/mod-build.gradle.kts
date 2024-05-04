@@ -1,3 +1,5 @@
+import build.plugin.Common
+
 plugins {
     id("java")
     id("java-library")
@@ -23,22 +25,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 }
 
-tasks.withType<Jar>() {
-
-    if(rootProject == project) {
-        archiveBaseName.set(project.name)
-    } else {
-        var name = project.name
-        var currentParent = project.parent
-        while(currentParent != rootProject) {
-            name = currentParent!!.name + "-" + name
-            currentParent = currentParent.parent
-        }
-        archiveBaseName.set(rootProject.name + "-" + name)
-    }
+tasks.withType<Jar> {
+    archiveBaseName.set(Common.getArchiveName(project, rootProject))
 }
 
-tasks.withType<Test>() {
+tasks.withType<Test> {
     useJUnitPlatform()
     workingDir("run/test")
 }

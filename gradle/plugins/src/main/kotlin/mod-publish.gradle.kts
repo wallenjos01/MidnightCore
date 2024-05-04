@@ -1,3 +1,5 @@
+import build.plugin.Common
+
 plugins {
     id("java")
     id("java-library")
@@ -6,17 +8,8 @@ plugins {
 
 publishing {
     publications.create<MavenPublication>("maven") {
-        if(rootProject == project) {
-            artifactId = project.name
-        } else {
-            var name = project.name
-            var currentParent = project.parent
-            while(currentParent != rootProject) {
-                name = currentParent!!.name + "-" + name
-                currentParent = currentParent.parent
-            }
-            artifactId = rootProject.name + "-" + name
-        }
+
+        artifactId = Common.getArchiveName(project, rootProject)
         from(components["java"])
     }
 
