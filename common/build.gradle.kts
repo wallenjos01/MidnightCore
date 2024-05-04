@@ -17,6 +17,7 @@ dependencies {
     api(libs.netty.buffer)
 
     api(libs.slf4j.api)
+    compileOnlyApi(libs.jetbrains.annotations)
 
     testImplementation(libs.midnight.cfg)
     testImplementation(libs.midnight.cfg.json)

@@ -16,10 +16,9 @@ dependencies {
     api(project(":common"))
     api(project(":server"))
 
-    compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
-
     java8CompileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
     java17CompileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
+    java21CompileOnly("org.spigotmc:spigot-api:1.20.5-R0.1-SNAPSHOT")
 
     compileOnly(libs.midnight.cfg)
     compileOnly(libs.jetbrains.annotations)

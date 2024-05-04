@@ -76,7 +76,12 @@ dependencies {
     shadow(libs.midnight.lib) { isTransitive = false }
     shadow(libs.zstd.jni)
 
-    compileOnly("org.spigotmc:spigot-api:1.20.2-R0.1-SNAPSHOT")
+    java8CompileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
+    java17CompileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
+    java21CompileOnly("org.spigotmc:spigot-api:1.20.6-R0.1-SNAPSHOT")
+
+    compileOnly(libs.jetbrains.annotations)
+
     testImplementation("org.yaml:snakeyaml:2.2")
 }
 
@@ -125,33 +130,31 @@ fun setupVersion(version: VersionInfo) {
         })
     }
 
-    multiVersion.getJarTask(javaVersion).from(set.output)
-
     dependencies {
 
         "java${javaVersion}CompileOnly"(set.output)
         "shadow${javaVersion}"(set.output)
 
-        "v${version.name}Implementation"("org.spigotmc:spigot-api:${version.version}-R0.1-SNAPSHOT")
-        "v${version.name}Implementation"("org.spigotmc:spigot:${version.version}-R0.1-SNAPSHOT")
+        "v${version.name}CompileOnly"("org.spigotmc:spigot-api:${version.version}-R0.1-SNAPSHOT")
+        "v${version.name}CompileOnly"("org.spigotmc:spigot:${version.version}-R0.1-SNAPSHOT")
 
         "v${version.name}CompileOnly"(libs.jetbrains.annotations)
-        "v${version.name}Implementation"(libs.midnight.cfg)
-        "v${version.name}Implementation"(libs.midnight.cfg.gson)
+        "v${version.name}CompileOnly"(libs.midnight.cfg)
+        "v${version.name}CompileOnly"(libs.midnight.cfg.gson)
 
-        // For whatever reason, intellisense cannot find project dependencies on java 8 sources sets. Gradle still can,
-        // and compilation works fine, but intelliJ complains about it. To work around this, those dependencies can be
-        // pulled from repositories instead. In the case where this becomes a problem, set spigot_intellisense_workaround
-        // to false in gradle.properties.
-        if(javaVersion == 8 && parseBoolean(project.properties["spigot_intellisense_workaround"] as String)) {
-            "v${version.name}Implementation"("org.wallentines:midnightcore-common:${project.version}")
-            "v${version.name}Implementation"("org.wallentines:midnightcore-server:${project.version}")
-            "v${version.name}Implementation"("org.wallentines:midnightcore-spigot-adapter:${project.version}")
+        // For whatever reason, intellisense cannot find project dependencies on source sets for other java versions.
+        // Gradle still can, and compilation works fine, but intelliJ complains about it. To work around this, those
+        // dependencies can be pulled from repositories instead. If this ever becomes a problem, set
+        // spigot_intellisense_workaround to false in gradle.properties.
+        if(javaVersion != multiVersion.defaultVersion && parseBoolean(project.properties["spigot_intellisense_workaround"] as String)) {
+            "v${version.name}CompileOnly"("org.wallentines:midnightcore-common:${project.version}")
+            "v${version.name}CompileOnly"("org.wallentines:midnightcore-server:${project.version}")
+            "v${version.name}CompileOnly"("org.wallentines:midnightcore-spigot-adapter:${project.version}")
         }
 
-        "v${version.name}Implementation"(project(":common"))
-        "v${version.name}Implementation"(project(":server"))
-        "v${version.name}Implementation"(project(":spigot:adapter"))
+        "v${version.name}CompileOnly"(project(":common"))
+        "v${version.name}CompileOnly"(project(":server"))
+        "v${version.name}CompileOnly"(project(":spigot:adapter"))
     }
 }
 
