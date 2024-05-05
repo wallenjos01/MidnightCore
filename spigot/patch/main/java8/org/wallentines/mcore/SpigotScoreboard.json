@@ -1,0 +1,12 @@
+[
+  {
+    "lines": [
+      {
+        "find": "board.registerNewObjective(objectiveId, Criteria.DUMMY, \"\");"
+      }
+    ],
+    "type": "replace",
+    "find": "objectiveId, Criteria.DUMMY, \"\"",
+    "replace": "objectiveId, \"dummy\""
+  }
+]

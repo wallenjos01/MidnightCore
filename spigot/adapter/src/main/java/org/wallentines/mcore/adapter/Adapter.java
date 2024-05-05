@@ -5,8 +5,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mcore.CustomScoreboard;
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigObject;
@@ -238,6 +238,9 @@ public interface Adapter {
     default void setTeamPrefix(Team team, Component component) {
         team.setPrefix(component.toLegacyText());
     }
+
+    default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormat fmt) { }
+    default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormat fmt, String playerName) { }
 
 
     /**

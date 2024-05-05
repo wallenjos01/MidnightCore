@@ -13,12 +13,18 @@ import net.minecraft.nbt.NBTCompressedStreamTools;
 import net.minecraft.nbt.NBTReadLimiter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.IChatBaseComponent;
+import net.minecraft.network.chat.numbers.BlankFormat;
+import net.minecraft.network.chat.numbers.FixedFormat;
+import net.minecraft.network.chat.numbers.NumberFormat;
+import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.world.scores.ScoreAccess;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.ScoreboardObjective;
 import net.minecraft.world.scores.ScoreboardTeam;
 import org.bukkit.Bukkit;
@@ -30,6 +36,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mcore.CustomScoreboard;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
@@ -258,6 +265,35 @@ public class AdapterImpl implements Adapter {
     @Override
     public void setTeamPrefix(Team team, Component component) {
         teamReflector.getHandle(team).b(convert(component));
+    }
+
+    @Override
+    public void setNumberFormat(Objective objective, CustomScoreboard.NumberFormat fmt) {
+
+        ScoreboardObjective o = obReflector.getHandle(objective);
+
+        switch (fmt.type) {
+            case DEFAULT -> o.a((NumberFormat) null);
+            case BLANK -> o.a(BlankFormat.a);
+            case STYLED -> o.a(new StyledFormat(convert(fmt.argument.baseCopy()).a()));
+            case FIXED -> o.a(new FixedFormat(convert(fmt.argument)));
+        }
+    }
+
+    @Override
+    public void setNumberFormat(Objective objective, CustomScoreboard.NumberFormat fmt, String name) {
+
+        ScoreboardObjective o = obReflector.getHandle(objective);
+
+        ScoreHolder sh = ScoreHolder.c(name);
+        ScoreAccess acc = o.a().c(sh, o);
+
+        switch (fmt.type) {
+            case DEFAULT -> acc.a((NumberFormat) null);
+            case BLANK -> acc.a(BlankFormat.a);
+            case STYLED -> acc.a(new StyledFormat(convert(fmt.argument.baseCopy()).a()));
+            case FIXED -> acc.a(new FixedFormat(convert(fmt.argument)));
+        }
     }
 
     private ConfigSection convert(NBTTagCompound internal) {

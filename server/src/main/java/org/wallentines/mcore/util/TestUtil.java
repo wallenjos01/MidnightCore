@@ -148,8 +148,10 @@ public class TestUtil {
             CustomScoreboard board = CustomScoreboard.FACTORY.get().create(Component.text("Test").withColor(TextColor.RED).withBold(true));
 
             board.setLine(13, Component.text("Hello"));
-            board.setLine(3, PlaceholderContent.component("%player_name%"));
+            board.setNumberFormat(13, CustomScoreboard.NumberFormatType.BLANK);
+            board.setLine(3, PlaceholderContent.component("%player_name%"), PlaceholderContent.component("%player_username%"));
             board.setLine(1, Component.text("Color").withColor(new Color(0x58BE44)));
+            board.setNumberFormat(1, CustomScoreboard.NumberFormatType.STYLED, Component.empty().withColor(TextColor.GREEN).withBold(true));
             board.setLine(0, Component.text("Zero").withColor(TextColor.AQUA).withItalic(true));
 
             board.addViewer(pl);

@@ -1,11 +1,11 @@
 package org.wallentines.mcore;
 
+import net.minecraft.network.chat.numbers.BlankFormat;
+import net.minecraft.network.chat.numbers.FixedFormat;
+import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.ScoreHolder;
+import net.minecraft.world.scores.*;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
@@ -69,6 +69,22 @@ public class FabricScoreboard extends CustomScoreboard {
         boards.get(player.getUUID()).updateLine(line);
     }
 
+    @Override
+    protected void updateNumberFormat(Player player) {
+        if(!boards.containsKey(player.getUUID())) {
+            return;
+        }
+        boards.get(player.getUUID()).updateNumberFormat();
+    }
+
+    @Override
+    protected void updateNumberFormat(int line, Player player) {
+        if(!boards.containsKey(player.getUUID())) {
+            return;
+        }
+        boards.get(player.getUUID()).updateNumberFormat(line);
+    }
+
     private class BoardInfo {
 
         String objectiveId;
@@ -96,8 +112,11 @@ public class FabricScoreboard extends CustomScoreboard {
             board.startTrackingObjective(obj);
             board.setDisplayObjective(DisplaySlot.SIDEBAR, obj);
 
+            updateNumberFormat();
+
             for(int i = 0 ; i < 15 ; i++) {
                 updateLine(i);
+                updateNumberFormat(i);
             }
 
             ((ScoreboardHolder) player).setScoreboard(board);
@@ -142,6 +161,49 @@ public class FabricScoreboard extends CustomScoreboard {
             } else {
                 team.setPlayerPrefix(WrappedComponent.resolved(entries[line], (Player) player));
                 board.getOrCreatePlayerScore(sh, obj).set(line);
+            }
+        }
+
+        public void updateNumberFormat() {
+            Objective obj = board.getObjective(objectiveId);
+            if(obj == null) {
+                throw new IllegalStateException("Attempt to update scoreboard before initialization!");
+            }
+
+            if(numberFormat == null) return;
+
+            switch (numberFormat.type) {
+                case DEFAULT -> obj.setNumberFormat(null);
+                case BLANK -> obj.setNumberFormat(BlankFormat.INSTANCE);
+                case STYLED -> obj.setNumberFormat(new StyledFormat(ConversionUtil.getStyle(numberFormat.argument)));
+                case FIXED -> obj.setNumberFormat(new FixedFormat(WrappedComponent.resolved(numberFormat.argument, player)));
+            }
+        }
+
+        public void updateNumberFormat(int line) {
+            Objective obj = board.getObjective(objectiveId);
+            if(obj == null) {
+                throw new IllegalStateException("Attempt to update scoreboard before initialization!");
+            }
+            if(entries[line] == null) return;
+
+            String hexIndex = Integer.toHexString(line);
+            String playerName = "§" + hexIndex;
+
+            ScoreHolder sh = ScoreHolder.forNameOnly(playerName);
+            ScoreAccess acc = board.getOrCreatePlayerScore(sh, obj);
+
+            NumberFormat fmt = lineFormats[line];
+            if(fmt == null) {
+                acc.numberFormatOverride(null);
+                return;
+            }
+
+            switch (fmt.type) {
+                case DEFAULT -> acc.numberFormatOverride(null);
+                case BLANK -> acc.numberFormatOverride(BlankFormat.INSTANCE);
+                case STYLED -> acc.numberFormatOverride(new StyledFormat(ConversionUtil.getStyle(fmt.argument)));
+                case FIXED -> acc.numberFormatOverride(new FixedFormat(WrappedComponent.resolved(fmt.argument, player)));
             }
         }
     }

@@ -59,6 +59,24 @@ public class SpigotScoreboard extends CustomScoreboard {
         board.updateLine(line);
     }
 
+    @Override
+    protected void updateNumberFormat(Player player) {
+
+        BoardInfo board = boards.get(player);
+        if(board == null) return;
+
+        board.updateNumberFormat();
+    }
+
+    @Override
+    protected void updateNumberFormat(int line, Player player) {
+
+        BoardInfo board = boards.get(player);
+        if(board == null) return;
+
+        board.updateNumberFormat(line);
+    }
+
     private class BoardInfo {
 
         ScoreboardManager manager;
@@ -82,13 +100,14 @@ public class SpigotScoreboard extends CustomScoreboard {
 
         void init() {
 
-            @SuppressWarnings("deprecation")
-            Objective obj = board.registerNewObjective(objectiveId, "dummy");
+            Objective obj = board.registerNewObjective(objectiveId, Criteria.DUMMY, "");
             Adapter.INSTANCE.get().setObjectiveName(obj, ComponentResolver.resolveComponent(title, player));
             obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
+            updateNumberFormat();
             for(int i = 0 ; i < 15 ; i++) {
                 updateLine(i);
+                updateNumberFormat(i);
             }
 
             player.getInternal().setScoreboard(board);
@@ -134,6 +153,37 @@ public class SpigotScoreboard extends CustomScoreboard {
                 Adapter.INSTANCE.get().setTeamPrefix(team, ComponentResolver.resolveComponent(entries[line], player));
                 obj.getScore(playerName).setScore(line);
             }
+        }
+
+        void updateNumberFormat() {
+            Objective obj = board.getObjective(objectiveId);
+            if(obj == null) {
+                throw new IllegalStateException("Attempt to update scoreboard before initialization!");
+            }
+            if(numberFormat == null) return;
+
+            NumberFormat fmt = new NumberFormat(numberFormat.type, numberFormat.argument == null ? null : ComponentResolver.resolveComponent(numberFormat.argument, player));
+            Adapter.INSTANCE.get().setNumberFormat(obj, fmt);
+        }
+
+
+        void updateNumberFormat(int line) {
+            Objective obj = board.getObjective(objectiveId);
+            if(obj == null) {
+                throw new IllegalStateException("Attempt to update scoreboard before initialization!");
+            }
+            if(entries[line] == null) return;
+
+            String hexIndex = Integer.toHexString(line);
+            String playerName = '\u00A7' + hexIndex;
+
+            NumberFormat og = lineFormats[line];
+            NumberFormat fmt = new NumberFormat(NumberFormatType.DEFAULT, null);
+            if(og != null) {
+                fmt = new NumberFormat(og.type, og.argument == null ? null : ComponentResolver.resolveComponent(og.argument, player));
+            }
+
+            Adapter.INSTANCE.get().setNumberFormat(obj, fmt, playerName);
         }
     }
 }
