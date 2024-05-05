@@ -110,6 +110,10 @@ public interface ItemStack {
     Stream<Identifier> getComponentIds();
 
 
+    /**
+     * Gets the data in the custom data component on the item. On pre-1.20.5 servers, this is the item's tag.
+     * @return The item's custom data
+     */
     @Nullable
     default ConfigSection getCustomData() {
         ConfigObject obj = saveComponent(CUSTOM_DATA_COMPONENT);
@@ -117,10 +121,20 @@ public interface ItemStack {
         return obj.asSection();
     }
 
+    /**
+     * Sets the data in the custom data component on the item. On pre-1.20.5 servers, this is the item's tag.
+     * @param section The new custom data
+     */
     default void setCustomData(ConfigSection section) {
         loadComponent(CUSTOM_DATA_COMPONENT, section);
     }
 
+
+    /**
+     * Merges the given data into the data in the custom data component on the item. On pre-1.20.5 servers, this is the
+     * item's tag.
+     * @param section The new custom data
+     */
     default void fillCustomData(ConfigSection section) {
 
         ConfigSection obj = getCustomData();
@@ -188,43 +202,12 @@ public interface ItemStack {
                     component.toJSONString() :
                     component.toLegacyText();
 
-            ConfigSection tag = getTag();
-            tag.getOrCreateSection("display").set("Name", strName);
-            setTag(tag);
+            fillCustomData(new ConfigSection().with("display", new ConfigSection().with("Name", strName)));
         }
     }
 
-
-    /**
-     * Gets the encoded display name of the item
-     * @return The item's display name
-     */
-    default String getStringName() {
-
-        if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
-
-            ConfigObject obj = saveComponent(CUSTOM_NAME_COMPONENT);
-            if(obj == null && getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_OVERRIDE)) {
-                obj = saveComponent(ITEM_NAME_COMPONENT);
-            }
-            if(obj == null) return null;
-
-            return obj.asString();
-
-        } else {
-
-            ConfigSection tag = getTag();
-            if (tag == null || !tag.has("display")) {
-                return null;
-            }
-
-            ConfigSection display = tag.getSection("display");
-            if (!display.hasString("Name")) {
-                return null;
-            }
-
-            return display.getString("Name");
-        }
+    default Component getTypeName() {
+        return Component.translate(getTranslationKey());
     }
 
     /**
@@ -233,28 +216,55 @@ public interface ItemStack {
      */
     default Component getName() {
 
-        Component def = Component.translate(getTranslationKey()).withColor(getRarityColor());
+        SerializeResult<Component> name;
+        boolean italicize = true;
 
-        String name = getStringName();
-        if(name == null) {
-            return def;
-        }
+        // 1.20.5+: Get item name from components
+        if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
-        SerializeResult<Component> comp;
-        if(getVersion().hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
-            comp = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, name), getVersion());
+
+            // Try custom_name first, then item_name
+            ConfigObject encoded = saveComponent(CUSTOM_NAME_COMPONENT);
+            if(encoded == null) {
+                encoded = saveComponent(ITEM_NAME_COMPONENT);
+                italicize = false; // item_name components are not automatically italicized
+            }
+
+            if(encoded == null) return getTypeName().withColor(getRarityColor());
+
+            name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, encoded.asString()), getVersion());
+
+        // pre-1.20.5: Get item name from tag
         } else {
-            comp = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(name));
+
+            ConfigSection tag = getCustomData();
+            if (tag == null || !tag.has("display")) {
+                return getTypeName().withColor(getRarityColor());
+            }
+
+            ConfigSection display = tag.getSection("display");
+            if (!display.hasString("Name")) {
+                return getTypeName().withColor(getRarityColor());
+            }
+
+            String rawName = display.getString("Name");
+
+            if(getVersion().hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
+                name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, rawName), getVersion());
+            } else {
+                name = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(rawName));
+            }
+
         }
 
-        if(comp.isComplete()) {
-            Component out = comp.getOrThrow();
-            if(out.italic == null) out = out.withItalic(true);
-            if(out.color == null) out = out.withColor(getRarityColor());
-            return out;
+        if(!name.isComplete()) {
+            return getTypeName().withColor(getRarityColor());
         }
 
-        return def;
+        Component out = name.getOrThrow();
+        if(italicize && out.italic == null) out = out.withItalic(true);
+        if(out.color == null) out = out.withColor(getRarityColor());
+        return out;
     }
 
     /**
@@ -289,7 +299,7 @@ public interface ItemStack {
             Identifier.serializer("minecraft").<ItemStack, GameVersion>entry("id", (is, ver) -> is.getType()).acceptKey("type").optional(),
             NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).acceptKey("Count").orElse(v -> 1),
             NumberSerializer.forByte((byte) 0,(byte) 15).<ItemStack, GameVersion>entry("data", (is,ver) -> is.getLegacyDataValue()).acceptKey("Damage").optional(),
-            ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getTag()).optional(),
+            ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getCustomData()).optional(),
             ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is,ver) -> ComponentPatchSet.fromItem(is)).optional(),
             (ver, type, count, data, tag, components) ->
                 new Builder(ver, type)

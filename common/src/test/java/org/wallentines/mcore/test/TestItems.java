@@ -21,13 +21,13 @@ public class TestItems {
 
         ItemStack is = ItemStack.Builder.of(new Identifier("minecraft", "grass_block"))
                 .withCount(3)
-                .withTag(new ConfigSection().with("key", "value"))
+                .withCustomData(new ConfigSection().with("key", "value"))
                 .build();
 
         Assertions.assertEquals(new Identifier("minecraft", "grass_block"), is.getType());
         Assertions.assertEquals(3, is.getCount());
-        Assertions.assertNotNull(is.getTag());
-        Assertions.assertEquals("value", is.getTag().getString("key"));
+        Assertions.assertNotNull(is.getCustomData());
+        Assertions.assertEquals("value", is.getCustomData().getString("key"));
 
 
         is = ItemStack.Builder.woolWithColor(TextColor.DARK_GREEN).build();
@@ -55,10 +55,10 @@ public class TestItems {
 
         is = ItemStack.Builder.headWithSkin(new Skin(skinId, "DUMMYVALUE==", "DUMMY/SIG-")).build();
         Assertions.assertEquals(new Identifier("minecraft", "player_head"), is.getType());
-        Assertions.assertNotNull(is.getTag());
-        Assertions.assertEquals(4, is.getTag().getSection("SkullOwner").getList("Id").size());
-        Assertions.assertEquals(testList, is.getTag().getSection("SkullOwner").getList("Id"));
-        Assertions.assertEquals("DUMMYVALUE==", is.getTag().getSection("SkullOwner").getSection("Properties").getList("textures").get(0).asSection().getString("Value"));
+        Assertions.assertNotNull(is.getCustomData());
+        Assertions.assertEquals(4, is.getCustomData().getSection("SkullOwner").getList("Id").size());
+        Assertions.assertEquals(testList, is.getCustomData().getSection("SkullOwner").getList("Id"));
+        Assertions.assertEquals("DUMMYVALUE==", is.getCustomData().getSection("SkullOwner").getSection("Properties").getList("textures").get(0).asSection().getString("Value"));
 
     }
 
@@ -69,13 +69,13 @@ public class TestItems {
 
         ItemStack is = ItemStack.Builder.of(new Identifier("minecraft", "grass_block"))
                 .withCount(3)
-                .withTag(new ConfigSection().with("key", "value"))
+                .withCustomData(new ConfigSection().with("key", "value"))
                 .build();
 
         Assertions.assertEquals(new Identifier("minecraft", "grass_block"), is.getType());
         Assertions.assertEquals(3, is.getCount());
-        Assertions.assertNotNull(is.getTag());
-        Assertions.assertEquals("value", is.getTag().getString("key"));
+        Assertions.assertNotNull(is.getCustomData());
+        Assertions.assertEquals("value", is.getCustomData().getString("key"));
 
 
         is = ItemStack.Builder.woolWithColor(TextColor.DARK_GREEN).build();
@@ -106,9 +106,9 @@ public class TestItems {
         is = ItemStack.Builder.headWithSkin(new Skin(skinId, "DUMMYVALUE==", "DUMMY/SIG-")).build();
         Assertions.assertEquals(new Identifier("minecraft", "skull"), is.getType());
         Assertions.assertEquals(3, is.getLegacyDataValue());
-        Assertions.assertNotNull(is.getTag());
-        Assertions.assertEquals(skinId.toString(), is.getTag().getSection("SkullOwner").getString("Id"));
-        Assertions.assertEquals("DUMMYVALUE==", is.getTag().getSection("SkullOwner").getSection("Properties").getList("textures").get(0).asSection().getString("Value"));
+        Assertions.assertNotNull(is.getCustomData());
+        Assertions.assertEquals(skinId.toString(), is.getCustomData().getSection("SkullOwner").getString("Id"));
+        Assertions.assertEquals("DUMMYVALUE==", is.getCustomData().getSection("SkullOwner").getSection("Properties").getList("textures").get(0).asSection().getString("Value"));
 
     }
 

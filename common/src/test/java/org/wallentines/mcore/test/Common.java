@@ -1,5 +1,6 @@
 package org.wallentines.mcore.test;
 
+import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mdcfg.ConfigObject;
@@ -49,14 +50,14 @@ public class Common {
     public static class DummyItem implements ItemStack {
 
         private final Identifier type;
+        private final byte legacyData;
         private int count;
-        private ConfigSection tag;
-        private byte legacyData;
+        private ConfigSection customData;
 
-        public DummyItem(Identifier type, int count, ConfigSection tag, byte legacyData) {
+        public DummyItem(Identifier type, int count, ConfigSection customData, byte legacyData) {
             this.type = type;
             this.count = count;
-            this.tag = tag;
+            this.customData = customData;
             this.legacyData = legacyData;
         }
 
@@ -71,11 +72,6 @@ public class Common {
         }
 
         @Override
-        public ConfigSection getTag() {
-            return tag;
-        }
-
-        @Override
         public byte getLegacyDataValue() {
             return legacyData;
         }
@@ -83,11 +79,6 @@ public class Common {
         @Override
         public void setCount(int count) {
             this.count = count;
-        }
-
-        @Override
-        public void setTag(ConfigSection tag) {
-            this.tag = tag;
         }
 
         @Override
@@ -103,6 +94,21 @@ public class Common {
         @Override
         public void removeComponent(Identifier id) {
 
+        }
+
+        @Override
+        public @Nullable ConfigSection getCustomData() {
+            return customData;
+        }
+
+        @Override
+        public void setCustomData(ConfigSection section) {
+            this.customData = section;
+        }
+
+        @Override
+        public void fillCustomData(ConfigSection section) {
+            customData.fillOverwrite(section);
         }
 
         @Override

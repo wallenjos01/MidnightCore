@@ -113,11 +113,6 @@ public class GenericAdapter implements Adapter {
     }
 
     @Override
-    public void setTag(ItemStack itemStack, ConfigSection tag) {
-
-    }
-
-    @Override
     public ConfigSection getTag(ItemStack itemStack) {
         return null;
     }

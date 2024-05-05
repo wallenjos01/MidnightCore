@@ -51,6 +51,10 @@ public class SpigotItem implements ItemStack {
 
     @Override
     public void loadComponent(Identifier id, ConfigObject config) {
+        if(id.equals(CUSTOM_DATA_COMPONENT)) {
+            setCustomData(config.asSection());
+            return;
+        }
         if(!getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
             throw new IllegalStateException("Attempt to load item component on pre-1.20.5!");
         }
@@ -59,6 +63,7 @@ public class SpigotItem implements ItemStack {
 
     @Override
     public @Nullable ConfigObject saveComponent(Identifier id) {
+        if(id.equals(CUSTOM_DATA_COMPONENT)) return getCustomData();
         if(!getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
             throw new IllegalStateException("Attempt to save item component on pre-1.20.5!");
         }
@@ -67,7 +72,7 @@ public class SpigotItem implements ItemStack {
 
     @Override
     public void removeComponent(Identifier id) {
-
+        if(id.equals(CUSTOM_DATA_COMPONENT)) setCustomData(null);
         if(!getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
             throw new IllegalStateException("Attempt to remove item component on pre-1.20.5!");
         }
@@ -76,7 +81,7 @@ public class SpigotItem implements ItemStack {
 
     @Override
     public Stream<Identifier> getComponentIds() {
-        return Stream.empty();
+        return Adapter.INSTANCE.get().getComponentIds(internal);
     }
 
     @Override

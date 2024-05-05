@@ -45,6 +45,7 @@ import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class AdapterImpl implements Adapter {
 
@@ -176,7 +177,7 @@ public class AdapterImpl implements Adapter {
         }
 
         // getComponents, getTyped
-        TypedDataComponent<?> comp = item.c().c(type);
+        TypedDataComponent<?> comp = item.a().c(type);
         if(comp == null) {
             return null;
         }
@@ -213,6 +214,19 @@ public class AdapterImpl implements Adapter {
 
         // applyComponents, builder, remove, build
         item.a(DataComponentPatch.a().a(type).a());
+    }
+
+    @Override
+    public Stream<Identifier> getComponentIds(ItemStack is) {
+
+        net.minecraft.world.item.ItemStack item = reflector.getHandle(is);
+        return item.a().c().map(typed -> {
+
+            MinecraftKey key = BuiltInRegistries.as.b(typed.a()); // DATA_COMPONENT_TYPE, getKey
+            if(key == null) throw new IllegalStateException("Found unregistered component " + typed);
+
+            return new Identifier(key.b(), key.a());
+        });
     }
 
     @Override

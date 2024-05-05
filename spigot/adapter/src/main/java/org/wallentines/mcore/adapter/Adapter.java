@@ -15,6 +15,8 @@ import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
+import java.util.stream.Stream;
+
 public interface Adapter {
 
     /**
@@ -175,6 +177,19 @@ public interface Adapter {
      * @param component The ID of the component to remove
      */
     default void removeComponent(ItemStack is, Identifier component) { }
+
+    /**
+     * Gets identifiers of all the components on the given ItemStack. On pre-1.20.5 servers, this will contain only
+     * the custom data component id
+     * @param is The ItemStack to lookup
+     * @return A stream of component ids
+     */
+    default Stream<Identifier> getComponentIds(ItemStack is) {
+        if(getTag(is) != null) {
+            return Stream.of(org.wallentines.mcore.ItemStack.CUSTOM_DATA_COMPONENT);
+        }
+        return Stream.empty();
+    }
 
     /**
      * Ensures the given ItemStack is backed by a real Minecraft item

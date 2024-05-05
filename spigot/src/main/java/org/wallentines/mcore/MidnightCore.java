@@ -36,7 +36,10 @@ public class MidnightCore extends JavaPlugin {
     private Adapter initAdapter() {
 
         // Find Adapter
-        Adapter adapter = Adapters.findAdapter(VersionUtil.findVersion(), this);
+        GameVersion version = VersionUtil.findVersion();
+        if(version == null) return new GenericAdapter(this);
+
+        Adapter adapter = Adapters.findAdapter(version, this);
         if (adapter == null) {
             MidnightCoreAPI.LOGGER.warn("MidnightCore does not fully support this version! Certain functions may not work correctly.");
             adapter = new GenericAdapter(this);

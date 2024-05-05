@@ -120,7 +120,7 @@ public class SpigotScoreboard extends CustomScoreboard {
 
             String hexIndex = Integer.toHexString(line);
             String teamName = objectiveId.substring(0, 14) + hexIndex;
-            String playerName = "§" + hexIndex;
+            String playerName = '\u00A7' + hexIndex;
 
             Team team = board.getTeam(teamName);
             if(team == null) {
