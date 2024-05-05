@@ -21,6 +21,7 @@ import org.wallentines.mcore.skin.SpigotSkinModule;
 import org.wallentines.mcore.sql.SQLModule;
 import org.wallentines.mcore.sql.SpigotSQLModule;
 import org.wallentines.mcore.util.CommandUtil;
+import org.wallentines.mcore.util.VersionUtil;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.codec.JSONCodec;
@@ -31,12 +32,11 @@ import java.nio.file.Paths;
 public class MidnightCore extends JavaPlugin {
 
 
+
     private Adapter initAdapter() {
 
         // Find Adapter
-        String apiVersion = Bukkit.getServer().getClass().getPackage().getName().replace(".",",").split(",")[3];
-
-        Adapter adapter = Adapters.findAdapter(apiVersion, this);
+        Adapter adapter = Adapters.findAdapter(VersionUtil.findVersion(), this);
         if (adapter == null) {
             MidnightCoreAPI.LOGGER.warn("MidnightCore does not fully support this version! Certain functions may not work correctly.");
             adapter = new GenericAdapter(this);

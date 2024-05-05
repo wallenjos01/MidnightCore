@@ -63,9 +63,9 @@ for(version in versions) {
 dependencies {
 
     // MidnightCore
-    api(project(":common"))
-    api(project(":server"))
-    api(project(":spigot:adapter"))
+    implementation(project(":common"))
+    implementation(project(":server"))
+    implementation(project(":spigot:adapter"))
 
     shadow(project(":common").setTransitive(false))
     shadow(project(":server").setTransitive(false))
