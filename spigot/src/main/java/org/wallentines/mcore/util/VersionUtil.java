@@ -12,12 +12,26 @@ import java.io.InputStream;
 
 public class VersionUtil {
 
-
+    private static Class<?> paperClass() {
+        try {
+            return Class.forName("io.papermc.paperclip.Paperclip");
+        } catch (ClassNotFoundException ex) {
+            return null;
+        }
+    }
 
     public static GameVersion findVersion() {
 
+        ClassLoader loader;
+        Class<?> clazz = paperClass();
+        if(clazz == null) clazz = Bukkit.class;
+
+        loader = clazz.getClassLoader();
+
         // Read from version.json
-        InputStream is = VersionUtil.class.getResourceAsStream("/version.json");
+        InputStream is = loader.getResourceAsStream("version.json");
+        if(is == null) is = loader.getResourceAsStream("/version.json");
+
         if (is != null) {
             try {
                 ConfigSection sec = JSONCodec.loadConfig(is).asSection();

@@ -79,7 +79,6 @@ public class SpigotPluginMessageModule extends ServerPluginMessageModule impleme
     protected void doRegister(Identifier packetId) {
 
         Bukkit.getMessenger().registerIncomingPluginChannel(plugin, packetId.toString(), this);
-        MidnightCoreAPI.LOGGER.warn("Registered channel " + packetId);
     }
 
     @Override
