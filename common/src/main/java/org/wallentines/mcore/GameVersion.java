@@ -66,7 +66,7 @@ public class GameVersion {
     /**
      * A singleton containing the GameVersion of the currently running server or client.
      */
-    public static final Singleton<GameVersion> CURRENT_VERSION = new DefaultedSingleton<>(new GameVersion("Unknown", 0));
+    public static final Singleton<GameVersion> CURRENT_VERSION = new DefaultedSingleton<>(new GameVersion("Unknown", RELEASE_MAX_VERSION));
 
     public static final GameVersion VERSION_1_8 = new GameVersion("1.8", 47);
     public static final GameVersion MAX = new GameVersion("Maximum", RELEASE_MAX_VERSION);

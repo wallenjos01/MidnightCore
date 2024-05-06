@@ -345,7 +345,7 @@ public interface ItemStack {
                 .withCount(getCount());
 
         if (version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
-            builder.withComponents(ComponentPatchSet.fromItem(this));
+            builder.withComponents(getComponentPatch());
         } else {
             builder.withCustomData(getCustomData());
         }
@@ -385,20 +385,16 @@ public interface ItemStack {
     Identifier PROFILE_COMPONENT = new Identifier("minecraft", "profile");
 
 
-    ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = ContextObjectSerializer.create(
-            Identifier.serializer("minecraft").<ItemStack, GameVersion>entry("id", (is, ver) -> is.getType()).acceptKey("type").optional(),
-            NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).acceptKey("Count").orElse(v -> 1),
-            NumberSerializer.forByte((byte) 0,(byte) 15).<ItemStack, GameVersion>entry("data", (is,ver) -> is.getLegacyDataValue()).acceptKey("Damage").optional(),
-            ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getCustomData()).optional(),
-            ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is,ver) -> is.getComponentPatch()).optional(),
-            (ver, type, count, data, tag, components) ->
-                new Builder(ver, type)
-                        .withCount(count)
-                        .withDataValue(data)
-                        .withCustomData(tag)
-                        .withComponents(components)
-                        .build()
-    );
+    ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = new ContextSerializer<ItemStack, GameVersion>() {
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> ctx, ItemStack value, GameVersion context) {
+            return Builder.SERIALIZER.serialize(ctx, value.asBuilder(), context);
+        }
+        @Override
+        public <O> SerializeResult<ItemStack> deserialize(SerializeContext<O> ctx, O value, GameVersion context) {
+            return Builder.SERIALIZER.deserialize(ctx, value, context).flatMap(Builder::build);
+        }
+    };
 
 
     Serializer<ItemStack> SERIALIZER = VERSION_SERIALIZER.forContext(GameVersion.CURRENT_VERSION::get);
@@ -980,6 +976,38 @@ public interface ItemStack {
                 }
             }
         }
+
+        public static final ContextSerializer<Builder, GameVersion> SERIALIZER = ContextObjectSerializer.create(
+                Identifier.serializer("minecraft").<Builder, GameVersion>entry(
+                                "id",
+                                (b, ver) -> b.id)
+                        .acceptKey("type")
+                        .optional(),
+                NumberSerializer.forInt(1,99).<Builder, GameVersion>entry(
+                                "count",
+                                (b,ver) -> b.count)
+                        .acceptKey("Count")
+                        .orElse(v -> 1),
+                NumberSerializer.forByte((byte) 0,(byte) 15).<Builder, GameVersion>entry(
+                                "data",
+                                (b,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : b.dataValue)
+                        .acceptKey("Damage")
+                        .optional(),
+                ConfigSection.SERIALIZER.<Builder, GameVersion>entry(
+                                "tag",
+                                (b,ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : b.getCustomData())
+                        .optional(),
+                ComponentPatchSet.SERIALIZER.<Builder, GameVersion>entry(
+                                "components",
+                                (b,ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? b.components : null)
+                        .optional(),
+                (ver, type, count, data, tag, components) ->
+                        new Builder(ver, type)
+                                .withCount(count)
+                                .withDataValue(data)
+                                .withCustomData(tag)
+                                .withComponents(components)
+        );
     }
 
 }
