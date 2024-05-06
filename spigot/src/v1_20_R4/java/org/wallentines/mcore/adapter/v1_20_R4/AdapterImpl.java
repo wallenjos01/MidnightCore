@@ -43,6 +43,7 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
+import org.wallentines.mcore.util.ComponentUtil;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
@@ -234,6 +235,37 @@ public class AdapterImpl implements Adapter {
 
             return new Identifier(key.b(), key.a());
         });
+    }
+
+    @Override
+    public org.wallentines.mcore.ItemStack.ComponentPatchSet getComponentPatch(ItemStack is) {
+
+        net.minecraft.world.item.ItemStack item = reflector.getHandle(is);
+        org.wallentines.mcore.ItemStack.ComponentPatchSet out = new org.wallentines.mcore.ItemStack.ComponentPatchSet();
+
+        DataComponentPatch.c res = item.d().e();
+        for(DataComponentType<?> type : res.a().b()) {
+
+            MinecraftKey id = BuiltInRegistries.as.b(type);
+            if(id == null) {
+                MidnightCoreAPI.LOGGER.warn("Found unregistered component " + type + "!");
+                continue;
+            }
+
+            TypedDataComponent<?> typed = res.a().c(type);
+            out.set(new Identifier(id.b(), id.a()), GsonContext.INSTANCE.convert(ConfigContext.INSTANCE, typed.a(JsonOps.INSTANCE).getOrThrow()));
+        }
+        for(DataComponentType<?> type : res.b()) {
+
+            MinecraftKey id = BuiltInRegistries.as.b(type);
+            if(id == null) {
+                MidnightCoreAPI.LOGGER.warn("Found unregistered component " + type + "!");
+                continue;
+            }
+
+            out.remove(new Identifier(id.b(), id.a()));
+        }
+        return out;
     }
 
     @Override

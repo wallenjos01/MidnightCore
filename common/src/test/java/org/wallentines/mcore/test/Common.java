@@ -117,6 +117,11 @@ public class Common {
         }
 
         @Override
+        public ComponentPatchSet getComponentPatch() {
+            return null;
+        }
+
+        @Override
         public void grow(int amount) {
             setCount(count + amount);
         }

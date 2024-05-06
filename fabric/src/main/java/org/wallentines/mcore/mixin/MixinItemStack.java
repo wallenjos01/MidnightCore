@@ -85,6 +85,35 @@ public abstract class MixinItemStack implements ItemStack {
         });
     }
 
+    public ComponentPatchSet mcore$getComponentPatch() {
+
+        ComponentPatchSet out = new ComponentPatchSet();
+
+        DataComponentPatch.SplitResult res = getComponentsPatch().split();
+        for(DataComponentType<?> type : res.added().keySet()) {
+
+            ResourceLocation id = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type);
+            if(id == null) {
+                MidnightCoreAPI.LOGGER.warn("Found unregistered component " + type + "!");
+                continue;
+            }
+
+            TypedDataComponent<?> typed = res.added().getTyped(type);
+            out.set(ConversionUtil.toIdentifier(id), ComponentUtil.encodeTyped(typed));
+        }
+        for(DataComponentType<?> type : res.removed()) {
+
+            ResourceLocation id = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type);
+            if(id == null) {
+                MidnightCoreAPI.LOGGER.warn("Found unregistered component " + type + "!");
+                continue;
+            }
+
+            out.remove(ConversionUtil.toIdentifier(id));
+        }
+        return out;
+    }
+
     public void mcore$setName(Component component) {
 
         set(DataComponents.CUSTOM_NAME, new WrappedComponent(ItemUtil.applyItemNameBaseStyle(component)));

@@ -109,6 +109,11 @@ public interface ItemStack {
      */
     Stream<Identifier> getComponentIds();
 
+    /**
+     * Gets a list of ids for the components on this item
+     * @return A list of ids
+     */
+    ComponentPatchSet getComponentPatch();
 
     /**
      * Gets the data in the custom data component on the item. On pre-1.20.5 servers, this is the item's tag.
@@ -222,7 +227,6 @@ public interface ItemStack {
         // 1.20.5+: Get item name from components
         if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
-
             // Try custom_name first, then item_name
             ConfigObject encoded = saveComponent(CUSTOM_NAME_COMPONENT);
             if(encoded == null) {
@@ -268,6 +272,92 @@ public interface ItemStack {
     }
 
     /**
+     * Gets the lore of an item as it appears when hovering over it
+     * @return The item's lore.
+     */
+    default List<Component> getLore() {
+
+        ConfigList lore;
+        GameVersion ver = getVersion();
+        if(ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+
+            ConfigObject encoded = saveComponent(LORE_COMPONENT);
+            if(encoded == null) return Collections.emptyList();
+
+            lore = encoded.asList();
+
+        } else {
+            ConfigSection tag = getCustomData();
+            if (tag == null || !tag.has("display")) {
+                return Collections.emptyList();
+            }
+
+            ConfigSection display = tag.getSection("display");
+            if (!display.hasList("Lore")) {
+                return Collections.emptyList();
+            }
+
+            lore = display.get("Lore").asList();
+        }
+
+        List<Component> out = new ArrayList<>();
+        for(ConfigObject o : lore.values()) {
+
+            String s = o.asString();
+            if(ver.hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
+                out.add(ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(s), ver).getOrThrow());
+            } else {
+                out.add(LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(s)).getOrThrow());
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Changes the item's lore to match the given components
+     * @param components The item's new lore
+     */
+    default void setLore(List<Component> components) {
+        ConfigList out = new ConfigList();
+        GameVersion ver = getVersion();
+        for(Component line : components) {
+            if(ver.hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
+                out.add(line, ModernSerializer.INSTANCE.forContext(ver));
+            } else {
+                out.add(line, LegacySerializer.INSTANCE);
+            }
+        }
+
+        if(ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+            loadComponent(LORE_COMPONENT, out);
+        } else {
+            fillCustomData(new ConfigSection().with("display", new ConfigSection().with("Lore", out)));
+        }
+    }
+
+    /**
+     * Converts the ItemStack into an item builder with the same values
+     * @return An item builder
+     */
+    default Builder asBuilder() {
+        GameVersion version = getVersion();
+        Builder builder = new Builder(version, getType())
+                .withCount(getCount());
+
+        if (version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+            builder.withComponents(ComponentPatchSet.fromItem(this));
+        } else {
+            builder.withCustomData(getCustomData());
+        }
+
+        if(!version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+            builder.withDataValue(getLegacyDataValue());
+        }
+
+        return builder;
+    }
+
+    /**
      * Gets the color associated with the item's rarity
      * @return The item's rarity color.
      */
@@ -300,7 +390,7 @@ public interface ItemStack {
             NumberSerializer.forInt(1,64).<ItemStack, GameVersion>entry("count", (is,ver) -> is.getCount()).acceptKey("Count").orElse(v -> 1),
             NumberSerializer.forByte((byte) 0,(byte) 15).<ItemStack, GameVersion>entry("data", (is,ver) -> is.getLegacyDataValue()).acceptKey("Damage").optional(),
             ConfigSection.SERIALIZER.<ItemStack, GameVersion>entry("tag", (is,ver) -> is.getCustomData()).optional(),
-            ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is,ver) -> ComponentPatchSet.fromItem(is)).optional(),
+            ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is,ver) -> is.getComponentPatch()).optional(),
             (ver, type, count, data, tag, components) ->
                 new Builder(ver, type)
                         .withCount(count)

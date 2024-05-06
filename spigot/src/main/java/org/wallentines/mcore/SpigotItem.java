@@ -3,6 +3,7 @@ package org.wallentines.mcore;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.adapter.Adapter;
+import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.math.Color;
@@ -82,6 +83,11 @@ public class SpigotItem implements ItemStack {
     @Override
     public Stream<Identifier> getComponentIds() {
         return Adapter.INSTANCE.get().getComponentIds(internal);
+    }
+
+    @Override
+    public ComponentPatchSet getComponentPatch() {
+        return Adapter.INSTANCE.get().getComponentPatch(internal);
     }
 
     @Override

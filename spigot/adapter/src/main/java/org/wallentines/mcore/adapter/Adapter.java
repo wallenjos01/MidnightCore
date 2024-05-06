@@ -192,6 +192,17 @@ public interface Adapter {
     }
 
     /**
+     * Gets identifiers of all the components on the given ItemStack. On pre-1.20.5 servers, this will contain only
+     * the custom data component id
+     * @param is The ItemStack to lookup
+     * @return A stream of component ids
+     */
+    default org.wallentines.mcore.ItemStack.ComponentPatchSet getComponentPatch(ItemStack is) {
+        return new org.wallentines.mcore.ItemStack.ComponentPatchSet();
+    }
+
+
+    /**
      * Ensures the given ItemStack is backed by a real Minecraft item
      * @param item The item to set up
      * @return An internally-backed item
