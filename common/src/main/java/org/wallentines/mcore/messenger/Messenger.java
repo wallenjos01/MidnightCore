@@ -9,8 +9,15 @@ import java.nio.charset.StandardCharsets;
 /**
  * An interface for implementations used by the messaging module to send messages to other servers.
  */
-public interface Messenger {
+public abstract class Messenger {
 
+
+    protected final MessengerModule module;
+    private boolean isShutdown;
+
+    protected Messenger(MessengerModule module) {
+        this.module = module;
+    }
 
     /**
      * Registers the given handler to handle messages in the given channel
@@ -18,28 +25,28 @@ public interface Messenger {
      * @param channel The channel to listen to
      * @param handler The handler for messages in that channel
      */
-    void subscribe(Object listener, String channel, EventHandler<Message> handler);
+    public abstract void subscribe(Object listener, String channel, EventHandler<Message> handler);
 
     /**
      * Unregisters all handlers for the given listener in the given channel
      * @param listener A listener
      * @param channel The channel to stop listening to
      */
-    void unsubscribe(Object listener, String channel);
+    public abstract void unsubscribe(Object listener, String channel);
 
     /**
      * Sends a message with the given bytes to the given channel
      * @param channel The channel to publish to
      * @param message The message's data
      */
-    void publish(String channel, ByteBuf message);
+    public abstract void publish(String channel, ByteBuf message);
 
     /**
      * Sends a message with the given bytes to the given channel
      * @param channel The channel to publish to
      * @param message The message's data
      */
-    default void publish(String channel, String message) {
+    public void publish(String channel, String message) {
         publish(channel, Unpooled.wrappedBuffer(message.getBytes(StandardCharsets.UTF_8)));
     }
 
@@ -49,7 +56,7 @@ public interface Messenger {
      * @param ttl how long the message should live before being considered expired
      * @param message The message's data
      */
-    void publish(String channel, int ttl, ByteBuf message);
+    public abstract void publish(String channel, int ttl, ByteBuf message);
 
     /**
      * Sends a message with the given bytes to the given channel
@@ -57,13 +64,35 @@ public interface Messenger {
      * @param ttl how long the message should live before being considered expired
      * @param message The message's data
      */
-    default void publish(String channel, int ttl, String message) {
+    public  void publish(String channel, int ttl, String message) {
         publish(channel, ttl, Unpooled.wrappedBuffer(message.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    /**
+     * Gets the module which created this messenger
+     * @return The messenger module
+     */
+    public MessengerModule getModule() {
+        return module;
+    }
+
+    /**
+     * Determines if the messenger was shutdown
+     * @return Whether the messenger was shutdown
+     */
+    public boolean isShutdown() {
+        return isShutdown;
     }
 
     /**
      * Cleans up the messenger. Only to be called internally
      */
-    default void shutdown() { }
+    public final void shutdown() {
+
+        isShutdown = true;
+        onShutdown();
+    }
+
+    protected void onShutdown() { }
 
 }

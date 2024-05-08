@@ -11,13 +11,14 @@ import java.util.*;
 /**
  * A messenger which uses plugin messages to communicate across traditional Minecraft proxies
  */
-public class PluginMessenger implements Messenger {
+public class PluginMessenger extends Messenger {
 
     private final PluginMessageBroker broker;
     private final Map<String, HandlerList<Message>> handlers;
     protected final String namespace;
 
-    protected PluginMessenger(PluginMessageBroker broker, String namespace) {
+    protected PluginMessenger(MessengerModule module, PluginMessageBroker broker, String namespace) {
+        super(module);
         this.handlers = new HashMap<>();
         this.namespace = namespace;
         this.broker = broker;
@@ -80,6 +81,7 @@ public class PluginMessenger implements Messenger {
             if(broker == null) throw new IllegalArgumentException("A plugin message broker is required!");
 
             return new PluginMessenger(
+                    module,
                     broker,
                     params.getOrDefault("namespace", (String) null)
             );

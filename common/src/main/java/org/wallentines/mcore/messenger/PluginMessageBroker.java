@@ -70,6 +70,10 @@ public abstract class PluginMessageBroker {
         onShutdown();
     }
 
+    public boolean isShutdown() {
+        return isShutdown;
+    }
+
     protected abstract void onShutdown();
 
     private static ByteBuf decrypt(ByteBuf buffer, SecretKey key) {

@@ -8,11 +8,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class CompositeMessenger implements Messenger {
+public class CompositeMessenger extends Messenger {
 
     private final List<Messenger> messengers;
 
     public CompositeMessenger(MessengerModule module, Collection<String> messengers) {
+        super(module);
 
         this.messengers = new ArrayList<>(messengers.size());
         for(String s : messengers) {
