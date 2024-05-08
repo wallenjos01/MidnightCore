@@ -70,6 +70,18 @@ public class FabricInventoryGUI extends InventoryGUI {
         }
     }
 
+    @Override
+    public void moveViewers(InventoryGUI other) {
+
+        for(Menu menu : open) {
+            Player player = menu.player.get();
+            if(player != null) {
+                other.open(player);
+            }
+        }
+
+    }
+
     private static ClickType getActionType(int action, net.minecraft.world.inventory.ClickType type) {
         return switch (type) {
             case PICKUP -> action == 0 ? ClickType.LEFT : ClickType.RIGHT;

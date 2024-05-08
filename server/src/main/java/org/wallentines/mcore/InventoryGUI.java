@@ -77,10 +77,13 @@ public abstract class InventoryGUI {
 
     public void close(Player player) {
 
-        if(OPEN_GUIS.remove(player.getUUID()) == this) {
+        if(OPEN_GUIS.get(player.getUUID()) == this) {
+            OPEN_GUIS.remove(player.getUUID());
             doClose(player);
         }
     }
+
+    public abstract void moveViewers(InventoryGUI other);
 
     public static void closeMenu(Player player) {
 

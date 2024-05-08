@@ -16,15 +16,23 @@ import java.util.HashMap;
 
 public class SpigotInventoryGUI extends InventoryGUI {
 
-    private final HashMap<Player, Inventory> players = new HashMap<>();
+    private final HashMap<SpigotPlayer, Inventory> players = new HashMap<>();
 
     public SpigotInventoryGUI(Component title, int rows) {
         super(title, rows);
     }
 
     @Override
+    public void moveViewers(InventoryGUI other) {
+
+        for(SpigotPlayer player : players.keySet()) {
+            other.open(player);
+        }
+    }
+
+    @Override
     public void update() {
-        for(Player player : players.keySet()) {
+        for(SpigotPlayer player : players.keySet()) {
             doUpdate(player);
         }
     }
@@ -38,23 +46,23 @@ public class SpigotInventoryGUI extends InventoryGUI {
         Inventory inv = Bukkit.createInventory(null, size, ComponentResolver.resolveComponent(title, player).toLegacyText());
         spl.getInternal().openInventory(inv);
 
-        players.put(spl.getInternal(), inv);
-        doUpdate(spl.getInternal());
+        players.put(spl, inv);
+        doUpdate(spl);
     }
 
     @Override
     protected void doClose(org.wallentines.mcore.Player player) {
         SpigotPlayer spl = ConversionUtil.validate(player);
-        if(players.containsKey(spl.getInternal())) {
-            players.remove(spl.getInternal());
+        if(players.containsKey(spl)) {
+            players.remove(spl);
             spl.getInternal().closeInventory();
         }
     }
 
-    private void doUpdate(Player player) {
+    private void doUpdate(org.wallentines.mcore.Player player) {
 
-        Inventory menu = players.get(player);
-        SpigotPlayer spl = new SpigotPlayer(Server.RUNNING_SERVER.get(), player);
+        SpigotPlayer spl = ConversionUtil.validate(player);
+        Inventory menu = players.get(spl);
 
         if(menu == null) {
             doOpen(spl);
