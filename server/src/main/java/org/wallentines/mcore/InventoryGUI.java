@@ -37,6 +37,31 @@ public abstract class InventoryGUI {
         this.items[index] = new Entry(itemStack, event);
     }
 
+    public void clearItem(int index) {
+        this.items[index] = null;
+    }
+
+    public int firstEmpty() {
+        for(int i = 0 ; i < items.length ; i++) {
+            if(items[i] == null) return i;
+        }
+        return -1;
+    }
+
+    public int lastItem() {
+        for(int i = items.length ; i > 0 ; i--) {
+            if(items[i - 1] != null) return i;
+        }
+        return -1;
+    }
+
+    public void clear() {
+        int last = lastItem();
+        for(int i = 0 ; i < last ; i++) {
+            items[i] = null;
+        }
+    }
+
     public void onClick(int index, Player player, ClickType type) {
         if(this.items[index] == null || this.items[index].event == null) return;
         this.items[index].event.execute(player, type);

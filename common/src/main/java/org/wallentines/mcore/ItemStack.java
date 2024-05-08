@@ -453,7 +453,7 @@ public interface ItemStack {
         public ComponentPatchSet copy() {
             ComponentPatchSet out = new ComponentPatchSet();
             for(Identifier id : components.keySet()) {
-                out.components.put(id, out.components.get(id).copy());
+                out.components.put(id, components.get(id).copy());
             }
             out.removedComponents.addAll(removedComponents);
             return out;

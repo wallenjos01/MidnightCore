@@ -87,7 +87,7 @@ public class UnresolvedItemStack {
 
                 O encodedLore = context.get("lore", value);
                 if(encodedLore != null) {
-                    SerializeResult<Collection<UnresolvedComponent>> res = UnresolvedComponent.SERIALIZER.listOf().deserialize(context, encodedName);
+                    SerializeResult<Collection<UnresolvedComponent>> res = UnresolvedComponent.SERIALIZER.listOf().deserialize(context, encodedLore);
                     if(!res.isComplete()) {
                         return SerializeResult.failure(res.getError());
                     }
