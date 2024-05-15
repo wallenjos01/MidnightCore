@@ -28,5 +28,11 @@
     "type": "replace",
     "find": "new Serializer<>() {",
     "replace": "new Serializer<UnresolvedComponent>() {"
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "List.copyOf(",
+    "replace": "new java.util.ArrayList<>("
   }
 ]

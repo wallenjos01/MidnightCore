@@ -92,13 +92,6 @@ public class PagedInventoryGUI {
         return pages.size();
     }
 
-    public int lastItem() {
-
-        if(pages.isEmpty()) return -1;
-
-        Page page = pages.getLast();
-        return page.offset + page.gui.lastItem();
-    }
 
     public int size() {
         return fullSize;
@@ -129,9 +122,6 @@ public class PagedInventoryGUI {
             updatePages(index);
         }
         Page out = getPage(index);
-        if(out == null) {
-            throw new IllegalStateException("Unable to find page for " + index + "!");
-        }
         return out;
     }
 
@@ -272,10 +262,6 @@ public class PagedInventoryGUI {
             offset += size;
         }
 
-        if (newPages.size() != newSizes.size()) {
-            throw new IllegalStateException("Missing a page!");
-        }
-
         this.pages = newPages;
 
         for(Page p : pages) {
@@ -283,7 +269,6 @@ public class PagedInventoryGUI {
         }
 
     }
-
 
     public interface PagedClickEvent {
         void execute(Player player, InventoryGUI.ClickType type, int page);
