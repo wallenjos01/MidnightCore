@@ -1,7 +1,6 @@
 package org.wallentines.mcore;
 
 import org.jetbrains.annotations.NotNull;
-import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.Tuples;

@@ -121,8 +121,7 @@ public class PagedInventoryGUI {
         if(index > fullSize) {
             updatePages(index);
         }
-        Page out = getPage(index);
-        return out;
+        return getPage(index);
     }
 
     private void setupReserved(InventoryGUI gui, int page) {
