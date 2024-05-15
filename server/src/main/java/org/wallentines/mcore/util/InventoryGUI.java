@@ -76,11 +76,21 @@ public interface InventoryGUI {
 
     Singleton<Factory> FACTORY = new Singleton<>();
 
-    static SingleInventoryGUI create(Component title, int rows) {
+    static SingleInventoryGUI create(Component title, int size) {
+
+        int rows = size / 9;
+        int partialRows = size % 9;
+        if(rows == 0 || partialRows > 0) rows++;
+
         return FACTORY.get().build(title, rows);
     }
 
-    static SingleInventoryGUI create(UnresolvedComponent title, int rows) {
+    static SingleInventoryGUI create(UnresolvedComponent title, int size) {
+
+        int rows = size / 9;
+        int partialRows = size % 9;
+        if(rows == 0 || partialRows > 0) rows++;
+
         return FACTORY.get().build(title, rows);
     }
 
@@ -92,12 +102,12 @@ public interface InventoryGUI {
         return new PagedInventoryGUI(title, sizeProvider);
     }
 
-    static PagedInventoryGUI createPaged(Component title, PagedInventoryGUI.SizeProvider sizeProvider, int rows) {
-        return new PagedInventoryGUI(title, sizeProvider, rows);
+    static PagedInventoryGUI createPaged(Component title, PagedInventoryGUI.SizeProvider sizeProvider, int size) {
+        return new PagedInventoryGUI(title, sizeProvider, size);
     }
 
-    static PagedInventoryGUI createPaged(UnresolvedComponent title, PagedInventoryGUI.SizeProvider sizeProvider, int rows) {
-        return new PagedInventoryGUI(title, sizeProvider, rows);
+    static PagedInventoryGUI createPaged(UnresolvedComponent title, PagedInventoryGUI.SizeProvider sizeProvider, int size) {
+        return new PagedInventoryGUI(title, sizeProvider, size);
     }
 
 
