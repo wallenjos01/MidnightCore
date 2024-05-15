@@ -1,7 +1,10 @@
 package org.wallentines.mcore.util;
 
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.lang.*;
+import org.wallentines.mcore.lang.LangManager;
+import org.wallentines.mcore.lang.LangRegistry;
+import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.messenger.Messenger;
 import org.wallentines.mcore.messenger.ServerMessengerModule;
 import org.wallentines.mcore.savepoint.SavepointModule;

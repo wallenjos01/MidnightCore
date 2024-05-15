@@ -3,7 +3,6 @@ package org.wallentines.mcore;
 import org.wallentines.midnightlib.event.HandlerList;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
 import java.util.stream.Stream;
 
 /**

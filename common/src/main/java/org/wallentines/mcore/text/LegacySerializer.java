@@ -1,16 +1,12 @@
 package org.wallentines.mcore.text;
 
-import org.wallentines.mdcfg.serializer.InlineSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.math.Color;
-import org.wallentines.midnightlib.registry.RegistryBase;
-import org.wallentines.midnightlib.registry.StringRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 
 /**

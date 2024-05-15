@@ -1,7 +1,10 @@
 package org.wallentines.mcore.skin;
 
 import org.bukkit.Bukkit;
-import org.wallentines.mcore.*;
+import org.wallentines.mcore.Player;
+import org.wallentines.mcore.Server;
+import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.util.ConversionUtil;

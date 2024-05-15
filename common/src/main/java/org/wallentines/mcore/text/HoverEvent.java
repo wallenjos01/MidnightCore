@@ -1,6 +1,5 @@
 package org.wallentines.mcore.text;
 
-import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.util.ItemUtil;

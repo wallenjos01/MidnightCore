@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.*;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.lang.UnresolvedComponent;
-import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.ConversionUtil;
 
 import java.lang.ref.WeakReference;

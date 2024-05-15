@@ -6,7 +6,9 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.midnightlib.event.EventHandler;
 import org.wallentines.midnightlib.event.HandlerList;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * A messenger which uses plugin messages to communicate across traditional Minecraft proxies

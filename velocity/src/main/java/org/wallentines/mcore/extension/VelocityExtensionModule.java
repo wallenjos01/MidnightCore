@@ -4,7 +4,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import org.wallentines.mcore.Proxy;
 import org.wallentines.mcore.ProxyModule;
-import org.wallentines.mcore.VelocityPlayer;
 import org.wallentines.mcore.VelocityProxy;
 import org.wallentines.mcore.pluginmsg.ProxyPluginMessageModule;
 import org.wallentines.mdcfg.ConfigSection;

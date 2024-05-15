@@ -5,8 +5,6 @@ import com.mojang.brigadier.context.CommandContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.midnightlib.registry.Identifier;
 
 public class MainCommandExecutor {

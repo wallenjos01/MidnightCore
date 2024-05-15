@@ -2,7 +2,6 @@ package org.wallentines.mcore.util;
 
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.TypedDataComponent;
-import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mdcfg.ConfigObject;
 
 public class ComponentUtil {

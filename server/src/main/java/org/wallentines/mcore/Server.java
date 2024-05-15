@@ -18,7 +18,6 @@ import org.wallentines.midnightlib.types.ResettableSingleton;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Stream;
 

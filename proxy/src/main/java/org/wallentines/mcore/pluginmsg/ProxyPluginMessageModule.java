@@ -10,8 +10,6 @@ import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
-import java.util.stream.Stream;
-
 /**
  * A module for sending custom packets to players and servers.
  */

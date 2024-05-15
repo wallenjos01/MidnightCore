@@ -4,7 +4,8 @@ import org.wallentines.mcore.lang.CustomPlaceholder;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PagedInventoryGUI {
 

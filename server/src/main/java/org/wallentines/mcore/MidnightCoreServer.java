@@ -1,6 +1,9 @@
 package org.wallentines.mcore;
 
-import org.wallentines.mcore.lang.*;
+import org.wallentines.mcore.lang.LangManager;
+import org.wallentines.mcore.lang.LangRegistry;
+import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.requirement.CooldownRequirement;
 import org.wallentines.mcore.requirement.PlayerCheck;
 import org.wallentines.mdcfg.ConfigObject;

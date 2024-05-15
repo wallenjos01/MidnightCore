@@ -4,7 +4,6 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.wallentines.midnightlib.event.HandlerList;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
 import java.util.stream.Stream;
 
 public class VelocityServer implements ProxyServer {

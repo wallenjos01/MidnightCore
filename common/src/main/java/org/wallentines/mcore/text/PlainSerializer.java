@@ -3,7 +3,6 @@ package org.wallentines.mcore.text;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.mdcfg.serializer.Serializer;
-import org.wallentines.midnightlib.registry.RegistryBase;
 
 /**
  * A {@link Serializer} which serializes components into plain text, disregarding color or formatting information in the process

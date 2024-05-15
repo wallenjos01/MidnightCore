@@ -4,8 +4,6 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.registry.Identifier;
-import org.wallentines.midnightlib.registry.RegistryBase;
-import org.wallentines.midnightlib.registry.StringRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;

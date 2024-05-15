@@ -1,7 +1,6 @@
 package org.wallentines.mcore.sql;
 
 import io.netty.util.concurrent.ThreadPerTaskExecutor;
-import org.bukkit.Bukkit;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
 import org.wallentines.mcore.lang.UnresolvedComponent;
