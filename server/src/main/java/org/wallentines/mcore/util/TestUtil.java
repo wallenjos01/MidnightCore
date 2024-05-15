@@ -142,6 +142,35 @@ public class TestUtil {
         }
     }
 
+    public static void pagedGuiCmd(Player pl) {
+
+        try {
+
+            UnresolvedItemStack next = new UnresolvedItemStack(ItemStack.Builder.glassPaneWithColor(TextColor.GREEN), Component.text("Next Page"));
+            UnresolvedItemStack prev = new UnresolvedItemStack(ItemStack.Builder.glassPaneWithColor(TextColor.RED), Component.text("Previous Page"));
+
+            GameVersion version = pl.getServer().getVersion();
+            PagedInventoryGUI gui = new PagedInventoryGUI(UnresolvedComponent.parse("Paged - %gui_page%/%gui_pages%").getOrThrow(), PagedInventoryGUI.SizeProvider.dynamic(5));
+            gui.addBottomReservedRow(PagedInventoryGUI.RowProvider.pageControls(next, prev));
+            gui.resize(256);
+
+            Color[] cs = new Color[]{ TextColor.RED, TextColor.YELLOW, TextColor.GREEN, TextColor.BLUE };
+            for(int c = 0 ; c < cs.length; c++) {
+                for(int i = 0 ; i < 64 ; i++) {
+                    ItemStack is = ItemStack.Builder.woolWithColor(version, cs[c]).withCount(i + 1).build();
+                    int realIndex = c * 64 + i;
+                    gui.setItem(realIndex, is, (cpl, ct, page) -> {
+                        cpl.sendMessage(Component.text("Page " + (page + 1) + ", Item " + (realIndex + 1)));
+                    });
+                }
+            }
+
+            gui.open(pl, 0);
+        } catch (Throwable th) {
+            MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
+        }
+    }
+
     public static void scoreboardCmd(Player pl) {
         try {
 

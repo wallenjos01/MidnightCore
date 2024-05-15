@@ -12,6 +12,7 @@ import org.wallentines.midnightlib.registry.StringRegistry;
  * Components are resolved according to their content type. If a resolver is available for the component's content type,
  * it will be resolved before being sent to players.
  */
+@Deprecated
 public interface ComponentResolver {
 
     /**

@@ -20,7 +20,7 @@ public class PlaceholderContext {
     private final Component parameter;
     private final List<Object> values = new ArrayList<>();
     private final HashMap<Class<?>, Object> cache = new HashMap<>();
-    private final HashMap<String, Either<String, Component>> customCache = new HashMap<>();
+    private final HashMap<String, CustomPlaceholder> customCache = new HashMap<>();
 
     /**
      * Constructs a new placeholder context with no parameter or values, with the global PlaceholderManager
@@ -63,6 +63,8 @@ public class PlaceholderContext {
     public PlaceholderContext copy() {
         PlaceholderContext out = new PlaceholderContext(parameter);
         out.values.addAll(values);
+        out.cache.putAll(cache);
+        out.customCache.putAll(customCache);
         return out;
     }
 
@@ -73,6 +75,8 @@ public class PlaceholderContext {
     public PlaceholderContext copy(Component parameter) {
         PlaceholderContext out = new PlaceholderContext(parameter);
         out.values.addAll(values);
+        out.cache.putAll(cache);
+        out.customCache.putAll(customCache);
         return out;
     }
 
@@ -102,11 +106,21 @@ public class PlaceholderContext {
 
         if(object instanceof CustomPlaceholder) {
             CustomPlaceholder cpl = (CustomPlaceholder) object;
-            customCache.putIfAbsent(cpl.getId(), cpl.getValue());
+            customCache.putIfAbsent(cpl.getId(), cpl);
         }
 
         values.add(object);
         cache.putIfAbsent(object.getClass(), object);
+    }
+
+    /**
+     * Adds a value to the context
+     * @param object The object to add
+     * @return A reference to self
+     */
+    public PlaceholderContext withValue(Object object) {
+        addValue(object);
+        return this;
     }
 
     /**
@@ -129,9 +143,42 @@ public class PlaceholderContext {
         }));
     }
 
+    /**
+     * Gets the custom placeholder with the given key
+     * @param key The key to lookup
+     * @return Either a string or a component
+     */
     public Either<String, Component> getCustomPlaceholder(String key) {
 
-        return customCache.get(key);
+        if(!customCache.containsKey(key)) return null;
+        return customCache.get(key).getValue();
+    }
+
+    /**
+     * Creates a new placeholder context with all the values from this and the given other context
+     * @param other The other context
+     * @return A new placeholder context
+     */
+    public PlaceholderContext and(PlaceholderContext other) {
+
+        PlaceholderContext ctx = new PlaceholderContext();
+        ctx.values.addAll(values);
+        ctx.cache.putAll(other.cache);
+        ctx.cache.putAll(cache);
+        ctx.customCache.putAll(other.customCache);
+        ctx.customCache.putAll(customCache);
+        ctx.values.addAll(other.values);
+
+        return ctx;
+    }
+
+    /**
+     * Removes all values from this context.
+     */
+    public void clear() {
+        values.clear();
+        cache.clear();
+        customCache.clear();
     }
 
 

@@ -35,6 +35,7 @@ public class WrappedComponent implements Component {
      * @param args The context by which to resolve the component
      * @return A new WrappedComponent
      */
+    @Deprecated
     public static WrappedComponent resolved(org.wallentines.mcore.text.Component comp, Object... args) {
         return new WrappedComponent(ComponentResolver.resolveComponent(comp, args));
     }

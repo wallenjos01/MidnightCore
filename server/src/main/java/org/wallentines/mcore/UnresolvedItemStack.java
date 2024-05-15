@@ -3,6 +3,7 @@ package org.wallentines.mcore;
 import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.UnresolvedComponent;
+import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.mdcfg.serializer.Serializer;
@@ -17,6 +18,10 @@ public class UnresolvedItemStack {
     private final PlaceholderManager manager;
     private final UnresolvedComponent title;
     private final List<UnresolvedComponent> lore;
+
+    public UnresolvedItemStack(ItemStack.Builder builder, Component name) {
+        this(builder, UnresolvedComponent.completed(name), List.of(), PlaceholderManager.INSTANCE);
+    }
 
     public UnresolvedItemStack(ItemStack.Builder builder, UnresolvedComponent name, List<UnresolvedComponent> lore) {
         this(builder, name, lore, PlaceholderManager.INSTANCE);

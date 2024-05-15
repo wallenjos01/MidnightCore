@@ -44,6 +44,13 @@ public class TestCommand {
                         TestUtil.guiCmd(pl);
                         return 1;
                     })
+                    .then(Commands.literal("paged")
+                            .executes(ctx -> {
+                                Player pl = ctx.getSource().getPlayerOrException();
+                                TestUtil.pagedGuiCmd(pl);
+                                return 1;
+                            })
+                    )
             )
             .then(Commands.literal("scoreboard")
                     .executes(ctx -> {

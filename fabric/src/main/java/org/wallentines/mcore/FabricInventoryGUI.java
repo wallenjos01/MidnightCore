@@ -9,7 +9,7 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.ConversionUtil;
 
@@ -20,7 +20,7 @@ public class FabricInventoryGUI extends InventoryGUI {
 
     private final List<Menu> open = new ArrayList<>();
 
-    public FabricInventoryGUI(Component title, int rows) {
+    public FabricInventoryGUI(UnresolvedComponent title, int rows) {
         super(title, rows);
     }
 
@@ -45,7 +45,7 @@ public class FabricInventoryGUI extends InventoryGUI {
         spl.openMenu(new MenuProvider() {
             @Override
             public @NotNull net.minecraft.network.chat.Component getDisplayName() {
-                return WrappedComponent.resolved(FabricInventoryGUI.this.title, spl);
+                return new WrappedComponent(FabricInventoryGUI.this.title.resolveFor(spl));
             }
 
             @Nullable

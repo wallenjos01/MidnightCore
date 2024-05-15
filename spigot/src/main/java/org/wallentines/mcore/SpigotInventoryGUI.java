@@ -8,6 +8,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+import org.wallentines.mcore.lang.PlaceholderContext;
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -18,7 +20,7 @@ public class SpigotInventoryGUI extends InventoryGUI {
 
     private final HashMap<SpigotPlayer, Inventory> players = new HashMap<>();
 
-    public SpigotInventoryGUI(Component title, int rows) {
+    public SpigotInventoryGUI(UnresolvedComponent title, int rows) {
         super(title, rows);
     }
 
@@ -43,7 +45,10 @@ public class SpigotInventoryGUI extends InventoryGUI {
         SpigotPlayer spl = ConversionUtil.validate(player);
         spl.getInternal().closeInventory();
 
-        Inventory inv = Bukkit.createInventory(null, size, ComponentResolver.resolveComponent(title, player).toLegacyText());
+        PlaceholderContext ctx = new PlaceholderContext();
+        ctx.addValue(player);
+
+        Inventory inv = Bukkit.createInventory(null, size, title.resolve(ctx).toLegacyText());
         spl.getInternal().openInventory(inv);
 
         players.put(spl, inv);

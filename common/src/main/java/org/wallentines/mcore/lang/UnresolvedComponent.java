@@ -28,15 +28,31 @@ import java.util.stream.Collectors;
 public class UnresolvedComponent {
 
     private final boolean tryParseJSON;
-    private final List<Either<String, UnresolvedPlaceholder>> parts = new ArrayList<>();
+    private final List<Either<String, UnresolvedPlaceholder>> parts;
+    private final PlaceholderContext context;
 
     // This should be set if the component can be resolved during the parsing phase. (i.e. if there were no placeholders)
     private Component completed;
 
-    private UnresolvedComponent(boolean tryParseJSON) {
+    private UnresolvedComponent(boolean tryParseJSON, PlaceholderContext context, List<Either<String, UnresolvedPlaceholder>> entries) {
         this.tryParseJSON = tryParseJSON;
+        this.context = context;
+        this.parts = List.copyOf(entries);
     }
 
+    private UnresolvedComponent(boolean tryParseJSON, PlaceholderContext context) {
+        this.tryParseJSON = tryParseJSON;
+        this.context = context;
+        this.parts = new ArrayList<>();
+    }
+
+    public PlaceholderContext getContext() {
+        return context;
+    }
+
+    public boolean isComplete() {
+        return completed != null;
+    }
 
     /**
      * Resolves this component while flattening all components to a single string, using the global PlaceholderManager
@@ -68,11 +84,32 @@ public class UnresolvedComponent {
     }
 
     /**
+     * Resolves this to a Component based on the internal context
+     * @return A resolved component
+     */
+    public Component resolve() {
+        return resolve(PlaceholderManager.INSTANCE, context);
+    }
+
+    /**
+     * Resolves this to a Component based on the internal context
+     * @param obj Objects to add to the placeholder context for resolution
+     * @return A resolved component
+     */
+    public Component resolveFor(Object... obj) {
+        PlaceholderContext ctx = context.copy();
+        for(Object o : obj) ctx.addValue(o);
+        return resolve(PlaceholderManager.INSTANCE, ctx);
+    }
+
+    /**
      * Resolves this to a Component based on the given context
      * @param ctx The context to use to resolve this component
      * @return A resolved component
      */
     public Component resolve(PlaceholderContext ctx) {
+
+        if(ctx != null) ctx = ctx.and(context);
         return resolve(PlaceholderManager.INSTANCE, ctx);
     }
 
@@ -139,6 +176,14 @@ public class UnresolvedComponent {
         return parts.stream().map(e -> e.leftOrGet(UnresolvedPlaceholder::toRawPlaceholder)).collect(Collectors.joining());
     }
 
+    public UnresolvedComponent copy() {
+        return new UnresolvedComponent(tryParseJSON, context.copy(), parts);
+    }
+
+    public UnresolvedComponent copyWithContext(PlaceholderContext context) {
+        return new UnresolvedComponent(tryParseJSON, context, parts);
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -173,7 +218,7 @@ public class UnresolvedComponent {
     }
 
     public static UnresolvedComponent completed(Component component) {
-        UnresolvedComponent out = new UnresolvedComponent(false);
+        UnresolvedComponent out = new UnresolvedComponent(false, new PlaceholderContext());
         out.completed = component;
         return out;
     }
@@ -207,7 +252,7 @@ public class UnresolvedComponent {
 
         try {
 
-            UnresolvedComponent out = new UnresolvedComponent(tryParseJSON);
+            UnresolvedComponent out = new UnresolvedComponent(tryParseJSON, new PlaceholderContext());
 
             CharBuffer buffer = CharBuffer.allocate(1024);
             StringBuilder currentString = new StringBuilder();
