@@ -225,8 +225,9 @@ public class PlaceholderContext {
      */
     public <T, R> R onValueOr(Class<T> clazz, Function<T, R> func, R defaultValue) {
         T val = getValue(clazz);
-        if(val != null) return func.apply(val);
-        return defaultValue;
+        R out = null;
+        if(val != null) out = func.apply(val);
+        return out != null ? out : defaultValue;
     }
 
     /**
@@ -238,8 +239,9 @@ public class PlaceholderContext {
      */
     public <T, R> R onValueOr(Class<T> clazz, Function<T, R> func, Supplier<R> defaultGetter) {
         T val = getValue(clazz);
-        if(val != null) return func.apply(val);
-        return defaultGetter.get();
+        R out = null;
+        if(val != null) out = func.apply(val);
+        return out != null ? out : defaultGetter.get();
     }
 
 }
