@@ -42,7 +42,7 @@ public class UnresolvedComponent {
 
     private UnresolvedComponent(Component completed) {
         this.tryParseJSON = false;
-        this.context = null;
+        this.context = new PlaceholderContext();
         this.parts = null;
         this.completed = completed;
     }
@@ -541,19 +541,6 @@ public class UnresolvedComponent {
 
         return out;
     }
-
-/*    private SerializeResult<UnresolvedComponent> finish() {
-
-        // Check if there are any placeholders to resolve
-        if(parts.stream().noneMatch(Either::hasRight)) {
-
-            // No placeholders found; resolve immediately and remove unresolved parts
-            completed = resolve(PlaceholderManager.INSTANCE, new PlaceholderContext());
-            parts.clear();
-        }
-
-        return SerializeResult.success(this);
-    }*/
 
     /**
      * A MidnightCFG serializer for unresolved components. Expects a string input and supplies a string output
