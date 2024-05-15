@@ -23,53 +23,40 @@ public class LegacySerializer implements Serializer<Component> {
     /**
      * Contains serializers for the default content types
      */
-    public static final StringRegistry<InlineContentSerializer<?>> CONTENT_SERIALIZERS = new StringRegistry<>();
+    //public static final StringRegistry<InlineContentSerializer<?>> CONTENT_SERIALIZERS = new StringRegistry<>();
 
     /**
      * A LegacySerializer instance which uses the color code character and does not support hex. For true legacy text
      */
-    public static final LegacySerializer INSTANCE = new LegacySerializer('\u00A7', false, CONTENT_SERIALIZERS);
+    public static final LegacySerializer INSTANCE = new LegacySerializer('\u00A7', false);
 
     /**
      * A LegacySerializer instance which uses an ampersand for color codes and has hex support. For text stored in
      * config files.
      */
-    public static final LegacySerializer CONFIG_INSTANCE = new LegacySerializer('&', true, CONTENT_SERIALIZERS);
+    public static final LegacySerializer CONFIG_INSTANCE = new LegacySerializer('&', true);
 
     private final Character colorChar;
     private final boolean hexSupport;
-    private final RegistryBase<String, InlineContentSerializer<?>> serializers;
+    //private final RegistryBase<String, InlineContentSerializer<?>> serializers;
 
     /**
      * Creates a LegacySerializer with the given color character, and optional rgb color support
      * @param colorChar The character which should prefix all color codes
      * @param hexSupport Whether hex color codes which appear after the color character (i.e. &#112233 if the color
      *                   character is '&') should be parsed or written.
-     * @param serializers The content serializers to use
      */
-    public LegacySerializer(Character colorChar, boolean hexSupport, RegistryBase<String, InlineContentSerializer<?>> serializers) {
+    public LegacySerializer(Character colorChar, boolean hexSupport) {
         this.colorChar = colorChar;
         this.hexSupport = hexSupport;
-        this.serializers = serializers;
     }
 
     @Override
     public <O> SerializeResult<O> serialize(SerializeContext<O> context, Component value) {
 
-        SerializeResult<String> content = serializeContent(context, value.content).map(o -> {
-            if(!context.isString(o)) {
-                return SerializeResult.failure("Unable to serialize component content! Expected string!");
-            }
-            return SerializeResult.success(context.asString(o));
-        });
-
-        if(!content.isComplete()) {
-            return SerializeResult.failure(content.getError());
-        }
-
         String style = toLegacyStyle(value);
         StringBuilder out = new StringBuilder(style);
-        out.append(content.getOrThrow());
+        out.append(PlainSerializer.serializeContent(value.content));
 
         for(Component child : value.children) {
 
@@ -82,16 +69,6 @@ public class LegacySerializer implements Serializer<Component> {
         }
 
         return SerializeResult.success(context.toString(out.toString()));
-    }
-
-    private <O> SerializeResult<O> serializeContent(SerializeContext<O> context, Content value) {
-
-        InlineContentSerializer<?> ser = serializers.get(value.type);
-        if(ser == null) {
-            return SerializeResult.failure("Serializer for component contents with type " + value.type + " not found!");
-        }
-
-        return ser.serialize(context, value);
     }
 
     @Override
@@ -196,21 +173,5 @@ public class LegacySerializer implements Serializer<Component> {
         return outComp;
     }
 
-    private static <T extends Content> void register(String id, Class<T> clazz, Function<T, String> ser) {
-        InlineContentSerializer<T> out = new InlineContentSerializer<>(clazz, InlineSerializer.of(ser, str -> {
-            throw new IllegalStateException("Cannot deserialize component content from legacy text!");
-        }));
-        CONTENT_SERIALIZERS.register(id, out);
-    }
-
-    static {
-
-        register("text", Content.Text.class, txt -> txt.text);
-        register("translate", Content.Translate.class, tra -> tra.key);
-        register("keybind", Content.Keybind.class, key -> key.key);
-        register("score", Content.Score.class, score -> "");
-        register("selector", Content.Selector.class, sel -> "");
-        register("nbt", Content.NBT.class, nbt -> "");
-    }
 
 }

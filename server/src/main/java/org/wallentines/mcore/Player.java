@@ -4,6 +4,7 @@ package org.wallentines.mcore;
 import org.wallentines.mcore.lang.LocaleHolder;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.skin.Skinnable;
 import org.wallentines.mcore.text.Component;
@@ -29,11 +30,23 @@ public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolde
      */
     void sendMessage(Component component);
 
+    default void sendMessage(UnresolvedComponent component) {
+        sendMessage(component.resolveFor(this));
+    }
+
     /**
      * Sends the user an action bar message
      * @param component The message to send
      */
     void sendActionBar(Component component);
+
+    /**
+     * Sends the user an action bar message
+     * @param component The message to send
+     */
+    default void sendActionBar(UnresolvedComponent component) {
+        sendActionBar(component.resolveFor(this));
+    }
 
     /**
      * Sends a title to the player
@@ -42,10 +55,26 @@ public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolde
     void sendTitle(Component title);
 
     /**
+     * Sends a title to the player
+     * @param title The title to send
+     */
+    default void sendTitle(UnresolvedComponent title) {
+        sendTitle(title.resolveFor(this));
+    }
+
+    /**
      * Sends a subtitle to the player
      * @param title The title to send
      */
     void sendSubtitle(Component title);
+
+    /**
+     * Sends a subtitle to the player
+     * @param title The title to send
+     */
+    default void sendSubtitle(UnresolvedComponent title) {
+        sendSubtitle(title.resolveFor(this));
+    }
 
     /**
      * Clears the titles for the player
@@ -125,6 +154,14 @@ public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolde
      * @param message The kick message to send
      */
     void kick(Component message);
+
+    /**
+     * Kicks the player from the server with the given message
+     * @param message The kick message to send
+     */
+    default void kick(UnresolvedComponent message) {
+        kick(message.resolveFor(this));
+    }
 
     static void registerPlaceholders(PlaceholderManager manager) {
 

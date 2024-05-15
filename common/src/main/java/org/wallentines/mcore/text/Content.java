@@ -1,7 +1,6 @@
 package org.wallentines.mcore.text;
 
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.serializer.InlineSerializer;
 import org.wallentines.mdcfg.serializer.ObjectSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;
 
@@ -15,9 +14,9 @@ import java.util.Objects;
 public abstract class Content {
 
     // The Content type (i.e. text, translate, keybind, etc.)
-    protected final String type;
+    protected final Type type;
 
-    protected Content(String type) {
+    protected Content(Type type) {
         this.type = type;
     }
 
@@ -25,16 +24,8 @@ public abstract class Content {
      * Returns the Content type
      * @return The Content type
      */
-    public String getType() {
+    public Type getType() {
         return type;
-    }
-
-    /**
-     * Whether this content needs to be resolved before being sent by the server
-     * @return Whether the content needs resolution
-     */
-    public boolean requiresResolution() {
-        return false;
     }
 
     /**
@@ -48,7 +39,7 @@ public abstract class Content {
         public final String text;
 
         public Text(String text) {
-            super("text");
+            super(Type.TEXT);
             this.text = text;
         }
 
@@ -91,7 +82,7 @@ public abstract class Content {
             this(key, null, null);
         }
         public Translate(String key, String fallback, Collection<Component> with) {
-            super("translate");
+            super(Type.TRANSLATE);
             this.key = key;
             this.fallback = fallback;
             this.with = with == null ? List.of() : List.copyOf(with);
@@ -124,7 +115,7 @@ public abstract class Content {
         public final String key;
 
         public Keybind(String key) {
-            super("keybind");
+            super(Type.KEYBIND);
             this.key = key;
         }
 
@@ -145,10 +136,6 @@ public abstract class Content {
                 Serializer.STRING.entry("keybind", con -> con.key),
                 Keybind::new
         );
-
-        public static final InlineSerializer<Keybind> PLAIN_SERIALIZER = InlineSerializer.of(
-                bind -> bind.key,
-                txt -> { throw new IllegalStateException("Unable to deserialize a Keybind component from plaintext!"); });
     }
 
 
@@ -178,7 +165,7 @@ public abstract class Content {
         }
 
         public Score(String name, String objective, String value) {
-            super("score");
+            super(Type.SCORE);
             this.name = name;
             this.objective = objective;
             this.value = value;
@@ -208,10 +195,6 @@ public abstract class Content {
                         cfg.getOrDefault("value", (String) null)
                 )
         );
-
-        public static final InlineSerializer<Score> PLAIN_SERIALIZER = InlineSerializer.of(
-                score -> "",
-                txt -> { throw new IllegalStateException("Unable to deserialize a Score component from plaintext!"); });
     }
 
 
@@ -235,7 +218,7 @@ public abstract class Content {
         }
 
         public Selector(String value, Component separator) {
-            super("selector");
+            super(Type.SELECTOR);
             this.value = value;
             this.separator = separator;
         }
@@ -257,10 +240,6 @@ public abstract class Content {
                 Serializer.STRING.entry("selector", con -> con.value),
                 Selector::new
         );
-
-        public static final InlineSerializer<Selector> PLAIN_SERIALIZER = InlineSerializer.of(
-                sel -> "",
-                txt -> { throw new IllegalStateException("Unable to deserialize a Selector component from plaintext!"); });
     }
 
 
@@ -296,7 +275,7 @@ public abstract class Content {
         public final String data;
 
         public NBT(String path, Boolean interpret, Component separator, DataSourceType type, String dataSource) {
-            super("nbt");
+            super(Type.NBT);
             this.path = path;
             this.interpret = interpret != null && interpret;
             this.separator = separator;
@@ -358,10 +337,32 @@ public abstract class Content {
                     }
             );
         }
+    }
 
-        public static final InlineSerializer<NBT> PLAIN_SERIALIZER = InlineSerializer.of(
-                nbt -> "",
-                txt -> { throw new IllegalStateException("Unable to deserialize a NBT component from plaintext!"); });
+    public enum Type {
+        TEXT("text"),
+        TRANSLATE("translate"),
+        KEYBIND("ketbind"),
+        SCORE("score"),
+        SELECTOR("selector"),
+        NBT("nbt");
+
+        final String id;
+
+        Type(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public static Type byId(String id) {
+            for(Type t : values()) {
+                if(t.id.equals(id)) return t;
+            }
+            return null;
+        }
     }
 
 }

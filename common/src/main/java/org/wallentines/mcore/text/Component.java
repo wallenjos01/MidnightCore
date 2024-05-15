@@ -158,7 +158,7 @@ public class Component {
      * @return The content of the component
      */
     public String text() {
-        return PlainSerializer.INSTANCE.serializeContent(ConfigContext.INSTANCE, content).getOrThrow().asString();
+        return PlainSerializer.serializeContent(content);
     }
 
     /**

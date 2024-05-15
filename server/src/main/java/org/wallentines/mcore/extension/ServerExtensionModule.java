@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.lang.CustomPlaceholder;
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.pluginmsg.ServerPluginMessageModule;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigList;
@@ -47,9 +48,9 @@ public class ServerExtensionModule implements ServerModule {
         this.cachedPacket = new ClientboundExtensionPacket(manager.getLoadedModuleIds());
 
         mod.registerPacketHandler(ServerboundExtensionPacket.ID, (player, buffer) -> {
-            Component kick = handleResponse(player.getUUID(), player.getUsername(), buffer);
+            UnresolvedComponent kick = handleResponse(player.getUUID(), player.getUsername(), buffer);
             if(kick != null) {
-                player.kick(getKickMessage());
+                player.kick(kick);
             }
         });
 
@@ -60,9 +61,9 @@ public class ServerExtensionModule implements ServerModule {
             server.joinEvent().register(this, pl -> smm.sendPacket(pl, cachedPacket));
         } else {
             mod.registerLoginPacketHandler(ServerboundExtensionPacket.ID, (negotiator, buffer) -> {
-                Component kick = handleResponse(negotiator.getPlayerUUID(), negotiator.getPlayerName(), buffer);
+                UnresolvedComponent kick = handleResponse(negotiator.getPlayerUUID(), negotiator.getPlayerName(), buffer);
                 if(kick != null) {
-                    negotiator.kick(getKickMessage());
+                    negotiator.kick(kick.resolve());
                 }
             });
             mod.onLogin.register(this, ln -> ln.sendPacket(cachedPacket));
@@ -96,19 +97,22 @@ public class ServerExtensionModule implements ServerModule {
     }
 
 
-    private Component getKickMessage() {
+    private UnresolvedComponent getKickMessage() {
         MidnightCoreServer mcore = MidnightCoreServer.INSTANCE.get();
-        return mcore.getLangManager().component("kick.missing_extensions", CustomPlaceholder.of("entries", () -> {
-            List<Component> entries = requiredExtensions.stream().map(id -> mcore.getLangManager().component("kick.missing_extensions.entry", CustomPlaceholder.inline("extension_id", id.toString()))).toList();
-            if(entries.isEmpty()) return Component.empty();
-            Component out = entries.get(0);
-            out = out.addChildren(entries.subList(1, entries.size()));
+        return mcore.getLangManager().component("kick.missing_extensions", CustomPlaceholder.of("entries", (ctx) -> {
+            List<UnresolvedComponent> entries = requiredExtensions
+                    .stream()
+                    .map(id -> mcore.getLangManager().component("kick.missing_extensions.entry", CustomPlaceholder.inline("extension_id", id.toString())))
+                    .toList();
 
+            if(entries.isEmpty()) return Component.empty();
+            Component out = entries.get(0).resolve(ctx);
+            out.addChildren(entries.stream().skip(1).map(uc -> uc.resolve(ctx)).toList());
             return out;
         }));
     }
 
-    private Component handleResponse(UUID playerId, String username, ByteBuf response) {
+    private UnresolvedComponent handleResponse(UUID playerId, String username, ByteBuf response) {
 
         if(response == null || response.readableBytes() == 0) {
             MidnightCoreAPI.LOGGER.info("Player " + username + " ignored extension packet");

@@ -3,11 +3,7 @@ package org.wallentines.mcore;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.wallentines.mcore.adapter.Adapter;
-import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.ArrayList;
@@ -37,9 +33,10 @@ public class MainCommandExecutor extends BukkitCommand {
     private void executeMain(CommandSender sender, String[] args) {
 
         Server server = Server.RUNNING_SERVER.get();
+        SpigotCommandSender ss = new SpigotCommandSender(sender);
 
         if(args.length == 0) {
-            MainCommand.executeMain(server, cmp -> sendMessage(sender, cmp));
+            MainCommand.executeMain(server, ss);
             return;
         }
 
@@ -56,7 +53,7 @@ public class MainCommandExecutor extends BukkitCommand {
                         sender.sendMessage(ChatColor.RED + "Usage: /mcore module load <[module]>");
                         return;
                     }
-                    MainCommand.executeLoadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeLoadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), ss);
                     return;
                 case "unload":
                     if(args.length == 2) {
@@ -64,7 +61,7 @@ public class MainCommandExecutor extends BukkitCommand {
                         return;
                     }
 
-                    MainCommand.executeUnloadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeUnloadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), ss);
                     return;
                 case "reload":
                     if(args.length == 2) {
@@ -72,9 +69,9 @@ public class MainCommandExecutor extends BukkitCommand {
                         return;
                     }
                     if(args[2].equals("all")) {
-                        MainCommand.executeReloadModule(server, null, cmp -> sendMessage(sender, cmp));
+                        MainCommand.executeReloadModule(server, null, ss);
                     } else {
-                        MainCommand.executeReloadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
+                        MainCommand.executeReloadModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), ss);
                     }
                     return;
                 case "enable":
@@ -82,22 +79,22 @@ public class MainCommandExecutor extends BukkitCommand {
                         sender.sendMessage(ChatColor.RED + "Usage: /mcore module enable <[module]>");
                         return;
                     }
-                    MainCommand.executeEnableModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeEnableModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), ss);
                     return;
                 case "disable":
                     if(args.length == 2) {
                         sender.sendMessage(ChatColor.RED + "Usage: /mcore module disable <[module]>");
                         return;
                     }
-                    MainCommand.executeDisableModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeDisableModule(server, Identifier.parseOrDefault(args[2], MidnightCoreAPI.MOD_ID), ss);
                     return;
                 case "list":
-                    MainCommand.executeListModules(server, cmp -> sendMessage(sender, cmp));
+                    MainCommand.executeListModules(server, ss);
             }
 
         } else if(args[0].equals("reload")) {
 
-            MainCommand.executeReload(cmp -> sendMessage(sender, cmp));
+            MainCommand.executeReload(ss);
         }
 
     }
@@ -141,14 +138,5 @@ public class MainCommandExecutor extends BukkitCommand {
         }
 
         return new ArrayList<>();
-    }
-
-    private void sendMessage(CommandSender sender, Component cmp) {
-
-        if(sender instanceof Player) {
-            Adapter.INSTANCE.get().sendMessage((Player) sender, ComponentResolver.resolveComponent(cmp, new SpigotPlayer(Server.RUNNING_SERVER.get(), (Player) sender)));
-        } else {
-            sender.sendMessage(ComponentResolver.resolveComponent(cmp).toLegacyText());
-        }
     }
 }

@@ -34,5 +34,11 @@
     "type": "replace",
     "find": "List.copyOf(",
     "replace": "new java.util.ArrayList<>("
+  },
+  {
+    "lines": [ "all" ],
+    "type": "replace",
+    "find": "List.of()",
+    "replace": "new java.util.ArrayList<>()"
   }
 ]

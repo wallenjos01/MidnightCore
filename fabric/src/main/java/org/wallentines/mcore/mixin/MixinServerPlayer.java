@@ -18,7 +18,6 @@ import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.*;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.AuthUtil;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -65,7 +64,7 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
     @Intrinsic(displace = true)
     public Component mcore$getDisplayName() {
         ServerPlayer spl = (ServerPlayer) (Object) this;
-        return ContentConverter.convertReverse(spl.getDisplayName());
+        return ConversionUtil.toComponent(spl.getDisplayName());
     }
 
     public boolean mcore$isOnline() {
@@ -83,20 +82,20 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
 
     public void mcore$sendMessage(Component component) {
 
-        sendSystemMessage(WrappedComponent.resolved(component, this), false);
+        sendSystemMessage(new WrappedComponent(component), false);
     }
 
     public void mcore$sendActionBar(Component component) {
 
-        sendSystemMessage(WrappedComponent.resolved(component, this), true);
+        sendSystemMessage(new WrappedComponent(component), true);
     }
 
     public void mcore$sendTitle(Component title) {
-        connection.send(new ClientboundSetTitleTextPacket(WrappedComponent.resolved(title, this)));
+        connection.send(new ClientboundSetTitleTextPacket(new WrappedComponent(title)));
     }
 
     public void mcore$sendSubtitle(Component title) {
-        connection.send(new ClientboundSetSubtitleTextPacket(WrappedComponent.resolved(title, this)));
+        connection.send(new ClientboundSetSubtitleTextPacket(new WrappedComponent(title)));
     }
 
     public void mcore$clearTitles() {
@@ -175,6 +174,6 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
 
     public void mcore$kick(Component message) {
 
-        connection.disconnect(WrappedComponent.resolved(message, this));
+        connection.disconnect(new WrappedComponent(message));
     }
 }

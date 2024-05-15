@@ -65,6 +65,15 @@ public class PlaceholderManager {
     }
 
     /**
+     * Parses a string, locating all placeholders, but does not resolve the placeholders yet.
+     * @param str The string to parse
+     * @return An unresolved component representing the string and all its placeholders
+     */
+    public UnresolvedComponent parse(String str, boolean tryParseJSON) {
+        return UnresolvedComponent.parse(str, tryParseJSON).getOrThrow();
+    }
+
+    /**
      * Parses a string, locating all placeholders, then resolves the placeholders according to the given context.
      * Will not attempt to parse strings as JSON
      * @param str The string to parse

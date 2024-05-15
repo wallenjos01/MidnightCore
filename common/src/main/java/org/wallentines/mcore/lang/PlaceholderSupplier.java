@@ -23,7 +23,11 @@ public interface PlaceholderSupplier {
      * @return A new placeholder supplier
      */
     static PlaceholderSupplier of(Function<PlaceholderContext, Component> func) {
-        return context -> Either.right(func.apply(context));
+        return context -> {
+            Component out = func.apply(context);
+            if(out == null) return null;
+            return Either.right(out);
+        };
     }
 
 
@@ -33,7 +37,11 @@ public interface PlaceholderSupplier {
      * @return A new placeholder supplier
      */
     static PlaceholderSupplier inline(Function<PlaceholderContext, String> func) {
-        return context -> Either.left(func.apply(context));
+        return context -> {
+            String out = func.apply(context);
+            if (out == null) return null;
+            return Either.left(out);
+        };
     }
 
 }

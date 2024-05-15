@@ -5,7 +5,6 @@ import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
@@ -132,22 +131,22 @@ public class SpigotPlayer implements Player {
 
     @Override
     public void sendMessage(Component component) {
-        Adapter.INSTANCE.get().sendMessage(internal, ComponentResolver.resolveComponent(component, this));
+        Adapter.INSTANCE.get().sendMessage(internal, component);
     }
 
     @Override
     public void sendActionBar(Component component) {
-        Adapter.INSTANCE.get().sendActionBar(internal, ComponentResolver.resolveComponent(component, this));
+        Adapter.INSTANCE.get().sendActionBar(internal, component);
     }
 
     @Override
     public void sendTitle(Component component) {
-        Adapter.INSTANCE.get().sendTitle(internal, ComponentResolver.resolveComponent(component, this));
+        Adapter.INSTANCE.get().sendTitle(internal, component);
     }
 
     @Override
     public void sendSubtitle(Component component) {
-        Adapter.INSTANCE.get().sendSubtitle(internal, ComponentResolver.resolveComponent(component, this));
+        Adapter.INSTANCE.get().sendSubtitle(internal, component);
     }
 
     @Override
@@ -206,7 +205,7 @@ public class SpigotPlayer implements Player {
 
     @Override
     public void kick(Component message) {
-        Adapter.INSTANCE.get().kickPlayer(internal, ComponentResolver.resolveComponent(message, this));
+        Adapter.INSTANCE.get().kickPlayer(internal, message);
     }
 
     @Override

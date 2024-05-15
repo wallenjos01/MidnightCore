@@ -19,7 +19,6 @@ import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.Location;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.ContentConverter;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.midnightlib.math.Vec3d;
@@ -83,7 +82,7 @@ public abstract class MixinEntity implements Entity {
         net.minecraft.network.chat.Component comp = getCustomName();
         if(comp == null) return Component.text(getStringUUID());
 
-        return ContentConverter.convertReverse(comp);
+        return ConversionUtil.toComponent(comp);
     }
 
     public Identifier mcore$getDimensionId() {

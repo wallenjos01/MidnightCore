@@ -250,8 +250,8 @@ public interface Adapter {
         team.setPrefix(component.toLegacyText());
     }
 
-    default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormat fmt) { }
-    default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormat fmt, String playerName) { }
+    default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormatType type, @Nullable Component argument) { }
+    default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormatType type, @Nullable Component argument, String playerName) { }
 
 
     /**

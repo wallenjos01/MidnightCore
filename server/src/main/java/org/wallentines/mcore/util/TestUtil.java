@@ -1,10 +1,7 @@
 package org.wallentines.mcore.util;
 
 import org.wallentines.mcore.*;
-import org.wallentines.mcore.lang.LangManager;
-import org.wallentines.mcore.lang.LangRegistry;
-import org.wallentines.mcore.lang.PlaceholderContent;
-import org.wallentines.mcore.lang.UnresolvedComponent;
+import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.messenger.Messenger;
 import org.wallentines.mcore.messenger.ServerMessengerModule;
 import org.wallentines.mcore.savepoint.SavepointModule;
@@ -174,11 +171,11 @@ public class TestUtil {
     public static void scoreboardCmd(Player pl) {
         try {
 
-            CustomScoreboard board = CustomScoreboard.FACTORY.get().create(Component.text("Test").withColor(TextColor.RED).withBold(true));
+            CustomScoreboard board = CustomScoreboard.create(Component.text("Test").withColor(TextColor.RED).withBold(true));
 
             board.setLine(13, Component.text("Hello"));
             board.setNumberFormat(13, CustomScoreboard.NumberFormatType.BLANK);
-            board.setLine(3, PlaceholderContent.component("%player_name%"), PlaceholderContent.component("%player_username%"));
+            board.setLine(3, PlaceholderManager.INSTANCE.parse("%player_name%"), PlaceholderManager.INSTANCE.parse("%player_username%"));
             board.setLine(1, Component.text("Color").withColor(new Color(0x58BE44)));
             board.setNumberFormat(1, CustomScoreboard.NumberFormatType.STYLED, Component.empty().withColor(TextColor.GREEN).withBold(true));
             board.setLine(0, Component.text("Zero").withColor(TextColor.AQUA).withItalic(true));

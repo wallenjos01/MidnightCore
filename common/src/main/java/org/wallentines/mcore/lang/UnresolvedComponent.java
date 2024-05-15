@@ -40,10 +40,17 @@ public class UnresolvedComponent {
         this.parts = List.copyOf(entries);
     }
 
+    private UnresolvedComponent(Component completed) {
+        this.tryParseJSON = false;
+        this.context = null;
+        this.parts = null;
+        this.completed = completed;
+    }
+
     private UnresolvedComponent(boolean tryParseJSON, PlaceholderContext context) {
         this.tryParseJSON = tryParseJSON;
         this.context = context;
-        this.parts = new ArrayList<>();
+        this.parts = List.of();
     }
 
     public PlaceholderContext getContext() {
@@ -111,6 +118,16 @@ public class UnresolvedComponent {
 
         if(ctx != null) ctx = ctx.and(context);
         return resolve(PlaceholderManager.INSTANCE, ctx);
+    }
+
+    /**
+     * Resolves this to a Component based on the given context
+     * @param manager The placeholder manager containing placeholders
+     * @return A resolved component
+     */
+    public Component resolve(PlaceholderManager manager) {
+
+        return resolve(manager, context);
     }
 
     /**
@@ -184,6 +201,10 @@ public class UnresolvedComponent {
         return new UnresolvedComponent(tryParseJSON, context, parts);
     }
 
+    public UnresolvedComponent copyWith(Object... values) {
+        return new UnresolvedComponent(tryParseJSON, context.copy().withValues(values), parts);
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -207,10 +228,75 @@ public class UnresolvedComponent {
 
     @Override
     public String toString() {
-        if(completed != null) {
+        if (completed != null) {
             return completed.toString();
         }
         return "UnresolvedComponent{tryParseJSON=" + tryParseJSON + ",parts=" + parts + "}";
+    }
+
+    public static class Builder {
+
+        private List<Either<String, UnresolvedPlaceholder>> parts = new ArrayList<>();
+        private PlaceholderContext context = new PlaceholderContext();
+        private boolean tryParseJSON;
+        private boolean completed = true;
+
+        public Builder append(String literal) {
+            parts.add(Either.left(literal));
+            return this;
+        }
+        public Builder append(UnresolvedPlaceholder placeholder) {
+            parts.add(Either.right(placeholder));
+            completed = false;
+            return this;
+        }
+        public Builder appendPlaceholder(String placeholder) {
+            append(new UnresolvedPlaceholder(placeholder));
+            return this;
+        }
+
+        public Builder appendPlaceholder(String placeholder, String argument) {
+            append(new UnresolvedPlaceholder(placeholder, builder().append(argument).build()));
+            return this;
+        }
+
+        public Builder appendPlaceholder(String placeholder, UnresolvedComponent argument) {
+            append(new UnresolvedPlaceholder(placeholder, argument));
+            return this;
+        }
+
+        public Builder tryParseJSON() {
+            return tryParseJSON(true);
+        }
+
+        public Builder tryParseJSON(boolean value) {
+            this.tryParseJSON = value;
+            return this;
+        }
+
+        public Builder withContextValue(Object o) {
+            context.addValue(o);
+            return this;
+        }
+
+        public Builder withContext(PlaceholderContext context) {
+            this.context = context;
+            return this;
+        }
+
+        public UnresolvedComponent build() {
+
+            UnresolvedComponent out = new UnresolvedComponent(tryParseJSON, context, parts);
+            if(completed) {
+                out = UnresolvedComponent.completed(out.resolve());
+            }
+
+            return out;
+        }
+
+    }
+    public static UnresolvedComponent.Builder builder() {
+        return new Builder();
     }
 
     public static UnresolvedComponent empty() {
@@ -218,9 +304,7 @@ public class UnresolvedComponent {
     }
 
     public static UnresolvedComponent completed(Component component) {
-        UnresolvedComponent out = new UnresolvedComponent(false, new PlaceholderContext());
-        out.completed = component;
-        return out;
+        return new UnresolvedComponent(component);
     }
 
     /**
@@ -252,7 +336,7 @@ public class UnresolvedComponent {
 
         try {
 
-            UnresolvedComponent out = new UnresolvedComponent(tryParseJSON, new PlaceholderContext());
+            UnresolvedComponent.Builder out = new UnresolvedComponent.Builder().tryParseJSON(tryParseJSON);
 
             CharBuffer buffer = CharBuffer.allocate(1024);
             StringBuilder currentString = new StringBuilder();
@@ -282,7 +366,7 @@ public class UnresolvedComponent {
                     reader.reset();
                     reader.skip(earlyIndex+1);
                     if(earlyIndex > 0) {
-                        out.parts.add(Either.left(str.substring(0, earlyIndex)));
+                        out.append(str.substring(0, earlyIndex));
                     }
                     break;
                 }
@@ -307,22 +391,21 @@ public class UnresolvedComponent {
                         }
 
                         if (!currentString.isEmpty()) {
-                            out.parts.add(Either.left(currentString.toString()));
+                            out.append(currentString.toString());
                             currentString.setLength(0);
                         }
 
-                        out.parts.add(Either.right(placeholder.getOrThrow()));
+                        out.append(placeholder.getOrThrow());
                     }
                 } else {
 
-                    out.parts.add(Either.left(str));
+                    out.append(str);
 
                 }
             }
 
             buffer.clear();
-
-            return out.finish();
+            return SerializeResult.success(out.build());
 
         } catch (IOException ex) {
 
@@ -403,13 +486,13 @@ public class UnresolvedComponent {
 
                 MutableComponent next = MutableComponent.fromComponent(cmp.rightOrThrow());
                 if(out == null) {
-                    out = new MutableComponent(new Content.Text(""));
-                }
-
-                if(out.children.isEmpty()) {
-                    out.addChild(next);
+                    out = next;
                 } else {
-                    out.getChild(out.children.size() - 1).addChild(next);
+                    if (out.children.isEmpty()) {
+                        out.addChild(next);
+                    } else {
+                        out.getChild(out.children.size() - 1).addChild(next);
+                    }
                 }
             }
         }
@@ -459,7 +542,7 @@ public class UnresolvedComponent {
         return out;
     }
 
-    private SerializeResult<UnresolvedComponent> finish() {
+/*    private SerializeResult<UnresolvedComponent> finish() {
 
         // Check if there are any placeholders to resolve
         if(parts.stream().noneMatch(Either::hasRight)) {
@@ -470,7 +553,7 @@ public class UnresolvedComponent {
         }
 
         return SerializeResult.success(this);
-    }
+    }*/
 
     /**
      * A MidnightCFG serializer for unresolved components. Expects a string input and supplies a string output

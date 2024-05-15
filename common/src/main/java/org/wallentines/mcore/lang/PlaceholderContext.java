@@ -124,6 +124,16 @@ public class PlaceholderContext {
     }
 
     /**
+     * Adds values to the context
+     * @param values The objects to add
+     * @return A reference to self
+     */
+    public PlaceholderContext withValues(Object... values) {
+        for(Object o : values) addValue(o);
+        return this;
+    }
+
+    /**
      * Finds an object of type T and returns it, or null
      * @param clazz The class of type of object to look up
      * @return The first object in {@link #values values} with type T
@@ -151,7 +161,7 @@ public class PlaceholderContext {
     public Either<String, Component> getCustomPlaceholder(String key) {
 
         if(!customCache.containsKey(key)) return null;
-        return customCache.get(key).getValue();
+        return customCache.get(key).getValue(this);
     }
 
     /**

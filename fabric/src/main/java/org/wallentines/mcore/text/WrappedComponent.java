@@ -30,17 +30,6 @@ public class WrappedComponent implements Component {
     }
 
     /**
-     * Creates a new WrappedComponent by resolving then wrapping a MidnightCore component
-     * @param comp The component to resolve and wrap
-     * @param args The context by which to resolve the component
-     * @return A new WrappedComponent
-     */
-    @Deprecated
-    public static WrappedComponent resolved(org.wallentines.mcore.text.Component comp, Object... args) {
-        return new WrappedComponent(ComponentResolver.resolveComponent(comp, args));
-    }
-
-    /**
      * Returns the style information of this component. Will convert if necessary
      * @return The component style.
      */
@@ -56,7 +45,7 @@ public class WrappedComponent implements Component {
      */
     @Override
     public @NotNull ComponentContents getContents() {
-        if(cachedContents == null) cachedContents = ContentConverter.convertContent(internal.content);
+        if(cachedContents == null) cachedContents = ConversionUtil.toContents(internal.content);
         return cachedContents;
     }
 

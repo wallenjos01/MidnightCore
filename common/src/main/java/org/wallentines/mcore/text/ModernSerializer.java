@@ -16,30 +16,8 @@ import java.util.List;
  */
 public class ModernSerializer implements ContextSerializer<Component, GameVersion> {
 
-    /**
-     * Contains serializers for the default content types
-     */
-    public static final StringRegistry<ContentSerializer<?>> CONTENT_SERIALIZERS = new StringRegistry<>();
 
-    /**
-     * The global modern serializer instance
-     */
-    public static final ModernSerializer INSTANCE = new ModernSerializer(CONTENT_SERIALIZERS);
-
-    /**
-     * A modern serializer instance containing only vanilla content types
-     */
-    public static final ModernSerializer VANILLA;
-
-    private final RegistryBase<String, ContentSerializer<?>> registry;
-
-    /**
-     * Constructs a new ModernSerializer with all the default content serializer types
-     */
-    public ModernSerializer(RegistryBase<String, ContentSerializer<?>> contentSerializers) {
-
-        this.registry = contentSerializers;
-    }
+    public static final ModernSerializer INSTANCE = new ModernSerializer();
 
     @Override
     public <O> SerializeResult<O> serialize(SerializeContext<O> context, Component value, GameVersion version) {
@@ -100,7 +78,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
 
     private <O> SerializeResult<O> serializeContent(SerializeContext<O> context, Content content, GameVersion version) {
 
-        ContentSerializer<?> serializer = registry.get(content.type);
+        ContentSerializer<?> serializer = getSerializer(content.type);
         if(serializer == null) {
             return SerializeResult.failure("Unable to serialize content with type " + content.type + "!");
         }
@@ -155,11 +133,11 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
         MutableComponent out = null;
         for(String s : context.getOrderedKeys(value)) {
 
-            ContentSerializer<?> ser = registry.get(s);
-            if(ser != null) {
+            Content.Type type = Content.Type.byId(s);
+            if(type != null) {
 
                 ContentSerializer.Context ctx = new ContentSerializer.Context(version, this);
-                SerializeResult<? extends Content> con = ser.deserialize(context, value, ctx);
+                SerializeResult<? extends Content> con = getSerializer(type).deserialize(context, value, ctx);
                 if(!con.isComplete()) {
                     return SerializeResult.failure("Unable to deserialize component contents! " + con.getError());
                 }
@@ -208,14 +186,14 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
         return SerializeResult.success(out.toComponent());
     }
 
-    public static final ContentSerializer<Content.Text> TEXT = register("text", Content.Text.class,
+    public static final ContentSerializer<Content.Text> TEXT = new ContentSerializer<>(Content.Text.class,
             ContextSerializer.fromStatic(ObjectSerializer.create(
                     Serializer.STRING.entry("text", (text) -> text.text),
                     Content.Text::new
             ))
     );
 
-    public static final ContentSerializer<Content.Translate> TRANSLATE = register("translate", Content.Translate.class,
+    public static final ContentSerializer<Content.Translate> TRANSLATE = new ContentSerializer<>(Content.Translate.class,
             ContextObjectSerializer.create(
                     Serializer.STRING.entry("translate", (translate, c) -> translate.key),
                     Serializer.STRING.<Content.Translate, ContentSerializer.Context>entry("fallback", (translate, context) -> translate.fallback).optional(),
@@ -224,14 +202,14 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
             )
     );
 
-    public static final ContentSerializer<Content.Keybind> KEYBIND = register("keybind", Content.Keybind.class,
+    public static final ContentSerializer<Content.Keybind> KEYBIND = new ContentSerializer<>(Content.Keybind.class,
             ContextSerializer.fromStatic(ObjectSerializer.create(
                     Serializer.STRING.entry("keybind", con -> con.key),
                     Content.Keybind::new
             ))
     );
 
-    public static final ContentSerializer<Content.Score> SCORE = register("score", Content.Score.class,
+    public static final ContentSerializer<Content.Score> SCORE = new ContentSerializer<>(Content.Score.class,
             ContextSerializer.fromStatic(ObjectSerializer.create(
                     ConfigSection.SERIALIZER.entry("score", con -> new ConfigSection()
                             .with("name", con.name)
@@ -245,14 +223,14 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
             ))
     );
 
-    public static final ContentSerializer<Content.Selector> SELECTOR = register("selector", Content.Selector.class,
+    public static final ContentSerializer<Content.Selector> SELECTOR = new ContentSerializer<>(Content.Selector.class,
             ContextSerializer.fromStatic(ObjectSerializer.create(
                     Serializer.STRING.entry("selector", con -> con.value),
                     Content.Selector::new
             ))
     );
 
-    public static final ContentSerializer<Content.NBT> NBT = register("nbt", Content.NBT.class,
+    public static final ContentSerializer<Content.NBT> NBT = new ContentSerializer<>(Content.NBT.class,
             ContextObjectSerializer.create(
                     Serializer.STRING.entry("nbt", (nbt, ctx) -> nbt.path),
                     Serializer.BOOLEAN.<Content.NBT, ContentSerializer.Context>entry("interpret", (nbt, ctx) -> nbt.interpret).optional(),
@@ -283,7 +261,26 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
                     }
             ));
 
-    private static <T extends Content> ContentSerializer<T> register(String id, Class<T> clazz, ContextSerializer<T, ContentSerializer.Context> serializer) {
+    private static ContentSerializer<?> getSerializer(Content.Type type) {
+        switch (type) {
+            case TEXT:
+                return TEXT;
+            case TRANSLATE:
+                return TRANSLATE;
+            case KEYBIND:
+                return KEYBIND;
+            case SCORE:
+                return SCORE;
+            case SELECTOR:
+                return SELECTOR;
+            case NBT:
+                return NBT;
+            default:
+                return null;
+        }
+    }
+
+/*    private static <T extends Content> ContentSerializer<T> register(String id, Class<T> clazz, ContextSerializer<T, ContentSerializer.Context> serializer) {
         ContentSerializer<T> out = new ContentSerializer<>(clazz, serializer);
         CONTENT_SERIALIZERS.register(id, out);
         return out;
@@ -291,6 +288,6 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
 
     static {
         VANILLA = new ModernSerializer(CONTENT_SERIALIZERS.freeze());
-    }
+    }*/
 
 }

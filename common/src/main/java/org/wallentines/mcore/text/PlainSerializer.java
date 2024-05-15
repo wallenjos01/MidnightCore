@@ -13,30 +13,12 @@ public class PlainSerializer implements Serializer<Component> {
     /**
      * The global plain serializer instance
      */
-    public static final PlainSerializer INSTANCE = new PlainSerializer(LegacySerializer.CONTENT_SERIALIZERS);
-
-    private final RegistryBase<String, InlineContentSerializer<?>> serializers;
-
-    /**
-     * Constructs a new PlainSerializer with all the default content serializer types
-     * @param serializers The content serializers to use
-     */
-    public PlainSerializer(RegistryBase<String, InlineContentSerializer<?>> serializers) {
-        this.serializers = serializers;
-    }
+    public static final PlainSerializer INSTANCE = new PlainSerializer();
 
     @Override
     public <O> SerializeResult<O> serialize(SerializeContext<O> context, Component value) {
-        SerializeResult<O> res = serializeContent(context, value.content);
-        if(!res.isComplete()) {
-            return res;
-        }
-        O out = res.getOrThrow();
-        if(!context.isString(out)) {
-            return SerializeResult.failure("Unable to serialize " + value.content.type + " as a string!");
-        }
 
-        StringBuilder str = new StringBuilder(context.asString(out));
+        StringBuilder str = new StringBuilder(serializeContent(value.content));
         for(Component comp : value.children) {
             SerializeResult<O> child = serialize(context, comp);
             if(!child.isComplete()) {
@@ -48,16 +30,6 @@ public class PlainSerializer implements Serializer<Component> {
         return SerializeResult.success(context.toString(str.toString()));
     }
 
-    public <O> SerializeResult<O> serializeContent(SerializeContext<O> context, Content value) {
-
-        InlineContentSerializer<?> ser = serializers.get(value.type);
-        if(ser == null) {
-            return SerializeResult.failure("Serializer for component contents with type " + value.type + " not found!");
-        }
-
-        return ser.serialize(context, value);
-    }
-
     @Override
     public <O> SerializeResult<Component> deserialize(SerializeContext<O> context, O value) {
 
@@ -67,4 +39,19 @@ public class PlainSerializer implements Serializer<Component> {
 
         return SerializeResult.success(Component.text(context.asString(value)));
     }
+
+
+    public static String serializeContent(Content content) {
+        switch (content.type) {
+            case TEXT:
+                return ((Content.Text) content).text;
+            case TRANSLATE:
+                return ((Content.Translate) content).key;
+            case KEYBIND:
+                return ((Content.Keybind) content).key;
+            default:
+                return "";
+        }
+    }
+
 }

@@ -4,9 +4,11 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.contents.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,6 +22,7 @@ import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ConversionUtil {
 
@@ -140,14 +143,120 @@ public class ConversionUtil {
     }
 
     public static Component toComponent(net.minecraft.network.chat.Component other) {
-        return ModernSerializer.INSTANCE
-                .deserialize(
-                        NBTContext.INSTANCE,
-                        ComponentSerialization.CODEC.encodeStart(NbtOps.INSTANCE, other)
-                                .getOrThrow(),
-                        GameVersion.CURRENT_VERSION.get()
-                ).getOrThrow();
+
+        Content contents = toContent(other.getContents());
+        Component out = new Component(contents);
+
+        Style style = other.getStyle();
+        if(!style.isEmpty()) {
+
+            if(style.isBold()) out = out.withBold(true);
+            if(style.isItalic()) out = out.withItalic(true);
+            if(style.isUnderlined()) out = out.withUnderlined(true);
+            if(style.isStrikethrough()) out = out.withStrikethrough(true);
+            if(style.isObfuscated()) out = out.withObfuscated(true);
+
+            if(style.getFont() != Style.DEFAULT_FONT) out = out.withFont(ConversionUtil.toIdentifier(style.getFont()));
+
+            out = out.withInsertion(style.getInsertion());
+            if(style.getColor() != null) out = out.withColor(ConversionUtil.toColor(style.getColor()));
+            if(style.getHoverEvent() != null) out = out.withHoverEvent(ConversionUtil.toHoverEvent(style.getHoverEvent()));
+            if(style.getClickEvent() != null) out = out.withClickEvent(ConversionUtil.toClickEvent(style.getClickEvent()));
+        }
+
+        for(net.minecraft.network.chat.Component child : other.getSiblings()) {
+            out = out.addChild(toComponent(child));
+        }
+
+        return out;
     }
+
+    public static ComponentContents toContents(Content content) {
+
+        switch (content.getType()) {
+            case TEXT:
+                return new PlainTextContents.LiteralContents(((Content.Text) content).text);
+            case TRANSLATE: {
+                Content.Translate md = (Content.Translate) content;
+                return new TranslatableContents(
+                        md.key,
+                        md.fallback,
+                        md.with == null ? null : md.with.stream().map(WrappedComponent::new).toArray());
+            }
+            case KEYBIND:
+                return new KeybindContents(((Content.Keybind) content).key);
+            case SCORE: {
+                Content.Score md = (Content.Score) content;
+                return new ScoreContents(md.name, md.objective);
+            }
+            case SELECTOR: {
+                Content.Selector md = (Content.Selector) content;
+                return new SelectorContents(
+                        md.value,
+                        Optional.ofNullable(md.separator == null ? null : new WrappedComponent(md.separator)));
+            }
+            case NBT: {
+                Content.NBT md = (Content.NBT) content;
+                DataSource source = switch (md.type) {
+                    case BLOCK -> new BlockDataSource(md.data);
+                    case ENTITY -> new EntityDataSource(md.data);
+                    default -> new StorageDataSource(new ResourceLocation(md.data));
+                };
+                return new NbtContents(
+                        md.path,
+                        md.interpret,
+                        Optional.ofNullable(md.separator == null ? null : new WrappedComponent(md.separator)),
+                        source
+                );
+            }
+            default:
+                throw new IllegalArgumentException("Don't know how to turn " + content + " into a Minecraft content!");
+        }
+    }
+
+    public static Content toContent(ComponentContents contents) {
+
+        if(contents instanceof PlainTextContents pt) {
+            return new Content.Text(pt.text());
+        }
+        else if(contents instanceof TranslatableContents mc) {
+            return new Content.Translate(
+                    mc.getKey(),
+                    mc.getFallback(),
+                    mc.getArgs().length == 0 ? null : Stream.of(mc.getArgs()).map(obj -> toComponent((net.minecraft.network.chat.Component) obj)).toList());
+        }
+        else if(contents instanceof KeybindContents mc) {
+            return new Content.Keybind(mc.getName());
+        }
+        else if(contents instanceof ScoreContents mc) {
+            return new Content.Score(mc.getName(), mc.getObjective(), null);
+        }
+        else if(contents instanceof SelectorContents mc) {
+            return new Content.Selector(
+                    mc.getPattern(),
+                    mc.getSeparator().map(ConversionUtil::toComponent).orElse(null));
+        }
+        else if(contents instanceof NbtContents mc) {
+            String pattern;
+            Content.NBT.DataSourceType type;
+            if(mc.getDataSource() instanceof BlockDataSource) {
+                pattern = ((BlockDataSource) mc.getDataSource()).posPattern();
+                type = Content.NBT.DataSourceType.BLOCK;
+            }
+            else if(mc.getDataSource() instanceof EntityDataSource) {
+                pattern = ((EntityDataSource) mc.getDataSource()).selectorPattern();
+                type = Content.NBT.DataSourceType.ENTITY;
+            }
+            else {
+                pattern = ((StorageDataSource) mc.getDataSource()).id().toString();
+                type = Content.NBT.DataSourceType.STORAGE;
+            }
+            return new Content.NBT(mc.getNbtPath(), mc.isInterpreting(), mc.getSeparator().map(ConversionUtil::toComponent).orElse(null), type, pattern);
+        }
+
+        throw new IllegalArgumentException("Don't know how to convert " + contents + " into a MidnightCore content!");
+    }
+
 
     public static EquipmentSlot toMCEquipmentSlot(Entity.EquipmentSlot slot) {
         return switch(slot) {

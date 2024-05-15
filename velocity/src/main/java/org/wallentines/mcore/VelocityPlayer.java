@@ -3,7 +3,6 @@ package org.wallentines.mcore;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.util.ConversionUtil;
 
 import java.net.InetSocketAddress;
@@ -46,7 +45,7 @@ public class VelocityPlayer implements ProxyPlayer {
 
     @Override
     public void sendMessage(Component message) {
-        player.sendMessage(ConversionUtil.toAdventure(ComponentResolver.resolveComponent(message, this)));
+        player.sendMessage(ConversionUtil.toAdventure(message));
     }
 
     @Override

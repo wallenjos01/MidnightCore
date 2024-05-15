@@ -17,6 +17,17 @@ public class UnresolvedPlaceholder {
     private final String id;
     private final UnresolvedComponent argument;
 
+
+    /**
+     * Constructs a new unresolved placeholder
+     * @param id The ID of the placeholder
+     */
+    public UnresolvedPlaceholder(String id) {
+        this.id = id;
+        this.argument = null;
+    }
+
+
     /**
      * Constructs a new unresolved placeholder
      * @param id The ID of the placeholder
@@ -71,14 +82,17 @@ public class UnresolvedPlaceholder {
         if(argument != null) ctx = ctx.copy(argument.resolve(manager, ctx));
 
         Either<String, Component> out = ctx.getCustomPlaceholder(id);
-        if(out == null) {
-            PlaceholderSupplier supp = manager.getPlaceholderSupplier(id);
-            if(supp == null || (out = supp.get(ctx)) == null) {
-                return Either.left(toRawPlaceholder());
-            }
+        if(out != null) {
+            return out;
         }
 
-        return out;
+        PlaceholderSupplier supp = manager.getPlaceholderSupplier(id);
+        if(supp != null) {
+            out = supp.get(ctx);
+            if(out != null) return out;
+        }
+
+        return Either.left(toRawPlaceholder());
     }
 
     @Override

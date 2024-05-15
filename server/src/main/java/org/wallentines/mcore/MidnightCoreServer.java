@@ -76,7 +76,7 @@ public class MidnightCoreServer {
         Player.registerPlaceholders(manager);
         Server.registerPlaceholders(manager);
         Entity.registerPlaceholders(manager);
-        LangContent.registerPlaceholders(manager);
+        LangManager.registerPlaceholders(manager);
 
         manager.registerSupplier("mcore_config_dir", PlaceholderSupplier.inline(ctx -> INSTANCE.get().dataDirectory.toString()));
 

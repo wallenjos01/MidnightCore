@@ -1,5 +1,6 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.types.Singleton;
 
@@ -9,21 +10,21 @@ import java.util.Set;
 
 public abstract class CustomScoreboard {
 
-    protected Component title;
-    protected final Component[] entries;
+    protected UnresolvedComponent title;
+    protected final UnresolvedComponent[] entries;
 
     protected NumberFormat numberFormat;
     protected final NumberFormat[] lineFormats;
 
     protected final Set<WrappedPlayer> viewers = new HashSet<>();
 
-    public CustomScoreboard(Component title) {
+    public CustomScoreboard(UnresolvedComponent title) {
         this.title = title;
-        this.entries = new Component[15];
+        this.entries = new UnresolvedComponent[15];
         this.lineFormats = new NumberFormat[15];
     }
 
-    public void setTitle(Component title) {
+    public void setTitle(UnresolvedComponent title) {
         this.title = title;
         for(WrappedPlayer p : viewers) {
             Player pl = p.get();
@@ -32,7 +33,11 @@ public abstract class CustomScoreboard {
     }
 
 
-    public void setLine(int line, Component component) {
+    public void setLine(int line, Component comp) {
+        setLine(line, UnresolvedComponent.completed(comp));
+    }
+
+    public void setLine(int line, UnresolvedComponent component) {
         if(line < 0 || line > 14) {
             throw new IndexOutOfBoundsException("Line " + line + " is out of the range 0 to 14!");
         }
@@ -43,7 +48,11 @@ public abstract class CustomScoreboard {
         updateLine(line);
     }
 
-    public void setLine(int line, Component component, Component numberFormat) {
+    public void setLine(int line, Component comp, Component numberFormat) {
+        setLine(line, UnresolvedComponent.completed(comp), UnresolvedComponent.completed(numberFormat));
+    }
+
+    public void setLine(int line, UnresolvedComponent component, UnresolvedComponent numberFormat) {
         if(line < 0 || line > 14) {
             throw new IndexOutOfBoundsException("Line " + line + " is out of the range 0 to 14!");
         }
@@ -67,10 +76,14 @@ public abstract class CustomScoreboard {
 
 
     public void setNumberFormat(NumberFormatType format) {
-        setNumberFormat(format, Component.empty());
+        setNumberFormat(format, (UnresolvedComponent) null);
     }
 
     public void setNumberFormat(NumberFormatType format, Component argument) {
+        setNumberFormat(format, UnresolvedComponent.completed(argument));
+    }
+
+    public void setNumberFormat(NumberFormatType format, UnresolvedComponent argument) {
         numberFormat = new NumberFormat(format, argument);
         for(WrappedPlayer p : viewers) {
             Player pl = p.get();
@@ -79,10 +92,14 @@ public abstract class CustomScoreboard {
     }
 
     public void setNumberFormat(int line, NumberFormatType format) {
-        setNumberFormat(line, format, Component.empty());
+        setNumberFormat(line, format, (UnresolvedComponent) null);
     }
 
     public void setNumberFormat(int line, NumberFormatType format, Component argument) {
+        setNumberFormat(line, format, UnresolvedComponent.completed(argument));
+    }
+
+    public void setNumberFormat(int line, NumberFormatType format, UnresolvedComponent argument) {
         lineFormats[line] = new NumberFormat(format, argument);
         for(WrappedPlayer p : viewers) {
             Player pl = p.get();
@@ -110,10 +127,17 @@ public abstract class CustomScoreboard {
     protected abstract void updateNumberFormat(Player player);
     protected abstract void updateNumberFormat(int line, Player player);
 
+    public static CustomScoreboard create(UnresolvedComponent title) {
+        return FACTORY.get().create(title);
+    }
+    public static CustomScoreboard create(Component title) {
+        return FACTORY.get().create(UnresolvedComponent.completed(title));
+    }
+
     public static final Singleton<Factory> FACTORY = new Singleton<>();
 
     public interface Factory {
-        CustomScoreboard create(Component title);
+        CustomScoreboard create(UnresolvedComponent title);
     }
 
     public enum NumberFormatType {
@@ -125,9 +149,9 @@ public abstract class CustomScoreboard {
 
     public static class NumberFormat {
         public final NumberFormatType type;
-        public final Component argument;
+        public final UnresolvedComponent argument;
 
-        public NumberFormat(NumberFormatType type, Component argument) {
+        public NumberFormat(NumberFormatType type, UnresolvedComponent argument) {
             this.type = type;
             this.argument = argument;
         }

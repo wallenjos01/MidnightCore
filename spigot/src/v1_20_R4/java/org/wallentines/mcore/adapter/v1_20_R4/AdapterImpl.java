@@ -300,31 +300,31 @@ public class AdapterImpl implements Adapter {
     }
 
     @Override
-    public void setNumberFormat(Objective objective, CustomScoreboard.NumberFormat fmt) {
+    public void setNumberFormat(Objective objective, CustomScoreboard.NumberFormatType type, @Nullable Component argument) {
 
         ScoreboardObjective o = obReflector.getHandle(objective);
 
-        switch (fmt.type) {
+        switch (type) {
             case DEFAULT -> o.a((NumberFormat) null);
             case BLANK -> o.a(BlankFormat.a);
-            case STYLED -> o.a(new StyledFormat(convert(fmt.argument.baseCopy()).a()));
-            case FIXED -> o.a(new FixedFormat(convert(fmt.argument)));
+            case STYLED -> o.a(new StyledFormat(convert(argument.baseCopy()).a()));
+            case FIXED -> o.a(new FixedFormat(convert(argument)));
         }
     }
 
     @Override
-    public void setNumberFormat(Objective objective, CustomScoreboard.NumberFormat fmt, String name) {
+    public void setNumberFormat(Objective objective, CustomScoreboard.NumberFormatType type, @Nullable Component argument, String name) {
 
         ScoreboardObjective o = obReflector.getHandle(objective);
 
         ScoreHolder sh = ScoreHolder.c(name);
         ScoreAccess acc = o.a().c(sh, o);
 
-        switch (fmt.type) {
+        switch (type) {
             case DEFAULT -> acc.a((NumberFormat) null);
             case BLANK -> acc.a(BlankFormat.a);
-            case STYLED -> acc.a(new StyledFormat(convert(fmt.argument.baseCopy()).a()));
-            case FIXED -> acc.a(new FixedFormat(convert(fmt.argument)));
+            case STYLED -> acc.a(new StyledFormat(convert(argument.baseCopy()).a()));
+            case FIXED -> acc.a(new FixedFormat(convert(argument)));
         }
     }
 

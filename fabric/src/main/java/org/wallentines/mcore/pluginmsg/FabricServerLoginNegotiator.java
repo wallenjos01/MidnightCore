@@ -29,7 +29,7 @@ public class FabricServerLoginNegotiator extends ServerLoginNegotiator {
 
     @Override
     public void kick(Component message) {
-        listener.disconnect(WrappedComponent.resolved(message));
+        listener.disconnect(new WrappedComponent(message));
     }
 
     @Override

@@ -67,6 +67,32 @@ public class LangManager {
     }
 
     /**
+     * Gets a message with the given key
+     * @param key The key to lookup
+     * @return A resolved message component
+     */
+    public Component getMessage(String key) {
+        return defaults.resolve(key, new PlaceholderContext());
+    }
+
+    /**
+     * Gets a message with the given key, resolved using the given context
+     * @param key The key to lookup
+     * @param ctx The context by which to resolve placeholders
+     * @return A resolved message component
+     */
+    public Component getMessage(String key, PlaceholderContext ctx) {
+
+        LangRegistry reg = ctx.onValueOr(
+                LocaleHolder.class,
+                lh -> languages.getOrDefault(lh.getLanguage(), defaults),
+                defaults);
+
+        return reg.resolveOr(key, ctx, defaults::resolve);
+    }
+
+
+    /**
      * Gets a message with the given key and language, resolved using the given context
      * @param key The key to lookup
      * @param language The language to search in
@@ -111,12 +137,26 @@ public class LangManager {
         scanDirectory();
     }
 
-    public Component component(String key, Object... args) {
-        return new Component(new LangContent(this, key, List.of(args)));
+    public UnresolvedComponent component(String key, Object... args) {
+        UnresolvedComponent comp = UnresolvedComponent.builder()
+                .appendPlaceholder("lang", key)
+                .tryParseJSON(tryParseJSON)
+                .withContextValue(this)
+                .build();
+
+        for(Object o : args) comp.getContext().addValue(o);
+        return comp;
     }
 
-    public Component componentWith(String key, List<Object> args) {
-        return new Component(new LangContent(this, key, List.copyOf(args)));
+    public UnresolvedComponent componentWith(String key, List<Object> args) {
+        UnresolvedComponent comp = UnresolvedComponent.builder()
+                .appendPlaceholder("lang", key)
+                .tryParseJSON(tryParseJSON)
+                .withContextValue(this)
+                .build();
+
+        for(Object o : args) comp.getContext().addValue(o);
+        return comp;
     }
 
     /**
@@ -203,6 +243,26 @@ public class LangManager {
             }
             return l;
         });
+    }
+
+    public static void registerPlaceholders(PlaceholderManager manager) {
+
+        manager.registerSupplier("lang", PlaceholderSupplier.of(ctx -> {
+
+            if(ctx.getParameter() == null) {
+                return null;
+            }
+
+            String param = ctx.getParameter().allText();
+            LangManager langManager = ctx.getValue(LangManager.class);
+
+            if(param == null || langManager == null) {
+                return null;
+            }
+
+            return langManager.getMessage(param, ctx);
+        }));
+
     }
 
 }

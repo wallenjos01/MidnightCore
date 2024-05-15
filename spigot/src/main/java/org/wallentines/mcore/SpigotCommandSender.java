@@ -4,7 +4,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.ComponentResolver;
 import org.wallentines.mcore.util.ConversionUtil;
 
 public class SpigotCommandSender implements org.wallentines.mcore.CommandSender {
@@ -37,7 +36,6 @@ public class SpigotCommandSender implements org.wallentines.mcore.CommandSender 
 
     @Override
     public void sendSuccess(Component component, boolean log) {
-        component = ComponentResolver.resolveComponent(component);
         if (sender instanceof Player) {
             Adapter.INSTANCE.get().sendMessage((Player) sender, component);
         } else {

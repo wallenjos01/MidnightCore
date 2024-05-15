@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.wallentines.mcore.lang.*;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.text.ComponentResolver;
 
 public class TestLang {
 
@@ -27,13 +26,12 @@ public class TestLang {
         LangRegistry registry = new LangRegistry(plMan);
         registry.register("test", UnresolvedComponent.parse("Hello, world %player_name%").getOrThrow());
         LangManager manager = new LangManager(registry, null);
+        LangManager.registerPlaceholders(plMan);
 
         Dummy pl = new Dummy();
 
         Component got = manager.getMessage("test", pl.getLanguage(), pl);
-        Component cmp = manager.component("test");
-
-        cmp = ComponentResolver.resolveComponent(cmp, pl);
+        Component cmp = manager.component("test", pl).resolve(plMan);
 
         Assertions.assertEquals(got, cmp);
 

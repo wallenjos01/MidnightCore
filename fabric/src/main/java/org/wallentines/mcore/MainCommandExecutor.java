@@ -62,51 +62,45 @@ public class MainCommandExecutor {
     }
 
     private static int emptyCommand(CommandContext<CommandSourceStack> ctx) {
-        return MainCommand.executeMain(ctx.getSource().getServer(), cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeMain(ctx.getSource().getServer(), ctx.getSource());
     }
 
     private static int moduleLoadCommand(CommandContext<CommandSourceStack> ctx) {
 
         Identifier id = ctx.getArgument("module", Identifier.class);
-        return MainCommand.executeLoadModule(ctx.getSource().getServer(), id, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeLoadModule(ctx.getSource().getServer(), id, ctx.getSource());
     }
 
     private static int moduleUnloadCommand(CommandContext<CommandSourceStack> ctx) {
 
         Identifier id = ctx.getArgument("module", Identifier.class);
-        return MainCommand.executeUnloadModule(ctx.getSource().getServer(), id, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeUnloadModule(ctx.getSource().getServer(), id, ctx.getSource());
     }
 
     private static int moduleReloadCommand(CommandContext<CommandSourceStack> ctx, Identifier module) {
-        return MainCommand.executeReloadModule(ctx.getSource().getServer(), module, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeReloadModule(ctx.getSource().getServer(), module, ctx.getSource());
     }
 
     private static int moduleListCommand(CommandContext<CommandSourceStack> ctx) {
 
-        return MainCommand.executeListModules(ctx.getSource().getServer(), cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeListModules(ctx.getSource().getServer(), ctx.getSource());
     }
 
     private static int moduleEnableCommand(CommandContext<CommandSourceStack> ctx) {
 
         Identifier id = ctx.getArgument("module", Identifier.class);
-        return MainCommand.executeEnableModule(ctx.getSource().getServer(), id, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeEnableModule(ctx.getSource().getServer(), id, ctx.getSource());
     }
 
     private static int moduleDisableCommand(CommandContext<CommandSourceStack> ctx) {
 
         Identifier id = ctx.getArgument("module", Identifier.class);
-        return MainCommand.executeDisableModule(ctx.getSource().getServer(), id, cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeDisableModule(ctx.getSource().getServer(), id, ctx.getSource());
     }
 
     private static int reloadCommand(CommandContext<CommandSourceStack> ctx) {
 
-        return MainCommand.executeReload(cmp -> sendSuccess(ctx.getSource(), cmp));
+        return MainCommand.executeReload(ctx.getSource());
     }
-
-    private static void sendSuccess(CommandSourceStack stack, Component comp) {
-
-        stack.sendSuccess(() -> WrappedComponent.resolved(comp, stack.getPlayer()), false);
-    }
-
 
 }
