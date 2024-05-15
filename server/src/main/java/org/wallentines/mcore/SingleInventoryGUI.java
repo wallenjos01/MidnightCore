@@ -2,11 +2,8 @@ package org.wallentines.mcore;
 
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.lang.UnresolvedComponent;
-import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.util.InventoryGUI;
 import org.wallentines.mdcfg.Tuples;
 import org.wallentines.midnightlib.types.Either;
-import org.wallentines.midnightlib.types.Singleton;
 
 import java.util.HashMap;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package org.wallentines.mcore.util;
+package org.wallentines.mcore;
 
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.*;

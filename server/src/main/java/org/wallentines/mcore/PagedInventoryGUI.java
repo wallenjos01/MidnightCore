@@ -3,7 +3,6 @@ package org.wallentines.mcore;
 import org.wallentines.mcore.lang.CustomPlaceholder;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mcore.util.InventoryGUI;
 
 import java.util.ArrayList;
 import java.util.List;
