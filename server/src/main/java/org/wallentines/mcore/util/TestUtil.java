@@ -126,7 +126,7 @@ public class TestUtil {
         try {
 
             GameVersion version = pl.getServer().getVersion();
-            SingleInventoryGUI gui = SingleInventoryGUI.FACTORY.get().build(Component.text("Hello"), 3);
+            InventoryGUI gui = InventoryGUI.create(Component.text("Hello"), 3);
 
             gui.setItem(0, ItemStack.Builder.woolWithColor(version, TextColor.RED).withName(Component.text("Hello, World").withColor(TextColor.AQUA)).build(), null);
             gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.glassWithColor(version, TextColor.GREEN), UnresolvedComponent.parse("%player_name%").getOrThrow(), null), (cpl, cl) -> {
@@ -150,9 +150,8 @@ public class TestUtil {
             UnresolvedItemStack prev = new UnresolvedItemStack(ItemStack.Builder.glassPaneWithColor(TextColor.RED), Component.text("Previous Page"));
 
             GameVersion version = pl.getServer().getVersion();
-            PagedInventoryGUI gui = new PagedInventoryGUI(UnresolvedComponent.parse("Paged - %gui_page%/%gui_pages%").getOrThrow(), PagedInventoryGUI.SizeProvider.dynamic(5));
+            PagedInventoryGUI gui = InventoryGUI.createPaged(UnresolvedComponent.parse("Paged - %gui_page%/%gui_pages%").getOrThrow(), PagedInventoryGUI.SizeProvider.dynamic(5), 256);
             gui.addBottomReservedRow(PagedInventoryGUI.RowProvider.pageControls(next, prev));
-            gui.resize(256);
 
             Color[] cs = new Color[]{ TextColor.RED, TextColor.YELLOW, TextColor.GREEN, TextColor.BLUE };
             for(int c = 0 ; c < cs.length; c++) {
