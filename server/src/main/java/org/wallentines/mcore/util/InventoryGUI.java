@@ -60,6 +60,11 @@ public interface InventoryGUI {
     void clear();
 
     /**
+     * Updates the menu
+     */
+    void update();
+
+    /**
      * Opens the GUI for the given player
      */
     void open(Player player);

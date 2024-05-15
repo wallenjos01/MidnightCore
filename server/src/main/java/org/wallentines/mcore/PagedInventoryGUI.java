@@ -150,6 +150,13 @@ public class PagedInventoryGUI implements InventoryGUI {
     }
 
     @Override
+    public void update() {
+        for(Page p : pages) {
+            p.gui.update();
+        }
+    }
+
+    @Override
     public void open(Player player) {
         open(player, 0);
     }

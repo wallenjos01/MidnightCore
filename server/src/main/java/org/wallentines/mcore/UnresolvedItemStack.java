@@ -20,8 +20,13 @@ public class UnresolvedItemStack {
     private final List<UnresolvedComponent> lore;
 
     public UnresolvedItemStack(ItemStack.Builder builder, Component name) {
-        this(builder, UnresolvedComponent.completed(name), List.of(), PlaceholderManager.INSTANCE);
+        this(builder, UnresolvedComponent.completed(name), null, PlaceholderManager.INSTANCE);
     }
+
+    public UnresolvedItemStack(ItemStack.Builder builder, UnresolvedComponent name) {
+        this(builder, name, null, PlaceholderManager.INSTANCE);
+    }
+
 
     public UnresolvedItemStack(ItemStack.Builder builder, UnresolvedComponent name, List<UnresolvedComponent> lore) {
         this(builder, name, lore, PlaceholderManager.INSTANCE);
@@ -30,7 +35,7 @@ public class UnresolvedItemStack {
     public UnresolvedItemStack(ItemStack.Builder builder, UnresolvedComponent name, List<UnresolvedComponent> lore, PlaceholderManager manager) {
         this.builder = builder;
         this.title = name;
-        this.lore = lore == null ? List.of() : List.copyOf(lore);
+        this.lore = lore == null ? null : List.copyOf(lore);
         this.manager = manager;
     }
 
