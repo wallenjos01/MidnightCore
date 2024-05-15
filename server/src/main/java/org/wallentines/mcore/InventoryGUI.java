@@ -1,7 +1,5 @@
 package org.wallentines.mcore;
 
-import org.jetbrains.annotations.NotNull;
-import org.wallentines.mcore.*;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.types.Singleton;
@@ -14,7 +12,7 @@ public interface InventoryGUI {
      * @param itemStack The item to put at that index.
      * @param event The click event to invoke when a player clicks at the index.
      */
-    void setItem(int index, @NotNull ItemStack itemStack, SingleInventoryGUI.ClickEvent event);
+    void setItem(int index, ItemStack itemStack, SingleInventoryGUI.ClickEvent event);
 
     /**
      * Sets the item and click event at the given index of the GUI. The item will be resolved with respect to each player.
@@ -22,7 +20,7 @@ public interface InventoryGUI {
      * @param itemStack The item to put at that index.
      * @param event The click event to invoke when a player clicks at the index.
      */
-    void setItem(int index, @NotNull UnresolvedItemStack itemStack, SingleInventoryGUI.ClickEvent event);
+    void setItem(int index, UnresolvedItemStack itemStack, SingleInventoryGUI.ClickEvent event);
 
     /**
      * Removes the item and click event at the given index of the GUI.
@@ -78,6 +76,12 @@ public interface InventoryGUI {
      * Closes the GUI for all players currently viewing it.
      */
     void closeAll();
+
+    /**
+     * Moves the viewers of this inventory GUI to another GUI
+     * @param other The other GUI
+     */
+    void moveViewers(InventoryGUI other);
 
     Singleton<Factory> FACTORY = new Singleton<>();
 

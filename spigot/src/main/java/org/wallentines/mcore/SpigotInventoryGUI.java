@@ -34,7 +34,7 @@ public class SpigotInventoryGUI extends SingleInventoryGUI {
     }
 
     @Override
-    public void moveViewers(SingleInventoryGUI other) {
+    public void moveViewers(InventoryGUI other) {
 
         for(SpigotPlayer player : players.keySet()) {
             other.open(player);

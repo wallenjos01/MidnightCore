@@ -219,13 +219,6 @@ public abstract class SingleInventoryGUI implements InventoryGUI {
         }
     }
 
-    public abstract void moveViewers(SingleInventoryGUI other);
-
-    public SingleInventoryGUI withViewersFrom(SingleInventoryGUI other) {
-        other.moveViewers(this);
-        return this;
-    }
-
     public static void closeMenu(Player player) {
         if(OPEN_GUIS.containsKey(player.getUUID())) {
             OPEN_GUIS.get(player.getUUID()).close(player);

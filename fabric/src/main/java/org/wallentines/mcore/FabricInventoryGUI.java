@@ -88,7 +88,7 @@ public class FabricInventoryGUI extends SingleInventoryGUI {
     }
 
     @Override
-    public void moveViewers(SingleInventoryGUI other) {
+    public void moveViewers(InventoryGUI other) {
 
         for(Menu menu : open) {
             Player player = menu.player.get();

@@ -52,6 +52,13 @@ public class PagedInventoryGUI implements InventoryGUI {
         }
     }
 
+    @Override
+    public void moveViewers(InventoryGUI other) {
+        for(Page p : pages) {
+            p.gui.moveViewers(other);
+        }
+    }
+
     public void setItem(int index, ItemStack item) {
         setItem(index, item, (SingleInventoryGUI.ClickEvent) null);
     }
