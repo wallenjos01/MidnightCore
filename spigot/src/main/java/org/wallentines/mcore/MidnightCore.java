@@ -132,7 +132,7 @@ public class MidnightCore extends JavaPlugin {
 
         // Factories
         ItemStack.FACTORY.set(new SpigotItem.Factory());
-        InventoryGUI.FACTORY.set(SpigotInventoryGUI::new);
+        SingleInventoryGUI.FACTORY.set(SpigotInventoryGUI::new);
         CustomScoreboard.FACTORY.set(SpigotScoreboard::new);
 
         // Placeholders

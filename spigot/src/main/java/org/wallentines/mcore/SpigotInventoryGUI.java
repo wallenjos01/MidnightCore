@@ -14,7 +14,7 @@ import org.wallentines.mcore.util.ConversionUtil;
 
 import java.util.HashMap;
 
-public class SpigotInventoryGUI extends InventoryGUI {
+public class SpigotInventoryGUI extends SingleInventoryGUI {
 
     private final HashMap<SpigotPlayer, Inventory> players = new HashMap<>();
 
@@ -23,7 +23,18 @@ public class SpigotInventoryGUI extends InventoryGUI {
     }
 
     @Override
-    public void moveViewers(InventoryGUI other) {
+    public void closeAll() {
+
+        for(SpigotPlayer player : players.keySet()) {
+            OPEN_GUIS.remove(player.getUUID());
+            player.getInternal().closeInventory();
+        }
+
+        players.clear();
+    }
+
+    @Override
+    public void moveViewers(SingleInventoryGUI other) {
 
         for(SpigotPlayer player : players.keySet()) {
             other.open(player);
@@ -115,7 +126,7 @@ public class SpigotInventoryGUI extends InventoryGUI {
             event.setCancelled(true);
 
             int slot = event.getSlot();
-            InventoryGUI data = OPEN_GUIS.get(pl.getUniqueId());
+            SingleInventoryGUI data = OPEN_GUIS.get(pl.getUniqueId());
             ClickType type = getActionType(event.getClick());
             Server.RUNNING_SERVER.get().submit(() -> {
                 data.onClick(slot, new SpigotPlayer(Server.RUNNING_SERVER.get(), pl), type);

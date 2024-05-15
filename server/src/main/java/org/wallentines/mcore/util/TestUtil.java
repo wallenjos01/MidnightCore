@@ -126,7 +126,7 @@ public class TestUtil {
         try {
 
             GameVersion version = pl.getServer().getVersion();
-            InventoryGUI gui = InventoryGUI.FACTORY.get().build(Component.text("Hello"), 3);
+            SingleInventoryGUI gui = SingleInventoryGUI.FACTORY.get().build(Component.text("Hello"), 3);
 
             gui.setItem(0, ItemStack.Builder.woolWithColor(version, TextColor.RED).withName(Component.text("Hello, World").withColor(TextColor.AQUA)).build(), null);
             gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.glassWithColor(version, TextColor.GREEN), UnresolvedComponent.parse("%player_name%").getOrThrow(), null), (cpl, cl) -> {

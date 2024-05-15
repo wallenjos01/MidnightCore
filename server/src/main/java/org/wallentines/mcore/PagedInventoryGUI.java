@@ -3,11 +3,12 @@ package org.wallentines.mcore;
 import org.wallentines.mcore.lang.CustomPlaceholder;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.util.InventoryGUI;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PagedInventoryGUI {
+public class PagedInventoryGUI implements InventoryGUI {
 
     private final UnresolvedComponent title;
     private final SizeProvider sizeProvider;
@@ -42,14 +43,21 @@ public class PagedInventoryGUI {
     }
 
     public void close(Player player) {
-        InventoryGUI.closeMenu(player);
+        SingleInventoryGUI.closeMenu(player);
+    }
+
+    @Override
+    public void closeAll() {
+        for(Page p : pages) {
+            p.gui.closeAll();
+        }
     }
 
     public void setItem(int index, ItemStack item) {
-        setItem(index, item, (InventoryGUI.ClickEvent) null);
+        setItem(index, item, (SingleInventoryGUI.ClickEvent) null);
     }
 
-    public void setItem(int index, ItemStack item, InventoryGUI.ClickEvent clickEvent) {
+    public void setItem(int index, ItemStack item, SingleInventoryGUI.ClickEvent clickEvent) {
         Page p = updateAndGetPage(index);
         int topOffset = topReserved.size() * 9;
         p.gui.setItem(topOffset + index - p.offset, item, clickEvent);
@@ -64,13 +72,25 @@ public class PagedInventoryGUI {
     }
 
     public void setItem(int index, UnresolvedItemStack item) {
-        setItem(index, item, (InventoryGUI.ClickEvent) null);
+        setItem(index, item, (SingleInventoryGUI.ClickEvent) null);
     }
 
-    public void setItem(int index, UnresolvedItemStack item, InventoryGUI.ClickEvent clickEvent) {
+    public void setItem(int index, UnresolvedItemStack item, SingleInventoryGUI.ClickEvent clickEvent) {
         Page p = updateAndGetPage(index);
         int topOffset = topReserved.size() * 9;
         p.gui.setItem(topOffset + index - p.offset, item, clickEvent);
+    }
+
+    @Override
+    public void clearItem(int index) {
+        Page p = getPage(index);
+        if(p != null) p.gui.clearItem(index - p.offset);
+    }
+
+    @Override
+    public int rows() {
+
+        return fullSize / 9;
     }
 
     public void setItem(int index, UnresolvedItemStack item, PagedClickEvent clickEvent) {
@@ -96,6 +116,42 @@ public class PagedInventoryGUI {
 
     public int size() {
         return fullSize;
+    }
+
+    @Override
+    public int firstEmpty() {
+
+        for(Page p : pages) {
+            int firstEmpty = p.gui.firstEmpty();
+            if(firstEmpty != -1) return firstEmpty;
+        }
+
+        return -1;
+    }
+
+    @Override
+    public int lastItem() {
+
+        for(int i = pages.size() - 1 ; i > 0 ; i--) {
+            int lastItem = pages.get(i).gui.lastItem();
+            if(lastItem != -1) return lastItem;
+        }
+
+        return -1;
+    }
+
+    @Override
+    public void clear() {
+        for(Page p : pages) {
+            p.gui.closeAll();
+        }
+        pages.clear();
+        resize(0);
+    }
+
+    @Override
+    public void open(Player player) {
+        open(player, 0);
     }
 
     /**
@@ -125,7 +181,7 @@ public class PagedInventoryGUI {
         return getPage(index);
     }
 
-    private void setupReserved(InventoryGUI gui, int page) {
+    private void setupReserved(SingleInventoryGUI gui, int page) {
 
         int offset = 0;
         for(RowProvider rp : topReserved) {
@@ -158,7 +214,7 @@ public class PagedInventoryGUI {
         int contentRows = size / 9;
         int rows = contentRows + (topReserved.size()) + (bottomReserved.size());
 
-        InventoryGUI gui = InventoryGUI.create(getPageTitle(page), rows);
+        SingleInventoryGUI gui = InventoryGUI.create(getPageTitle(page), rows);
 
         return new Page(gui, offset, page, size);
     }
@@ -271,7 +327,7 @@ public class PagedInventoryGUI {
     }
 
     public interface PagedClickEvent {
-        void execute(Player player, InventoryGUI.ClickType type, int page);
+        void execute(Player player, SingleInventoryGUI.ClickType type, int page);
     }
 
 
@@ -319,12 +375,12 @@ public class PagedInventoryGUI {
 
 
     private static class Page {
-        final InventoryGUI gui;
+        final SingleInventoryGUI gui;
         final int offset;
         final int index;
         final int size;
 
-        Page(InventoryGUI gui, int offset, int index, int size) {
+        Page(SingleInventoryGUI gui, int offset, int index, int size) {
             this.gui = gui;
             this.offset = offset;
             this.index = index;
@@ -339,7 +395,7 @@ public class PagedInventoryGUI {
     public interface Row {
         void setItem(int index, UnresolvedItemStack is, PagedClickEvent event);
 
-        static Row fromGUI(InventoryGUI gui, int page, int offset) {
+        static Row fromGUI(SingleInventoryGUI gui, int page, int offset) {
             return (index, is, event) -> {
                 if(index < 0 || index > 8) {
                     throw new IllegalStateException("Attempt to place item outside of row bounds!");

@@ -6,6 +6,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +19,7 @@ import org.wallentines.mcore.util.ConversionUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FabricInventoryGUI extends InventoryGUI {
+public class FabricInventoryGUI extends SingleInventoryGUI {
 
     private final List<Menu> open = new ArrayList<>();
 
@@ -66,14 +67,28 @@ public class FabricInventoryGUI extends InventoryGUI {
     @Override
     protected void doClose(Player player) {
 
+        if(player == null) return;
+
         ServerPlayer pl = ConversionUtil.validate(player);
-        if(pl != null && pl.containerMenu != pl.inventoryMenu) {
+        if(pl.containerMenu != pl.inventoryMenu) {
             pl.closeContainer();
         }
     }
 
     @Override
-    public void moveViewers(InventoryGUI other) {
+    public void closeAll() {
+        for(Menu m : open) {
+            Player spl = m.player.get();
+            if(spl != null) {
+                OPEN_GUIS.remove(spl.getUUID());
+                ConversionUtil.validate(spl).closeContainer();
+            }
+        }
+        open.clear();
+    }
+
+    @Override
+    public void moveViewers(SingleInventoryGUI other) {
 
         for(Menu menu : open) {
             Player player = menu.player.get();
@@ -81,7 +96,6 @@ public class FabricInventoryGUI extends InventoryGUI {
                 other.open(player);
             }
         }
-
     }
 
     private static ClickType getActionType(int action, net.minecraft.world.inventory.ClickType type) {
@@ -150,6 +164,13 @@ public class FabricInventoryGUI extends InventoryGUI {
 
             if(player.level().isClientSide || slot < 0 || slot >= items.length) return;
             FabricInventoryGUI.this.onClick(slot, (ServerPlayer) player, getActionType(button, clickType));
+        }
+
+        @Override
+        public void removed(net.minecraft.world.entity.player.Player player) {
+            if(player == this.player.get()) {
+                open.remove(this);
+            }
         }
 
         private static MenuType<?> getMenuType(int rows) {

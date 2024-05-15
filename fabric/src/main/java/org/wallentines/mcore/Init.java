@@ -80,7 +80,7 @@ public class Init implements ModInitializer {
 
         // Factories
         ItemStack.FACTORY.set(new ItemFactory());
-        InventoryGUI.FACTORY.set(FabricInventoryGUI::new);
+        SingleInventoryGUI.FACTORY.set(FabricInventoryGUI::new);
         CustomScoreboard.FACTORY.set(FabricScoreboard::new);
 
         // Placeholders
