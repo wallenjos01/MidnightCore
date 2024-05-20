@@ -10,14 +10,13 @@ import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Skin;
-import org.wallentines.mcore.adapter.Adapter;
-import org.wallentines.mcore.adapter.ItemReflector;
-import org.wallentines.mcore.adapter.NbtContext;
-import org.wallentines.mcore.adapter.SkinUpdater;
+import org.wallentines.mcore.adapter.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mdcfg.ConfigSection;
@@ -32,12 +31,16 @@ public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
     private ItemReflector<net.minecraft.server.v1_16_R1.ItemStack, CraftItemStack> reflector;
+    private Reflector<ScoreboardObjective, Objective> obReflector;
+    private Reflector<ScoreboardTeam, Team> teamReflector;
 
     @Override
     public boolean initialize() {
 
         try {
             reflector = new ItemReflector<>(CraftItemStack.class);
+            obReflector = new Reflector<>(Objective.class, "org.bukkit.craftbukkit.v1_16_R1.scoreboard.CraftObjective", "objective");
+            teamReflector = new Reflector<>(Team.class, "org.bukkit.craftbukkit.v1_16_R1.scoreboard.CraftTeam", "team");
 
         } catch (Exception ex) {
             return false;
@@ -190,6 +193,16 @@ public class AdapterImpl implements Adapter {
     public Color getRarityColor(ItemStack itemStack) {
         Integer clr = reflector.getHandle(itemStack).v().e.e();
         return clr == null ? Color.WHITE : new Color(clr);
+    }
+
+    @Override
+    public void setObjectiveName(Objective objective, Component component) {
+        obReflector.getHandle(objective).setDisplayName(convert(component));
+    }
+
+    @Override
+    public void setTeamPrefix(Team team, Component component) {
+        teamReflector.getHandle(team).setPrefix(convert(component));
     }
     
     private ConfigSection convert(NBTTagCompound internal) {
