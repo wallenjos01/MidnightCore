@@ -21,9 +21,11 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
     private boolean firstSend = false;
 
     private ServerPluginMessageBroker(Server server, ServerPluginMessageModule module, boolean encrypt, RegisterTime registerTime) {
-        super(encrypt);
+        super();
         this.server = server;
         this.module = module;
+
+        init(encrypt);
 
         server.joinEvent().register(this, pl -> {
 

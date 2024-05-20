@@ -34,6 +34,7 @@ public class ProxyMessengerModule extends MessengerModule implements ProxyModule
                     .with("enabled", true)
                     .with("broker", new ConfigSection()
                             .with("persistent_registration", true)
+                            .with("encrypt", false)
                     )
     );
 }

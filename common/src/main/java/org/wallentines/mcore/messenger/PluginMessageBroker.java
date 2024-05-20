@@ -14,8 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -37,13 +36,17 @@ public abstract class PluginMessageBroker {
     protected static final byte ONLINE = 4;
 
 
-    protected SecretKey key;
+    protected BufCipher key;
 
     protected final List<PluginMessenger> messengers;
+
     private boolean isShutdown;
 
-    protected PluginMessageBroker(boolean encrypt) {
+    protected PluginMessageBroker() {
         messengers = new ArrayList<>();
+    }
+
+    protected void init(boolean encrypt) {
         if(encrypt) key = readKey(getKeyFile());
     }
 
@@ -79,54 +82,9 @@ public abstract class PluginMessageBroker {
 
     protected abstract void onShutdown();
 
-    private static ByteBuf decrypt(ByteBuf buffer, SecretKey key) {
-
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CFB8/NoPadding");
-            cipher.init(Cipher.DECRYPT_MODE, key);
-
-            if(buffer.hasArray()) {
-                cipher.update(buffer.array(), buffer.readerIndex(), buffer.readableBytes(), buffer.array(), buffer.readerIndex());
-                return buffer;
-            }
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            buffer.readBytes(bos, buffer.readableBytes());
-
-            return Unpooled.wrappedBuffer(cipher.doFinal(bos.toByteArray()));
-
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException |
-                 IllegalBlockSizeException | ShortBufferException | BadPaddingException | IOException e) {
-            throw new RuntimeException("Unable to decrypt message!", e);
-        }
-    }
-
-    private static ByteBuf encrypt(ByteBuf buffer, SecretKey key, int start) {
-
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CFB8/NoPadding");
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-
-            if(buffer.hasArray()) {
-                cipher.update(buffer.array(), start, buffer.writerIndex() - start, buffer.array(), start);
-                return buffer;
-            }
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            buffer.readerIndex(start);
-            buffer.readBytes(bos, buffer.writerIndex() - start);
-
-            return Unpooled.wrappedBuffer(cipher.doFinal(bos.toByteArray()));
-
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException |
-                 IllegalBlockSizeException | ShortBufferException | BadPaddingException | IOException e) {
-            throw new RuntimeException("Unable to encrypt message!", e);
-        }
-    }
-
     protected abstract File getKeyFile();
 
-    protected static SecretKey readKey(File file) {
+    protected static BufCipher readKey(File file) {
         try(FileInputStream fis = new FileInputStream(file);
             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
 
@@ -136,9 +94,9 @@ public abstract class PluginMessageBroker {
                 bos.write(buffer, 0, read);
             }
 
-            return new SecretKeySpec(bos.toByteArray(), "AES");
-        } catch (IOException ex) {
-            MidnightCoreAPI.LOGGER.error("Unable to read encryption key!");
+            return new BufCipher(new SecretKeySpec(bos.toByteArray(), "AES"));
+        } catch (IOException | GeneralSecurityException ex) {
+            MidnightCoreAPI.LOGGER.error("Unable to read encryption key!", ex);
             return null;
         }
     }
@@ -255,22 +213,14 @@ public abstract class PluginMessageBroker {
         @Override
         public void write(ByteBuf buffer) {
 
-
-            // Setup encryption buffer if necessary
-            ByteBuf real;
-            if(!encrypt || buffer.hasArray()) {
-                real = buffer;
-            } else {
-                real = Unpooled.buffer();
-            }
-
-
             // Flags
-            real.writeByte(Flag.pack(getFlags()));
-            int startIndex = real.writerIndex();
+            buffer.writeByte(Flag.pack(getFlags()));
+
+            ByteBuf real = Unpooled.buffer();
 
             // Sent
-            real.writeLong(sent.toEpochMilli());
+            MidnightCoreAPI.LOGGER.warn("Sent seconds: {}", sent.getEpochSecond());
+            real.writeLong(sent.getEpochSecond());
 
             // TTL
             if(ttl > 0) {
@@ -303,10 +253,12 @@ public abstract class PluginMessageBroker {
 
             // Encryption
             if(encrypt) {
-                real = encrypt(real, key, startIndex);
-            }
-
-            if(real != buffer) {
+                try {
+                    key.encrypt(real, buffer);
+                } catch (ShortBufferException ex) {
+                    throw new RuntimeException("Unable to encrypt buffer!", ex);
+                }
+            } else {
                 buffer.writeBytes(real);
             }
         }
@@ -321,11 +273,19 @@ public abstract class PluginMessageBroker {
         // Decrypt
         boolean encrypt = flags.contains(Flag.ENCRYPTED);
         if(encrypt) {
-            buffer = decrypt(buffer, key);
+
+            ByteBuf decrypted = Unpooled.buffer(key.getDecryptedLength(buffer.readableBytes()));
+            try {
+                key.decrypt(buffer, decrypted);
+            } catch (ShortBufferException ex) {
+                throw new RuntimeException("Unable to decrypt message!", ex);
+            }
+            buffer = decrypted;
         }
 
         // Timestamp
-        Instant sent = Instant.ofEpochSecond(buffer.readLong());
+        long time = buffer.readLong();
+        Instant sent = Instant.ofEpochSecond(time);
 
         // TTL
         int ttl = 0;

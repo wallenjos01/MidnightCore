@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.*;
 
 public class ProxyPluginMessageBroker extends PluginMessageBroker {
@@ -27,11 +28,13 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     private final boolean enablePersistence;
 
     public ProxyPluginMessageBroker(Proxy proxy, ProxyPluginMessageModule module, boolean encrypt, boolean enablePersistence) {
-        super(encrypt);
+        super();
 
         this.proxy = proxy;
         this.module = module;
         this.enablePersistence = enablePersistence;
+
+        init(encrypt);
 
         if (enablePersistence) {
             loadRegistrations();
@@ -185,11 +188,12 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         File out = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.key").toFile();
         if(!out.exists()) {
 
+            SecureRandom random = new SecureRandom();
+
             try(FileOutputStream fos = new FileOutputStream(out)) {
                 KeyGenerator gen = KeyGenerator.getInstance("AES");
-                gen.init(256);
+                gen.init(128, random);
                 SecretKey key = gen.generateKey();
-
                 fos.write(key.getEncoded());
 
             } catch (NoSuchAlgorithmException | IOException ex) {
@@ -263,7 +267,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         return new ProxyPluginMessageBroker(
                 prx,
                 pm,
-                cfg.getOrDefault("encrypt", true),
+                cfg.getOrDefault("encrypt", false),
                 cfg.getOrDefault("persistence", true));
     };
 

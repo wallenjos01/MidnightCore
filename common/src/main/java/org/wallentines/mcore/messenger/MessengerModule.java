@@ -112,6 +112,5 @@ public abstract class MessengerModule {
             .with("messengers", new ConfigSection()
                     .with("default", new ConfigSection()
                             .with("type", "plugin_message")
-                            .with("encrypt", false)
                     ));
 }

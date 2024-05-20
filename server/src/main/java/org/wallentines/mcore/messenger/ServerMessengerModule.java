@@ -27,12 +27,12 @@ public class ServerMessengerModule extends MessengerModule implements ServerModu
     public static final ModuleInfo<Server, ServerModule> STARTUP_REGISTER = new ModuleInfo<>(
             ServerMessengerModule::new,
             MessengerModule.ID,
-            DEFAULT_CONFIG.copy().with("broker", new ConfigSection().with("register", "startup"))
+            DEFAULT_CONFIG.copy().with("broker", new ConfigSection().with("register", "startup").with("encrypt", false))
     );
 
     public static final ModuleInfo<Server, ServerModule> ALWAYS_REGISTER = new ModuleInfo<>(
             ServerMessengerModule::new,
             MessengerModule.ID,
-            DEFAULT_CONFIG.copy().with("broker", new ConfigSection().with("register", "always"))
+            DEFAULT_CONFIG.copy().with("broker", new ConfigSection().with("register", "always").with("encrypt", false))
     );
 }
