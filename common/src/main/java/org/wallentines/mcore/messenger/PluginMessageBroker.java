@@ -217,7 +217,6 @@ public abstract class PluginMessageBroker {
             ByteBuf real = Unpooled.buffer();
 
             // Sent
-            MidnightCoreAPI.LOGGER.warn("Sent seconds: {}", sent.getEpochSecond());
             real.writeLong(sent.getEpochSecond());
 
             // TTL

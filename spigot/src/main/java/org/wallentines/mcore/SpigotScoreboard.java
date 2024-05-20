@@ -99,7 +99,7 @@ public class SpigotScoreboard extends CustomScoreboard {
 
         void init() {
 
-            Objective obj = board.registerNewObjective(objectiveId, Criteria.DUMMY, "");
+            Objective obj = board.registerNewObjective(objectiveId, Criteria.DUMMY, "dummy");
             Adapter.INSTANCE.get().setObjectiveName(obj, title.resolveFor(player));
             obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
