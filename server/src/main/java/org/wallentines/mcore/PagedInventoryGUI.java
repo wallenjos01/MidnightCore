@@ -5,6 +5,7 @@ import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PagedInventoryGUI implements InventoryGUI {
@@ -109,10 +110,12 @@ public class PagedInventoryGUI implements InventoryGUI {
 
     public void addTopReservedRow(RowProvider rowProvider) {
         topReserved.add(rowProvider);
+        updatePages(fullSize, true);
     }
 
     public void addBottomReservedRow(RowProvider rowProvider) {
         bottomReserved.add(rowProvider);
+        updatePages(fullSize, true);
     }
 
     public int pageCount() {
@@ -173,7 +176,7 @@ public class PagedInventoryGUI implements InventoryGUI {
      */
     public void resize(int max) {
         if(max > fullSize) {
-            updatePages(max);
+            updatePages(max, false);
         }
     }
 
@@ -189,7 +192,7 @@ public class PagedInventoryGUI implements InventoryGUI {
 
     private Page updateAndGetPage(int index) {
         if(index > fullSize) {
-            updatePages(index);
+            updatePages(index, false);
         }
         return getPage(index);
     }
@@ -224,15 +227,14 @@ public class PagedInventoryGUI implements InventoryGUI {
 
     private Page createEmptyPage(int page, int offset, int size) {
 
-        int contentRows = size / 9;
-        int rows = contentRows + (topReserved.size()) + (bottomReserved.size());
+        int realSize = size + (topReserved.size() * 9) + (bottomReserved.size() * 9);
 
-        SingleInventoryGUI gui = InventoryGUI.create(getPageTitle(page), rows);
+        SingleInventoryGUI gui = InventoryGUI.create(getPageTitle(page), realSize);
 
         return new Page(gui, offset, page, size);
     }
 
-    private void updatePages(int lastItem) {
+    private void updatePages(int lastItem, boolean forceRefresh) {
 
         // Find the new page sizes
         List<Integer> newSizes = new ArrayList<>();
@@ -251,11 +253,11 @@ public class PagedInventoryGUI implements InventoryGUI {
         // Update old pages
         Page partialPage = null;
         int itemsRemaining = 0;
+        int topOffset = topReserved.size() * 9;
         offset = 0;
 
         for(Page p : pages) {
 
-            int topOffset = topReserved.size() * 9;
             int pItems = p.size;
             int rpItems = pItems;
 
@@ -284,7 +286,7 @@ public class PagedInventoryGUI implements InventoryGUI {
                 int newPageSize = newSizes.get(index);
 
                 // If the page is the same, just reinsert it.
-                if(p.offset == offset && p.size == newPageSize) {
+                if(!forceRefresh && p.offset == offset && p.size == newPageSize) {
                     if(index == p.index) {
                         newPages.add(p);
                     } else {
@@ -332,7 +334,6 @@ public class PagedInventoryGUI implements InventoryGUI {
         }
 
         this.pages = newPages;
-
         for(Page p : pages) {
             setupReserved(p.gui, p.index);
         }

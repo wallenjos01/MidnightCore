@@ -179,7 +179,7 @@ public class SpigotScoreboard extends CustomScoreboard {
             if(og == null) {
                 Adapter.INSTANCE.get().setNumberFormat(obj, NumberFormatType.DEFAULT, null, playerName);
             } else {
-                Adapter.INSTANCE.get().setNumberFormat(obj, og.type, og.argument == null ? null : numberFormat.argument.resolveFor(player), playerName);
+                Adapter.INSTANCE.get().setNumberFormat(obj, og.type, og.argument == null ? null : og.argument.resolveFor(player), playerName);
             }
 
         }
