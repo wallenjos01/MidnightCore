@@ -272,6 +272,10 @@ public abstract class PluginMessageBroker {
         boolean encrypt = flags.contains(Flag.ENCRYPTED);
         if(encrypt) {
 
+            if(key == null) {
+                throw new IllegalStateException("Received an encrypted packet without a key to decrypt it! Please put a AES-128 key called messenger.key in the MidnightCore folder!");
+            }
+
             ByteBuf decrypted = Unpooled.buffer(key.getDecryptedLength(buffer.readableBytes()));
             try {
                 key.decrypt(buffer, decrypted);
