@@ -9,6 +9,7 @@ import org.wallentines.mcore.util.TestUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,17 +43,21 @@ public class TestCommandExecutor extends BukkitCommand {
 
         if(args.length == 0) {
             TestUtil.cmd(player);
-            return;
         }
-
-        switch (args[0]) {
-            case "gui" -> TestUtil.guiCmd(player);
-            case "equip" -> TestUtil.equipCmd(player);
-            case "scoreboard" -> TestUtil.scoreboardCmd(player);
-            case "skin" -> TestUtil.skinCmd(player);
-            case "save" -> TestUtil.saveCmd(player);
-            case "load" -> TestUtil.loadCmd(player);
-            case "messenger" -> TestUtil.messengerCmd(player);
+        else if(args.length == 1) {
+            switch (args[0]) {
+                case "gui" -> TestUtil.guiCmd(player);
+                case "equip" -> TestUtil.equipCmd(player);
+                case "scoreboard" -> TestUtil.scoreboardCmd(player);
+                case "skin" -> TestUtil.skinCmd(player);
+                case "save" -> TestUtil.saveCmd(player);
+                case "load" -> TestUtil.loadCmd(player);
+                case "messenger" -> TestUtil.messengerCmd(player);
+            }
+        } else if(args.length == 2) {
+            if(args[0].equals("gui") && args[1].equals("paged")) {
+                TestUtil.pagedGuiCmd(player);
+            }
         }
     }
 
@@ -65,8 +70,15 @@ public class TestCommandExecutor extends BukkitCommand {
         if(args.length == 0) {
             return options;
         }
-
-        return options.stream().filter(arg -> arg.startsWith(args[args.length - 1])).collect(Collectors.toList());
+        else if(args.length == 1) {
+            return options.stream().filter(arg -> arg.startsWith(args[args.length - 1])).collect(Collectors.toList());
+        }
+        else if(args.length == 2) {
+            if(args[0].equals("gui") && "paged".startsWith(args[1])) {
+                return Arrays.asList("paged");
+            }
+        }
+        return Collections.emptyList();
     }
 
 
