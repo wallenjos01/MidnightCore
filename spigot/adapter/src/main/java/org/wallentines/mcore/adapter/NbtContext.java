@@ -9,6 +9,7 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import java.io.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.zip.GZIPInputStream;
 
 public class NbtContext {
 

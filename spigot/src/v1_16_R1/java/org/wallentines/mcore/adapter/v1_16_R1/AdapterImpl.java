@@ -25,6 +25,10 @@ import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.util.Objects;
 
 public class AdapterImpl implements Adapter {
@@ -204,16 +208,17 @@ public class AdapterImpl implements Adapter {
     public void setTeamPrefix(Team team, Component component) {
         teamReflector.getHandle(team).setPrefix(convert(component));
     }
-    
+
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        return NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
+        return NbtContext.fromMojang(
+                (tag, os) -> NBTCompressedStreamTools.a(tag, (DataOutput) new DataOutputStream(os)), internal);
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         return NbtContext.toMojang(
                 section,
-                NBTCompressedStreamTools::a);
+                is -> NBTCompressedStreamTools.a(new DataInputStream(is)));
     }
 
     private IChatBaseComponent convert(Component component) {

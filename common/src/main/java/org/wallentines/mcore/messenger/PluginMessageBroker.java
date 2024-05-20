@@ -10,7 +10,6 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -85,16 +84,15 @@ public abstract class PluginMessageBroker {
     protected abstract File getKeyFile();
 
     protected static BufCipher readKey(File file) {
-        try(FileInputStream fis = new FileInputStream(file);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+        try(FileInputStream fis = new FileInputStream(file)) {
 
-            byte[] buffer = new byte[1024];
-            int read;
-            while((read = fis.read(buffer)) != -1) {
-                bos.write(buffer, 0, read);
+            byte[] buffer = new byte[16];
+            if(fis.read(buffer) != 16) {
+                MidnightCoreAPI.LOGGER.error("Encryption key was not the right length! Expected a 128-bit key!");
+                return null;
             }
 
-            return new BufCipher(new SecretKeySpec(bos.toByteArray(), "AES"));
+            return new BufCipher(new SecretKeySpec(buffer, "AES"));
         } catch (IOException | GeneralSecurityException ex) {
             MidnightCoreAPI.LOGGER.error("Unable to read encryption key!", ex);
             return null;

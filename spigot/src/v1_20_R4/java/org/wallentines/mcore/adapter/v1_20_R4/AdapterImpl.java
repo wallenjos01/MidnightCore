@@ -43,7 +43,6 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
-import org.wallentines.mcore.util.ComponentUtil;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ConfigContext;
@@ -52,6 +51,9 @@ import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -153,7 +155,7 @@ public class AdapterImpl implements Adapter {
     public ConfigSection getTag(Player player) {
         EntityPlayer ep = ((CraftPlayer) player).getHandle();
         NBTTagCompound nbt = new NBTTagCompound();
-        ep.f(nbt);
+        ep.saveWithoutId(nbt, true);
         return convert(nbt);
     }
 
@@ -330,13 +332,14 @@ public class AdapterImpl implements Adapter {
 
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        return NbtContext.fromMojang(NBTCompressedStreamTools::a, internal);
+        return NbtContext.fromMojang(
+                (tag, os) -> NBTCompressedStreamTools.b(tag, new DataOutputStream(os)), internal);
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         return NbtContext.toMojang(
                 section,
-                is -> NBTCompressedStreamTools.a(is, NBTReadLimiter.a()));
+                is -> NBTCompressedStreamTools.a(new DataInputStream(is)));
     }
 
     private IChatBaseComponent convert(Component component) {
