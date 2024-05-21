@@ -81,6 +81,9 @@ dependencies {
     shadow(libs.midnight.lib) { isTransitive = false }
     shadow(libs.zstd.jni)
 
+    "shadow8"(libs.slf4j.api)
+    "shadow8"(libs.slf4j.simple)
+
     java8CompileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
     java17CompileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
     java21CompileOnly("org.spigotmc:spigot-api:1.20.6-R0.1-SNAPSHOT")

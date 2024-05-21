@@ -15,12 +15,11 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.SNBTCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.util.Objects;
 
 public class AdapterImpl implements Adapter {
@@ -192,14 +191,14 @@ public class AdapterImpl implements Adapter {
 
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        return NbtContext.fromMojang(
-                (tag, os) -> NBTCompressedStreamTools.a(tag, (DataOutput) new DataOutputStream(os)), internal);
+        return SNBTCodec.INSTANCE.decode(ConfigContext.INSTANCE, internal.toString()).asSection();
     }
 
     private NBTTagCompound convert(ConfigSection section) {
-        return NbtContext.toMojang(
-                section,
-                is -> NBTCompressedStreamTools.a(new DataInputStream(is)));
+        if(section == null) return null;
+        try {
+            return MojangsonParser.parse(SNBTCodec.INSTANCE.encodeToString(ConfigContext.INSTANCE, section));
+        } catch (MojangsonParseException ex) { throw new RuntimeException(ex); }
     }
 
     private IChatBaseComponent convert(Component component) {

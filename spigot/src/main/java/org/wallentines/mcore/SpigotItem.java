@@ -176,7 +176,7 @@ public class SpigotItem implements ItemStack {
         @Override
         public ItemStack buildStructured(Identifier id, int count, ComponentPatchSet components, GameVersion version) {
 
-            if(!Server.RUNNING_SERVER.get().getVersion().hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+            if(!Server.RUNNING_SERVER.get().getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
                 throw new IllegalStateException("Cannot create structured item on this version!");
             }
 

@@ -109,7 +109,6 @@ public class SpigotPluginMessageModule extends ServerPluginMessageModule impleme
     @Override
     public void onPluginMessageReceived(@NotNull String channel, @NotNull org.bukkit.entity.Player player, byte @NotNull [] data) {
 
-        MidnightCoreAPI.LOGGER.warn("Received a plugin message in channel " + channel);
         SpigotPlayer spl = new SpigotPlayer(Server.RUNNING_SERVER.get(), player);
         handlePacket(spl, Identifier.parseOrDefault(channel, MidnightCoreAPI.MOD_ID), Unpooled.wrappedBuffer(data));
 

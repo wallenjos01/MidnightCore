@@ -63,6 +63,14 @@ public class GameVersion {
     }
 
 
+    @Override
+    public String toString() {
+        if(isSnapshot()) {
+            return id + " (Snapshot " + getSnapshotVersion() + ")";
+        }
+        return id + " (" + protocolVersion + ")";
+    }
+
     /**
      * A singleton containing the GameVersion of the currently running server or client.
      */

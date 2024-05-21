@@ -164,7 +164,7 @@ public abstract class PluginMessageBroker {
         private Packet(String channel, boolean encrypt, String namespace, int ttl, ByteBuf payload, Instant sent) {
             this.channel = channel;
             this.sent = sent;
-            this.payload = payload == null ? null : payload.asReadOnly();
+            this.payload = payload == null ? null : payload.duplicate();
             this.namespace = namespace;
             this.encrypt = encrypt;
             this.ttl = ttl;
@@ -175,7 +175,7 @@ public abstract class PluginMessageBroker {
         private Packet(byte systemChannel, boolean encrypt, ByteBuf payload, Instant sent) {
             this.channel = null;
             this.sent = sent;
-            this.payload = payload == null ? null : payload.asReadOnly();
+            this.payload = payload == null ? null : payload.duplicate();
             this.namespace = null;
             this.ttl = 0;
             this.encrypt = encrypt;

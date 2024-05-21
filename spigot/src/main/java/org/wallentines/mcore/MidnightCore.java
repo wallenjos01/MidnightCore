@@ -37,7 +37,11 @@ public class MidnightCore extends JavaPlugin {
 
         // Find Adapter
         GameVersion version = VersionUtil.findVersion();
-        if(version == null) return new GenericAdapter(this);
+        if(version == null) {
+
+            MidnightCoreAPI.LOGGER.warn("Unable to determine game version! Certain functions may not work correctly.");
+            return new GenericAdapter(this);
+        }
 
         Adapter adapter = Adapters.findAdapter(version, this);
         if (adapter == null) {
@@ -51,12 +55,13 @@ public class MidnightCore extends JavaPlugin {
                 return adapter;
             }
         } catch (Exception ex) {
-            // Ignore
+            MidnightCoreAPI.LOGGER.error("An error occurred while enabling an adapter!", ex);
         }
 
+        MidnightCoreAPI.LOGGER.warn("Unable to enable adapter! Certain functions may not work correctly.");
         adapter = new GenericAdapter(this);
         if(!adapter.initialize()) {
-            throw new IllegalStateException("Failed to enable generic adapter!");
+            throw new RuntimeException("Failed to enable generic adapter!");
         }
         return adapter;
 
@@ -78,6 +83,8 @@ public class MidnightCore extends JavaPlugin {
         // Adapter and version
         Adapter.INSTANCE.set(adapter);
         GameVersion.CURRENT_VERSION.set(adapter.getGameVersion());
+
+        MidnightCoreAPI.LOGGER.info("Initialized adapter for version {}", adapter.getGameVersion());
 
         // Create server
         SpigotServer server = new SpigotServer(this);

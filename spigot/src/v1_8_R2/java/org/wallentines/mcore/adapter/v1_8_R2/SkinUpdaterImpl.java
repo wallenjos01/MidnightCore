@@ -11,6 +11,7 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.SkinUpdater;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 public class SkinUpdaterImpl implements SkinUpdater {
@@ -112,6 +113,10 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
         server.getPlayerList().updateClient(epl);
         epl.updateAbilities();
+
+        for (MobEffect mobeffect : epl.getEffects()) {
+            epl.playerConnection.sendPacket(new PacketPlayOutEntityEffect(entityId, mobeffect));
+        }
 
         epl.motX = velocity.a;
         epl.motY = velocity.b;

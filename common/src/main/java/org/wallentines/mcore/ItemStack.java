@@ -368,7 +368,7 @@ public interface ItemStack {
      * @return An empty item stack
      */
     static ItemStack empty() {
-        return Builder.of(GameVersion.MAX, new Identifier("minecraft", "air")).build();
+        return Builder.of(GameVersion.CURRENT_VERSION.get(), new Identifier("minecraft", "air")).build();
     }
 
 
@@ -970,7 +970,6 @@ public interface ItemStack {
 
                 if(version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
                     return FACTORY.get().buildTagged(id, count, customData, version);
-
                 } else {
                     return FACTORY.get().buildLegacy(id, count, dataValue, customData, version);
                 }

@@ -14,16 +14,13 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.ItemReflector;
-import org.wallentines.mcore.adapter.NbtContext;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.SNBTCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
-
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 
 public class AdapterImpl implements Adapter {
 
@@ -132,7 +129,13 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void loadTag(Player player, ConfigSection configSection) {
-        ((CraftPlayer) player).getHandle().a(convert(configSection));
+
+        EntityPlayer epl = ((CraftPlayer) player).getHandle();
+        epl.a(convert(configSection));
+        epl.server.getPlayerList().updateClient(epl);
+        for (MobEffect mobeffect : epl.getEffects()) {
+            epl.playerConnection.sendPacket(new PacketPlayOutEntityEffect(epl.getId(), mobeffect));
+        }
     }
 
     @Override
@@ -161,6 +164,8 @@ public class AdapterImpl implements Adapter {
     public ConfigSection getTag(ItemStack itemStack) {
 
         net.minecraft.server.v1_8_R3.ItemStack mis = reflector.getHandle(itemStack);
+        if(mis == null) return null;
+
         NBTTagCompound nbt = mis.getTag();
         if(nbt == null) return null;
 
@@ -190,14 +195,15 @@ public class AdapterImpl implements Adapter {
 
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        return NbtContext.fromMojang(
-                (tag, os) -> NBTCompressedStreamTools.a(tag, (DataOutput) new DataOutputStream(os)), internal);
+        return new SNBTCodec(false, true).decode(ConfigContext.INSTANCE, internal.toString()).asSection();
+
     }
 
     private NBTTagCompound convert(ConfigSection section) {
-        return NbtContext.toMojang(
-                section,
-                is -> NBTCompressedStreamTools.a(new DataInputStream(is)));
+        if(section == null) return null;
+        try {
+            return MojangsonParser.parse(SNBTCodec.INSTANCE.encodeToString(ConfigContext.INSTANCE, section));
+        } catch (MojangsonParseException ex) { throw new RuntimeException(ex); }
     }
 
     private IChatBaseComponent convert(Component component) {

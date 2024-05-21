@@ -11,7 +11,7 @@ public class Adapters {
 
         switch (version.getProtocolVersion()) {
             case 47: {
-                String[] parts = version.getId().split(".");
+                String[] parts = version.getId().split("\\.");
                 int patch = parts.length < 3 ? 0 :  Integer.parseInt(parts[2]);
                 if(patch < 3) {
                     return new org.wallentines.mcore.adapter.v1_8_R1.AdapterImpl();

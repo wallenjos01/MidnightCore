@@ -2,11 +2,11 @@
   {
     "lines": [
       {
-        "find": "board.registerNewObjective(objectiveId, Criteria.DUMMY, \"\");"
+        "find": "board.registerNewObjective(objectiveId, Criteria.DUMMY, \"dummy\");"
       }
     ],
     "type": "replace",
-    "find": "objectiveId, Criteria.DUMMY, \"\"",
+    "find": "objectiveId, Criteria.DUMMY, \"dummy\"",
     "replace": "objectiveId, \"dummy\""
   }
 ]

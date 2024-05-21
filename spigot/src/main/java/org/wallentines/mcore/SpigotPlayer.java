@@ -115,12 +115,12 @@ public class SpigotPlayer implements Player {
     public ItemStack getItem(EquipmentSlot slot) {
 
         return new SpigotItem(switch (slot) {
-            case FEET -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.FEET);
-            case LEGS -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.LEGS);
-            case CHEST -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.CHEST);
-            case HEAD -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.HEAD);
-            case MAINHAND -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.HAND);
-            case OFFHAND -> internal.getInventory().getItem(org.bukkit.inventory.EquipmentSlot.OFF_HAND);
+            case FEET -> internal.getInventory().getBoots();
+            case LEGS -> internal.getInventory().getLeggings();
+            case CHEST -> internal.getInventory().getChestplate();
+            case HEAD -> internal.getInventory().getHelmet();
+            case MAINHAND -> internal.getInventory().getItemInMainHand();
+            case OFFHAND -> internal.getInventory().getItemInOffHand();
         });
     }
 

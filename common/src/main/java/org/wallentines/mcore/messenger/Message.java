@@ -43,7 +43,7 @@ public final class Message {
      * @return The message content
      */
     public ByteBuf payload() {
-        return payload.asReadOnly();
+        return payload.duplicate().duplicate();
     }
 
     public String payloadAsString() {
