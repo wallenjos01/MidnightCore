@@ -4,7 +4,6 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.TextColor;
-import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.serializer.ContextSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
@@ -112,100 +111,5 @@ public class ItemUtil {
             out = out.withColor(TextColor.WHITE);
         }
         return out;
-    }
-
-    /**
-     * Converts an object to an NBT string using the given context
-     * @param context The context by which to convert
-     * @param object The config object to convert
-     * @return A string representation of an NBT tag
-     */
-    public static <T> String toNBTString(SerializeContext<T> context, T object) {
-
-        // Strings
-        if(context.isString(object)) {
-            return "\"" + context.asString(object).replace("\"", "\\\"") + "\"";
-        }
-        // Numbers
-        if(context.isNumber(object)) {
-            Number number = context.asNumber(object);
-            if(number instanceof Byte) { return number.byteValue() + "b"; }
-            if(number instanceof Short) { return number.shortValue() + "s"; }
-            if(number instanceof Integer) { return number.intValue() + ""; }
-            if(number instanceof Long) { return number.longValue() + "l"; }
-            if(number instanceof Float) { return number.floatValue() + "f"; }
-            if(number instanceof Double) { return number.doubleValue() + "d"; }
-
-            if(ConfigPrimitive.isInteger(number)) {
-                return number.longValue() + "l";
-            } else {
-                return number.doubleValue() + "d";
-            }
-        }
-        // Booleans
-        if(context.isBoolean(object)) {
-            return context.asBoolean(object) ? "1b" : "0b";
-        }
-        // Lists
-        if(context.isList(object)) {
-
-            boolean maybeByte = true;
-            boolean maybeInt = true;
-            boolean maybeLong = true;
-
-            Collection<T> values = context.asList(object);
-            Iterator<T> it = values.iterator();
-            while((maybeByte || maybeLong || maybeInt) && it.hasNext()) {
-                T value = it.next();
-                if(!context.isNumber(value)) {
-                    maybeByte = false;
-                    maybeInt = false;
-                    maybeLong = false;
-                    break;
-                }
-
-                Number num = context.asNumber(value);
-                if(!(num instanceof Byte)) maybeByte = false;
-                if(!(num instanceof Integer)) maybeInt = false;
-                if(!(num instanceof Long)) maybeLong = false;
-            }
-
-            StringBuilder out = new StringBuilder("[");
-            if(maybeByte) {
-                out.append("B;");
-                int i = 0;
-                for(T t : values) out.append(i++ > 0 ? "," : "").append(context.asNumber(t).byteValue()).append("b");
-            } else if(maybeInt) {
-                out.append("I;");
-                int i = 0;
-                for(T t : values) out.append(i++ > 0 ? "," : "").append(context.asNumber(t).intValue());
-            } else if(maybeLong) {
-                out.append("L;");
-                int i = 0;
-                for(T t : values) out.append(i++ > 0 ? "," : "").append(context.asNumber(t).longValue()).append("l");
-            } else {
-                int i = 0;
-                for(T t : values) out.append(i++ > 0 ? "," : "").append(toNBTString(context, t));
-            }
-            out.append("]");
-            return out.toString();
-        }
-        // Compounds
-        if(context.isMap(object)) {
-            Map<String, T> values = context.asMap(object);
-            StringBuilder out = new StringBuilder("{");
-            int i = 0;
-            for(Map.Entry<String, T> ent : values.entrySet()) {
-                if(i++ > 0) {
-                    out.append(",");
-                }
-                out.append("\"").append(ent.getKey().replace("\"", "\\\"")).append("\":");
-                out.append(toNBTString(context, ent.getValue()));
-            }
-            out.append("}");
-            return out.toString();
-        }
-
-        throw new IllegalArgumentException("Don't know how to turn " + object + " into a NBT String!");
     }
 }

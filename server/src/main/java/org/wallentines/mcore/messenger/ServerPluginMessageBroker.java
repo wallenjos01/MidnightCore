@@ -90,10 +90,10 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
             }
         }
 
-        payload.writeBoolean(key != null);
+        payload.writeBoolean(shouldEncrypt());
         payload.writeBoolean(rootNamespace);
 
-        PacketBufferUtil.writeVarInt(payload, messengers.size());
+        PacketBufferUtil.writeVarInt(payload, namespaces.size());
         for(String s : namespaces) {
             PacketBufferUtil.writeUtf(payload, s);
         }

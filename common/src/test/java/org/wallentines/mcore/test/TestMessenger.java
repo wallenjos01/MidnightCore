@@ -42,16 +42,16 @@ public class TestMessenger {
             ByteBuf data = Unpooled.buffer();
             data.writeLong(value);
 
-            Packet packet = new Packet("test", key != null, null, 1000, data);
+            Packet packet = new Packet("test", shouldEncrypt(), null, 1000, data);
 
-            Assertions.assertEquals(key != null, packet.getFlags().contains(Flag.ENCRYPTED));
+            Assertions.assertEquals(shouldEncrypt(), packet.getFlags().contains(Flag.ENCRYPTED));
 
             ByteBuf encoded = Unpooled.buffer();
             packet.write(encoded);
 
             Packet decoded = readPacket(encoded);
 
-            Assertions.assertEquals(key != null, decoded.getFlags().contains(Flag.ENCRYPTED));
+            Assertions.assertEquals(shouldEncrypt(), decoded.getFlags().contains(Flag.ENCRYPTED));
 
             Message msg = decoded.toMessage(null);
 

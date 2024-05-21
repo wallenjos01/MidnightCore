@@ -10,39 +10,41 @@ import java.security.GeneralSecurityException;
 
 public class BufCipher {
 
-
-    private final Cipher dCipher;
-    private final Cipher eCipher;
+    private final Cipher cipher;
+    private final SecretKey key;
 
     public BufCipher(SecretKey key) throws GeneralSecurityException  {
 
-        this.dCipher = Cipher.getInstance("AES/CFB8/NoPadding");
-        this.dCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(key.getEncoded()));
-
-        this.eCipher = Cipher.getInstance("AES/CFB8/NoPadding");
-        this.eCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(key.getEncoded()));
-
+        this.key = key;
+        this.cipher = Cipher.getInstance("AES/CFB8/NoPadding");
     }
 
-    public int getDecryptedLength(int length) {
-        return dCipher.getOutputSize(length);
+    public int getOutputLength(int length) {
+        try {
+            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(key.getEncoded()));
+            return cipher.getOutputSize(length);
+        } catch(GeneralSecurityException ex) {
+            throw new RuntimeException("Unable to determine output length!", ex);
+        }
     }
 
-    public int getEncryptedLength(int length) {
-        return eCipher.getOutputSize(length);
+    public void decrypt(ByteBuf in, ByteBuf out) {
+        cipher(Cipher.DECRYPT_MODE, in, out);
     }
 
-    public void decrypt(ByteBuf in, ByteBuf out) throws ShortBufferException {
-        cipher(dCipher, in, out);
+    public void encrypt(ByteBuf in, ByteBuf out) {
+        cipher(Cipher.ENCRYPT_MODE, in, out);
     }
 
-    public void encrypt(ByteBuf in, ByteBuf out) throws ShortBufferException {
-        cipher(eCipher, in, out);
-    }
-
-    private void cipher(Cipher cipher, ByteBuf buffer, ByteBuf out) {
+    private void cipher(int mode, ByteBuf buffer, ByteBuf out)  {
 
         int inputLength = buffer.readableBytes();
+
+        try {
+            cipher.init(mode, key, new IvParameterSpec(key.getEncoded()));
+        } catch(GeneralSecurityException ex) {
+            throw new RuntimeException("An error occurred while ciphering data!", ex);
+        }
 
         byte[] input = new byte[inputLength];
         buffer.readBytes(input);
@@ -50,12 +52,11 @@ public class BufCipher {
         byte[] output = new byte[cipher.getOutputSize(inputLength)];
 
         try {
-
             cipher.update(input, 0, inputLength, output, 0);
-
         } catch (ShortBufferException ex) {
-            throw new IllegalStateException("Not enough room for ciphered data!");
+            throw new RuntimeException("Not enough room for ciphered data!", ex);
         }
+
 
         out.writeBytes(output);
     }

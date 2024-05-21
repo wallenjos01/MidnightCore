@@ -222,7 +222,7 @@ public class AdapterImpl implements Adapter {
 
         SerializeResult<JsonElement> serialized = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component, getGameVersion());
         if(!serialized.isComplete()) {
-            MidnightCoreAPI.LOGGER.error("An error occurred while serializing a component! " + serialized.getError());
+            MidnightCoreAPI.LOGGER.error("An error occurred while serializing a component! {}", serialized.getError());
             return null;
         }
         return IChatBaseComponent.ChatSerializer.a(serialized.getOrThrow()); // fromJsonTree()

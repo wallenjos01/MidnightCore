@@ -34,8 +34,7 @@ public abstract class PluginMessageBroker {
     protected static final byte REQUEST = 3;
     protected static final byte ONLINE = 4;
 
-
-    protected BufCipher key;
+    private BufCipher cipher;
 
     protected final List<PluginMessenger> messengers;
 
@@ -46,11 +45,18 @@ public abstract class PluginMessageBroker {
     }
 
     protected void init(boolean encrypt) {
-        if(encrypt) key = readKey(getKeyFile());
+        if(encrypt) {
+            SecretKey key = readKey(getKeyFile());
+            try {
+                this.cipher = new BufCipher(key);
+            } catch (GeneralSecurityException ex) {
+                throw new RuntimeException("Unable to initialize cipher!", ex);
+            }
+        }
     }
 
     public void send(String channel, String namespace, int ttl, ByteBuf message) {
-        send(new PluginMessageBroker.Packet(channel, key != null, namespace, ttl, message));
+        send(new PluginMessageBroker.Packet(channel, shouldEncrypt(), namespace, ttl, message));
     }
 
     protected abstract void send(Packet packet);
@@ -62,6 +68,10 @@ public abstract class PluginMessageBroker {
                 msg.handle(packet);
             }
         }
+    }
+
+    public boolean shouldEncrypt() {
+        return cipher != null;
     }
 
     public void register(PluginMessenger messenger) {
@@ -83,7 +93,7 @@ public abstract class PluginMessageBroker {
 
     protected abstract File getKeyFile();
 
-    protected static BufCipher readKey(File file) {
+    protected static SecretKey readKey(File file) {
         try(FileInputStream fis = new FileInputStream(file)) {
 
             byte[] buffer = new byte[16];
@@ -92,8 +102,8 @@ public abstract class PluginMessageBroker {
                 return null;
             }
 
-            return new BufCipher(new SecretKeySpec(buffer, "AES"));
-        } catch (IOException | GeneralSecurityException ex) {
+            return new SecretKeySpec(buffer, "AES");
+        } catch (IOException ex) {
             MidnightCoreAPI.LOGGER.error("Unable to read encryption key!", ex);
             return null;
         }
@@ -154,7 +164,7 @@ public abstract class PluginMessageBroker {
         private Packet(String channel, boolean encrypt, String namespace, int ttl, ByteBuf payload, Instant sent) {
             this.channel = channel;
             this.sent = sent;
-            this.payload = payload;
+            this.payload = payload == null ? null : payload.asReadOnly();
             this.namespace = namespace;
             this.encrypt = encrypt;
             this.ttl = ttl;
@@ -165,7 +175,7 @@ public abstract class PluginMessageBroker {
         private Packet(byte systemChannel, boolean encrypt, ByteBuf payload, Instant sent) {
             this.channel = null;
             this.sent = sent;
-            this.payload = payload;
+            this.payload = payload == null ? null : payload.asReadOnly();
             this.namespace = null;
             this.ttl = 0;
             this.encrypt = encrypt;
@@ -173,7 +183,7 @@ public abstract class PluginMessageBroker {
         }
 
         Packet(byte systemChannel, ByteBuf payload) {
-            this(systemChannel, key != null, payload, Instant.now(Clock.systemUTC()));
+            this(systemChannel, PluginMessageBroker.this.shouldEncrypt(), payload, Instant.now(Clock.systemUTC()));
         }
 
         public boolean isSystemMessage() {
@@ -212,7 +222,8 @@ public abstract class PluginMessageBroker {
         public void write(ByteBuf buffer) {
 
             // Flags
-            buffer.writeByte(Flag.pack(getFlags()));
+            byte flags = Flag.pack(getFlags());
+            buffer.writeByte(flags);
 
             ByteBuf real = Unpooled.buffer();
 
@@ -230,8 +241,8 @@ public abstract class PluginMessageBroker {
             }
 
             // Channel
-            if(systemChannel > 0) {
-                buffer.writeByte(systemChannel);
+            if(systemChannel != -1) {
+                real.writeByte(systemChannel);
             } else {
                 if(channel == null) {
                     PacketBufferUtil.writeVarInt(real, 0);
@@ -244,17 +255,14 @@ public abstract class PluginMessageBroker {
             if(payload == null) {
                 PacketBufferUtil.writeVarInt(real, 0);
             } else {
-                PacketBufferUtil.writeVarInt(real, payload.writerIndex());
+                int length = payload.readableBytes();
+                PacketBufferUtil.writeVarInt(real, length);
                 real.writeBytes(payload);
             }
 
             // Encryption
             if(encrypt) {
-                try {
-                    key.encrypt(real, buffer);
-                } catch (ShortBufferException ex) {
-                    throw new RuntimeException("Unable to encrypt buffer!", ex);
-                }
+                cipher.encrypt(real, buffer);
             } else {
                 buffer.writeBytes(real);
             }
@@ -271,16 +279,12 @@ public abstract class PluginMessageBroker {
         boolean encrypt = flags.contains(Flag.ENCRYPTED);
         if(encrypt) {
 
-            if(key == null) {
+            if(cipher == null) {
                 throw new IllegalStateException("Received an encrypted packet without a key to decrypt it! Please put a AES-128 key called messenger.key in the MidnightCore folder!");
             }
 
-            ByteBuf decrypted = Unpooled.buffer(key.getDecryptedLength(buffer.readableBytes()));
-            try {
-                key.decrypt(buffer, decrypted);
-            } catch (ShortBufferException ex) {
-                throw new RuntimeException("Unable to decrypt message!", ex);
-            }
+            ByteBuf decrypted = Unpooled.buffer(cipher.getOutputLength(buffer.readableBytes()));
+            cipher.decrypt(buffer, decrypted);
             buffer = decrypted;
         }
 

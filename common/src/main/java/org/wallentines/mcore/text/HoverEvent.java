@@ -4,6 +4,7 @@ import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.util.ItemUtil;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.SNBTCodec;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.StringRegistry;
@@ -143,7 +144,9 @@ public class HoverEvent<T> {
                         ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "count" : "Count",
                         (is,ver) -> is.getCount()).orElse(ctx -> 1),
                 Serializer.BYTE.<ItemStack,GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.getLegacyDataValue()).optional(),
-                ConfigSection.SERIALIZER.<ItemStack,GameVersion>entry("tag", (is, ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : is.getCustomData()).optional(),
+                ConfigSection.SERIALIZER.mapToString(SNBTCodec.INSTANCE)
+                        .<ItemStack,GameVersion>entry("tag", (is, ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : is.getCustomData())
+                        .optional(),
                 ItemStack.ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is, ver) -> ver .hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? ItemStack.ComponentPatchSet.fromItem(is) : null).optional(),
                 (ver, id, count, data, tag, components) ->
                     ItemStack.Builder.of(ver, id)

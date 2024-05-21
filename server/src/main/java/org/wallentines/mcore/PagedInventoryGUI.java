@@ -5,7 +5,6 @@ import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class PagedInventoryGUI implements InventoryGUI {
@@ -434,7 +433,7 @@ public class PagedInventoryGUI implements InventoryGUI {
                         gui.open(player, p - 1);
                     }));
                 }
-                if(page < gui.pageCount()) {
+                if(page + 1 < gui.pageCount()) {
                     row.setItem(8, nextPage, ((player, type, p) -> {
                         gui.open(player, p + 1);
                     }));
