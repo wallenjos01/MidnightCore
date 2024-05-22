@@ -21,24 +21,32 @@ public class SpigotSavepoint extends Savepoint {
 
         SpigotPlayer spl = ConversionUtil.validate(player);
         org.bukkit.entity.Player bpl = spl.getInternal();
-        if(nbt != null) {
+        if(nbt == null) {
+            loadOther(spl);
+        } else {
             for(PotionEffect eff : bpl.getActivePotionEffects()) {
                 bpl.removePotionEffect(eff.getType());
             }
+            GameMode previousGameMode = spl.getGameMode();
+
             org.bukkit.Location loc = bpl.getLocation();
-            Adapter.INSTANCE.get().loadTag(bpl, nbt);
+            Adapter adapter = Adapter.INSTANCE.get();
+            adapter.loadTag(bpl, nbt);
+
             bpl.teleport(loc);
-            for(PotionEffect eff : bpl.getActivePotionEffects()) {
-                eff.apply(bpl);
-            }
+            spl.setGameMode(previousGameMode);
+            adapter.runOnServer(() -> {
+                loadOther(spl);
+            });
         }
+    }
+    private void loadOther(SpigotPlayer player) {
         if(gameMode != null) {
-            spl.setGameMode(gameMode);
+            player.setGameMode(gameMode);
         }
         if(location != null) {
-            spl.teleport(location);
+            player.teleport(location);
         }
-
     }
 
 

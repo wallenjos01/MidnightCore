@@ -140,7 +140,12 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void loadTag(Player player, ConfigSection configSection) {
-        ((CraftPlayer) player).getHandle().a(convert(configSection));
+        EntityPlayer epl = ((CraftPlayer) player).getHandle();
+        epl.a(convert(configSection));
+        epl.server.getPlayerList().updateClient(epl);
+        for (MobEffect mobeffect : epl.getEffects()) {
+            epl.playerConnection.sendPacket(new PacketPlayOutEntityEffect(epl.getId(), mobeffect));
+        }
     }
 
     @Override

@@ -41,6 +41,7 @@ public class AdapterImpl implements Adapter {
 
         updater = new SkinUpdaterImpl();
         codec = new SNBTCodec()
+                .expectArrayIndices()
                 .useDoubleQuotes();
 
         return true;
@@ -133,7 +134,12 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void loadTag(Player player, ConfigSection configSection) {
-        ((CraftPlayer) player).getHandle().a(convert(configSection));
+        EntityPlayer epl = ((CraftPlayer) player).getHandle();
+        epl.a(convert(configSection));
+        epl.server.getPlayerList().updateClient(epl);
+        for (MobEffect mobeffect : epl.getEffects()) {
+            epl.playerConnection.sendPacket(new PacketPlayOutEntityEffect(epl.getId(), mobeffect));
+        }
     }
 
     @Override
@@ -155,6 +161,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public String getTranslationKey(ItemStack is) {
         net.minecraft.server.v1_11_R1.ItemStack mis = reflector.getHandle(is);
+        if(mis == null) return "item.minecraft.air";
         return mis.getItem().b(mis);
     }
 
@@ -162,6 +169,7 @@ public class AdapterImpl implements Adapter {
     public ConfigSection getTag(ItemStack itemStack) {
 
         net.minecraft.server.v1_11_R1.ItemStack mis = reflector.getHandle(itemStack);
+        if(mis == null) return null;
         NBTTagCompound nbt = mis.getTag();
         if(nbt == null) return null;
 
@@ -189,7 +197,14 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public Color getRarityColor(ItemStack itemStack) {
-        return Color.fromRGBI(reflector.getHandle(itemStack).v().e.b());
+        net.minecraft.server.v1_11_R1.ItemStack mis = reflector.getHandle(itemStack);
+        if(mis == null) return Color.WHITE;
+        return Color.fromRGBI(mis.v().e.b());
+    }
+
+    @Override
+    public String getLocale(Player player) {
+        return ((CraftPlayer) player).getHandle().locale;
     }
 
     private ConfigSection convert(NBTTagCompound internal) {
@@ -206,6 +221,6 @@ public class AdapterImpl implements Adapter {
     }
 
     private IChatBaseComponent convert(Component component) {
-        return IChatBaseComponent.ChatSerializer.a(component.toJSONString());
+        return IChatBaseComponent.ChatSerializer.a(component.toJSONString(getGameVersion()));
     }
 }

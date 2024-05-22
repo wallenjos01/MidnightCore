@@ -3,11 +3,16 @@ package org.wallentines.mcore.util;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mcore.text.TextColor;
+import org.wallentines.mdcfg.codec.JSONCodec;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.ContextSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -112,4 +117,25 @@ public class ItemUtil {
         }
         return out;
     }
+
+
+
+    public static String serializeName(Component component, GameVersion version, GameVersion.Feature feature) {
+        String strName;
+        if(version.hasFeature(feature)) {
+            try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                JSONCodec.minified().encode(ConfigContext.INSTANCE, ModernSerializer.INSTANCE.forContext(version), component, bos);
+                strName = bos.toString();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        } else {
+            strName = component.toLegacyText();
+            if(component.color == null) {
+                strName = "\u00A7f" + strName;
+            }
+        }
+        return strName;
+    }
+
 }

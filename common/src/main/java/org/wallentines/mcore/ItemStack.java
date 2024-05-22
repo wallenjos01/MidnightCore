@@ -194,20 +194,19 @@ public interface ItemStack {
      */
     default void setName(Component component) {
 
-        if(getVersion().hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+        GameVersion version = getVersion();
+        if(version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
-            if(getVersion().hasFeature(GameVersion.Feature.ITEM_NAME_OVERRIDE)) {
-                loadComponent(ITEM_NAME_COMPONENT, new ConfigPrimitive(component.toJSONString()));
+            if(version.hasFeature(GameVersion.Feature.ITEM_NAME_OVERRIDE)) {
+                loadComponent(ITEM_NAME_COMPONENT, new ConfigPrimitive(component.toJSONString(version)));
             } else {
-                loadComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(ItemUtil.applyItemNameBaseStyle(component).toJSONString()));
+                loadComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(ItemUtil.applyItemNameBaseStyle(component).toJSONString(version)));
             }
 
         } else {
 
             component = ItemUtil.applyItemNameBaseStyle(component);
-            String strName = getVersion().hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES) ?
-                    component.toJSONString() :
-                    component.toLegacyText();
+            String strName = ItemUtil.serializeName(component, getVersion(), GameVersion.Feature.COMPONENT_ITEM_NAMES);
 
             fillCustomData(new ConfigSection().with("display", new ConfigSection().with("Name", strName)));
         }
@@ -223,7 +222,7 @@ public interface ItemStack {
      */
     default Component getName() {
 
-        SerializeResult<Component> name;
+        Component name;
         boolean italicize = true;
 
         // 1.20.5+: Get item name from components
@@ -238,7 +237,7 @@ public interface ItemStack {
 
             if(encoded == null) return getTypeName().withColor(getRarityColor());
 
-            name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, encoded.asString()), getVersion());
+            name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, encoded.asString()), getVersion()).getOrThrow();
 
         // pre-1.20.5: Get item name from tag
         } else {
@@ -256,21 +255,18 @@ public interface ItemStack {
             String rawName = display.getString("Name");
 
             if(getVersion().hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
-                name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, rawName), getVersion());
+                name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, rawName), getVersion()).getOrThrow();
             } else {
-                name = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(rawName));
+                name = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(rawName)).getOrThrow();
+                if(name.italic == null && name.color != null) {
+                    name = name.withItalic(false);
+                }
             }
-
         }
 
-        if(!name.isComplete()) {
-            return getTypeName().withColor(getRarityColor());
-        }
-
-        Component out = name.getOrThrow();
-        if(italicize && out.italic == null) out = out.withItalic(true);
-        if(out.color == null) out = out.withColor(getRarityColor());
-        return out;
+        if(italicize && name.italic == null) name = name.withItalic(true);
+        if(name.color == null) name = name.withColor(getRarityColor());
+        return name;
     }
 
     /**
@@ -306,7 +302,7 @@ public interface ItemStack {
         for(ConfigObject o : lore.values()) {
 
             String s = o.asString();
-            if(ver.hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
+            if(ver.hasFeature(GameVersion.Feature.COMPONENT_ITEM_LORE)) {
                 out.add(ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(s), ver).getOrThrow());
             } else {
                 out.add(LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(s)).getOrThrow());
@@ -323,11 +319,7 @@ public interface ItemStack {
         ConfigList out = new ConfigList();
         GameVersion ver = getVersion();
         for(Component line : components) {
-            if(ver.hasFeature(GameVersion.Feature.COMPONENT_ITEM_LORE)) {
-                out.add(line, ModernSerializer.INSTANCE.forContext(ver));
-            } else {
-                out.add(line, LegacySerializer.INSTANCE);
-            }
+            out.add(ItemUtil.serializeName(line, ver, GameVersion.Feature.COMPONENT_ITEM_LORE));
         }
 
         if(ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
@@ -398,11 +390,7 @@ public interface ItemStack {
         }
     };
 
-
     Serializer<ItemStack> SERIALIZER = VERSION_SERIALIZER.forContext(GameVersion.CURRENT_VERSION::get);
-
-
-
 
     /**
      * An interface to construct an item stack
@@ -493,7 +481,6 @@ public interface ItemStack {
             return out;
         });
     }
-
 
     /**
      * A builder type to easily create item stacks.
@@ -628,30 +615,15 @@ public interface ItemStack {
             if (version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
 
                 if(version.hasFeature(GameVersion.Feature.ITEM_NAME_OVERRIDE)) {
-                    return withComponent(ITEM_NAME_COMPONENT, new ConfigPrimitive(name.toJSONString()));
+                    return withComponent(ITEM_NAME_COMPONENT, new ConfigPrimitive(name.toJSONString(version)));
                 } else {
-                    return withComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(ItemUtil.applyItemNameBaseStyle(name).toJSONString()));
+                    return withComponent(CUSTOM_NAME_COMPONENT, new ConfigPrimitive(ItemUtil.applyItemNameBaseStyle(name).toJSONString(version)));
                 }
             }
 
             name = ItemUtil.applyItemNameBaseStyle(name);
-            getCustomData().getOrCreateSection("display").set("Name", serialize(name, GameVersion.Feature.COMPONENT_ITEM_NAMES));
+            getCustomData().getOrCreateSection("display").set("Name", ItemUtil.serializeName(name, version, GameVersion.Feature.COMPONENT_ITEM_NAMES));
             return this;
-        }
-
-        private String serialize(Component component, GameVersion.Feature feature) {
-            String strName;
-            if(version.hasFeature(feature)) {
-                try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                    JSONCodec.minified().encode(ConfigContext.INSTANCE, ModernSerializer.INSTANCE.forContext(version), component, bos);
-                    strName = bos.toString();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            } else {
-                strName = component.toLegacyText();
-            }
-            return strName;
         }
 
         /**
@@ -664,7 +636,7 @@ public interface ItemStack {
             ConfigList list = new ConfigList();
             for(Component cmp : lore) {
                 cmp = ItemUtil.applyItemLoreBaseStyle(cmp);
-                String str = serialize(cmp, GameVersion.Feature.COMPONENT_ITEM_LORE);
+                String str = ItemUtil.serializeName(cmp, version, GameVersion.Feature.COMPONENT_ITEM_LORE);
 
                 list.add(str);
             }

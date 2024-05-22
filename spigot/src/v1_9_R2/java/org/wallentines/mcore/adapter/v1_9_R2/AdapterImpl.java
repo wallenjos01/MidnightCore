@@ -133,7 +133,12 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void loadTag(Player player, ConfigSection configSection) {
-        ((CraftPlayer) player).getHandle().a(convert(configSection));
+        EntityPlayer epl = ((CraftPlayer) player).getHandle();
+        epl.a(convert(configSection));
+        epl.server.getPlayerList().updateClient(epl);
+        for (MobEffect mobeffect : epl.getEffects()) {
+            epl.playerConnection.sendPacket(new PacketPlayOutEntityEffect(epl.getId(), mobeffect));
+        }
     }
 
     @Override
@@ -155,7 +160,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public String getTranslationKey(ItemStack is) {
         net.minecraft.server.v1_9_R2.ItemStack mis = reflector.getHandle(is);
-        if(mis == null) return "item.minecraft.air";
+        if(mis == null) return "";
         return mis.getItem().a(mis);
     }
 
@@ -196,6 +201,11 @@ public class AdapterImpl implements Adapter {
         return Color.fromRGBI(mis.u().e.b());
     }
 
+    @Override
+    public String getLocale(Player player) {
+        return ((CraftPlayer) player).getHandle().locale;
+    }
+
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
         return codec.decode(ConfigContext.INSTANCE, internal.toString()).asSection();
@@ -209,6 +219,6 @@ public class AdapterImpl implements Adapter {
     }
 
     private IChatBaseComponent convert(Component component) {
-        return IChatBaseComponent.ChatSerializer.a(component.toJSONString());
+        return IChatBaseComponent.ChatSerializer.a(component.toJSONString(getGameVersion()));
     }
 }

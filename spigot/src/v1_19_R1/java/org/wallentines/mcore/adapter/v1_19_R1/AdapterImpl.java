@@ -6,12 +6,10 @@ import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTCompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.scores.ScoreboardObjective;
 import net.minecraft.world.scores.ScoreboardTeam;
 import org.bukkit.Bukkit;
@@ -147,7 +145,12 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void loadTag(Player player, ConfigSection configSection) {
-        ((CraftPlayer) player).getHandle().a(convert(configSection));
+        EntityPlayer epl = ((CraftPlayer) player).getHandle();
+        epl.a(convert(configSection));
+        epl.c.ac().e(epl);
+        for (MobEffect mobeffect : epl.ed()) {
+            epl.b.a(new PacketPlayOutEntityEffect(epl.ae(), mobeffect));
+        }
     }
 
     @Override

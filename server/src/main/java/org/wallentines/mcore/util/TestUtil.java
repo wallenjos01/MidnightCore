@@ -38,7 +38,6 @@ public class TestUtil {
             manager.setLanguageEntries("en_us", english);
             manager.setLanguageEntries("es_mx", spanish);
 
-
             pl.sendMessage(org.wallentines.mcore.text.Component.text("\u00BB Hello").withColor(TextColor.RED));
             pl.sendMessage(manager.component("test"));
 

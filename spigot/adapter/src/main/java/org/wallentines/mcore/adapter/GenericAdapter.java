@@ -52,12 +52,12 @@ public class GenericAdapter implements Adapter {
 
     @Override
     public void sendMessage(Player player, Component component) {
-        player.spigot().sendMessage(ComponentSerializer.parse(component.toJSONString()));
+        player.spigot().sendMessage(ComponentSerializer.parse(component.toJSONString(getGameVersion())));
     }
 
     @Override
     public void sendActionBar(Player player, Component component) {
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, ComponentSerializer.parse(component.toJSONString()));
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, ComponentSerializer.parse(component.toJSONString(getGameVersion())));
     }
 
     @Override

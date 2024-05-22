@@ -277,15 +277,4 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
                 return null;
         }
     }
-
-/*    private static <T extends Content> ContentSerializer<T> register(String id, Class<T> clazz, ContextSerializer<T, ContentSerializer.Context> serializer) {
-        ContentSerializer<T> out = new ContentSerializer<>(clazz, serializer);
-        CONTENT_SERIALIZERS.register(id, out);
-        return out;
-    }
-
-    static {
-        VANILLA = new ModernSerializer(CONTENT_SERIALIZERS.freeze());
-    }*/
-
 }

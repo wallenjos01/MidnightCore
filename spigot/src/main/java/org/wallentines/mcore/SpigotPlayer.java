@@ -172,10 +172,7 @@ public class SpigotPlayer implements Player {
 
     @Override
     public String getLanguage() {
-        if(getServer().getVersion().getProtocolVersion() >= 335) { // Spigot doesn't have the getLocale() method until 1.12
-            return internal.getLocale();
-        }
-        return "en_US";
+        return Adapter.INSTANCE.get().getLocale(internal);
     }
 
     @Override

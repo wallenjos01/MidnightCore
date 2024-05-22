@@ -241,18 +241,49 @@ public interface Adapter {
      */
     Color getRarityColor(ItemStack itemStack);
 
+    /**
+     * Gets the player's locale.
+     * @param player The player to lookup.
+     * @return The player's locale string.
+     */
+    default String getLocale(Player player) {
+        return player.getLocale();
+    }
 
+    /**
+     * Sets the display name of a scoreboard objective
+     * @param objective The objective
+     * @param component The display name
+     */
     default void setObjectiveName(Objective objective, Component component) {
         objective.setDisplayName(component.toLegacyText());
     }
 
+    /**
+     * Sets the prefix of a scoreboard team
+     * @param team The scoreboard team
+     * @param component The prefix
+     */
     default void setTeamPrefix(Team team, Component component) {
         team.setPrefix(component.toLegacyText());
     }
 
+    /**
+     * Sets the default number format for a scoreboard objective
+     * @param objective The scoreboard objective
+     * @param type The number format type
+     * @param argument The number format argument, if applicable
+     */
     default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormatType type, @Nullable Component argument) { }
-    default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormatType type, @Nullable Component argument, String playerName) { }
 
+    /**
+     * Sets the number format for a particular player and scoreboard objective
+     * @param objective The scoreboard objective
+     * @param type The number format type
+     * @param argument The number format argument, if applicable
+     * @param playerName The score holder to set the number format for
+     */
+    default void setNumberFormat(Objective objective, CustomScoreboard.NumberFormatType type, @Nullable Component argument, String playerName) { }
 
     /**
      * Contains the registered singleton for the given version. Populated as soon as the plugin is loaded

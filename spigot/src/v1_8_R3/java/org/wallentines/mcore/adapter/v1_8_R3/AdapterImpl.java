@@ -161,7 +161,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public String getTranslationKey(ItemStack is) {
         net.minecraft.server.v1_8_R3.ItemStack mis = reflector.getHandle(is);
-        if(mis == null) return "item.minecraft.air";
+        if(mis == null) return "";
         return mis.getItem().a(mis);
     }
 
@@ -175,6 +175,11 @@ public class AdapterImpl implements Adapter {
         if(nbt == null) return null;
 
         return convert(nbt);
+    }
+
+    @Override
+    public String getLocale(Player player) {
+        return ((CraftPlayer) player).getHandle().locale;
     }
 
     @Override
@@ -214,6 +219,6 @@ public class AdapterImpl implements Adapter {
     }
 
     private IChatBaseComponent convert(Component component) {
-        return IChatBaseComponent.ChatSerializer.a(component.toJSONString());
+        return IChatBaseComponent.ChatSerializer.a(component.toJSONString(getGameVersion()));
     }
 }
