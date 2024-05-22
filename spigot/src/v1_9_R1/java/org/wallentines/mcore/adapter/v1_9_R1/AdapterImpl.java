@@ -24,6 +24,7 @@ public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
     private ItemReflector<net.minecraft.server.v1_9_R1.ItemStack, CraftItemStack> reflector;
+    private SNBTCodec codec;
 
     @Override
     public boolean initialize() {
@@ -36,6 +37,9 @@ public class AdapterImpl implements Adapter {
         }
 
         updater = new SkinUpdaterImpl();
+        codec = new SNBTCodec()
+                .expectArrayIndices()
+                .useDoubleQuotes();
 
         return true;
     }
@@ -150,6 +154,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public String getTranslationKey(ItemStack is) {
         net.minecraft.server.v1_9_R1.ItemStack mis = reflector.getHandle(is);
+        if(mis == null) return "item.minecraft.air";
         return mis.getItem().a(mis);
     }
 
@@ -157,6 +162,7 @@ public class AdapterImpl implements Adapter {
     public ConfigSection getTag(ItemStack itemStack) {
 
         net.minecraft.server.v1_9_R1.ItemStack mis = reflector.getHandle(itemStack);
+        if(mis == null) return null;
         NBTTagCompound nbt = mis.getTag();
         if(nbt == null) return null;
 
@@ -184,19 +190,20 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public Color getRarityColor(ItemStack itemStack) {
-        return Color.fromRGBI(reflector.getHandle(itemStack).u().e.b());
+        net.minecraft.server.v1_9_R1.ItemStack mis = reflector.getHandle(itemStack);
+        if(mis == null) return Color.WHITE;
+        return Color.fromRGBI(mis.u().e.b());
     }
 
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        return SNBTCodec.INSTANCE.decode(ConfigContext.INSTANCE, internal.toString()).asSection();
-
+        return codec.decode(ConfigContext.INSTANCE, internal.toString()).asSection();
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         if(section == null) return null;
         try {
-            return MojangsonParser.parse(SNBTCodec.INSTANCE.encodeToString(ConfigContext.INSTANCE, section));
+            return MojangsonParser.parse(codec.encodeToString(ConfigContext.INSTANCE, section));
         } catch (MojangsonParseException ex) { throw new RuntimeException(ex); }
     }
 

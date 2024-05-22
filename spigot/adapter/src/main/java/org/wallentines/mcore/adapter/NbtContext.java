@@ -1,6 +1,5 @@
 package org.wallentines.mcore.adapter;
 
-import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.NBTCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;

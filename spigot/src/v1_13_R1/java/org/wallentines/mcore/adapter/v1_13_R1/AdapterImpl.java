@@ -32,6 +32,7 @@ public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
     private ItemReflector<net.minecraft.server.v1_13_R1.ItemStack, CraftItemStack> reflector;
+    private SNBTCodec codec;
 
     @Override
     public boolean initialize() {
@@ -44,6 +45,8 @@ public class AdapterImpl implements Adapter {
         }
 
         updater = new SkinUpdaterImpl();
+        codec = new SNBTCodec()
+                .useDoubleQuotes();
 
         return true;
     }
@@ -196,13 +199,13 @@ public class AdapterImpl implements Adapter {
 
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        return SNBTCodec.INSTANCE.decode(ConfigContext.INSTANCE, internal.toString()).asSection();
+        return codec.decode(ConfigContext.INSTANCE, internal.toString()).asSection();
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         if(section == null) return null;
         try {
-            return MojangsonParser.parse(SNBTCodec.INSTANCE.encodeToString(ConfigContext.INSTANCE, section));
+            return MojangsonParser.parse(codec.encodeToString(ConfigContext.INSTANCE, section));
         } catch (CommandSyntaxException ex) { throw new RuntimeException(ex); }
     }
 

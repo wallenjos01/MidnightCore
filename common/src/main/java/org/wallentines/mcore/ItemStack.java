@@ -16,6 +16,8 @@ import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -321,7 +323,7 @@ public interface ItemStack {
         ConfigList out = new ConfigList();
         GameVersion ver = getVersion();
         for(Component line : components) {
-            if(ver.hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
+            if(ver.hasFeature(GameVersion.Feature.COMPONENT_ITEM_LORE)) {
                 out.add(line, ModernSerializer.INSTANCE.forContext(ver));
             } else {
                 out.add(line, LegacySerializer.INSTANCE);
@@ -633,14 +635,24 @@ public interface ItemStack {
             }
 
             name = ItemUtil.applyItemNameBaseStyle(name);
-            String strName = version.hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES) ?
-                    name.toJSONString() :
-                    name.toLegacyText();
-
-            getCustomData().getOrCreateSection("display").set("Name", strName);
+            getCustomData().getOrCreateSection("display").set("Name", serialize(name, GameVersion.Feature.COMPONENT_ITEM_NAMES));
             return this;
         }
 
+        private String serialize(Component component, GameVersion.Feature feature) {
+            String strName;
+            if(version.hasFeature(feature)) {
+                try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                    JSONCodec.minified().encode(ConfigContext.INSTANCE, ModernSerializer.INSTANCE.forContext(version), component, bos);
+                    strName = bos.toString();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } else {
+                strName = component.toLegacyText();
+            }
+            return strName;
+        }
 
         /**
          * Changes the item's lore to the given value
@@ -652,9 +664,7 @@ public interface ItemStack {
             ConfigList list = new ConfigList();
             for(Component cmp : lore) {
                 cmp = ItemUtil.applyItemLoreBaseStyle(cmp);
-                String str = version.hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES) ?
-                        cmp.toJSONString() :
-                        cmp.toLegacyText();
+                String str = serialize(cmp, GameVersion.Feature.COMPONENT_ITEM_LORE);
 
                 list.add(str);
             }
@@ -662,8 +672,9 @@ public interface ItemStack {
             if(version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
                 return withComponent(LORE_COMPONENT, list);
             }
-
-            getCustomData().getOrCreateSection("display").set("Lore", list);
+            else {
+                getCustomData().getOrCreateSection("display").set("Lore", list);
+            }
             return this;
         }
 

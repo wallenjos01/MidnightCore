@@ -11,7 +11,6 @@ import org.wallentines.mcore.Skin;
 import org.wallentines.mcore.adapter.SkinUpdater;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 public class SkinUpdaterImpl implements SkinUpdater {

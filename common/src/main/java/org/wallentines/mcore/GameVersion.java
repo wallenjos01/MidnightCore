@@ -98,13 +98,18 @@ public class GameVersion {
         public static final Feature INT_ARRAY_UUIDS = new Feature(707);
 
         /**
+         * Starting in 1.14 (18w43a), Items now use components for their lore rather than legacy text
+         */
+        public static final Feature COMPONENT_ITEM_LORE = new Feature(440);
+
+        /**
          * Starting in 1.13 (17w47a), Items no longer have numeric IDs (1=stone, 2=grass, etc.) and use namespaced IDs
          * (minecraft:stone, minecraft:grass) exclusively
          */
         public static final Feature NAMESPACED_IDS = new Feature(346);
 
         /**
-         * Starting in 1.13 (?), Items now use components for their custom names rather than legacy text
+         * Starting in 1.13 (18w01a), Items now use components for their custom names rather than legacy text
          */
         public static final Feature COMPONENT_ITEM_NAMES = new Feature(346);
 

@@ -32,6 +32,7 @@ public class AdapterImpl implements Adapter {
 
     private SkinUpdaterImpl updater;
     private ItemReflector<net.minecraft.server.v1_13_R2.ItemStack, CraftItemStack> reflector;
+    private SNBTCodec codec;
 
     @Override
     public boolean initialize() {
@@ -44,6 +45,8 @@ public class AdapterImpl implements Adapter {
         }
 
         updater = new SkinUpdaterImpl();
+        codec = new SNBTCodec()
+                .useDoubleQuotes();
 
         return true;
     }
@@ -56,8 +59,7 @@ public class AdapterImpl implements Adapter {
 
     @Override
     public void addTickListener(Runnable runnable) {
-        CraftServer server = (CraftServer) Bukkit.getServer();
-        server.getHandle().getServer().a(runnable::run);
+        ((CraftServer) Bukkit.getServer()).getHandle().getServer().a(runnable::run);
     }
 
     @Override
@@ -179,10 +181,7 @@ public class AdapterImpl implements Adapter {
     @Override
     public GameVersion getGameVersion() {
         MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
-        return new UncertainGameVersion<>(server.getVersion(), 404,
-                () -> ((CraftServer) Bukkit.getServer()).getServer().getServerPing().getServerData(),
-                ServerPing.ServerData::getProtocolVersion
-        );
+        return new GameVersion(server.getVersion(), 404);
     }
 
     @Override
@@ -197,13 +196,14 @@ public class AdapterImpl implements Adapter {
 
     private ConfigSection convert(NBTTagCompound internal) {
         if(internal == null) return null;
-        return SNBTCodec.INSTANCE.decode(ConfigContext.INSTANCE, internal.asString()).asSection();
+        return codec.decode(ConfigContext.INSTANCE, internal.asString()).asSection();
     }
 
     private NBTTagCompound convert(ConfigSection section) {
         if(section == null) return null;
         try {
-            return MojangsonParser.parse(SNBTCodec.INSTANCE.encodeToString(ConfigContext.INSTANCE, section));
+            String str = codec.encodeToString(ConfigContext.INSTANCE, section);
+            return MojangsonParser.parse(str);
         } catch (CommandSyntaxException ex) { throw new RuntimeException(ex); }
     }
 

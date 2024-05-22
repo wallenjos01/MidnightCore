@@ -61,6 +61,13 @@ public class HoverEvent<T> {
         return new HoverEvent<>(Type.SHOW_ENTITY, entity);
     }
 
+    private static SNBTCodec snbt(GameVersion version) {
+        SNBTCodec out = new SNBTCodec();
+        if(version.getProtocolVersion() < 477) {
+            out.useDoubleQuotes();
+        }
+        return out;
+    }
 
     public static final ContextSerializer<HoverEvent<?>, GameVersion> SERIALIZER = new ContextSerializer<>() {
         @Override
@@ -76,10 +83,17 @@ public class HoverEvent<T> {
 
             O out = context.toMap(new HashMap<>());
             context.set("action", context.toString(id), out);
-            String key = version.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "contents" : "value";
 
             return event.type.serializer.serialize(context, event.value, version).map(o -> {
-                context.set(key, o, out);
+                if(version.hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
+                    context.set("contents", o, out);
+                } else {
+                    if(event.type == Type.SHOW_TEXT || event.type == Type.SHOW_ACHIEVEMENT) {
+                        context.set("value", o, out);
+                    } else {
+                        context.set("value", context.toString(snbt(version).encodeToString(context, o)), out);
+                    }
+                }
                 return SerializeResult.success(out);
             });
         }
@@ -144,9 +158,7 @@ public class HoverEvent<T> {
                         ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "count" : "Count",
                         (is,ver) -> is.getCount()).orElse(ctx -> 1),
                 Serializer.BYTE.<ItemStack,GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.getLegacyDataValue()).optional(),
-                ConfigSection.SERIALIZER.mapToString(SNBTCodec.INSTANCE)
-                        .<ItemStack,GameVersion>entry("tag", (is, ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : is.getCustomData())
-                        .optional(),
+                ConfigSection.SERIALIZER.<ItemStack,GameVersion>entry("tag", (is, ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : is.getCustomData()).optional(),
                 ItemStack.ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is, ver) -> ver .hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? ItemStack.ComponentPatchSet.fromItem(is) : null).optional(),
                 (ver, id, count, data, tag, components) ->
                     ItemStack.Builder.of(ver, id)
