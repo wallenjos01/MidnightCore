@@ -12,10 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
-import org.wallentines.mcore.ServerModule;
-import org.wallentines.mcore.Skin;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.util.AuthUtil;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.MojangUtil;
@@ -50,7 +47,16 @@ public class FabricSkinModule extends SkinModule {
 
     @Override
     public void forceUpdate(Player player) {
+        player.getServer().submit(() -> {
+            try {
+                doUpdate(player);
+            } catch (Throwable th) {
+                MidnightCoreAPI.LOGGER.error("An error occurred while updating a player's skin!", th);
+            }
+        });
+    }
 
+    private void doUpdate(Player player) {
         ServerPlayer spl = ConversionUtil.validate(player);
 
         // Update

@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -113,6 +114,10 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
         server.getPlayerList().updateClient(epl);
         epl.updateAbilities();
+
+        for (MobEffect mobeffect : epl.getEffects()) {
+            epl.b.sendPacket(new PacketPlayOutEntityEffect(epl.getId(), mobeffect));
+        }
 
         epl.setMot(velocity); // setDeltaMovement()
         epl.b.sendPacket(new PacketPlayOutEntityVelocity(epl));

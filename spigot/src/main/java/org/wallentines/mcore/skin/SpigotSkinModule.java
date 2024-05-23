@@ -1,10 +1,7 @@
 package org.wallentines.mcore.skin;
 
 import org.bukkit.Bukkit;
-import org.wallentines.mcore.Player;
-import org.wallentines.mcore.Server;
-import org.wallentines.mcore.ServerModule;
-import org.wallentines.mcore.Skin;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.adapter.Adapter;
 import org.wallentines.mcore.adapter.SkinUpdater;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -41,12 +38,19 @@ public class SpigotSkinModule extends SkinModule {
 
     @Override
     public void forceUpdate(Player player) {
-        updater.changePlayerSkin(ConversionUtil.validate(player).getInternal(), getSkin(player));
+        setSkin(player, getSkin(player));
     }
 
     @Override
     public void setSkin(Player player, Skin skin) {
-        updater.changePlayerSkin(ConversionUtil.validate(player).getInternal(), skin);
+        Adapter adapter = Adapter.INSTANCE.get();
+        adapter.runOnServer(() -> {
+            try {
+                updater.changePlayerSkin(ConversionUtil.validate(player).getInternal(), skin);
+            } catch (Throwable th) {
+                MidnightCoreAPI.LOGGER.error("An error occurred while updating a player's skin!", th);
+            }
+        });
     }
 
     @Override
@@ -61,7 +65,7 @@ public class SpigotSkinModule extends SkinModule {
         if(offlineModeSkins && !Bukkit.getServer().getOnlineMode()) {
             MojangUtil.getSkinByNameAsync(player.getUsername()).thenAccept(skin -> {
                 loginSkins.put(player, skin);
-                setSkin(player, skin);
+                if(getSkin(player) != null) setSkin(player, skin);
             });
         }
     }

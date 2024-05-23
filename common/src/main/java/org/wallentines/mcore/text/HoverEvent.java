@@ -3,15 +3,14 @@ package org.wallentines.mcore.text;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.ItemStack;
 import org.wallentines.mcore.util.ItemUtil;
+import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.SNBTCodec;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.StringRegistry;
 
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class HoverEvent<T> {
 
@@ -85,6 +84,7 @@ public class HoverEvent<T> {
             context.set("action", context.toString(id), out);
 
             return event.type.serializer.serialize(context, event.value, version).map(o -> {
+
                 if(version.hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
                     context.set("contents", o, out);
                 } else {
@@ -152,22 +152,105 @@ public class HoverEvent<T> {
         /**
          * Shows an item tooltip when a component is hovered over
          */
-        public static final HoverEvent.Type<ItemStack> SHOW_ITEM = register("show_item", ContextObjectSerializer.create(
-                Identifier.serializer("minecraft").entry("id", (is, ver) -> is.getType()),
-                Serializer.INT.<ItemStack,GameVersion>entry(ver ->
-                        ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "count" : "Count",
-                        (is,ver) -> is.getCount()).orElse(ctx -> 1),
-                Serializer.BYTE.<ItemStack,GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.getLegacyDataValue()).optional(),
-                ConfigSection.SERIALIZER.<ItemStack,GameVersion>entry("tag", (is, ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : is.getCustomData()).optional(),
-                ItemStack.ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is, ver) -> ver .hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? ItemStack.ComponentPatchSet.fromItem(is) : null).optional(),
-                (ver, id, count, data, tag, components) ->
-                    ItemStack.Builder.of(ver, id)
-                        .withCount(count)
-                        .withDataValue(data)
-                        .withCustomData(tag)
-                        .withComponents(components)
-                        .build()
-        ));
+        public static final HoverEvent.Type<ItemStack> SHOW_ITEM = register("show_item", new ContextSerializer<ItemStack, GameVersion>() {
+            @Override
+            public <O> SerializeResult<O> serialize(SerializeContext<O> ctx, ItemStack value, GameVersion version) {
+
+                ConfigSection out = new ConfigSection();
+                out.set("id", value.getType().toString());
+
+                String countKey = version.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "count" : "Count";
+                out.set(countKey, value.getCount());
+
+                if(!version.hasFeature(GameVersion.Feature.NAMESPACED_IDS)) {
+                    out.set("Damage", value.getLegacyDataValue());
+                }
+
+                if(version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+                    out.set("components", ItemStack.ComponentPatchSet.fromItem(value), ItemStack.ComponentPatchSet.SERIALIZER);
+                } else {
+                    if(version.hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
+                        out.set("tag", snbt(version).encodeToString(ConfigContext.INSTANCE, value.getCustomData()));
+                    } else {
+                        out.set("tag", value.getCustomData());
+                    }
+                }
+
+                return SerializeResult.success(ConfigContext.INSTANCE.convert(ctx, out));
+            }
+
+            @Override
+            public <O> SerializeResult<ItemStack> deserialize(SerializeContext<O> ctx, O value, GameVersion version) {
+
+                ConfigSection sec = ctx.convert(ConfigContext.INSTANCE, value).asSection();
+                String sid = sec.getOrDefault("id", (String) null);
+                if(sid == null) {
+                    return SerializeResult.failure("Item id is required!");
+                }
+
+                Identifier id;
+                try {
+                    id = Identifier.parseOrDefault(sid, "minecraft");
+                } catch (IllegalArgumentException ex) {
+                    return SerializeResult.failure("Unable to parse item ID! " + ex.getMessage());
+                }
+                ItemStack.Builder builder = ItemStack.Builder.of(version, id);
+
+                String countKey = version.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "count" : "Count";
+
+                if(sec.has(countKey)) {
+                    builder.withCount(sec.getOrDefault(countKey, 1).intValue());
+                }
+
+                if(!version.hasFeature(GameVersion.Feature.NAMESPACED_IDS) && sec.has("Damage")) {
+                    builder.withDataValue(sec.getOrDefault("Damage", 0).byteValue());
+                }
+
+                if(version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+                    if(sec.has("components")) {
+                        Optional<ItemStack.ComponentPatchSet> opt = sec.getOptional("components", ItemStack.ComponentPatchSet.SERIALIZER);
+                        if(opt.isPresent()) {
+                            builder.withComponents(opt.get());
+                        } else {
+                            return SerializeResult.failure("Unable to parse item components!");
+                        }
+                    }
+                } else {
+                    if(sec.has("tag")) {
+                        ConfigSection tag;
+                        if (version.hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
+                            ConfigObject obj = snbt(version).decode(ConfigContext.INSTANCE, sec.getString("tag"));
+                            if (!obj.isString()) {
+                                return SerializeResult.failure("Expected item tag to be an SNBT string!");
+                            }
+                            tag = obj.asSection();
+                        } else {
+                            tag = sec.getSection("tag");
+                        }
+                        builder.withCustomData(tag);
+                    }
+                }
+
+                return SerializeResult.success(builder.build());
+            }
+        });
+//        public static final HoverEvent.Type<ItemStack> SHOW_ITEM = register("show_item", ContextObjectSerializer.create(
+//                Identifier.serializer("minecraft").entry("id", (is, ver) -> is.getType()),
+//                Serializer.INT.<ItemStack,GameVersion>entry(ver ->
+//                        ver.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "count" : "Count",
+//                        (is,ver) -> is.getCount()).orElse(ctx -> 1),
+//                Serializer.BYTE.<ItemStack,GameVersion>entry("Damage", (is,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : is.getLegacyDataValue()).optional(),
+//                ConfigSection.SERIALIZER.
+//                        <ItemStack,GameVersion>entry("tag", (is, ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : is.getCustomData()).optional(),
+//                ItemStack.ComponentPatchSet.SERIALIZER.<ItemStack, GameVersion>entry("components", (is, ver) -> ver .hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? ItemStack.ComponentPatchSet.fromItem(is) : null).optional(),
+//                (ver, id, count, data, tag, components) ->
+//                    ItemStack.Builder.of(ver, id)
+//                        .withCount(count)
+//                        .withDataValue(data)
+//                        .withCustomData(tag)
+//                        .withComponents(components)
+//                        .build()
+//        ));
 
 
         /**

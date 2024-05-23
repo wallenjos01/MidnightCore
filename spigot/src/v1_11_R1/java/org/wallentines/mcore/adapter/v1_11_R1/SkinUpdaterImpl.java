@@ -116,11 +116,9 @@ public class SkinUpdaterImpl implements SkinUpdater {
         server.getPlayerList().updateClient(epl);
         epl.updateAbilities();
 
-        server.postToMainThread(() -> {
-            for (MobEffect mobeffect : epl.getEffects()) {
-                epl.playerConnection.sendPacket(new PacketPlayOutEntityEffect(entityId, mobeffect));
-            }
-        });
+        for (MobEffect mobeffect : epl.getEffects()) {
+            epl.playerConnection.sendPacket(new PacketPlayOutEntityEffect(entityId, mobeffect));
+        }
 
         epl.motX = velocity.x;
         epl.motY = velocity.y;

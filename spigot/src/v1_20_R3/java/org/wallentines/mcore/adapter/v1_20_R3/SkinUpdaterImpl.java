@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3D;
@@ -117,6 +118,10 @@ public class SkinUpdaterImpl implements SkinUpdater {
         server.g(() -> {
             server.ae().d(epl); // sendPlayerPermissionLevel
             server.ae().e(epl); // sendAllLevelInfo
+
+            for (MobEffect mobeffect : epl.es()) {
+                epl.c.a(new PacketPlayOutEntityEffect(epl.aj(), mobeffect));
+            }
 
             epl.w(); // onUpdateAbilities
             epl.fS().j(); // getInventory(), tick()
