@@ -16,8 +16,6 @@ import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
