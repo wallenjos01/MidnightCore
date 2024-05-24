@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -123,19 +124,21 @@ public class FabricSkinModule extends SkinModule {
 
         // The client waits for a game event after respawning to show the screen properly
         spl.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START, 0.0f));
+        server.getPlayerList().sendPlayerPermissionLevel(spl);
+        server.getPlayerList().sendAllPlayerInfo(spl);
+
         spl.connection.send(position);
         spl.connection.send(equip);
         spl.connection.send(experience);
 
-        server.getPlayerList().sendPlayerPermissionLevel(spl);
-        server.getPlayerList().sendAllPlayerInfo(spl);
-
         spl.onUpdateAbilities();
-        spl.getInventory().tick();
 
         spl.setDeltaMovement(velocity);
         spl.connection.send(new ClientboundSetEntityMotionPacket(spl));
 
+        for(MobEffectInstance effect : spl.getActiveEffects()) {
+            spl.connection.send(new ClientboundUpdateMobEffectPacket(spl.getId(), effect, true));
+        }
     }
 
     private void onLogin(GameProfile profile, boolean offlineModeSkins) {
@@ -161,7 +164,7 @@ public class FabricSkinModule extends SkinModule {
 
         ServerPlayer spl = ConversionUtil.validate(player);
 
-        if(AuthUtil.getProfileSkin(spl.getGameProfile()) == skin) return;
+        if(Objects.equals(AuthUtil.getProfileSkin(spl.getGameProfile()), skin)) return;
         AuthUtil.setProfileSkin(spl.getGameProfile(), skin);
 
         forceUpdate(player);

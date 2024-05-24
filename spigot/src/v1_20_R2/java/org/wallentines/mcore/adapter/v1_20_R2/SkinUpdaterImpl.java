@@ -115,25 +115,21 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
         // The remaining packets should only be sent to the updated player
         epl.c.b(respawn);
+
+        server.ac().d(epl); // sendPlayerPermissionLevel
+        server.ac().e(epl); // sendAllPlayerInfo
+
         epl.c.b(position);
         epl.c.b(equip);
         epl.c.b(exp);
 
+        epl.w(); // onUpdateAbilities
+
         epl.f(velocity); // setDeltaMovement()
         epl.c.b(new PacketPlayOutEntityVelocity(epl));
 
-        server.g(() -> {
-            server.ac().d(epl); // sendPlayerPermissionLevel
-            server.ac().e(epl); // sendAllLevelInfo
-
-            for (MobEffect mobeffect : epl.er()) {
-                epl.c.a(new PacketPlayOutEntityEffect(epl.ah(), mobeffect));
-            }
-
-            epl.w(); // onUpdateAbilities
-            epl.fR().j(); // getInventory(), tick()
-
-        });
-
+        for (MobEffect mobeffect : epl.er()) {
+            epl.c.a(new PacketPlayOutEntityEffect(epl.ah(), mobeffect));
+        }
     }
 }

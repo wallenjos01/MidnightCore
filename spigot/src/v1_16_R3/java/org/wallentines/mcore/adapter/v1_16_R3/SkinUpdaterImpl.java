@@ -33,7 +33,7 @@ public class SkinUpdaterImpl implements SkinUpdater {
         setProfileSkin(gameProfile, skin);
 
         MinecraftServer server = epl.server;
-        if(server == null) return;
+        if(server == null) throw new RuntimeException("Attempt to update player skin without a server!");
 
         // Make sure player is ready to receive a respawn packet
         player.leaveVehicle();
@@ -42,8 +42,8 @@ public class SkinUpdaterImpl implements SkinUpdater {
         Vec3D velocity = epl.getMot(); // getDeltaMovement()
 
         // Create Packets
-        PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, epl);
-        PacketPlayOutPlayerInfo add = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, epl); // createPlayerInitializing()
+        PacketPlayOutPlayerInfo remove = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, epl);
+        PacketPlayOutPlayerInfo add = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, epl); // createPlayerInitializing()
 
         List<Pair<EnumItemSlot, ItemStack>> items = Arrays.stream(EnumItemSlot.values()).map(eis -> new Pair<>(eis, epl.getEquipment(eis))).collect(Collectors.toList()); // getItemBySlot
 
