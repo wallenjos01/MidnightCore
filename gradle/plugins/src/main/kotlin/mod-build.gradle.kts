@@ -15,7 +15,7 @@ repositories {
     mavenCentral()
     maven("https://maven.wallentines.org/releases")
 
-    if(GradleVersion.version(version as String).isSnapshot) {
+    if ((version as String).endsWith("-SNAPSHOT")) {
         maven("https://maven.wallentines.org/snapshots")
         mavenLocal()
     }

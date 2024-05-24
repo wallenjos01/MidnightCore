@@ -16,7 +16,7 @@ publishing {
     if (project.hasProperty("pubUrl")) {
 
         var url: String = project.properties["pubUrl"] as String
-        url += if(GradleVersion.version(version as String).isSnapshot) {
+        url += if((version as String).endsWith("-SNAPSHOT")) {
             "snapshots"
         } else {
             "releases"

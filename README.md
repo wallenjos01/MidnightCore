@@ -1,12 +1,12 @@
 # MidnightCore
 *A cross-platform library for Minecraft servers, clients, and proxies*
 <br/>
-Current Version: 2.0.0-pre4
+Current Version: 2.0.0-pre7
 
 ## Overview
 - MidnightCore has a number of classes and features to make creating plugins and mods easier.
 - The library currently supports Fabric servers and clients, Spigot servers, and Velocity proxies
-  - Fabric builds are for the current version (1.20.2), and Spigot supports versions 1.8-1.20.2
+  - Fabric builds are for the current version (1.20.6), and Spigot supports versions 1.8-1.20.6
 - The library is designed to be modular, so anything that a user does not need can be disabled
 
 ## Usage
@@ -33,15 +33,15 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots") // For Fabric servers, required for fabric-permissions-api
 }
 dependencies {
-    compileOnly("org.wallentines:midnightcore-common:2.0.0-pre6")
+    compileOnly("org.wallentines:midnightcore-common:2.0.0-pre7")
     
-    compileOnly("org.wallentines:midnightcore-server:2.0.0-pre6") // For servers
-    compileOnly("org.wallentines:midnightcore-client:2.0.0-pre6") // For clients
-    compileOnly("org.wallentines:midnightcore-proxy:2.0.0-pre6") // For proxies
+    compileOnly("org.wallentines:midnightcore-server:2.0.0-pre7") // For servers
+    compileOnly("org.wallentines:midnightcore-client:2.0.0-pre7") // For clients
+    compileOnly("org.wallentines:midnightcore-proxy:2.0.0-pre7") // For proxies
     
-    compileOnly("org.wallentines:midnightcore-fabric:2.0.0-pre6") // For Fabric servers and clients
-    compileOnly("org.wallentines:midnightcore-spigot:2.0.0-pre6") // For Spigot servers
-    compileOnly("org.wallentines:midnightcore-velocity:2.0.0-pre6") // For Velocity proxies
+    compileOnly("org.wallentines:midnightcore-fabric:2.0.0-pre7") // For Fabric servers and clients
+    compileOnly("org.wallentines:midnightcore-spigot:2.0.0-pre7") // For Spigot servers
+    compileOnly("org.wallentines:midnightcore-velocity:2.0.0-pre7") // For Velocity proxies
 }
 ```
 - As shown above, the library is divided into three layers: Common, Environment, and Target
