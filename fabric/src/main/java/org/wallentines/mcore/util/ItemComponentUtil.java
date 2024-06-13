@@ -1,21 +1,29 @@
 package org.wallentines.mcore.util;
 
+import com.mojang.serialization.DynamicOps;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.TypedDataComponent;
+import net.minecraft.resources.RegistryOps;
+import org.wallentines.mcore.Server;
 import org.wallentines.mdcfg.ConfigObject;
 
-public class ComponentUtil {
+public class ItemComponentUtil {
+
+    private static DynamicOps<ConfigObject> getConfigOps() {
+        return RegistryOps.create(ConfigOps.INSTANCE, RegistryUtil.access());
+    }
 
     public static <T> ConfigObject encode(DataComponentType<T> type, T value) {
-        return type.codecOrThrow().encodeStart(ConfigOps.INSTANCE, value).getOrThrow();
+        return type.codecOrThrow().encodeStart(getConfigOps(), value).getOrThrow();
     }
 
     public static <T> ConfigObject encodeTyped(TypedDataComponent<T> type) {
-        return type.encodeValue(ConfigOps.INSTANCE).getOrThrow();
+        return type.encodeValue(getConfigOps()).getOrThrow();
     }
 
     public static <T> T decode(DataComponentType<T> type, ConfigObject value) {
-        return type.codecOrThrow().decode(ConfigOps.INSTANCE, value).getOrThrow().getFirst();
+        return type.codecOrThrow().decode(getConfigOps(), value).getOrThrow().getFirst();
     }
 
     public static <T> TypedDataComponent<T> decodeTyped(DataComponentType<T> type, ConfigObject value) {

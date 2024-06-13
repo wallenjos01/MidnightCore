@@ -44,7 +44,7 @@ public class ConversionUtil {
      */
     public static ResourceLocation toResourceLocation(Identifier location) {
 
-        return new ResourceLocation(location.getNamespace(), location.getPath());
+        return ResourceLocation.tryBuild(location.getNamespace(), location.getPath());
     }
 
     /**
@@ -201,7 +201,7 @@ public class ConversionUtil {
                 DataSource source = switch (md.type) {
                     case BLOCK -> new BlockDataSource(md.data);
                     case ENTITY -> new EntityDataSource(md.data);
-                    default -> new StorageDataSource(new ResourceLocation(md.data));
+                    default -> new StorageDataSource(ResourceLocation.parse(md.data));
                 };
                 return new NbtContents(
                         md.path,

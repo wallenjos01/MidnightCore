@@ -66,7 +66,7 @@ public abstract class MixinItemStack implements ItemStack {
             return null;
         }
 
-        return ComponentUtil.encodeTyped(comp);
+        return ItemComponentUtil.encodeTyped(comp);
     }
 
     public void mcore$removeComponent(Identifier id) {
@@ -99,7 +99,7 @@ public abstract class MixinItemStack implements ItemStack {
             }
 
             TypedDataComponent<?> typed = res.added().getTyped(type);
-            out.set(ConversionUtil.toIdentifier(id), ComponentUtil.encodeTyped(typed));
+            out.set(ConversionUtil.toIdentifier(id), ItemComponentUtil.encodeTyped(typed));
         }
         for(DataComponentType<?> type : res.removed()) {
 

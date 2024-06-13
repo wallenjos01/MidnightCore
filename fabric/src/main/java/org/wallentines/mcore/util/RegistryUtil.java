@@ -1,6 +1,8 @@
 package org.wallentines.mcore.util;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -10,28 +12,23 @@ import java.util.Optional;
 
 public class RegistryUtil {
 
-    @SuppressWarnings("unchecked")
+    private static final RegistryAccess.Frozen BUILTIN = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+
     public static <T> Optional<Registry<T>> registry(ResourceKey<? extends Registry<T>> key) {
-
-        Server srv = Server.RUNNING_SERVER.getOrNull();
-        if(srv == null) {
-            return (Optional<Registry<T>>) BuiltInRegistries.REGISTRY.getOptional(key.location());
-        }
-
-        return ((MinecraftServer) srv).registryAccess().registry(key);
-
+        return access().registry(key);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> Registry<T> registryOrThrow(ResourceKey<? extends Registry<T>> key) {
+        return access().registryOrThrow(key);
+    }
 
+    public static RegistryAccess access() {
         Server srv = Server.RUNNING_SERVER.getOrNull();
         if(srv == null) {
-            return (Registry<T>) BuiltInRegistries.REGISTRY.get(key.location());
+            return BUILTIN;
         }
 
-        return ((MinecraftServer) srv).registryAccess().registryOrThrow(key);
-
+        return ((MinecraftServer) srv).registryAccess();
     }
 
 }
