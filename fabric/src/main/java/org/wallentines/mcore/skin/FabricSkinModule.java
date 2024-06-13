@@ -106,7 +106,7 @@ public class FabricSkinModule extends SkinModule {
                     spl.getYRot(),
                     EntityType.PLAYER,
                     0,
-                    spl.getDeltaMovement(),
+                    velocity,
                     spl.getYHeadRot()
             );
 
