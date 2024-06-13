@@ -35,7 +35,7 @@ public record AdvancementData(Map<ResourceLocation, AdvancementProgress> advance
             }
         }
     };
-    public static final InlineSerializer<ResourceLocation> RESOURCE_LOCATION_SERIALIZER = InlineSerializer.of(ResourceLocation::toString, ResourceLocation::new);
+    public static final InlineSerializer<ResourceLocation> RESOURCE_LOCATION_SERIALIZER = InlineSerializer.of(ResourceLocation::toString, ResourceLocation::tryParse);
 
 
     public AdvancementData(Map<ResourceLocation, AdvancementProgress> advancements, Integer dataVersion) {

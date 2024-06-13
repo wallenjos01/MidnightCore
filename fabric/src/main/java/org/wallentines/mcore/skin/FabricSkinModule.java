@@ -3,13 +3,13 @@ package org.wallentines.mcore.skin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -96,7 +96,19 @@ public class FabricSkinModule extends SkinModule {
         if(!observers.isEmpty()) {
 
             ClientboundRemoveEntitiesPacket destroy = new ClientboundRemoveEntitiesPacket(spl.getId());
-            Packet<?> spawn = spl.getAddEntityPacket();
+            ClientboundAddEntityPacket spawn = new ClientboundAddEntityPacket(
+                    spl.getId(),
+                    spl.getUUID(),
+                    spl.getX(),
+                    spl.getY(),
+                    spl.getZ(),
+                    spl.getXRot(),
+                    spl.getYRot(),
+                    EntityType.PLAYER,
+                    0,
+                    spl.getDeltaMovement(),
+                    spl.getYHeadRot()
+            );
 
             List<SynchedEntityData.DataValue<?>> entityData = spl.getEntityData().getNonDefaultValues();
             ClientboundSetEntityDataPacket tracker = null;

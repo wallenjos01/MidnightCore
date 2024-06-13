@@ -7,7 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import org.wallentines.mcore.util.ComponentUtil;
+import org.wallentines.mcore.util.ItemComponentUtil;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.mdcfg.ConfigSection;
@@ -38,7 +38,7 @@ public class ItemFactory implements ItemStack.Factory {
 
                 ResourceLocation loc = ConversionUtil.toResourceLocation(cmp);
                 DataComponentType<?> type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(loc);
-                patch.set(ComponentUtil.decodeTyped(type, components.get(cmp)));
+                patch.set(ItemComponentUtil.decodeTyped(type, components.get(cmp)));
             }
             for (Identifier cmp : components.removedComponents) {
 
