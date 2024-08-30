@@ -18,7 +18,7 @@ public class Adapters {
     public static GameVersion estimateVersion(String apiVersion) {
         return switch (apiVersion) {
             case "1_20_R4" -> new GameVersion("1.20.6", 766);
-            case "1_21_R1" -> new GameVersion("1.21", 767);
+            case "1_21_R1" -> new GameVersion("1.21.1", 767);
             default -> null;
         };
     }

@@ -97,6 +97,28 @@ public abstract class SQLModule {
     }
 
 
+    public CompletableFuture<SQLConnection> connect(ConnectionSpec spec, Executor executor) {
+
+        String combinedUrl = spec.url;
+        if(spec.database != null) {
+            combinedUrl += "/" + spec.database;
+        }
+
+        final String finalUrl = combinedUrl;
+        return CompletableFuture.supplyAsync(() -> repo.getDriver(spec.driver).create(finalUrl, spec.username, spec.password, spec.tablePrefix, spec.parameters), executor);
+    }
+
+    public CompletableFuture<SQLConnection> connect(DatabasePreset preset, ConfigSection config, Executor executor) {
+        ConnectionSpec spec = preset.finalize(config).getOrThrow();
+        return connect(spec, executor);
+    }
+
+    public CompletableFuture<SQLConnection> connect(ConfigSection config, Executor executor) {
+        String preset = config.getOrDefault("preset", "default");
+        return connect(getPreset(preset), config, executor);
+    }
+
+
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "sql");
 
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
