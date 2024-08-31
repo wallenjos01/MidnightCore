@@ -30,7 +30,7 @@ public class MainCommand {
             return 0;
         }
 
-        if(ModuleUtil.loadModule(server.getModuleManager(), info, server, server.getModuleConfig())) {
+        if(ModuleUtil.loadModule(server.getModuleManager(), moduleId, server.getModuleConfig())) {
             sender.sendSuccess(message("command.module.loaded", CustomPlaceholder.inline("module_id", moduleId)), false);
             return 2;
         }
@@ -70,7 +70,7 @@ public class MainCommand {
                 return 0;
             }
 
-            if(ModuleUtil.reloadModule(server.getModuleManager(), info, server, server.getModuleConfig())) {
+            if(ModuleUtil.reloadModule(server.getModuleManager(), moduleId, server.getModuleConfig())) {
                 sender.sendSuccess(message("command.module.reload", CustomPlaceholder.inline("module_id", moduleId)), false);
                 return 1;
             }
