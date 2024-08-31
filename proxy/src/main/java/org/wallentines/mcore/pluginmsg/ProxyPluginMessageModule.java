@@ -15,9 +15,9 @@ import org.wallentines.midnightlib.registry.Registry;
  */
 public abstract class ProxyPluginMessageModule implements ProxyModule {
 
-    protected final Registry<PacketHandler<ProxyPlayer>> playerHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
-    protected final Registry<PacketHandler<ServerMessage>> serverHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
-    protected final Registry<PacketHandler<ProxyPlayer>> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    protected final Registry<Identifier, PacketHandler<ProxyPlayer>> playerHandlers = Registry.create(MidnightCoreAPI.MOD_ID);
+    protected final Registry<Identifier, PacketHandler<ServerMessage>> serverHandlers = Registry.create(MidnightCoreAPI.MOD_ID);
+    protected final Registry<Identifier, PacketHandler<ProxyPlayer>> loginHandlers = Registry.create(MidnightCoreAPI.MOD_ID);
 
     /**
      * An event called when a player logs into the proxy. (Not individual servers)
@@ -37,16 +37,15 @@ public abstract class ProxyPluginMessageModule implements ProxyModule {
 
     /**
      * Sends a custom packet to a server. This will not work if the server has no player connected to it.
-     * @param server A player on the server to send a packet to
+     * @param player A player on the server to send a packet to
      * @param packet The packet to send
      */
-/*
-    public void sendServerMessage(ProxyPlayer server, Packet packet) {
+    public void sendServerMessage(ProxyPlayer player, Packet packet) {
         ByteBuf out = Unpooled.buffer();
         packet.write(out);
-        sendServerMessage(server, packet.getId(), out);
+        sendServerMessage(player.getServer(), packet.getId(), out);
     }
-*/
+
 
     /**
      * Sends a custom packet to a server. This will not work if the server has no player connected to it.
@@ -132,7 +131,7 @@ public abstract class ProxyPluginMessageModule implements ProxyModule {
         return handleGeneric(new ServerMessage(player, server), serverHandlers, id, buffer);
     }
 
-    private <T> boolean handleGeneric(T data, Registry<PacketHandler<T>> registry, Identifier id, ByteBuf buffer) {
+    private <T> boolean handleGeneric(T data, Registry<Identifier, PacketHandler<T>> registry, Identifier id, ByteBuf buffer) {
 
         PacketHandler<T> handler = registry.get(id);
         if(handler == null) {

@@ -51,8 +51,8 @@ val versions = listOf(
     VersionInfo("1_20_R1","1.20.1", 17),
     VersionInfo("1_20_R2","1.20.2", 17),
     VersionInfo("1_20_R3","1.20.4", 17),
-    VersionInfo("1_20_R4","1.20.5", 21),
-    VersionInfo("1_21_R1","1.21", 21),
+    VersionInfo("1_20_R4","1.20.6", 21),
+    VersionInfo("1_21_R1","1.21.1", 21),
 )
 
 
@@ -87,7 +87,7 @@ dependencies {
 
     java8CompileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
     java17CompileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
-    java21CompileOnly("org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT")
+    java21CompileOnly("org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT")
 
     compileOnly(libs.jetbrains.annotations)
 }

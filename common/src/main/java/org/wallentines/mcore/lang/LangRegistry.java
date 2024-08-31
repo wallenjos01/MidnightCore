@@ -8,7 +8,7 @@ import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.Functions;
 import org.wallentines.mdcfg.serializer.SerializeResult;
-import org.wallentines.midnightlib.registry.StringRegistry;
+import org.wallentines.midnightlib.registry.Registry;
 
 import java.util.function.Function;
 
@@ -17,7 +17,7 @@ import java.util.function.Function;
  */
 public class LangRegistry {
 
-    private final StringRegistry<UnresolvedComponent> entries = new StringRegistry<>();
+    private final Registry<String, UnresolvedComponent> entries = Registry.createStringRegistry();
     private final PlaceholderManager manager;
 
 

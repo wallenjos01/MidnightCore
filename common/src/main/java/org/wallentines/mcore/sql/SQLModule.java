@@ -5,7 +5,7 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.sql.DriverRepository;
 import org.wallentines.mdcfg.sql.SQLConnection;
 import org.wallentines.midnightlib.registry.Identifier;
-import org.wallentines.midnightlib.registry.StringRegistry;
+import org.wallentines.midnightlib.registry.Registry;
 
 import java.io.File;
 import java.util.Collection;
@@ -18,7 +18,7 @@ public abstract class SQLModule {
 
     protected DriverRepository repo;
     protected Executor executor;
-    protected final StringRegistry<DatabasePreset> presets = new StringRegistry<>();
+    protected final Registry<String, DatabasePreset> presets = Registry.createStringRegistry();
 
     protected void init(ConfigSection config, Executor executor) {
 

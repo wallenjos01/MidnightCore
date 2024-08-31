@@ -1,7 +1,7 @@
 package org.wallentines.mcore.messenger;
 
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.midnightlib.registry.StringRegistry;
+import org.wallentines.midnightlib.registry.Registry;
 
 /**
  * An interface for creating Messengers
@@ -28,6 +28,6 @@ public interface MessengerType {
     /**
      * A registry of messenger types available to the messenger module
      */
-    StringRegistry<MessengerType> REGISTRY = new StringRegistry<>();
+    Registry<String, MessengerType> REGISTRY = Registry.createStringRegistry();
 
 }

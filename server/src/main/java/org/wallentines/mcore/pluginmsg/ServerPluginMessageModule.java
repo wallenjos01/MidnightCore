@@ -16,9 +16,9 @@ import org.wallentines.midnightlib.registry.Registry;
  */
 public abstract class ServerPluginMessageModule implements ServerModule {
 
-    protected final Registry<PacketHandler<Player>> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
-    protected final Registry<PacketHandler<ServerLoginNegotiator>> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
-    protected final Registry<PacketHandler<ConfiguringPlayer>> configHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    protected final Registry<Identifier, PacketHandler<Player>> handlers = Registry.create(MidnightCoreAPI.MOD_ID);
+    protected final Registry<Identifier, PacketHandler<ServerLoginNegotiator>> loginHandlers = Registry.create(MidnightCoreAPI.MOD_ID);
+    protected final Registry<Identifier, PacketHandler<ConfiguringPlayer>> configHandlers = Registry.create(MidnightCoreAPI.MOD_ID);
 
     /**
      * An event fired when a Player begins connecting to the server, during the "Negotiating" phase. This event can

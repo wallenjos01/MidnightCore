@@ -8,7 +8,7 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.SNBTCodec;
 import org.wallentines.mdcfg.serializer.*;
 import org.wallentines.midnightlib.registry.Identifier;
-import org.wallentines.midnightlib.registry.StringRegistry;
+import org.wallentines.midnightlib.registry.Registry;
 
 import java.util.*;
 
@@ -286,7 +286,7 @@ public class HoverEvent<T> {
         }
     }
 
-    public static final StringRegistry<HoverEvent.Type<?>> TYPES = new StringRegistry<>();
+    public static final Registry<String, HoverEvent.Type<?>> TYPES = Registry.createStringRegistry();
 
     private static <T> HoverEvent.Type<T> register(String id, ContextSerializer<T, GameVersion> serializer) {
         Type<T> type = new Type<>(serializer);

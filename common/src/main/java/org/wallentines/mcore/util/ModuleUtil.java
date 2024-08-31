@@ -5,6 +5,7 @@ import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
+import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
 
@@ -23,7 +24,7 @@ public class ModuleUtil {
      * @param <T> The type of data to pass
      * @param <M> The type of module to load
      */
-    public static <T,M extends Module<T>> void loadModules(ModuleManager<T, M> manager, Registry<ModuleInfo<T, M>> registry, T data, FileWrapper<ConfigObject> moduleConfig) {
+    public static <T,M extends Module<T>> void loadModules(ModuleManager<T, M> manager, Registry<Identifier, ModuleInfo<T, M>> registry, T data, FileWrapper<ConfigObject> moduleConfig) {
 
         manager.loadAll(moduleConfig.getRoot().asSection(), data, registry);
         moduleConfig.save();

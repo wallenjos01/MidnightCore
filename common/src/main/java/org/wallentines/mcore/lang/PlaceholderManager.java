@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.ComponentUtil;
-import org.wallentines.midnightlib.registry.StringRegistry;
+import org.wallentines.midnightlib.registry.Registry;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
@@ -23,7 +23,7 @@ public class PlaceholderManager {
 
     public static final Pattern VALID_PLACEHOLDER_ID = Pattern.compile("[A-Za-z0-9-_]+");
 
-    private final StringRegistry<PlaceholderSupplier> registeredPlaceholders = new StringRegistry<>();
+    private final Registry<String, PlaceholderSupplier> registeredPlaceholders = Registry.createStringRegistry();
 
     /**
      * Gets the placeholder supplier for the placeholder with the given name

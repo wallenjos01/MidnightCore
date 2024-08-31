@@ -11,6 +11,7 @@ import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
+import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.requirement.CheckType;
 import org.wallentines.midnightlib.requirement.Requirement;
@@ -84,7 +85,7 @@ public interface Server {
      * Loads all modules from the given registry using the server's module config
      * @param registry The registry to find modules in
      */
-    default void loadModules(Registry<ModuleInfo<Server, ServerModule>> registry) {
+    default void loadModules(Registry<Identifier, ModuleInfo<Server, ServerModule>> registry) {
 
         ModuleUtil.loadModules(getModuleManager(), registry, this, getModuleConfig());
 
@@ -179,7 +180,7 @@ public interface Server {
     /**
      * The global file codec registry. Contains a JSON codec, and YAML on Spigot
      */
-    Registry<CheckType<Player>> REQUIREMENT_REGISTRY = Requirement.defaultRegistry(MidnightCoreAPI.MOD_ID);
+    Registry<Identifier, CheckType<Player>> REQUIREMENT_REGISTRY = Requirement.defaultRegistry(MidnightCoreAPI.MOD_ID);
 
 
 }

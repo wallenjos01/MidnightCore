@@ -8,6 +8,7 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
+import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.types.Singleton;
 
@@ -63,7 +64,7 @@ public interface Proxy {
      * Loads all modules from the given registry using the proxy's module config
      * @param registry The registry to find modules in
      */
-    default void loadModules(Registry<ModuleInfo<Proxy, ProxyModule>> registry) {
+    default void loadModules(Registry<Identifier, ModuleInfo<Proxy, ProxyModule>> registry) {
 
         ModuleUtil.loadModules(getModuleManager(), registry, this, getModuleConfig());
         shutdownEvent().register(this, ev -> getModuleManager().unloadAll());

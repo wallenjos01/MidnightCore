@@ -13,8 +13,8 @@ import org.wallentines.midnightlib.registry.Registry;
  */
 public abstract class ClientPluginMessageModule implements ClientModule {
 
-    protected final Registry<PacketHandler<Client>> handlers = new Registry<>(MidnightCoreAPI.MOD_ID);
-    protected final Registry<ClientLoginPacketHandler> loginHandlers = new Registry<>(MidnightCoreAPI.MOD_ID);
+    protected final Registry<Identifier, PacketHandler<Client>> handlers = Registry.create(MidnightCoreAPI.MOD_ID);
+    protected final Registry<Identifier, ClientLoginPacketHandler> loginHandlers = Registry.create(MidnightCoreAPI.MOD_ID);
 
     protected Client client;
 

@@ -10,7 +10,7 @@ import org.wallentines.midnightlib.registry.Registry;
  */
 public interface ProxyModule extends Module<Proxy> {
 
-    Registry<ModuleInfo<Proxy, ProxyModule>> REGISTRY = new Registry<>(MidnightCoreAPI.MOD_ID);
+    Registry<Identifier, ModuleInfo<Proxy, ProxyModule>> REGISTRY = Registry.create(MidnightCoreAPI.MOD_ID);
 
     /**
      * Attempts to register a proxy module, but will not attempt to overwrite existing modules

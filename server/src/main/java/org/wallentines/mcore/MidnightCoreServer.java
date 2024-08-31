@@ -85,16 +85,16 @@ public class MidnightCoreServer {
 
     }
 
-    static void registerRequirements(Registry<CheckType<Player>> registry) {
+    static void registerRequirements(Registry<Identifier, CheckType<Player>> registry) {
 
-        registry.register("cooldown", CooldownRequirement.type());
-        registry.register("permission", PlayerCheck.create(Serializer.STRING, "value", Player::hasPermission));
-        registry.register("world", PlayerCheck.create(Identifier.serializer("minecraft"), "value", (pl, id) -> pl.getDimensionId().equals(id)));
-        registry.register("region", PlayerCheck.create(Region.SERIALIZER, "value", (pl, reg) -> reg.isWithin(pl.getPosition())));
-        registry.register("locale", PlayerCheck.create(Serializer.STRING, "value", (pl, str) -> str.contains("_") ? pl.getLanguage().equals(str) : pl.getLanguage().startsWith(str)));
-        registry.register("username", StringCheck.type(Player::getUsername));
-        registry.register("uuid", StringCheck.type(pl -> pl.getUUID().toString()));
-        registry.register("game_mode", StringCheck.type(pl -> pl.getGameMode().getId()));
+        registry.tryRegister("cooldown", CooldownRequirement.type());
+        registry.tryRegister("permission", PlayerCheck.create(Serializer.STRING, "value", Player::hasPermission));
+        registry.tryRegister("world", PlayerCheck.create(Identifier.serializer("minecraft"), "value", (pl, id) -> pl.getDimensionId().equals(id)));
+        registry.tryRegister("region", PlayerCheck.create(Region.SERIALIZER, "value", (pl, reg) -> reg.isWithin(pl.getPosition())));
+        registry.tryRegister("locale", PlayerCheck.create(Serializer.STRING, "value", (pl, str) -> str.contains("_") ? pl.getLanguage().equals(str) : pl.getLanguage().startsWith(str)));
+        registry.tryRegister("username", StringCheck.type(Player::getUsername));
+        registry.tryRegister("uuid", StringCheck.type(pl -> pl.getUUID().toString()));
+        registry.tryRegister("game_mode", StringCheck.type(pl -> pl.getGameMode().getId()));
 
     }
 

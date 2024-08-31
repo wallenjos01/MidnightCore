@@ -4,6 +4,7 @@ import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.midnightlib.Version;
 import org.wallentines.midnightlib.module.Module;
 import org.wallentines.midnightlib.module.ModuleInfo;
+import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
 /**
@@ -20,6 +21,6 @@ public interface ServerExtension extends Module<ServerExtensionModule> {
     /**
      * A registry which contains the module information for loading server extensions
      */
-    Registry<ModuleInfo<ServerExtensionModule, ServerExtension>> REGISTRY = new Registry<>(MidnightCoreAPI.MOD_ID);
+    Registry<Identifier, ModuleInfo<ServerExtensionModule, ServerExtension>> REGISTRY = Registry.create(MidnightCoreAPI.MOD_ID);
 
 }
