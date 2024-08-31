@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class ClientExtensionModule implements ClientModule {
 
-    private final ModuleManager<ClientExtensionModule, ClientExtension> manager = new ModuleManager<>();
+    private final ModuleManager<ClientExtensionModule, ClientExtension> manager = new ModuleManager<>(ClientExtension.REGISTRY, this);
     private ClientPluginMessageModule cmm;
 
     @Override
@@ -31,6 +31,8 @@ public class ClientExtensionModule implements ClientModule {
             MidnightCoreAPI.LOGGER.warn("Unable to initialize client extension module! The client messaging module is required!");
             return false;
         }
+
+        manager.loadAll(section.getSection("extensions"));
 
         cmm.registerPacketHandler(ServerboundExtensionPacket.ID, (client, byteBuf) -> {
             try {

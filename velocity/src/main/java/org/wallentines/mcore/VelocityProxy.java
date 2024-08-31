@@ -24,7 +24,7 @@ public class VelocityProxy implements Proxy {
     private final Map<UUID, VelocityPlayer> playerCache = new HashMap<>();
     private final Map<String, VelocityServer> serverCache = new HashMap<>();
 
-    private final ModuleManager<Proxy, ProxyModule> modules = new ModuleManager<>();
+    private final ModuleManager<Proxy, ProxyModule> modules = new ModuleManager<>(ProxyModule.REGISTRY, this);
     private final HandlerList<Proxy> onShutdown = new SingletonHandlerList<>();
     private final HandlerList<ProxyPlayer> onJoin = new HandlerList<>();
     private final HandlerList<Connection> onConnect = new HandlerList<>();

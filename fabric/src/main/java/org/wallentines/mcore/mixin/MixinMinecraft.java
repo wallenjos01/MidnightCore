@@ -20,14 +20,13 @@ import java.nio.file.Path;
 public abstract class MixinMinecraft implements Client {
 
     @Unique
-    private final ModuleManager<Client, ClientModule> mcore$modules = new ModuleManager<>();
+    private final ModuleManager<Client, ClientModule> mcore$modules = new ModuleManager<>(ClientModule.REGISTRY, this);
 
     @Inject(method="<init>", at=@At("RETURN"))
     private void onInit(GameConfig gameConfig, CallbackInfo ci) {
 
         Client.RUNNING_CLIENT.set(this);
-
-        loadModules(ClientModule.REGISTRY);
+        loadModules();
     }
 
     public ModuleManager<Client, ClientModule> mcore$getModuleManager() {

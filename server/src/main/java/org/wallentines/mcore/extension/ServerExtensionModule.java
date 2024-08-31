@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public class ServerExtensionModule implements ServerModule {
 
-    private final ModuleManager<ServerExtensionModule, ServerExtension> manager = new ModuleManager<>();
+    private final ModuleManager<ServerExtensionModule, ServerExtension> manager = new ModuleManager<>(ServerExtension.REGISTRY, this);
     private final HashMap<UUID, Map<Identifier, Version>> enabledExtensions = new HashMap<>();
     private Set<Identifier> requiredExtensions = Set.of();
     private ServerPluginMessageModule smm;
@@ -44,7 +44,7 @@ public class ServerExtensionModule implements ServerModule {
         this.smm = mod;
         requiredExtensions = Set.copyOf(section.getListFiltered("required_extensions", Identifier.serializer(MidnightCoreAPI.MOD_ID)));
 
-        manager.loadAll(section.getSection("extensions"), this, ServerExtension.REGISTRY);
+        manager.loadAll(section.getSection("extensions"));
         this.cachedPacket = new ClientboundExtensionPacket(manager.getLoadedModuleIds());
 
         mod.registerPacketHandler(ServerboundExtensionPacket.ID, (player, buffer) -> {

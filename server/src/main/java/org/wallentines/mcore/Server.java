@@ -82,13 +82,11 @@ public interface Server {
     ModuleManager<Server, ServerModule> getModuleManager();
 
     /**
-     * Loads all modules from the given registry using the server's module config
-     * @param registry The registry to find modules in
+     * Loads all server modules using the server's module config
      */
-    default void loadModules(Registry<Identifier, ModuleInfo<Server, ServerModule>> registry) {
+    default void loadModules() {
 
-        ModuleUtil.loadModules(getModuleManager(), registry, this, getModuleConfig());
-
+        ModuleUtil.loadModules(getModuleManager(), getModuleConfig());
         shutdownEvent().register(this, ev -> getModuleManager().unloadAll());
     }
 

@@ -1,7 +1,7 @@
 pluginManagement {
     repositories {
+        mavenCentral()
         gradlePluginPortal()
-        maven("https://plugins.gradle.org/m2/")
         maven("https://maven.fabricmc.net/")
         maven("https://maven.wallentines.org/plugins")
     }

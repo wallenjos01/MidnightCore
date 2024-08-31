@@ -95,7 +95,7 @@ public class MidnightCore extends JavaPlugin {
         });
 
         // Load Modules
-        server.loadModules(ServerModule.REGISTRY);
+        server.loadModules();
 
         Server.RUNNING_SERVER.set(server);
 

@@ -5,10 +5,7 @@ import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
-import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
-import org.wallentines.midnightlib.registry.Identifier;
-import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.io.File;
@@ -24,12 +21,11 @@ public interface Client {
     ModuleManager<Client, ClientModule> getModuleManager();
 
     /**
-     * Loads all modules from the given registry using the client's module config
-     * @param registry The registry to find modules in
+     * Loads all client modules using the client's module config
      */
-    default void loadModules(Registry<Identifier, ModuleInfo<Client, ClientModule>> registry) {
+    default void loadModules() {
 
-        ModuleUtil.loadModules(getModuleManager(), registry, this, getModuleConfig());
+        ModuleUtil.loadModules(getModuleManager(), getModuleConfig());
     }
 
     /**

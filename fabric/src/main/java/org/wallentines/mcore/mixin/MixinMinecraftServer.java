@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public abstract class MixinMinecraftServer implements Server {
 
     @Unique
-    private final ModuleManager<Server, ServerModule> mcore$moduleManager = new ModuleManager<>();
+    private final ModuleManager<Server, ServerModule> mcore$moduleManager = new ModuleManager<>(ServerModule.REGISTRY, this);
     @Unique
     private final HandlerList<Server> mcore$tickEvent = new HandlerList<>();
     @Unique
@@ -120,7 +120,7 @@ public abstract class MixinMinecraftServer implements Server {
     @Inject(method = "runServer", at=@At(value = "INVOKE", target="Lnet/minecraft/server/MinecraftServer;initServer()Z", shift = At.Shift.AFTER))
     private void afterInit(CallbackInfo ci) {
         Server.RUNNING_SERVER.reset();
-        loadModules(ServerModule.REGISTRY);
+        loadModules();
         Server.RUNNING_SERVER.set(this);
     }
 

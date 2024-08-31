@@ -61,12 +61,11 @@ public interface Proxy {
     ProxyServer getServer(String name);
 
     /**
-     * Loads all modules from the given registry using the proxy's module config
-     * @param registry The registry to find modules in
+     * Loads all proxy modules using the proxy's module config
      */
-    default void loadModules(Registry<Identifier, ModuleInfo<Proxy, ProxyModule>> registry) {
+    default void loadModules() {
 
-        ModuleUtil.loadModules(getModuleManager(), registry, this, getModuleConfig());
+        ModuleUtil.loadModules(getModuleManager(), getModuleConfig());
         shutdownEvent().register(this, ev -> getModuleManager().unloadAll());
 
     }

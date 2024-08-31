@@ -56,7 +56,7 @@ public class MainCommand {
 
         if(moduleId == null) {
 
-            server.getModuleManager().reloadAll(server.getModuleConfig().getRoot().asSection(), server, ServerModule.REGISTRY);
+            server.getModuleManager().reloadAll(server.getModuleConfig().getRoot().asSection());
             int loaded = server.getModuleManager().getCount();
 
             sender.sendSuccess(message("command.module.reload.all", CustomPlaceholder.inline("count", loaded)), false);

@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 public class SpigotServer implements Server, Listener {
 
-    private final ModuleManager<Server, ServerModule> moduleManager = new ModuleManager<>();
+    private final ModuleManager<Server, ServerModule> moduleManager = new ModuleManager<>(ServerModule.REGISTRY, this);
     private final HandlerList<Server> tickEvent = new HandlerList<>();
     private final HandlerList<Server> shutdownEvent = new HandlerList<>();
     private final HandlerList<Player> joinEvent = new HandlerList<>();
