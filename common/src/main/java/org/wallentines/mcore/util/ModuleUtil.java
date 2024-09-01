@@ -39,7 +39,12 @@ public class ModuleUtil {
     public static <T, M extends Module<T>> boolean loadModule(ModuleManager<T, M> manager, Identifier id, FileWrapper<ConfigObject> moduleConfig) {
 
         ConfigObject config = moduleConfig.getRoot().asSection().get(id.toString());
-        if(config == null || !config.isSection()) config = new ConfigSection();
+        ConfigSection defaultConfig = manager.getModuleInfo(id).getDefaultConfig();
+        if(config == null || !config.isSection()) { 
+            config = defaultConfig;
+        } else {
+            config.asSection().fill(defaultConfig);
+        }
         if(manager.loadModule(id, config.asSection())) {
             moduleConfig.getRoot().asSection().set(id.toString(), config);
             moduleConfig.save();
