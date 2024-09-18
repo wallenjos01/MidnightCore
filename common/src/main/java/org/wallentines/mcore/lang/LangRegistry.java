@@ -17,7 +17,7 @@ import java.util.function.Function;
  */
 public class LangRegistry {
 
-    private final Registry<String, UnresolvedComponent> entries = Registry.createStringRegistry();
+    private final Registry<String, UnresolvedComponent> entries = Registry.createStringRegistry(false, false, true);
     private final PlaceholderManager manager;
 
 
