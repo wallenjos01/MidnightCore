@@ -1,7 +1,7 @@
 # MidnightCore
 *A cross-platform library for Minecraft servers, clients, and proxies*
 <br/>
-Current Version: 2.0.0-pre7
+Current Version: 2.0.0-pre8
 
 ## Overview
 - MidnightCore has a number of classes and features to make creating plugins and mods easier.
@@ -33,15 +33,15 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots") // For Fabric servers, required for fabric-permissions-api
 }
 dependencies {
-    compileOnly("org.wallentines:midnightcore-common:2.0.0-pre7")
+    compileOnly("org.wallentines:midnightcore-common:2.0.0-pre8")
     
-    compileOnly("org.wallentines:midnightcore-server:2.0.0-pre7") // For servers
-    compileOnly("org.wallentines:midnightcore-client:2.0.0-pre7") // For clients
-    compileOnly("org.wallentines:midnightcore-proxy:2.0.0-pre7") // For proxies
+    compileOnly("org.wallentines:midnightcore-server:2.0.0-pre8") // For servers
+    compileOnly("org.wallentines:midnightcore-client:2.0.0-pre8") // For clients
+    compileOnly("org.wallentines:midnightcore-proxy:2.0.0-pre8") // For proxies
     
-    compileOnly("org.wallentines:midnightcore-fabric:2.0.0-pre7") // For Fabric servers and clients
-    compileOnly("org.wallentines:midnightcore-spigot:2.0.0-pre7") // For Spigot servers
-    compileOnly("org.wallentines:midnightcore-velocity:2.0.0-pre7") // For Velocity proxies
+    compileOnly("org.wallentines:midnightcore-fabric:2.0.0-pre8") // For Fabric servers and clients
+    compileOnly("org.wallentines:midnightcore-spigot:2.0.0-pre8") // For Spigot servers
+    compileOnly("org.wallentines:midnightcore-velocity:2.0.0-pre8") // For Velocity proxies
 }
 ```
 - As shown above, the library is divided into three layers: Common, Environment, and Target
