@@ -25,7 +25,7 @@ dependencies {
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
-    modImplementation("net.fabricmc:fabric-loader:0.15.11")
+    modImplementation("net.fabricmc:fabric-loader:0.16.5")
 
     // Fabric API
     val apiModules = listOf(
@@ -35,7 +35,7 @@ dependencies {
             "fabric-command-api-v2"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.100.1+1.21"))!!)
+        modApi(include(fabricApi.module(mod, "0.104.0+1.21.1"))!!)
     }
 
     include(modApi("me.lucko:fabric-permissions-api:0.3.1") {
