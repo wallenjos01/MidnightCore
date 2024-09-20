@@ -1,15 +1,12 @@
 [versions]
-junit = "5.9.1"
-netty = "4.1.94.Final"
-mdcfg = "2.4.0-SNAPSHOT"
-mdlib = "1.7.0-SNAPSHOT"
-slf4j = "2.0.7"
-jbr-anno = "24.0.1"
+netty = "4.1.113.Final"
+mdcfg = "2.4.0"
+mdlib = "1.7.0"
+slf4j = "2.0.11"
+jbr-anno = "24.1.0"
 zstd = "1.5.5-5"
 
 [libraries]
-junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 netty-buffer = { module = "io.netty:netty-buffer", version.ref = "netty" }
 netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
 midnight-cfg = { module = "org.wallentines:midnightcfg-api", version.ref="mdcfg" }
