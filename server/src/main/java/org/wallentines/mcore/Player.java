@@ -174,6 +174,19 @@ public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolde
      */
     CompletableFuture<ByteBuf> getCookie(Identifier id);
 
+    /**
+     * Stores the given cookie data on the client at the given id
+     * @param id The cookie ID
+     * @param value The cookie value
+     */
+    void setCookie(Identifier id, ByteBuf value);
+
+    /**
+     * Clears the given cookie data on the client at the given id
+     * @param id The cookie ID
+     */
+    void clearCookie(Identifier id);
+
     static void registerPlaceholders(PlaceholderManager manager) {
 
         manager.registerSupplier("player_uuid", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Player.class, pl -> pl.getUUID().toString(), "")));
