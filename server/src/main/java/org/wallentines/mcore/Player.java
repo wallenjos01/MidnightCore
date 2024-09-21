@@ -202,6 +202,13 @@ public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolde
      */
     void clearCookie(Identifier id);
 
+    /**
+     * Transfers the player to the server at the given hostname and port
+     * @param hostname The server hostname
+     * @param port The server port
+     */
+    void transfer(String hostname, int port);
+
     static void registerPlaceholders(PlaceholderManager manager) {
 
         manager.registerSupplier("player_uuid", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Player.class, pl -> pl.getUUID().toString(), "")));

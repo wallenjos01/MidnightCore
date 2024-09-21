@@ -64,8 +64,8 @@ public class AdapterImpl implements Adapter {
     public boolean initialize() {
 
         reflector = new ItemReflector<>(CraftItemStack.class);
-        obReflector = new Reflector<>(Objective.class, "org.bukkit.craftbukkit.v1_20_R4.scoreboard.CraftObjective", "objective");
-        teamReflector = new Reflector<>(Team.class, "org.bukkit.craftbukkit.v1_20_R4.scoreboard.CraftTeam", "team");
+        obReflector = new Reflector<>(Objective.class, "org.bukkit.craftbukkit.v1_21_R1.scoreboard.CraftObjective", "objective");
+        teamReflector = new Reflector<>(Team.class, "org.bukkit.craftbukkit.v1_21_R1.scoreboard.CraftTeam", "team");
 
         updater = new SkinUpdaterImpl();
         return true;

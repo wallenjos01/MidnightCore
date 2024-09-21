@@ -1,0 +1,29 @@
+[
+  {
+    "lines": [
+      {
+        "find": "getInternal().transfer("
+      }
+    ],
+    "type": "set",
+    "value": "MidnightCoreAPI.LOGGER.warn(\"Transferring players is not supported on this version!\");"
+  },
+  {
+    "lines": [
+      {
+        "find": "getInternal().retrieveCookie("
+      }
+    ],
+    "type": "set",
+    "value": "MidnightCoreAPI.LOGGER.warn(\"Setting cookies is not supported on this version!\"); return CompletableFuture.completedFuture(null);"
+  },
+  {
+    "lines": [
+      {
+        "find": "getInternal().storeCookie("
+      }
+    ],
+    "type": "set",
+    "value": "MidnightCoreAPI.LOGGER.warn(\"Clearing cookies is not supported on this version!\");"
+  }
+]

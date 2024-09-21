@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundStoreCookiePacket;
+import net.minecraft.network.protocol.common.ClientboundTransferPacket;
 import net.minecraft.network.protocol.cookie.ClientboundCookieRequestPacket;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceLocation;
@@ -208,6 +209,11 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
     public void mcore$clearCookie(Identifier id) {
 
         connection.send(new ClientboundStoreCookiePacket(ConversionUtil.toResourceLocation(id), null));
+    }
+
+    public void mcore$transfer(String hostname, int port) {
+
+        connection.send(new ClientboundTransferPacket(hostname, port));
     }
 
 }

@@ -1,6 +1,7 @@
 package org.wallentines.mcore;
 
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.adapter.Adapter;
@@ -208,18 +209,22 @@ public class SpigotPlayer implements Player {
 
     @Override
     public CompletableFuture<byte[]> getCookie(Identifier id) {
-        MidnightCoreAPI.LOGGER.warn("Getting cookies is not supported on Spigot!");
-        return CompletableFuture.completedFuture(null);
+        return getInternal().retrieveCookie(NamespacedKey.fromString(id.toString()));
     }
 
     @Override
     public void setCookie(Identifier id, byte[] value) {
-        MidnightCoreAPI.LOGGER.warn("Setting cookies is not supported on Spigot!");
+        getInternal().storeCookie(NamespacedKey.fromString(id.toString()), value);
     }
 
     @Override
     public void clearCookie(Identifier id) {
-        MidnightCoreAPI.LOGGER.warn("Clearing cookies is not supported on Spigot!");
+        getInternal().storeCookie(NamespacedKey.fromString(id.toString()), null);
+    }
+
+    @Override
+    public void transfer(String hostname, int port) {
+        getInternal().transfer(hostname, port);
     }
 
     @Override
