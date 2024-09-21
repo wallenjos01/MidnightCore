@@ -172,14 +172,29 @@ public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolde
      * @param id The cookie ID
      * @return a completable future for the cookie data
      */
-    CompletableFuture<ByteBuf> getCookie(Identifier id);
+    CompletableFuture<byte[]> getCookie(Identifier id);
 
     /**
      * Stores the given cookie data on the client at the given id
      * @param id The cookie ID
      * @param value The cookie value
      */
-    void setCookie(Identifier id, ByteBuf value);
+    void setCookie(Identifier id, byte[] value);
+
+    /**
+     * Stores the given cookie data on the client at the given id
+     * @param id The cookie ID
+     * @param value The cookie value
+     */
+    default void setCookie(Identifier id, ByteBuf value) {
+        byte[] data;
+        if(value.hasArray()) {
+            data = value.array();
+        } else {
+            data = new byte[value.readableBytes()];
+        }
+        setCookie(id, data);
+    }
 
     /**
      * Clears the given cookie data on the client at the given id

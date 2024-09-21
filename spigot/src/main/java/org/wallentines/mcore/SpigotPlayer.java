@@ -1,6 +1,5 @@
 package org.wallentines.mcore;
 
-import io.netty.buffer.ByteBuf;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
@@ -208,13 +207,13 @@ public class SpigotPlayer implements Player {
     }
 
     @Override
-    public CompletableFuture<ByteBuf> getCookie(Identifier id) {
+    public CompletableFuture<byte[]> getCookie(Identifier id) {
         MidnightCoreAPI.LOGGER.warn("Getting cookies is not supported on Spigot!");
         return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public void setCookie(Identifier id, ByteBuf value) {
+    public void setCookie(Identifier id, byte[] value) {
         MidnightCoreAPI.LOGGER.warn("Setting cookies is not supported on Spigot!");
     }
 

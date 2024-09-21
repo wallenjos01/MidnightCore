@@ -1,6 +1,5 @@
 package org.wallentines.mcore.mixin;
 
-import io.netty.buffer.Unpooled;
 import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -29,7 +28,7 @@ public class MixinServerGamePacketListener {
         ServerCommonPacketListenerImpl self = (ServerCommonPacketListenerImpl) (Object) this;
         if(!(self instanceof ServerGamePacketListenerImpl)) return;
 
-        mcore$cookies.invoke(new CookieResponse(((ServerGamePacketListenerImpl) self).player, ConversionUtil.toIdentifier(packet.key()), Unpooled.wrappedBuffer(packet.payload())));
+        mcore$cookies.invoke(new CookieResponse(((ServerGamePacketListenerImpl) self).player, ConversionUtil.toIdentifier(packet.key()), packet.payload()));
     }
 
     public HandlerList<CookieResponse> mcore$responseEvent() {

@@ -1,7 +1,6 @@
 package org.wallentines.mcore.mixin;
 
 import com.google.common.collect.Sets;
-import io.netty.buffer.ByteBuf;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundStoreCookiePacket;
@@ -185,13 +184,13 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
     }
 
 
-    public CompletableFuture<ByteBuf> mcore$getCookie(Identifier id) {
+    public CompletableFuture<byte[]> mcore$getCookie(Identifier id) {
 
         ResourceLocation loc = ConversionUtil.toResourceLocation(id);
         connection.send(new ClientboundCookieRequestPacket(loc));
 
         HandlerList<CookieResponse> event = ((CookieHolder) connection).responseEvent();
-        CompletableFuture<ByteBuf> future = new CompletableFuture<>();
+        CompletableFuture<byte[]> future = new CompletableFuture<>();
         event.register(future, cookie -> {
             if(cookie.player() == MixinServerPlayer.this && cookie.id().equals(id)) {
                 future.complete(cookie.data());
@@ -202,17 +201,8 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
         return future;
     }
 
-    public void mcore$setCookie(Identifier id, ByteBuf data) {
-
-        byte[] dataBuf;
-        if(data.hasArray()) {
-            dataBuf = data.array();
-        } else {
-            dataBuf = new byte[data.readableBytes()];
-            data.readBytes(dataBuf);
-        }
-
-        connection.send(new ClientboundStoreCookiePacket(ConversionUtil.toResourceLocation(id), dataBuf));
+    public void mcore$setCookie(Identifier id, byte[] data) {
+        connection.send(new ClientboundStoreCookiePacket(ConversionUtil.toResourceLocation(id), data));
     }
 
     public void mcore$clearCookie(Identifier id) {
