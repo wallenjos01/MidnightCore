@@ -1,5 +1,6 @@
 package org.wallentines.mcore;
 
+import io.netty.buffer.ByteBuf;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class SpigotPlayer implements Player {
 
@@ -203,6 +205,22 @@ public class SpigotPlayer implements Player {
     @Override
     public void kick(Component message) {
         Adapter.INSTANCE.get().kickPlayer(internal, message);
+    }
+
+    @Override
+    public CompletableFuture<ByteBuf> getCookie(Identifier id) {
+        MidnightCoreAPI.LOGGER.warn("Getting cookies is not supported on Spigot!");
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public void setCookie(Identifier id, ByteBuf value) {
+        MidnightCoreAPI.LOGGER.warn("Setting cookies is not supported on Spigot!");
+    }
+
+    @Override
+    public void clearCookie(Identifier id) {
+        MidnightCoreAPI.LOGGER.warn("Clearing cookies is not supported on Spigot!");
     }
 
     @Override

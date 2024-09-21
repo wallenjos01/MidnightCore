@@ -1,6 +1,5 @@
 package org.wallentines.mcore.mixin;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
@@ -19,7 +18,7 @@ import org.wallentines.midnightlib.event.HandlerList;
 
 @Mixin(ServerCommonPacketListenerImpl.class)
 @Implements(@Interface(iface = CookieHolder.class, prefix = "mcore$"))
-public class MixinServerGamePacketListener implements CookieHolder {
+public class MixinServerGamePacketListener {
 
     @Unique
     private final HandlerList<CookieResponse> mcore$cookies = new HandlerList<>();
