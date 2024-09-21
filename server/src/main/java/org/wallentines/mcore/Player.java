@@ -1,6 +1,7 @@
 package org.wallentines.mcore;
 
 
+import io.netty.buffer.ByteBuf;
 import org.wallentines.mcore.lang.LocaleHolder;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
@@ -8,6 +9,9 @@ import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.skin.SkinModule;
 import org.wallentines.mcore.skin.Skinnable;
 import org.wallentines.mcore.text.Component;
+import org.wallentines.midnightlib.registry.Identifier;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * An interface representing a Server-side player object.
@@ -162,6 +166,13 @@ public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolde
     default void kick(UnresolvedComponent message) {
         kick(message.resolveFor(this));
     }
+
+    /**
+     * Queries the player for a cookie
+     * @param id The cookie ID
+     * @return a completable future for the cookie data
+     */
+    CompletableFuture<ByteBuf> getCookie(Identifier id);
 
     static void registerPlaceholders(PlaceholderManager manager) {
 

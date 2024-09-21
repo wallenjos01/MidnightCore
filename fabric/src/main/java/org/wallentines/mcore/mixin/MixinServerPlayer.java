@@ -1,9 +1,12 @@
 package org.wallentines.mcore.mixin;
 
 import com.google.common.collect.Sets;
+import io.netty.buffer.ByteBuf;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.cookie.ClientboundCookieRequestPacket;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
@@ -21,9 +24,12 @@ import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.AuthUtil;
 import org.wallentines.mcore.util.ConversionUtil;
+import org.wallentines.midnightlib.event.HandlerList;
+import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 
 @Mixin(ServerPlayer.class)
@@ -176,4 +182,23 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
 
         connection.disconnect(new WrappedComponent(message));
     }
+
+
+    public CompletableFuture<ByteBuf> mcore$getCookie(Identifier id) {
+
+        ResourceLocation loc = ConversionUtil.toResourceLocation(id);
+        connection.send(new ClientboundCookieRequestPacket(loc));
+
+        HandlerList<CookieResponse> event = ((CookieHolder) connection).responseEvent();
+        CompletableFuture<ByteBuf> future = new CompletableFuture<>();
+        event.register(future, cookie -> {
+            if(cookie.player() == MixinServerPlayer.this && cookie.id().equals(id)) {
+                future.complete(cookie.data());
+                event.unregisterAll(future);
+            }
+        });
+
+        return future;
+    }
+
 }
