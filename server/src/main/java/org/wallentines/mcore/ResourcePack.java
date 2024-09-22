@@ -2,6 +2,8 @@ package org.wallentines.mcore;
 
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.lang.UnresolvedComponent;
+import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 
 import java.util.UUID;
 
@@ -47,5 +49,14 @@ public class ResourcePack {
     public UnresolvedComponent message() {
         return message;
     }
+
+    public static final Serializer<ResourcePack> SERIALIZER = ObjectSerializer.create(
+            Serializer.UUID.entry("uuid", ResourcePack::uuid),
+            Serializer.STRING.entry("url", ResourcePack::url),
+            Serializer.STRING.entry("hash", ResourcePack::hash),
+            Serializer.BOOLEAN.entry("forced", ResourcePack::forced).orElse(false),
+            UnresolvedComponent.SERIALIZER.entry("message", ResourcePack::message).optional(),
+            ResourcePack::new
+    );
 
 }
