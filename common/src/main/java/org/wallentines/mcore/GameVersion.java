@@ -134,6 +134,11 @@ public class GameVersion {
         public static final Feature CONFIGURATION_PROTOCOL = new Feature(764, -1, 144);
 
         /**
+         * Starting in 1.20.3, Server resource packs were identified by UUIDs, and multiple could be applied
+         */
+        public static final Feature RESOURCE_PACK_IDS = new Feature(765, -1, 164);
+
+        /**
          * In 1.20.5, Cookies and server transfer packets were added.
          */
         public static final Feature TRANSFER_PACKETS = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 171);

@@ -5,8 +5,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.adapter.Adapter;
+import org.wallentines.mcore.lang.PlaceholderContext;
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.ConversionUtil;
+import org.wallentines.mcore.util.ResourcePackUtil;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -225,6 +228,21 @@ public class SpigotPlayer implements Player {
     @Override
     public void transfer(String hostname, int port) {
         getInternal().transfer(hostname, port);
+    }
+
+    @Override
+    public void addResourcePack(ResourcePack pack) {
+        ResourcePackUtil.addResourcePack(this, pack);
+    }
+
+    @Override
+    public void removeResourcePack(UUID uuid) {
+        ResourcePackUtil.removeResourcePack(this, uuid);
+    }
+
+    @Override
+    public void clearResourcePacks() {
+        ResourcePackUtil.clearResourcePacks(this);
     }
 
     @Override

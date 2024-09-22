@@ -11,6 +11,7 @@ import org.wallentines.mcore.skin.Skinnable;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.registry.Identifier;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -208,6 +209,23 @@ public interface Player extends Entity, Skinnable, LocaleHolder, PermissionHolde
      * @param port The server port
      */
     void transfer(String hostname, int port);
+
+    /**
+     * Adds a resource pack to the client
+     * @param pack The resource pack to add
+     */
+    void addResourcePack(ResourcePack pack);
+
+    /**
+     * Removes a resource pack with the given ID from the client
+     * @param uuid The pack UUID
+     */
+    void removeResourcePack(UUID uuid);
+
+    /**
+     * Removes all server resource packs from the client
+     */
+    void clearResourcePacks();
 
     static void registerPlaceholders(PlaceholderManager manager) {
 

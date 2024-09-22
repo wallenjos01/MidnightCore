@@ -3,6 +3,8 @@ package org.wallentines.mcore.mixin;
 import com.google.common.collect.Sets;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ClientboundStoreCookiePacket;
 import net.minecraft.network.protocol.common.ClientboundTransferPacket;
 import net.minecraft.network.protocol.cookie.ClientboundCookieRequestPacket;
@@ -21,6 +23,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.asm.mixin.*;
 import org.wallentines.mcore.*;
+import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.AuthUtil;
@@ -30,6 +33,8 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -207,13 +212,25 @@ public abstract class MixinServerPlayer implements Player, ScoreboardHolder {
     }
 
     public void mcore$clearCookie(Identifier id) {
-
         connection.send(new ClientboundStoreCookiePacket(ConversionUtil.toResourceLocation(id), null));
     }
 
     public void mcore$transfer(String hostname, int port) {
-
         connection.send(new ClientboundTransferPacket(hostname, port));
     }
 
+    public void mcore$addResourcePack(ResourcePack pack) {
+
+        UnresolvedComponent msg = pack.message();
+        WrappedComponent cmp = msg == null ? null : new WrappedComponent(msg.resolveFor(this));
+        connection.send(new ClientboundResourcePackPushPacket(pack.uuid(), pack.url(), pack.hash(), pack.forced(), Optional.ofNullable(cmp)));
+    }
+
+    public void mcore$removeResourcePack(UUID id) {
+        connection.send(new ClientboundResourcePackPopPacket(Optional.of(id)));
+    }
+
+    public void mcore$clearResourcePacks() {
+        connection.send(new ClientboundResourcePackPopPacket(Optional.empty()));
+    }
 }
