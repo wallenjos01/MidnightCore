@@ -1,6 +1,5 @@
 package org.wallentines.mcore.util;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,11 +14,11 @@ public class RegistryUtil {
     private static final RegistryAccess.Frozen BUILTIN = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
     public static <T> Optional<Registry<T>> registry(ResourceKey<? extends Registry<T>> key) {
-        return access().registry(key);
+        return access().lookup(key);
     }
 
     public static <T> Registry<T> registryOrThrow(ResourceKey<? extends Registry<T>> key) {
-        return access().registryOrThrow(key);
+        return access().lookupOrThrow(key);
     }
 
     public static RegistryAccess access() {

@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -31,8 +31,6 @@ public abstract class MixinEntity implements Entity {
 
     @Shadow private Level level;
 
-    @Shadow public abstract boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h);
-
     @Shadow public abstract void setDeltaMovement(Vec3 vec3);
 
     @Shadow public abstract Vec3 getDeltaMovement();
@@ -49,8 +47,10 @@ public abstract class MixinEntity implements Entity {
 
     @Shadow public abstract String getStringUUID();
 
-    @Shadow public abstract CommandSourceStack createCommandSourceStack();
 
+    @Shadow public abstract boolean teleportTo(ServerLevel par1, double par2, double par3, double par4, Set<Relative> par5, float par6, float par7, boolean par8);
+
+    @Shadow public abstract CommandSourceStack createCommandSourceStackForNameResolution(ServerLevel par1);
 
     @Intrinsic(displace = true)
     public UUID mcore$getUUID() {
@@ -135,7 +135,9 @@ public abstract class MixinEntity implements Entity {
             float wrappedYaw = Mth.wrapDegrees(yaw);
             float wrappedPitch = Mth.wrapDegrees(pitch);
 
-            if (teleportTo(level, x, y, z, new HashSet<>(), wrappedYaw, wrappedPitch)) {
+
+            //if (teleportTo(level, x, y, z, new HashSet<>(), wrappedYaw, wrappedPitch)) {
+            if(teleportTo(level, x, y, z, new HashSet<>(), wrappedYaw, wrappedPitch, false)) {
 
                 if (self instanceof LivingEntity liv && !liv.isFallFlying()) {
                     setDeltaMovement(getDeltaMovement().multiply(1.0, 0.0, 1.0));
@@ -173,7 +175,9 @@ public abstract class MixinEntity implements Entity {
 
         net.minecraft.world.entity.Entity ent = (net.minecraft.world.entity.Entity) (Object) this;
 
-        CommandSourceStack css = createCommandSourceStack();
+        if(ent.level().isClientSide) return;
+
+        CommandSourceStack css = createCommandSourceStackForNameResolution((ServerLevel) ent.level());
         ent.getServer().getCommands().performPrefixedCommand(css, command);
     }
 }

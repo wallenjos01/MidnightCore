@@ -80,7 +80,7 @@ public class FabricSkinModule extends SkinModule {
         ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(spl.createCommonSpawnInfo(world), (byte) 3);
 
 
-        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getX(), spl.getY(), spl.getZ(), spl.getRotationVector().y, spl.getRotationVector().x, new HashSet<>(), 0);
+        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getId(), spl.position(), spl.getDeltaMovement(), spl.getRotationVector().y, spl.getRotationVector().x, new HashSet<>());
         ClientboundSetExperiencePacket experience = new ClientboundSetExperiencePacket(spl.experienceProgress, spl.totalExperience, spl.experienceLevel);
 
 

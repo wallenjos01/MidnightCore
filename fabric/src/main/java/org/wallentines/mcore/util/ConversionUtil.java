@@ -1,7 +1,9 @@
 package org.wallentines.mcore.util;
 
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.commands.arguments.selector.SelectorPattern;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.Style;
@@ -67,7 +69,7 @@ public class ConversionUtil {
         if(event.getType() == HoverEvent.Type.SHOW_ENTITY) {
             HoverEvent.EntityInfo info = (HoverEvent.EntityInfo) event.getValue();
             net.minecraft.network.chat.HoverEvent.EntityTooltipInfo out = new net.minecraft.network.chat.HoverEvent.EntityTooltipInfo(
-                    BuiltInRegistries.ENTITY_TYPE.get(toResourceLocation(info.type)),
+                    BuiltInRegistries.ENTITY_TYPE.get(toResourceLocation(info.type)).get().value(),
                     info.uuid,
                     Optional.ofNullable(info.name).map(WrappedComponent::new)
             );
@@ -187,12 +189,12 @@ public class ConversionUtil {
                 return new KeybindContents(((Content.Keybind) content).key);
             case SCORE: {
                 Content.Score md = (Content.Score) content;
-                return new ScoreContents(md.name, md.objective);
+                return new ScoreContents(Either.right(md.name), md.objective);
             }
             case SELECTOR: {
                 Content.Selector md = (Content.Selector) content;
                 return new SelectorContents(
-                        md.value,
+                        SelectorPattern.parse(md.value).getOrThrow(),
                         Optional.ofNullable(md.separator == null ? null : new WrappedComponent(md.separator)));
             }
             case NBT: {
@@ -229,12 +231,12 @@ public class ConversionUtil {
             return new Content.Keybind(mc.getName());
         }
         else if(contents instanceof ScoreContents mc) {
-            return new Content.Score(mc.getName(), mc.getObjective(), null);
+            return new Content.Score(mc.name().right().orElse(mc.name().left().orElseThrow().pattern()), mc.objective(), null);
         }
         else if(contents instanceof SelectorContents mc) {
             return new Content.Selector(
-                    mc.getPattern(),
-                    mc.getSeparator().map(ConversionUtil::toComponent).orElse(null));
+                    mc.selector().pattern(),
+                    mc.separator().map(ConversionUtil::toComponent).orElse(null));
         }
         else if(contents instanceof NbtContents mc) {
             String pattern;

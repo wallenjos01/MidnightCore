@@ -1,6 +1,7 @@
 package org.wallentines.mcore.mixin;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -45,23 +46,25 @@ public abstract class MixinItemStack implements ItemStack {
     }
 
     public void mcore$loadComponent(Identifier id, ConfigObject config) {
-        DataComponentType<?> type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(ConversionUtil.toResourceLocation(id));
-        if(type == null) {
-            MidnightCoreAPI.LOGGER.warn("Component type " + id + " is not registered!");
+        Optional<Holder.Reference<DataComponentType<?>>> type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(ConversionUtil.toResourceLocation(id));
+        if(type.isEmpty()) {
+            MidnightCoreAPI.LOGGER.warn("Attempt to load component with unregistered type {}!", id);
             return;
         }
 
-        set(type, type.codecOrThrow().decode(ConfigOps.INSTANCE, config).getOrThrow().getFirst());
+        DataComponentType<?> dct = type.get().value();
+        set(dct, dct.codecOrThrow().decode(ConfigOps.INSTANCE, config).getOrThrow().getFirst());
     }
 
     public ConfigObject mcore$saveComponent(Identifier id) {
-        DataComponentType<?> type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(ConversionUtil.toResourceLocation(id));
-        if(type == null) {
-            MidnightCoreAPI.LOGGER.warn("Component type " + id + " is not registered!");
+        Optional<Holder.Reference<DataComponentType<?>>> type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(ConversionUtil.toResourceLocation(id));
+        if(type.isEmpty()) {
+            MidnightCoreAPI.LOGGER.warn("Attempt to save component with unregistered type {}!", id);
             return null;
         }
 
-        TypedDataComponent<?> comp = getComponents().getTyped(type);
+        DataComponentType<?> dct = type.get().value();
+        TypedDataComponent<?> comp = getComponents().getTyped(dct);
         if(comp == null) {
             return null;
         }
@@ -71,8 +74,13 @@ public abstract class MixinItemStack implements ItemStack {
 
     public void mcore$removeComponent(Identifier id) {
 
-        DataComponentType<?> type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(ConversionUtil.toResourceLocation(id));
-        applyComponents(DataComponentPatch.builder().remove(type).build());
+        Optional<Holder.Reference<DataComponentType<?>>> type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(ConversionUtil.toResourceLocation(id));
+        if(type.isEmpty()) {
+            return;
+        }
+
+        DataComponentType<?> dct = type.get().value();
+        applyComponents(DataComponentPatch.builder().remove(dct).build());
     }
 
     public Stream<Identifier> mcore$getComponentIds() {
