@@ -5,8 +5,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 import org.wallentines.mcore.adapter.Adapter;
-import org.wallentines.mcore.lang.PlaceholderContext;
-import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.ResourcePackUtil;

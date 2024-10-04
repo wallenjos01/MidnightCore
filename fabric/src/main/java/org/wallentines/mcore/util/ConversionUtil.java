@@ -14,7 +14,6 @@ import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.wallentines.mcore.ConfiguringPlayer;
-import org.wallentines.mcore.Entity;
 import org.wallentines.mcore.Player;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.text.*;
@@ -259,7 +258,7 @@ public class ConversionUtil {
     }
 
 
-    public static EquipmentSlot toMCEquipmentSlot(Entity.EquipmentSlot slot) {
+    public static EquipmentSlot toMCEquipmentSlot(org.wallentines.mcore.EquipmentSlot slot) {
         return switch(slot) {
             case MAINHAND -> net.minecraft.world.entity.EquipmentSlot.MAINHAND;
             case OFFHAND -> net.minecraft.world.entity.EquipmentSlot.OFFHAND;

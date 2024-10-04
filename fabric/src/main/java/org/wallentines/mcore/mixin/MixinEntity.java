@@ -14,10 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
-import org.wallentines.mcore.Entity;
-import org.wallentines.mcore.ItemStack;
-import org.wallentines.mcore.Location;
-import org.wallentines.mcore.Server;
+import org.wallentines.mcore.*;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.util.ConversionUtil;
 import org.wallentines.mcore.util.RegistryUtil;
@@ -152,7 +149,7 @@ public abstract class MixinEntity implements Entity {
         }
     }
 
-    public ItemStack mcore$getItem(Entity.EquipmentSlot slot) {
+    public ItemStack mcore$getItem(EquipmentSlot slot) {
 
         net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
         if(self instanceof LivingEntity le) {
@@ -162,7 +159,7 @@ public abstract class MixinEntity implements Entity {
         return null;
     }
 
-    public void mcore$setItem(Entity.EquipmentSlot slot, ItemStack item) {
+    public void mcore$setItem(EquipmentSlot slot, ItemStack item) {
 
         net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
         if(self instanceof LivingEntity le) {

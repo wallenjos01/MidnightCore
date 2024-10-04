@@ -3,8 +3,6 @@ package org.wallentines.mcore;
 import org.wallentines.mcore.lang.PlaceholderManager;
 import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.text.Component;
-import org.wallentines.mdcfg.serializer.InlineSerializer;
-import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
@@ -102,37 +100,6 @@ public interface Entity {
      * @param command The command text to run
      */
     void runCommand(String command);
-
-    enum EquipmentSlot {
-
-        MAINHAND("mainhand"),
-        OFFHAND("offhand"),
-        FEET("feet"),
-        LEGS("legs"),
-        CHEST("chest"),
-        HEAD("head");
-
-        private final String id;
-
-        EquipmentSlot(String id) {
-            this.id = id;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public static EquipmentSlot byId(String id) {
-            for(EquipmentSlot slot : values()) {
-                if(slot.id.equals(id)) {
-                    return slot;
-                }
-            }
-            return null;
-        }
-
-        public static final Serializer<EquipmentSlot> SERIALIZER = InlineSerializer.of(EquipmentSlot::getId, EquipmentSlot::byId);
-    }
 
     static void registerPlaceholders(PlaceholderManager manager) {
 

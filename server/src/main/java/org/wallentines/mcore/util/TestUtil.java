@@ -56,7 +56,7 @@ public class TestUtil {
                             .withHoverEvent(HoverEvent.forItem(is))
             );
 
-            ItemStack hand = pl.getItem(Entity.EquipmentSlot.MAINHAND);
+            ItemStack hand = pl.getItem(EquipmentSlot.MAINHAND);
             pl.sendMessage(
                     hand.getName().addChild(Component.text(" (" + hand.getTranslationKey() + ")"))
             );
@@ -222,11 +222,11 @@ public class TestUtil {
                     .withName(Component.text("Test Sword").withColor(new Color(0xAF4EBE)))
                     .build();
 
-            pl.setItem(Entity.EquipmentSlot.HEAD, hat);
-            pl.setItem(Entity.EquipmentSlot.CHEST, shirt);
-            pl.setItem(Entity.EquipmentSlot.LEGS, legs);
-            pl.setItem(Entity.EquipmentSlot.FEET, feet);
-            pl.setItem(Entity.EquipmentSlot.MAINHAND, sword);
+            pl.setItem(EquipmentSlot.HEAD, hat);
+            pl.setItem(EquipmentSlot.CHEST, shirt);
+            pl.setItem(EquipmentSlot.LEGS, legs);
+            pl.setItem(EquipmentSlot.FEET, feet);
+            pl.setItem(EquipmentSlot.MAINHAND, sword);
 
             if(version.hasFeature(GameVersion.Feature.OFF_HAND)) {
 
@@ -235,7 +235,7 @@ public class TestUtil {
                         .withName(Component.text("Hello").withColor(new Color(0x398F3C)))
                         .build();
 
-                pl.setItem(Entity.EquipmentSlot.OFFHAND, cmd);
+                pl.setItem(EquipmentSlot.OFFHAND, cmd);
             }
 
         } catch (Throwable th) {
