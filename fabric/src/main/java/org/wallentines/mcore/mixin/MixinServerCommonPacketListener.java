@@ -17,18 +17,19 @@ import org.wallentines.midnightlib.event.HandlerList;
 
 @Mixin(ServerCommonPacketListenerImpl.class)
 @Implements(@Interface(iface = CookieHolder.class, prefix = "mcore$"))
-public class MixinServerGamePacketListener {
+public class MixinServerCommonPacketListener {
 
     @Unique
     private final HandlerList<CookieResponse> mcore$cookies = new HandlerList<>();
 
-    @Inject(method = "handleCookieResponse", at=@At("HEAD"))
+    @Inject(method = "handleCookieResponse", at=@At("HEAD"), cancellable = true)
     private void onCookieResponse(ServerboundCookieResponsePacket packet, CallbackInfo ci) {
 
         ServerCommonPacketListenerImpl self = (ServerCommonPacketListenerImpl) (Object) this;
         if(!(self instanceof ServerGamePacketListenerImpl)) return;
 
         mcore$cookies.invoke(new CookieResponse(((ServerGamePacketListenerImpl) self).player, ConversionUtil.toIdentifier(packet.key()), packet.payload()));
+        ci.cancel();
     }
 
     public HandlerList<CookieResponse> mcore$responseEvent() {

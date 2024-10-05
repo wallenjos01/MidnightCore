@@ -18,7 +18,7 @@
     "MixinPlayerAdvancements",
     "MixinPlayerList",
     "MixinServerConfigPacketListener",
-    "MixinServerGamePacketListener",
+    "MixinServerCommonPacketListener",
     "MixinServerPlayer",
     "MixinServerScoreboard"
   ],
