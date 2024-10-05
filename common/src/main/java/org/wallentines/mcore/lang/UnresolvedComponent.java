@@ -47,12 +47,6 @@ public class UnresolvedComponent {
         this.completed = completed;
     }
 
-    private UnresolvedComponent(boolean tryParseJSON, PlaceholderContext context) {
-        this.tryParseJSON = tryParseJSON;
-        this.context = context;
-        this.parts = List.of();
-    }
-
     public PlaceholderContext getContext() {
         return context;
     }
@@ -250,6 +244,18 @@ public class UnresolvedComponent {
             completed = false;
             return this;
         }
+
+        public Builder append(UnresolvedComponent component) {
+
+            if(component.isComplete()) {
+                append(component.toRaw());
+            } else if(component.parts != null) {
+                parts.addAll(component.parts);
+                if (completed) completed = component.isComplete();
+            }
+            return this;
+        }
+
         public Builder appendPlaceholder(String placeholder) {
             append(new UnresolvedPlaceholder(placeholder));
             return this;
