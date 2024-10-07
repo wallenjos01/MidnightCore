@@ -10,7 +10,8 @@ import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.types.Singleton;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public interface Client {
@@ -36,12 +37,12 @@ public interface Client {
      */
     default FileWrapper<ConfigObject> getModuleConfig() {
 
-        File moduleStorage = getConfigDirectory().resolve("MidnightCore").resolve("client").toFile();
-
-        if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {
-            throw new IllegalStateException("Unable to create module storage directory!");
+        Path moduleStorage = getConfigDirectory().resolve("MidnightCore").resolve("client");
+        try {
+            Files.createDirectories(moduleStorage);
+        } catch (IOException ex) {
+            throw new RuntimeException("Unable to create module storage directory!", ex);
         }
-
         return MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());
     }
 

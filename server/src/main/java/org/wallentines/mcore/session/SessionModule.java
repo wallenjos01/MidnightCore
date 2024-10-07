@@ -16,7 +16,9 @@ import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.types.Singleton;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -36,10 +38,15 @@ public abstract class SessionModule implements ServerModule {
 
         this.server.set(data);
 
-        File recoveryFolder = data.getConfigDirectory().resolve("MidnightCore").resolve("recovery").toFile();
-        if(!recoveryFolder.isDirectory() && !recoveryFolder.mkdirs()) {
-            MidnightCoreAPI.LOGGER.error("Unable to create recovery folder at " + recoveryFolder.getAbsolutePath() + "!");
-            return false;
+        Path recoveryFolder = data.getConfigDirectory().resolve("MidnightCore").resolve("recovery");
+
+        if(!Files.isDirectory(recoveryFolder)) {
+            try {
+                Files.createDirectories(recoveryFolder);
+            } catch (IOException ex) {
+                MidnightCoreAPI.LOGGER.error("Unable to create recovery folder at {}", recoveryFolder.toAbsolutePath(), ex);
+                return false;
+            }
         }
 
         FileCodecRegistry reg = new FileCodecRegistry();

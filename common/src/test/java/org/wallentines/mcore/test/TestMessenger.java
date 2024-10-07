@@ -12,6 +12,8 @@ import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
@@ -31,8 +33,8 @@ public class TestMessenger {
         protected void onShutdown() { }
 
         @Override
-        protected File getKeyFile() {
-            return new File("messenger.key");
+        protected Path getKeyFile() {
+            return Paths.get("messenger.key");
         }
 
         public void testPackets() {

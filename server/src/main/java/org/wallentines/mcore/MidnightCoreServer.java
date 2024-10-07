@@ -19,7 +19,6 @@ import org.wallentines.midnightlib.requirement.StringCheck;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 import org.wallentines.midnightlib.types.Singleton;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +29,7 @@ public class MidnightCoreServer {
     private final boolean testCommand;
 
     private final FileWrapper<ConfigObject> config;
-    private final File dataDirectory;
+    private final Path dataDirectory;
 
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
             .with("register_test_command", false);
@@ -48,10 +47,10 @@ public class MidnightCoreServer {
             FileWrapper<ConfigObject> config = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "config", globalConfig.toFile(), DEFAULT_CONFIG);
             defaultConfig.fillOverwrite(config.getRoot().asSection());
 
-            File langFolder = globalConfig.resolve("lang").toFile();
-            if(langFolder.isDirectory()) {
+            Path langFolder = globalConfig.resolve("lang");
+            if(Files.isDirectory(langFolder)) {
                 try {
-                    Files.copy(langFolder.toPath(), langDirectory);
+                    Files.copy(langFolder, langDirectory);
                 } catch (IOException ex) {
                     MidnightCoreAPI.LOGGER.warn("Unable to copy lang defaults to world!");
                 }
@@ -59,12 +58,16 @@ public class MidnightCoreServer {
 
         }
 
-        dataDirectory = directory.toFile();
-        if(!dataDirectory.isDirectory() && !dataDirectory.mkdirs()) {
-            throw new IllegalStateException("Unable to create config directory!");
+        dataDirectory = directory;
+        if(!Files.isDirectory(dataDirectory)) {
+            try {
+                Files.createDirectories(dataDirectory);
+            } catch (IOException ex) {
+                throw new RuntimeException("Unable to create config directory!", ex);
+            }
         }
 
-        langManager = new LangManager(langDefaults, langDirectory.toFile());
+        langManager = new LangManager(langDefaults, langDirectory);
         langManager.saveLanguageDefaults("en_us", langDefaults);
 
         this.config = MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "config", dataDirectory, defaultConfig);

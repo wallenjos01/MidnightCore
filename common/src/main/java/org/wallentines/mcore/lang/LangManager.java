@@ -9,11 +9,13 @@ import org.wallentines.mdcfg.codec.FileCodecRegistry;
 import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Loads language entries for all files in a given folder
@@ -21,7 +23,7 @@ import java.util.List;
 public class LangManager {
     private final HashMap<String, LangRegistry> languages = new HashMap<>();
     private final LangRegistry defaults;
-    private final File searchDirectory;
+    private final java.nio.file.Path searchDirectory;
     private final FileCodecRegistry fileCodecRegistry;
     private final PlaceholderManager manager;
     private final boolean tryParseJSON;
@@ -33,7 +35,7 @@ public class LangManager {
      * @param defaults The defaults entries to use
      * @param searchDirectory The directory to search for language files in
      */
-    public LangManager(LangRegistry defaults, File searchDirectory) {
+    public LangManager(LangRegistry defaults, Path searchDirectory) {
         this(defaults, searchDirectory, MidnightCoreAPI.FILE_CODEC_REGISTRY, PlaceholderManager.INSTANCE);
     }
 
@@ -44,7 +46,7 @@ public class LangManager {
      * @param fileCodecRegistry The codec registry to use for decoding files
      * @param manager The placeholder manager to use for resolving placeholders
      */
-    public LangManager(LangRegistry defaults, File searchDirectory, FileCodecRegistry fileCodecRegistry, PlaceholderManager manager) {
+    public LangManager(LangRegistry defaults, Path searchDirectory, FileCodecRegistry fileCodecRegistry, PlaceholderManager manager) {
         this(defaults, searchDirectory, fileCodecRegistry, manager, false);
     }
 
@@ -56,7 +58,7 @@ public class LangManager {
      * @param manager The placeholder manager to use for resolving placeholders
      * @param tryParseJSON Whether JSON strings should be decoded during resolution
      */
-    public LangManager(LangRegistry defaults, File searchDirectory, FileCodecRegistry fileCodecRegistry, PlaceholderManager manager, boolean tryParseJSON) {
+    public LangManager(LangRegistry defaults, Path searchDirectory, FileCodecRegistry fileCodecRegistry, PlaceholderManager manager, boolean tryParseJSON) {
         this.defaults = defaults;
         this.searchDirectory = searchDirectory;
         this.fileCodecRegistry = fileCodecRegistry;
@@ -166,8 +168,12 @@ public class LangManager {
      */
     public void saveLanguageDefaults(String language, LangRegistry registry) {
 
-        if(!searchDirectory.isDirectory() && !searchDirectory.mkdirs()) {
-            throw new IllegalStateException("Unable to create lang directory!");
+        if(!Files.isDirectory(searchDirectory)) {
+            try {
+                Files.createDirectories(searchDirectory);
+            } catch (IOException ex) {
+                throw new RuntimeException("An error occurred while creating a lang folder!", ex);
+            }
         }
 
         FileWrapper<ConfigObject> wrapper = fileCodecRegistry.findOrCreate(ConfigContext.INSTANCE, language, searchDirectory);
@@ -182,38 +188,41 @@ public class LangManager {
 
     private void scanDirectory() {
 
-        if(searchDirectory == null || !searchDirectory.isDirectory()) {
+        if(searchDirectory == null || !Files.isDirectory(searchDirectory)) {
             return;
         }
 
-        File[] fs = searchDirectory.listFiles();
-        if(fs != null) for(File f : fs) {
+        try(Stream<Path> stream = Files.list(searchDirectory)) {
 
-            if(!f.isFile()) continue;
-            FileCodec codec = fileCodecRegistry.forFile(f);
+            stream.filter(Files::isRegularFile).forEach(path -> {
+                FileCodec codec = fileCodecRegistry.forFile(path);
 
-            if(codec == null) {
-                MidnightCoreAPI.LOGGER.warn("Unable to find file codec for lang file " + f.getAbsolutePath() + "!");
-                continue;
-            }
+                if(codec == null) {
+                    MidnightCoreAPI.LOGGER.warn("Unable to find file codec for lang file {}!", path.toAbsolutePath());
+                    return;
+                }
 
-            ConfigObject obj;
-            try {
-                obj = codec.loadFromFile(ConfigContext.INSTANCE, f, StandardCharsets.UTF_8);
-            } catch (DecodeException | IOException ex) {
-                MidnightCoreAPI.LOGGER.warn("An error occurred while decoding lang file " + f.getAbsolutePath() + "! " + ex.getMessage());
-                continue;
-            }
+                ConfigObject obj;
+                try {
+                    obj = codec.loadFromFile(ConfigContext.INSTANCE, path, StandardCharsets.UTF_8);
+                } catch (DecodeException | IOException ex) {
+                    MidnightCoreAPI.LOGGER.warn("An error occurred while decoding lang file {}!", path.toAbsolutePath(), ex);
+                    return;
+                }
 
-            if(!obj.isSection()) {
-                MidnightCoreAPI.LOGGER.warn("Lang file " + f.getAbsolutePath() + " formatted incorrectly! Expected root to be a section!");
-                continue;
-            }
+                if(!obj.isSection()) {
+                    MidnightCoreAPI.LOGGER.warn("Lang file {} formatted incorrectly! Expected root to be a section!", path.toAbsolutePath());
+                    return;
+                }
 
-            languages.put(
-                    f.getName().substring(0, f.getName().lastIndexOf(".")),
-                    LangRegistry.fromConfig(obj.asSection(), manager, tryParseJSON)
-            );
+                languages.put(
+                        path.getFileName().toString().substring(0, path.getFileName().toString().lastIndexOf(".")),
+                        LangRegistry.fromConfig(obj.asSection(), manager, tryParseJSON)
+                );
+            });
+
+        } catch (IOException ex) {
+            throw new RuntimeException("An error occurred while scanning lang directory!", ex);
         }
     }
 

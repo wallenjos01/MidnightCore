@@ -10,9 +10,10 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.time.Clock;
 import java.time.Instant;
@@ -91,10 +92,10 @@ public abstract class PluginMessageBroker {
 
     protected abstract void onShutdown();
 
-    protected abstract File getKeyFile();
+    protected abstract Path getKeyFile();
 
-    protected static SecretKey readKey(File file) {
-        try(FileInputStream fis = new FileInputStream(file)) {
+    protected static SecretKey readKey(Path file) {
+        try(InputStream fis = Files.newInputStream(file)) {
 
             byte[] buffer = new byte[16];
             if(fis.read(buffer) != 16) {

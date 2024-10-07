@@ -9,7 +9,9 @@ import org.wallentines.mdcfg.codec.FileCodecRegistry;
 import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Queue;
@@ -19,7 +21,7 @@ import java.util.Queue;
  */
 public class DataManager {
 
-    private final File searchDirectory;
+    private final Path searchDirectory;
     private final FileCodecRegistry fileCodecRegistry;
     private final HashMap<String, FileWrapper<ConfigObject>> openFiles = new HashMap<>();
     private final Queue<String> opened = new ArrayDeque<>();
@@ -34,7 +36,7 @@ public class DataManager {
      * Constructs a new data manager with the given search directory, using the default codec registry
      * @param searchDirectory The directory to search for and save data files in
      */
-    public DataManager(File searchDirectory) {
+    public DataManager(Path searchDirectory) {
         this(searchDirectory, MidnightCoreAPI.FILE_CODEC_REGISTRY);
     }
 
@@ -43,7 +45,7 @@ public class DataManager {
      * @param searchDirectory The directory to search for and save data files in
      * @param fileCodecRegistry The codecs to use to decode and encode data files
      */
-    public DataManager(File searchDirectory, FileCodecRegistry fileCodecRegistry) {
+    public DataManager(Path searchDirectory, FileCodecRegistry fileCodecRegistry) {
         this.searchDirectory = searchDirectory;
         this.fileCodecRegistry = fileCodecRegistry;
     }
@@ -138,9 +140,13 @@ public class DataManager {
 
         if(obj == null) return true;
 
-        if(!obj.getFile().delete()) {
-            MidnightCoreAPI.LOGGER.error("Unable to delete data file " + obj.getFile().getAbsolutePath() + "!");
-            return false;
+        try {
+            if (!Files.deleteIfExists(obj.getPath())) {
+                MidnightCoreAPI.LOGGER.error("Unable to delete data file {}!", obj.getPath());
+                return false;
+            }
+        } catch (IOException ex) {
+            MidnightCoreAPI.LOGGER.error("An error occurred while deleting data file {}!", obj.getPath(), ex);
         }
         return true;
     }

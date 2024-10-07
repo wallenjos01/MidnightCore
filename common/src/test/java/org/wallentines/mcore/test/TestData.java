@@ -8,6 +8,7 @@ import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.JSONCodec;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 public class TestData {
 
@@ -21,7 +22,7 @@ public class TestData {
             Assertions.fail("Unable to create data directory!");
         }
 
-        DataManager manager = new DataManager(new File("data"));
+        DataManager manager = new DataManager(Paths.get("data"));
         ConfigSection saved = new ConfigSection().with("key", "value").with("number", 42);
         manager.save("test", saved);
 

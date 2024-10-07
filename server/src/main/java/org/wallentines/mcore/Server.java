@@ -9,7 +9,6 @@ import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
 import org.wallentines.midnightlib.event.SingletonHandlerList;
-import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
@@ -17,7 +16,8 @@ import org.wallentines.midnightlib.requirement.CheckType;
 import org.wallentines.midnightlib.requirement.Requirement;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -103,10 +103,14 @@ public interface Server {
      */
     default FileWrapper<ConfigObject> getModuleConfig() {
 
-        File moduleStorage = getConfigDirectory().resolve("MidnightCore").toFile();
+        Path moduleStorage = getConfigDirectory().resolve("MidnightCore");
 
-        if(!moduleStorage.isDirectory() && !moduleStorage.mkdirs()) {
-            throw new IllegalStateException("Unable to create module storage directory!");
+        if(!Files.isDirectory(moduleStorage)) {
+            try {
+                Files.createDirectories(moduleStorage);
+            } catch (IOException ex) {
+                throw new RuntimeException("Unable to create module storage directory!", ex);
+            }
         }
 
         return MidnightCoreAPI.FILE_CODEC_REGISTRY.findOrCreate(ConfigContext.INSTANCE, "modules", moduleStorage, new ConfigSection());

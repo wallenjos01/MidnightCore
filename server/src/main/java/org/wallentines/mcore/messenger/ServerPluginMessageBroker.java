@@ -7,7 +7,7 @@ import org.wallentines.mcore.pluginmsg.ServerPluginMessageModule;
 import org.wallentines.mcore.util.PacketBufferUtil;
 import org.wallentines.mdcfg.serializer.InlineSerializer;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,8 +131,8 @@ public class ServerPluginMessageBroker extends PluginMessageBroker {
     }
 
     @Override
-    protected File getKeyFile() {
-        return server.getConfigDirectory().resolve("MidnightCore").resolve("messenger.key").toFile();
+    protected Path getKeyFile() {
+        return server.getConfigDirectory().resolve("MidnightCore").resolve("messenger.key");
     }
 
 

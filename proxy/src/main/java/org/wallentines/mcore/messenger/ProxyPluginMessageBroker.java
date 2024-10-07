@@ -12,10 +12,11 @@ import org.wallentines.mdcfg.serializer.*;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
@@ -99,8 +100,8 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
 
     private void loadRegistrations() {
 
-        File in = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.mdb").toFile();
-        if(!in.exists()) return;
+        Path in = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.mdb");
+        if(!Files.exists(in)) return;
 
         ConfigList root;
         try {
@@ -166,7 +167,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
 
         if(enablePersistence) {
 
-            File out = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.mdb").toFile();
+            Path out = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.mdb");
             ConfigList root = new ConfigList();
             Serializer<ForwardInfo> ser = ForwardInfo.SERIALIZER.forContext(proxy);
             for(ForwardInfo fi : forwarders.values()) {
@@ -183,14 +184,14 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     }
 
     @Override
-    protected File getKeyFile() {
+    protected Path getKeyFile() {
 
-        File out = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.key").toFile();
-        if(!out.exists()) {
+        Path out = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.key");
+        if(!Files.exists(out)) {
 
             SecureRandom random = new SecureRandom();
 
-            try(FileOutputStream fos = new FileOutputStream(out)) {
+            try(OutputStream fos = Files.newOutputStream(out)) {
                 KeyGenerator gen = KeyGenerator.getInstance("AES");
                 gen.init(128, random);
                 SecretKey key = gen.generateKey();
