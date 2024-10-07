@@ -1,5 +1,7 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.util.ModuleUtil;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
@@ -55,5 +57,13 @@ public interface Client {
      * is created and will not be reset for the lifecycle of the application
      */
     Singleton<Client> RUNNING_CLIENT = new Singleton<>();
+
+    static void registerPlaceholders(PlaceholderManager manager) {
+
+        manager.registerSupplier("client_modules_loaded", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Client.class, srv -> srv.getModuleManager().getCount() + "", "0")));
+        manager.registerSupplier("client_modules_registered", PlaceholderSupplier.inline(ctx -> ClientModule.REGISTRY.getSize() + ""));
+        manager.registerSupplier("client_config_dir", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Client.class, srv -> srv.getConfigDirectory().toString(), "")));
+
+    }
 
 }

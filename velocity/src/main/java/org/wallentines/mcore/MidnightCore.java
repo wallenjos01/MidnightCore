@@ -36,6 +36,7 @@ public class MidnightCore {
         ProxyModule.tryRegister(VelocitySQLModule.ID, VelocitySQLModule.MODULE_INFO);
         ProxyModule.tryRegister(ProxyMessengerModule.ID, ProxyMessengerModule.MODULE_INFO);
 
+        Proxy.registerPlaceholders(PlaceholderManager.INSTANCE);
         ProxyPlayer.registerPlaceholders(PlaceholderManager.INSTANCE);
     }
 

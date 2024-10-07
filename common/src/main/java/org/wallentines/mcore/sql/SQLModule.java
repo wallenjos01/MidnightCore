@@ -1,130 +1,81 @@
 package org.wallentines.mcore.sql;
 
 import org.wallentines.mcore.MidnightCoreAPI;
+import org.wallentines.mcore.lang.PlaceholderContext;
+import org.wallentines.mcore.lang.UnresolvedComponent;
+import org.wallentines.mdcfg.ConfigList;
+import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.sql.DriverRepository;
+import org.wallentines.mdcfg.sql.PresetRegistry;
+import org.wallentines.mdcfg.sql.DatabasePreset;
 import org.wallentines.mdcfg.sql.SQLConnection;
 import org.wallentines.midnightlib.registry.Identifier;
-import org.wallentines.midnightlib.registry.Registry;
 
-import java.io.File;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public abstract class SQLModule {
 
-    protected DriverRepository repo;
+    //protected DriverRepository repo;
+    protected PresetRegistry registry;
     protected Executor executor;
-    protected final Registry<String, DatabasePreset> presets = Registry.createStringRegistry();
+//    protected final Registry<String, DatabasePreset> presets = Registry.createStringRegistry();
+
+    private static ConfigObject applyPlaceholders(ConfigObject obj, PlaceholderContext ctx) {
+        if(obj.isString()) {
+            return new ConfigPrimitive(UnresolvedComponent.parse(obj.asString()).getOrThrow().resolveFlat(ctx));
+        } else if(obj.isSection()) {
+            ConfigSection sec = new ConfigSection();
+            for(String key : obj.asSection().getKeys()) {
+                sec.set(key, applyPlaceholders(obj.asSection().get(key), ctx));
+            }
+            return sec;
+        } else if(obj.isList()) {
+            ConfigList list = new ConfigList();
+            for(ConfigObject entry : obj.asList().values()) {
+                list.add(applyPlaceholders(entry, ctx));
+            }
+            return list;
+        } else {
+            return obj;
+        }
+    }
 
     protected void init(ConfigSection config, Executor executor) {
 
-        presets.clear();
+        this.registry = PresetRegistry.SERIALIZER.deserialize(ConfigContext.INSTANCE, applyPlaceholders(config, new PlaceholderContext())).getOrThrow();
         this.executor = executor;
 
-        Map<String, DriverRepository.DriverSpec> drivers = new HashMap<>(DriverRepository.DEFAULT_DRIVERS);
-        ConfigSection driverSec = config.getSection("additional_drivers");
-        for(String key : driverSec.getKeys()) {
-            DriverRepository.DriverSpec spec = driverSec.get(key, DriverRepository.DRIVER_SERIALIZER);
-            drivers.put(key, spec);
-        }
+    }
 
-        String type = config.getOrDefault("repo_type", "folder");
-        File folder = MidnightCoreAPI.GLOBAL_CONFIG_DIRECTORY.get().resolve("MidnightCore").resolve(config.getOrDefault("repo_dir", "sql_drivers")).toFile();
-        switch (type) {
-            case "maven": {
-                if (!folder.isDirectory() && !folder.mkdirs()) {
-                    throw new IllegalStateException("Unable to create SQL driver directory!");
-                }
-                this.repo = new DriverRepository.Maven(folder, drivers);
-                break;
-            }
-            case "folder": {
-                if (!folder.isDirectory() && !folder.mkdirs()) {
-                    throw new IllegalStateException("Unable to create SQL driver directory!");
-                }
-                this.repo = new DriverRepository.Folder(folder, drivers);
-                break;
-            }
-            case "classpath":
-                this.repo = new DriverRepository.Classpath(drivers);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown repository type " + type + "!");
-        }
-
-        ConfigSection presetSec = config.getSection("presets");
-        for(String key : presetSec.getKeys()) {
-            presets.register(key, presetSec.get(key, DatabasePreset.SERIALIZER));
-        }
-
+    public PresetRegistry getRegistry() {
+        return registry;
     }
 
     public DriverRepository getRepository() {
-        return repo;
+        return registry.getRepository();
     }
 
     public DatabasePreset getPreset(String id) {
-        return presets.get(id);
+        return registry.getPreset(id);
     }
 
     public Collection<String> getPresetIds() {
-        return presets.getIds();
-    }
-
-    public CompletableFuture<SQLConnection> connect(ConnectionSpec spec) {
-
-        String combinedUrl = spec.url;
-        if(spec.database != null) {
-            combinedUrl += "/" + spec.database;
-        }
-
-        final String finalUrl = combinedUrl;
-        return CompletableFuture.supplyAsync(() -> repo.getDriver(spec.driver).create(finalUrl, spec.username, spec.password, spec.tablePrefix, spec.parameters));
-    }
-
-    public CompletableFuture<SQLConnection> connect(DatabasePreset preset, ConfigSection config) {
-        ConnectionSpec spec = preset.finalize(config).getOrThrow();
-        return connect(spec);
+        return registry.getPresets().keySet();
     }
 
     public CompletableFuture<SQLConnection> connect(ConfigSection config) {
-        String preset = config.getOrDefault("preset", "default");
-        return connect(getPreset(preset), config);
+        return registry.connect(config, executor);
     }
-
-
-    public CompletableFuture<SQLConnection> connect(ConnectionSpec spec, Executor executor) {
-
-        String combinedUrl = spec.url;
-        if(spec.database != null) {
-            combinedUrl += "/" + spec.database;
-        }
-
-        final String finalUrl = combinedUrl;
-        return CompletableFuture.supplyAsync(() -> repo.getDriver(spec.driver).create(finalUrl, spec.username, spec.password, spec.tablePrefix, spec.parameters), executor);
-    }
-
-    public CompletableFuture<SQLConnection> connect(DatabasePreset preset, ConfigSection config, Executor executor) {
-        ConnectionSpec spec = preset.finalize(config).getOrThrow();
-        return connect(spec, executor);
-    }
-
-    public CompletableFuture<SQLConnection> connect(ConfigSection config, Executor executor) {
-        String preset = config.getOrDefault("preset", "default");
-        return connect(getPreset(preset), config, executor);
-    }
-
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "sql");
-
     public static final ConfigSection DEFAULT_CONFIG = new ConfigSection()
-            .with("enabled", false)
-            .with("repo_type", "maven")
-            .with("repo_dir", "sql_drivers")
-            .with("additional_drivers", new ConfigSection());
+            .with("repository", new ConfigSection()
+                    .with("type", "maven")
+                    .with("folder", "%global_config_dir%/MidnightCore/sql_drivers"));
 
 }

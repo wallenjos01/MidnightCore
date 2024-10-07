@@ -1,15 +1,14 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.lang.PlaceholderManager;
+import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.util.ModuleUtil;
 import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.codec.FileWrapper;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.midnightlib.event.HandlerList;
-import org.wallentines.midnightlib.module.ModuleInfo;
 import org.wallentines.midnightlib.module.ModuleManager;
-import org.wallentines.midnightlib.registry.Identifier;
-import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.types.Singleton;
 
 import java.io.File;
@@ -132,6 +131,15 @@ public interface Proxy {
             this.server = server;
             this.previousServer = previousServer;
         }
+    }
+
+    static void registerPlaceholders(PlaceholderManager manager) {
+
+        manager.registerSupplier("proxy_modules_loaded", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Proxy.class, srv -> srv.getModuleManager().getCount() + "", "0")));
+        manager.registerSupplier("proxy_player_count", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Proxy.class, srv -> srv.getPlayerCount() + "", "0")));
+        manager.registerSupplier("proxy_modules_registered", PlaceholderSupplier.inline(ctx -> ProxyModule.REGISTRY.getSize() + ""));
+        manager.registerSupplier("proxy_config_dir", PlaceholderSupplier.inline(ctx -> ctx.onValueOr(Proxy.class, srv -> srv.getConfigDirectory().toString(), "")));
+
     }
 
 }
