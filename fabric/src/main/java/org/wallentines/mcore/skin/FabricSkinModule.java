@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.wallentines.mcore.*;
@@ -80,7 +81,7 @@ public class FabricSkinModule extends SkinModule {
         ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(spl.createCommonSpawnInfo(world), (byte) 3);
 
 
-        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getId(), spl.position(), spl.getDeltaMovement(), spl.getRotationVector().y, spl.getRotationVector().x, new HashSet<>());
+        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getId(), PositionMoveRotation.of(spl), new HashSet<>());
         ClientboundSetExperiencePacket experience = new ClientboundSetExperiencePacket(spl.experienceProgress, spl.totalExperience, spl.experienceLevel);
 
 
