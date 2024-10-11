@@ -46,13 +46,40 @@ public class TestUnresolved {
 
         Color color = Color.fromRGBI(10);
         plm.registerSupplier("color", PlaceholderSupplier.inline(ctx -> color.toHex()));
-        plm.registerSupplier("name", PlaceholderSupplier.of(ctx -> Component.text("Name").withColor(color)));
+        plm.registerSupplier("name", PlaceholderSupplier.of(ctx -> Component.text("Name").withColor(Color.fromRGBI(11))));
 
-        UnresolvedComponent un = plm.parse("&%color%Hello, %name%!");
+        UnresolvedComponent un = plm.parse("&%color%&lHello&f, %name%!");
         Component cmp = un.resolve(plm, new PlaceholderContext());
 
         Assertions.assertEquals("Hello, Name!", cmp.allText());
-        Assertions.assertEquals(Component.text("Hello, ").withColor(color).addChild(Component.text("Name").withColor(color)).addChild(Component.text("!")), cmp);
+        Assertions.assertEquals(
+                Component.empty().withColor(color)
+                        .addChild(Component.text("Hello").withBold(true))
+                        .addChild(Component.text(", ").withColor(Color.WHITE)
+                            .addChild(Component.text("Name").withColor(Color.fromRGBI(11)))
+                        )
+                        .addChild(Component.text("!")),
+                cmp
+        );
+
+    }
+
+    @Test
+    public void testFormatting() {
+
+        PlaceholderManager plm = new PlaceholderManager();
+        plm.registerSupplier("name", PlaceholderSupplier.of(ctx -> Component.text("Name").withItalic(true)));
+
+        UnresolvedComponent un = plm.parse("&aHello, %name%!");
+        Component cmp = un.resolve(plm, new PlaceholderContext());
+
+        Assertions.assertEquals("Hello, Name!", cmp.allText());
+        Assertions.assertEquals(
+                Component.text("Hello, ").withColor(Color.fromRGBI(10))
+                        .addChild(Component.text("Name").withItalic(true))
+                        .addChild(Component.text("!")),
+                cmp
+        );
 
     }
 

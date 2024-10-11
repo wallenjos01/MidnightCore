@@ -24,11 +24,11 @@ public class TestComponentSerializing {
 
         Assertions.assertEquals(TextColor.GOLD, comp.color);
         Assertions.assertEquals(1, comp.children.size());
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
 
         Assertions.assertEquals(TextColor.LIGHT_PURPLE, comp.children.get(0).color);
         Assertions.assertEquals(0, comp.children.get(0).children.size());
-        Assertions.assertTrue(comp.children.get(0).content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.children.get(0).content);
 
     }
 
@@ -43,11 +43,11 @@ public class TestComponentSerializing {
         Component comp = parsed.getOrThrow();
         Assertions.assertEquals(TextColor.GREEN, comp.color);
         Assertions.assertEquals(1, comp.children.size());
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
 
         Assertions.assertEquals(TextColor.AQUA, comp.children.get(0).color);
         Assertions.assertEquals(0, comp.children.get(0).children.size());
-        Assertions.assertTrue(comp.children.get(0).content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.children.get(0).content);
 
         String serialized = comp.toLegacyText();
         String serialized2 = LegacySerializer.INSTANCE.serialize(ConfigContext.INSTANCE, comp).getOrThrow().asString();
@@ -90,7 +90,7 @@ public class TestComponentSerializing {
 
         Component comp = parsedString.getOrThrow();
         Assertions.assertNull(comp.color);
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
         Assertions.assertEquals(0, comp.children.size());
 
 
@@ -102,7 +102,7 @@ public class TestComponentSerializing {
 
         comp = parsedNumber.getOrThrow();
         Assertions.assertNull(comp.color);
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
         Assertions.assertEquals(0, comp.children.size());
 
 
@@ -114,7 +114,7 @@ public class TestComponentSerializing {
 
         comp = parsedBool.getOrThrow();
         Assertions.assertNull(comp.color);
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
         Assertions.assertEquals(0, comp.children.size());
 
 
@@ -126,7 +126,7 @@ public class TestComponentSerializing {
 
         comp = parsedObject.getOrThrow();
         Assertions.assertEquals(TextColor.GREEN, comp.color);
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
         Assertions.assertEquals(0, comp.children.size());
 
 
@@ -138,12 +138,12 @@ public class TestComponentSerializing {
 
         comp = parsedList.getOrThrow();
         Assertions.assertEquals(TextColor.GREEN, comp.color);
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
         Assertions.assertEquals(1, comp.children.size());
 
         Assertions.assertEquals(TextColor.GREEN, comp.children.get(0).color);
         Assertions.assertEquals(0, comp.children.get(0).children.size());
-        Assertions.assertTrue(comp.children.get(0).content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.children.get(0).content);
 
     }
 
@@ -157,12 +157,12 @@ public class TestComponentSerializing {
 
         Component comp = parsed.getOrThrow();
         Assertions.assertEquals(TextColor.GREEN, comp.color);
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
         Assertions.assertEquals(1, comp.children.size());
 
         Assertions.assertEquals(new Color(0x354a56), comp.children.get(0).color);
         Assertions.assertEquals(0, comp.children.get(0).children.size());
-        Assertions.assertTrue(comp.children.get(0).content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.children.get(0).content);
 
 
         testModern(ConfigSerializer.INSTANCE);
@@ -176,7 +176,7 @@ public class TestComponentSerializing {
         comp = parsed.getOrThrow();
         Assertions.assertEquals(TextColor.GREEN, comp.color);
         Assertions.assertEquals("Hello, #354a56World", comp.text());
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
         Assertions.assertEquals(0, comp.children.size());
 
 
@@ -188,8 +188,35 @@ public class TestComponentSerializing {
         comp = parsed.getOrThrow();
         Assertions.assertEquals(TextColor.GREEN, comp.color);
         Assertions.assertEquals("Hello, &6World", comp.text());
-        Assertions.assertTrue(comp.content instanceof Content.Text);
+        Assertions.assertInstanceOf(Content.Text.class, comp.content);
         Assertions.assertEquals(0, comp.children.size());
+
+
+        testConfigString("Hello", Component.text("Hello"));
+
+        testConfigString("&lHello", Component.text("Hello").withBold(true));
+        testConfigString("&oHello", Component.text("Hello").withItalic(true));
+        testConfigString("&nHello", Component.text("Hello").withUnderlined(true));
+        testConfigString("&mHello", Component.text("Hello").withStrikethrough(true));
+        testConfigString("&kHello", Component.text("Hello").withObfuscated(true));
+
+        testConfigString("&6Hello", Component.text("Hello").withColor(Color.fromRGBI(6)));
+        testConfigString("&6&lHello", Component.text("Hello").withColor(Color.fromRGBI(6)).withBold(true));
+        testConfigString("&6&l&oHello", Component.text("Hello").withColor(Color.fromRGBI(6)).withBold(true).withItalic(true));
+        testConfigString("&6&l&o&nHello", Component.text("Hello").withColor(Color.fromRGBI(6)).withBold(true).withItalic(true).withUnderlined(true));
+        testConfigString("&6&l&o&n&mHello", Component.text("Hello").withColor(Color.fromRGBI(6)).withBold(true).withItalic(true).withUnderlined(true).withStrikethrough(true));
+        testConfigString("&6&l&o&n&m&kHello", Component.text("Hello").withColor(Color.fromRGBI(6)).withBold(true).withItalic(true).withUnderlined(true).withStrikethrough(true).withObfuscated(true));
+
+        testConfigString("&6Hello, &eWorld", Component.text("Hello, ").withColor(Color.fromRGBI(6)).addChild(Component.text("World").withColor(Color.fromRGBI(14))));
+        testConfigString("&6&lHello, &eWorld", Component.empty().withColor(Color.fromRGBI(6)).addChild(Component.text("Hello, ").withBold(true)).addChild(Component.text("World").withColor(Color.fromRGBI(14))));
+
+        testConfigString("&6&lHello, &oWorld", Component.empty().withColor(Color.fromRGBI(6)).addChild(Component.text("Hello, ").withBold(true)).addChild(Component.text("World").withItalic(true)));
+
+    }
+
+
+    private void testConfigString(String str, Component expected) {
+        Assertions.assertEquals(expected, ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(str)).getOrThrow());
     }
 
     @Test

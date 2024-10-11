@@ -230,7 +230,7 @@ public class UnresolvedComponent {
 
     public static class Builder {
 
-        private List<Either<String, UnresolvedPlaceholder>> parts = new ArrayList<>();
+        private final List<Either<String, UnresolvedPlaceholder>> parts = new ArrayList<>();
         private PlaceholderContext context = new PlaceholderContext();
         private boolean tryParseJSON;
         private boolean completed = true;
@@ -481,24 +481,18 @@ public class UnresolvedComponent {
         for(Either<String, Component> cmp : inlined) {
 
             if(cmp.hasLeft()) {
-                MutableComponent text = MutableComponent.fromComponent(ConfigSerializer.NO_JSON.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(cmp.leftOrThrow())).getOrThrow());
+                MutableComponent next = MutableComponent.fromComponent(ConfigSerializer.NO_JSON.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(cmp.leftOrThrow())).getOrThrow());
                 if(out == null) {
-                    out = text;
+                    out = next;
                 } else {
-                    out.addChild(text);
+                    out.addChild(next);
                 }
-
             } else {
-
                 MutableComponent next = MutableComponent.fromComponent(cmp.rightOrThrow());
                 if(out == null) {
                     out = next;
                 } else {
-                    if (out.children.isEmpty()) {
-                        out.addChild(next);
-                    } else {
-                        out.getChild(out.children.size() - 1).addChild(next);
-                    }
+                    out.append(next);
                 }
             }
         }
