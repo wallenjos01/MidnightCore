@@ -13,12 +13,6 @@ import org.wallentines.midnightlib.types.Either;
  */
 public class LegacySerializer implements Serializer<Component> {
 
-
-    /**
-     * Contains serializers for the default content types
-     */
-    //public static final StringRegistry<InlineContentSerializer<?>> CONTENT_SERIALIZERS = new StringRegistry<>();
-
     /**
      * A LegacySerializer instance which uses the color code character and does not support hex. For true legacy text
      */
@@ -200,33 +194,6 @@ public class LegacySerializer implements Serializer<Component> {
         }
 
         return out.toComponent();
-
-//        MutableComponent first = out.get(0);
-//        if(out.size() > 1 && first.hasFormatting()) {
-//
-//            MutableComponent child = MutableComponent.empty();
-//            child.content = first.content;
-//            child.bold = first.bold;
-//            child.italic = first.italic;
-//            child.underlined = first.underlined;
-//            child.strikethrough = first.strikethrough;
-//            child.obfuscated = first.obfuscated;
-//
-//            first.content = new Content.Text("");
-//            first.bold = null;
-//            first.italic = null;
-//            first.underlined = null;
-//            first.strikethrough = null;
-//            first.obfuscated = null;
-//
-//            first.addChild(child);
-//        }
-//
-//        for(int i = 1; i < out.size() ; i++) {
-//            first.addChild(out.get(i));
-//        }
-//
-//        return first.toComponent();
     }
 
 

@@ -57,8 +57,8 @@ public class TestUnresolved {
                         .addChild(Component.text("Hello").withBold(true))
                         .addChild(Component.text(", ").withColor(Color.WHITE)
                             .addChild(Component.text("Name").withColor(Color.fromRGBI(11)))
-                        )
-                        .addChild(Component.text("!")),
+                            .addChild(Component.text("!"))
+                        ),
                 cmp
         );
 

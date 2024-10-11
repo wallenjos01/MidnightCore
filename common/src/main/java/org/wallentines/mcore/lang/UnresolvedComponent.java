@@ -477,28 +477,34 @@ public class UnresolvedComponent {
 
     private Component resolveConfigText(List<Either<String, Component>> inlined) {
 
+        if(inlined.isEmpty()) {
+            return Component.empty();
+        }
+        else if(inlined.size() == 1) {
+            return inlined.get(0).rightOrGet(str -> ConfigSerializer.NO_JSON.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(str)).getOrThrow());
+        }
+
         MutableComponent out = null;
+        MutableComponent lastLiteral = null;
+
         for(Either<String, Component> cmp : inlined) {
 
             if(cmp.hasLeft()) {
-                MutableComponent next = MutableComponent.fromComponent(ConfigSerializer.NO_JSON.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(cmp.leftOrThrow())).getOrThrow());
-                if(out == null) {
-                    out = next;
+                MutableComponent text = MutableComponent.fromComponent(ConfigSerializer.NO_JSON.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(cmp.leftOrThrow())).getOrThrow());
+                if(lastLiteral == null) {
+                    out = text;
                 } else {
-                    out.addChild(next);
+                    lastLiteral.addChild(text);
                 }
+                lastLiteral = text.getLastChild();
             } else {
-                MutableComponent next = MutableComponent.fromComponent(cmp.rightOrThrow());
-                if(out == null) {
-                    out = next;
-                } else {
-                    out.append(next);
+                Component next = cmp.rightOrThrow();
+                if(lastLiteral == null) {
+                    out = MutableComponent.empty();
+                    lastLiteral = out;
                 }
+                lastLiteral.addChild(next);
             }
-        }
-
-        if(out == null) {
-            return Component.empty();
         }
 
         return out.toComponent();

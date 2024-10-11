@@ -112,12 +112,22 @@ public class MutableComponent {
         });
     }
 
+    public void addChild(Either<Component, MutableComponent> cmp) {
+        this.children.add(cmp);
+    }
+
+
     public void addChild(MutableComponent cmp) {
         this.children.add(Either.right(cmp));
     }
 
     public void addChild(Component cmp) {
         this.children.add(Either.left(cmp));
+    }
+
+    public MutableComponent getLastChild() {
+        if(children.isEmpty()) return this;
+        return getChild(children.size() - 1);
     }
 
     public MutableComponent copy() {
@@ -133,14 +143,6 @@ public class MutableComponent {
         out.hoverEvent = this.hoverEvent;
         out.clickEvent = this.clickEvent;
         return out;
-    }
-
-    public void append(MutableComponent cmp) {
-        if(this.children.isEmpty()) {
-            addChild(cmp);
-            return;
-        }
-        getChild(children.size() - 1).addChild(cmp);
     }
 
     /**
