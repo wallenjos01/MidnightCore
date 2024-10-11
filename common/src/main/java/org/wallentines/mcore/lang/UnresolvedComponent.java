@@ -481,7 +481,7 @@ public class UnresolvedComponent {
         for(Either<String, Component> cmp : inlined) {
 
             if(cmp.hasLeft()) {
-                MutableComponent text = MutableComponent.fromComponent(ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(cmp.leftOrThrow())).getOrThrow());
+                MutableComponent text = MutableComponent.fromComponent(ConfigSerializer.NO_JSON.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(cmp.leftOrThrow())).getOrThrow());
                 if(out == null) {
                     out = text;
                 } else {

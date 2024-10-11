@@ -34,7 +34,6 @@ public class LegacySerializer implements Serializer<Component> {
 
     private final Character colorChar;
     private final boolean hexSupport;
-    //private final RegistryBase<String, InlineContentSerializer<?>> serializers;
 
     /**
      * Creates a LegacySerializer with the given color character, and optional rgb color support
@@ -137,7 +136,9 @@ public class LegacySerializer implements Serializer<Component> {
                 } else if(hexSupport && next == '#' && i < content.length() - 8) {
 
                     String hex = content.substring(i + 2, i + 8);
-                    out.add(currentComponent.withContent(new Content.Text(currentString.toString())));
+                    if(!currentString.isEmpty()) {
+                        out.add(currentComponent.withContent(new Content.Text(currentString.toString())));
+                    }
 
                     currentString = new StringBuilder();
 

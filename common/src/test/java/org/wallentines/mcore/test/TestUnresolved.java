@@ -8,6 +8,7 @@ import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.midnightlib.math.Color;
 
 public class TestUnresolved {
 
@@ -35,6 +36,23 @@ public class TestUnresolved {
 
 
         Assertions.assertEquals(comp, comp2);
+
+    }
+
+    @Test
+    public void testComponent() {
+
+        PlaceholderManager plm = new PlaceholderManager();
+
+        Color color = Color.fromRGBI(10);
+        plm.registerSupplier("color", PlaceholderSupplier.inline(ctx -> color.toHex()));
+        plm.registerSupplier("name", PlaceholderSupplier.of(ctx -> Component.text("Name").withColor(color)));
+
+        UnresolvedComponent un = plm.parse("&%color%Hello, %name%!");
+        Component cmp = un.resolve(plm, new PlaceholderContext());
+
+        Assertions.assertEquals("Hello, Name!", cmp.allText());
+        Assertions.assertEquals(Component.text("Hello, ").withColor(color).addChild(Component.text("Name").withColor(color)).addChild(Component.text("!")), cmp);
 
     }
 

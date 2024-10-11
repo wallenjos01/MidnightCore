@@ -15,7 +15,18 @@ public class ConfigSerializer implements Serializer<Component> {
     /**
      * The global instance of a ConfigSerializer
      */
-    public static final ConfigSerializer INSTANCE = new ConfigSerializer();
+    public static final ConfigSerializer INSTANCE = new ConfigSerializer(true);
+
+    /**
+     * The global instance of a ConfigSerializer
+     */
+    public static final ConfigSerializer NO_JSON = new ConfigSerializer(false);
+
+    private final boolean tryParseJSON;
+
+    public ConfigSerializer(boolean tryParseJSON) {
+        this.tryParseJSON = tryParseJSON;
+    }
 
     @Override
     public <O> SerializeResult<O> serialize(SerializeContext<O> context, Component value) {
@@ -32,15 +43,17 @@ public class ConfigSerializer implements Serializer<Component> {
 
         if(context.isString(value)) {
 
-            String s = context.asString(value);
-            String stripped = s.stripLeading();
-            if(stripped.isEmpty()) return SerializeResult.success(Component.text(s));
-            if(stripped.charAt(0) == '{') {
-                try {
-                    O sec = JSONCodec.minified().decode(context, stripped);
-                    return ModernSerializer.INSTANCE.forContext(GameVersion.MAX).deserialize(context, sec);
-                } catch (DecodeException ex) {
-                    // Ignore
+            if(tryParseJSON) {
+                String s = context.asString(value);
+                String stripped = s.stripLeading();
+                if (stripped.isEmpty()) return SerializeResult.success(Component.text(s));
+                if (stripped.charAt(0) == '{') {
+                    try {
+                        O sec = JSONCodec.minified().decode(context, stripped);
+                        return ModernSerializer.INSTANCE.forContext(GameVersion.MAX).deserialize(context, sec);
+                    } catch (DecodeException ex) {
+                        // Ignore
+                    }
                 }
             }
 

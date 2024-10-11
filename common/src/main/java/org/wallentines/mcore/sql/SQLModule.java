@@ -20,10 +20,8 @@ import java.util.concurrent.Executor;
 
 public abstract class SQLModule {
 
-    //protected DriverRepository repo;
     protected PresetRegistry registry;
     protected Executor executor;
-//    protected final Registry<String, DatabasePreset> presets = Registry.createStringRegistry();
 
     private static ConfigObject applyPlaceholders(ConfigObject obj, PlaceholderContext ctx) {
         if(obj.isString()) {

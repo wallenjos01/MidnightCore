@@ -40,7 +40,7 @@ public class Init implements ModInitializer {
             try {
                 defaults = JSONCodec.loadConfig(Init.class.getResourceAsStream("/midnightcore/en_us.json")).asSection();
             } catch (IOException ex) {
-                MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! " + ex.getMessage());
+                MidnightCoreAPI.LOGGER.error("Unable to load default lang entries from jar resource! {}", ex.getMessage());
             }
             MinecraftServer server = ConversionUtil.validate(srv);
             MidnightCoreServer mcs = new MidnightCoreServer(srv, LangRegistry.fromConfig(defaults, PlaceholderManager.INSTANCE));
