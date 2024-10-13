@@ -122,11 +122,19 @@ public abstract class CustomScoreboard {
     public void setNumberFormat(int line, NumberFormatType format, UnresolvedComponent argument) {
 
         if(entries[line] == null) return;
-        entries[line].format = new NumberFormat(format, argument);
+        entries[line] = new Line(entries[line].line.copy(), new NumberFormat(format, argument));
         for(WrappedPlayer p : viewers) {
             Player pl = p.get();
             if(pl != null) updateNumberFormat(line, pl);
         }
+    }
+
+    public CustomScoreboard copy() {
+        CustomScoreboard out = FACTORY.get().create(title);
+        out.context = context;
+        out.numberFormat = numberFormat;
+        System.arraycopy(entries, 0, out.entries, 0, entries.length);
+        return out;
     }
 
     public void forceUpdate() {
@@ -243,7 +251,7 @@ public abstract class CustomScoreboard {
     protected static class Line {
 
         private final UnresolvedComponent line;
-        private NumberFormat format;
+        private final NumberFormat format;
 
         private Line(UnresolvedComponent line, NumberFormat format) {
             this.line = line;
