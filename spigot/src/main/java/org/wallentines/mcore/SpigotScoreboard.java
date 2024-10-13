@@ -3,6 +3,7 @@ package org.wallentines.mcore;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.*;
 import org.wallentines.mcore.adapter.Adapter;
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.util.ConversionUtil;
 
@@ -83,6 +84,7 @@ public class SpigotScoreboard extends CustomScoreboard {
         String objectiveId;
         WeakReference<Scoreboard> originalBoard;
         SpigotPlayer player;
+        PlaceholderContext ctx;
 
         BoardInfo(String objectiveId, SpigotPlayer player) {
             this.objectiveId = objectiveId;
@@ -95,12 +97,13 @@ public class SpigotScoreboard extends CustomScoreboard {
             }
 
             this.board = manager.getNewScoreboard();
+            this.ctx = context.copy().withValue(player);
         }
 
         void init() {
 
             Objective obj = board.registerNewObjective(objectiveId, Criteria.DUMMY, "dummy");
-            Adapter.INSTANCE.get().setObjectiveName(obj, title.resolveFor(player));
+            Adapter.INSTANCE.get().setObjectiveName(obj, title.resolve(ctx));
             obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
             updateNumberFormat();
@@ -127,7 +130,7 @@ public class SpigotScoreboard extends CustomScoreboard {
                 throw new IllegalStateException("Attempt to update scoreboard before initialization!");
             }
 
-            Adapter.INSTANCE.get().setObjectiveName(obj, title.resolveFor(player));
+            Adapter.INSTANCE.get().setObjectiveName(obj, title.resolve(ctx));
         }
 
         void updateLine(int line) {
@@ -149,7 +152,7 @@ public class SpigotScoreboard extends CustomScoreboard {
             if(entries[line] == null) {
                 board.resetScores(playerName);
             } else {
-                Adapter.INSTANCE.get().setTeamPrefix(team, entries[line].line().resolveFor(player));
+                Adapter.INSTANCE.get().setTeamPrefix(team, entries[line].line().resolve(ctx));
                 obj.getScore(playerName).setScore(line);
             }
         }
@@ -161,7 +164,7 @@ public class SpigotScoreboard extends CustomScoreboard {
             }
             if(numberFormat == null) return;
 
-            Adapter.INSTANCE.get().setNumberFormat(obj, numberFormat.type, numberFormat.argument == null ? null : numberFormat.argument.resolveFor(player));
+            Adapter.INSTANCE.get().setNumberFormat(obj, numberFormat.type, numberFormat.argument == null ? null : numberFormat.argument.resolve(ctx));
         }
 
 
@@ -179,7 +182,7 @@ public class SpigotScoreboard extends CustomScoreboard {
             if(og == null) {
                 Adapter.INSTANCE.get().setNumberFormat(obj, NumberFormatType.DEFAULT, null, playerName);
             } else {
-                Adapter.INSTANCE.get().setNumberFormat(obj, og.type, og.argument == null ? null : og.argument.resolveFor(player), playerName);
+                Adapter.INSTANCE.get().setNumberFormat(obj, og.type, og.argument == null ? null : og.argument.resolve(ctx), playerName);
             }
 
         }

@@ -7,6 +7,7 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.*;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -91,12 +92,14 @@ public class FabricScoreboard extends CustomScoreboard {
         PlayerTeam[] teams;
         ServerScoreboard board;
         ServerPlayer player;
+        PlaceholderContext ctx;
 
         public BoardInfo(String objectiveId, ServerPlayer spl) {
             this.objectiveId = objectiveId;
             this.teams = new PlayerTeam[15];
             this.board = new ServerScoreboard(spl.server);
             this.player = spl;
+            this.ctx = context.copy().withValue(player);
         }
 
         public void init() {
@@ -104,7 +107,7 @@ public class FabricScoreboard extends CustomScoreboard {
             Objective obj = board.addObjective(
                     objectiveId,
                     ObjectiveCriteria.DUMMY,
-                    new WrappedComponent(title.resolveFor(player)),
+                    new WrappedComponent(title.resolve(ctx)),
                     ObjectiveCriteria.RenderType.INTEGER,
                     false,
                     null);
@@ -134,7 +137,7 @@ public class FabricScoreboard extends CustomScoreboard {
                 throw new IllegalStateException("Attempt to update scoreboard before initialization!");
             }
 
-            obj.setDisplayName(new WrappedComponent(title.resolveFor(player)));
+            obj.setDisplayName(new WrappedComponent(title.resolve(ctx)));
         }
 
         public void updateLine(int line) {
@@ -159,7 +162,7 @@ public class FabricScoreboard extends CustomScoreboard {
             if(entries[line] == null) {
                 board.resetSinglePlayerScore(sh, obj);
             } else {
-                team.setPlayerPrefix(new WrappedComponent(entries[line].line().resolveFor(player)));
+                team.setPlayerPrefix(new WrappedComponent(entries[line].line().resolve(ctx)));
                 board.getOrCreatePlayerScore(sh, obj).set(line);
             }
         }
@@ -175,8 +178,8 @@ public class FabricScoreboard extends CustomScoreboard {
             switch (numberFormat.type) {
                 case DEFAULT -> obj.setNumberFormat(null);
                 case BLANK -> obj.setNumberFormat(BlankFormat.INSTANCE);
-                case STYLED -> obj.setNumberFormat(new StyledFormat(ConversionUtil.getStyle(numberFormat.argument.resolveFor(player))));
-                case FIXED -> obj.setNumberFormat(new FixedFormat(new WrappedComponent(numberFormat.argument.resolveFor(player))));
+                case STYLED -> obj.setNumberFormat(new StyledFormat(ConversionUtil.getStyle(numberFormat.argument.resolve(ctx))));
+                case FIXED -> obj.setNumberFormat(new FixedFormat(new WrappedComponent(numberFormat.argument.resolve(ctx))));
             }
         }
 
@@ -202,8 +205,8 @@ public class FabricScoreboard extends CustomScoreboard {
             switch (fmt.type) {
                 case DEFAULT -> acc.numberFormatOverride(null);
                 case BLANK -> acc.numberFormatOverride(BlankFormat.INSTANCE);
-                case STYLED -> acc.numberFormatOverride(new StyledFormat(ConversionUtil.getStyle(fmt.argument.resolveFor(player))));
-                case FIXED -> acc.numberFormatOverride(new FixedFormat(new WrappedComponent(fmt.argument.resolveFor(player))));
+                case STYLED -> acc.numberFormatOverride(new StyledFormat(ConversionUtil.getStyle(fmt.argument.resolve(ctx))));
+                case FIXED -> acc.numberFormatOverride(new FixedFormat(new WrappedComponent(fmt.argument.resolve(ctx))));
             }
         }
     }

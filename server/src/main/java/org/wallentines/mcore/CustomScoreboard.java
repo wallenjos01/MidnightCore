@@ -1,5 +1,6 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.mdcfg.serializer.*;
@@ -15,6 +16,7 @@ public abstract class CustomScoreboard {
     protected UnresolvedComponent title;
     protected final Line[] entries;
     protected NumberFormat numberFormat;
+    protected PlaceholderContext context;
 
     protected final Set<WrappedPlayer> viewers = new HashSet<>();
 
@@ -23,12 +25,22 @@ public abstract class CustomScoreboard {
         this.entries = new Line[15];
     }
 
+    public CustomScoreboard(UnresolvedComponent title, PlaceholderContext context) {
+        this.title = title;
+        this.entries = new Line[15];
+        this.context = context;
+    }
+
     public void setTitle(UnresolvedComponent title) {
         this.title = title;
         for(WrappedPlayer p : viewers) {
             Player pl = p.get();
             if(pl != null) updateTitle(pl);
         }
+    }
+
+    public void setContext(PlaceholderContext context) {
+        this.context = context;
     }
 
 
