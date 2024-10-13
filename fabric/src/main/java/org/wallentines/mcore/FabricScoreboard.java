@@ -159,7 +159,7 @@ public class FabricScoreboard extends CustomScoreboard {
             if(entries[line] == null) {
                 board.resetSinglePlayerScore(sh, obj);
             } else {
-                team.setPlayerPrefix(new WrappedComponent(entries[line].resolveFor(player)));
+                team.setPlayerPrefix(new WrappedComponent(entries[line].line().resolveFor(player)));
                 board.getOrCreatePlayerScore(sh, obj).set(line);
             }
         }
@@ -193,7 +193,7 @@ public class FabricScoreboard extends CustomScoreboard {
             ScoreHolder sh = ScoreHolder.forNameOnly(playerName);
             ScoreAccess acc = board.getOrCreatePlayerScore(sh, obj);
 
-            NumberFormat fmt = lineFormats[line];
+            NumberFormat fmt = entries[line].format();
             if(fmt == null) {
                 acc.numberFormatOverride(null);
                 return;

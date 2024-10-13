@@ -149,7 +149,7 @@ public class SpigotScoreboard extends CustomScoreboard {
             if(entries[line] == null) {
                 board.resetScores(playerName);
             } else {
-                Adapter.INSTANCE.get().setTeamPrefix(team, entries[line].resolveFor(player));
+                Adapter.INSTANCE.get().setTeamPrefix(team, entries[line].line().resolveFor(player));
                 obj.getScore(playerName).setScore(line);
             }
         }
@@ -175,7 +175,7 @@ public class SpigotScoreboard extends CustomScoreboard {
             String hexIndex = Integer.toHexString(line);
             String playerName = '\u00A7' + hexIndex;
 
-            NumberFormat og = lineFormats[line];
+            NumberFormat og = entries[line].format();
             if(og == null) {
                 Adapter.INSTANCE.get().setNumberFormat(obj, NumberFormatType.DEFAULT, null, playerName);
             } else {
