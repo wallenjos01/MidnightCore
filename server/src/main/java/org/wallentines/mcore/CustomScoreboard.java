@@ -129,6 +129,19 @@ public abstract class CustomScoreboard {
         }
     }
 
+    public void forceUpdate() {
+        for(WrappedPlayer p : viewers) {
+            Player pl = p.get();
+            if(pl != null) {
+                updateTitle(pl);
+                for(int i = 0 ; i < 15 ; i++) {
+                    updateLine(i);
+                    updateNumberFormat(i);
+                }
+            }
+        }
+    }
+
     protected void updateLine(int i) {
         for(WrappedPlayer p : viewers) {
             Player pl = p.get();
