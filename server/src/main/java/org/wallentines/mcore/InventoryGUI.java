@@ -1,5 +1,6 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.Component;
 import org.wallentines.midnightlib.types.Singleton;
@@ -86,37 +87,56 @@ public interface InventoryGUI {
     Singleton<Factory> FACTORY = new Singleton<>();
 
     static SingleInventoryGUI create(Component title, int size) {
-
-        int rows = size / 9;
-        int partialRows = size % 9;
-        if(rows == 0 || partialRows > 0) rows++;
-
-        return FACTORY.get().build(title, rows);
+        return create(UnresolvedComponent.completed(title), size);
     }
 
     static SingleInventoryGUI create(UnresolvedComponent title, int size) {
+        return create(title, size, new PlaceholderContext());
+    }
+
+    static SingleInventoryGUI create(Component title, int size, PlaceholderContext context) {
+        return create(UnresolvedComponent.completed(title), size, context);
+    }
+
+    static SingleInventoryGUI create(UnresolvedComponent title, int size, PlaceholderContext ctx) {
 
         int rows = size / 9;
         int partialRows = size % 9;
         if(rows == 0 || partialRows > 0) rows++;
 
-        return FACTORY.get().build(title, rows);
+        return FACTORY.get().build(title, rows, ctx);
     }
 
     static PagedInventoryGUI createPaged(Component title, PagedInventoryGUI.SizeProvider sizeProvider) {
-        return new PagedInventoryGUI(title, sizeProvider);
+        return new PagedInventoryGUI(UnresolvedComponent.completed(title), sizeProvider, 0, new PlaceholderContext());
     }
 
     static PagedInventoryGUI createPaged(UnresolvedComponent title, PagedInventoryGUI.SizeProvider sizeProvider) {
-        return new PagedInventoryGUI(title, sizeProvider);
+        return new PagedInventoryGUI(title, sizeProvider, 0, new PlaceholderContext());
     }
 
     static PagedInventoryGUI createPaged(Component title, PagedInventoryGUI.SizeProvider sizeProvider, int size) {
-        return new PagedInventoryGUI(title, sizeProvider, size);
+        return new PagedInventoryGUI(UnresolvedComponent.completed(title), sizeProvider, size, new PlaceholderContext());
     }
 
     static PagedInventoryGUI createPaged(UnresolvedComponent title, PagedInventoryGUI.SizeProvider sizeProvider, int size) {
-        return new PagedInventoryGUI(title, sizeProvider, size);
+        return new PagedInventoryGUI(title, sizeProvider, size, new PlaceholderContext());
+    }
+
+    static PagedInventoryGUI createPaged(Component title, PagedInventoryGUI.SizeProvider sizeProvider, PlaceholderContext ctx) {
+        return new PagedInventoryGUI(UnresolvedComponent.completed(title), sizeProvider, 0, ctx);
+    }
+
+    static PagedInventoryGUI createPaged(UnresolvedComponent title, PagedInventoryGUI.SizeProvider sizeProvider, PlaceholderContext ctx) {
+        return new PagedInventoryGUI(title, sizeProvider, 0, ctx);
+    }
+
+    static PagedInventoryGUI createPaged(Component title, PagedInventoryGUI.SizeProvider sizeProvider, int size, PlaceholderContext ctx) {
+        return new PagedInventoryGUI(UnresolvedComponent.completed(title), sizeProvider, size, ctx);
+    }
+
+    static PagedInventoryGUI createPaged(UnresolvedComponent title, PagedInventoryGUI.SizeProvider sizeProvider, int size, PlaceholderContext ctx) {
+        return new PagedInventoryGUI(title, sizeProvider, size, ctx);
     }
 
 
@@ -140,11 +160,7 @@ public interface InventoryGUI {
 
     interface Factory {
 
-        SingleInventoryGUI build(UnresolvedComponent title, int rows);
-
-        default SingleInventoryGUI build(Component title, int rows) {
-            return build(UnresolvedComponent.completed(title), rows);
-        }
+        SingleInventoryGUI build(UnresolvedComponent title, int rows, PlaceholderContext ctx);
     }
 
 }

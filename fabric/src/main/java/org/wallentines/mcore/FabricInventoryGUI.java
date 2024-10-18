@@ -6,12 +6,12 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mcore.text.WrappedComponent;
 import org.wallentines.mcore.util.ConversionUtil;
@@ -23,8 +23,8 @@ public class FabricInventoryGUI extends SingleInventoryGUI {
 
     private final List<Menu> open = new ArrayList<>();
 
-    public FabricInventoryGUI(UnresolvedComponent title, int rows) {
-        super(title, rows);
+    public FabricInventoryGUI(UnresolvedComponent title, int rows, PlaceholderContext ctx) {
+        super(title, rows, ctx);
     }
 
     @Override
@@ -113,11 +113,13 @@ public class FabricInventoryGUI extends SingleInventoryGUI {
     private class Menu extends AbstractContainerMenu {
 
         private final WrappedPlayer player;
+        private final PlaceholderContext ctx;
 
         Menu(int id, ServerPlayer spl) {
             super(getMenuType(FabricInventoryGUI.this.size / 9), id);
 
             this.player = new WrappedPlayer(spl);
+            this.ctx = context.copy().withValue(spl);
 
             Container container = new SimpleContainer(FabricInventoryGUI.this.size);
             for(int i = 0 ; i < FabricInventoryGUI.this.size ; i++) {
@@ -142,7 +144,7 @@ public class FabricInventoryGUI extends SingleInventoryGUI {
                 Entry ent = FabricInventoryGUI.this.items[i];
                 if(ent == null) continue;
 
-                org.wallentines.mcore.ItemStack is = ent.getItem(spl);
+                org.wallentines.mcore.ItemStack is = ent.getItem(ctx);
                 if(is != null) {
                     setItem(i, stateId, ConversionUtil.validate(is));
                 }

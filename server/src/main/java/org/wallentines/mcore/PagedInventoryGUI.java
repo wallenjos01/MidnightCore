@@ -1,8 +1,8 @@
 package org.wallentines.mcore;
 
 import org.wallentines.mcore.lang.CustomPlaceholder;
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.UnresolvedComponent;
-import org.wallentines.mcore.text.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,28 +11,17 @@ public class PagedInventoryGUI implements InventoryGUI {
 
     private final UnresolvedComponent title;
     private final SizeProvider sizeProvider;
+    private final PlaceholderContext context;
+
     private List<Page> pages = new ArrayList<>();
     private final List<RowProvider> topReserved = new ArrayList<>();
     private final List<RowProvider> bottomReserved = new ArrayList<>();
     private int fullSize = -1;
 
-    public PagedInventoryGUI(Component title, SizeProvider provider) {
-        this(title, provider, 0);
-    }
-
-    public PagedInventoryGUI(Component title, SizeProvider provider, int initialSize) {
-        this.title = UnresolvedComponent.completed(title);
-        this.sizeProvider = provider;
-        resize(initialSize);
-    }
-
-    public PagedInventoryGUI(UnresolvedComponent title, SizeProvider provider) {
-        this(title, provider, 0);
-    }
-
-    public PagedInventoryGUI(UnresolvedComponent title, SizeProvider provider, int size) {
+    public PagedInventoryGUI(UnresolvedComponent title, SizeProvider provider, int size, PlaceholderContext context) {
         this.title = title;
         this.sizeProvider = provider;
+        this.context = context;
         resize(size);
     }
 
@@ -72,9 +61,8 @@ public class PagedInventoryGUI implements InventoryGUI {
     public void setItem(int index, ItemStack item, PagedClickEvent clickEvent) {
         Page p = updateAndGetPage(index);
         int topOffset = topReserved.size() * 9;
-        p.gui.setItem(topOffset + index - p.offset, item, (player, type) -> {
-            clickEvent.execute(player, type, p.index);
-        });
+        p.gui.setItem(topOffset + index - p.offset, item, (player, type) ->
+                clickEvent.execute(player, type, p.index));
     }
 
     public void setItem(int index, UnresolvedItemStack item) {
@@ -228,7 +216,7 @@ public class PagedInventoryGUI implements InventoryGUI {
 
         int realSize = size + (topReserved.size() * 9) + (bottomReserved.size() * 9);
 
-        SingleInventoryGUI gui = InventoryGUI.create(getPageTitle(page), realSize);
+        SingleInventoryGUI gui = InventoryGUI.create(getPageTitle(page), realSize, context);
 
         return new Page(gui, offset, page, size);
     }

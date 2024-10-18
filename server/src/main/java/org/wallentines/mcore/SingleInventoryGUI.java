@@ -1,6 +1,7 @@
 package org.wallentines.mcore;
 
 import org.jetbrains.annotations.NotNull;
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mcore.lang.UnresolvedComponent;
 import org.wallentines.mdcfg.Tuples;
 import org.wallentines.midnightlib.types.Either;
@@ -13,10 +14,11 @@ public abstract class SingleInventoryGUI implements InventoryGUI {
     protected final int size;
     protected final Entry[] items;
     protected final UnresolvedComponent title;
+    protected final PlaceholderContext context;
 
     protected static final HashMap<UUID, SingleInventoryGUI> OPEN_GUIS = new HashMap<>();
 
-    protected SingleInventoryGUI(UnresolvedComponent title, int rows) {
+    protected SingleInventoryGUI(UnresolvedComponent title, int rows, PlaceholderContext context) {
 
         if(rows > 6 || rows < 1) {
             throw new IllegalArgumentException("Cannot create inventory GUI with " + rows + " rows!");
@@ -25,6 +27,7 @@ public abstract class SingleInventoryGUI implements InventoryGUI {
         this.size = rows * 9;
         this.items = new Entry[size];
         this.title = title;
+        this.context = context;
     }
 
     /**
@@ -245,8 +248,8 @@ public abstract class SingleInventoryGUI implements InventoryGUI {
             this.event = event;
         }
 
-        public ItemStack getItem(Player player) {
-            return item.leftOrGet(r -> r.resolve(player));
+        public ItemStack getItem(PlaceholderContext ctx) {
+            return item.leftOrGet(r -> r.resolve(ctx));
         }
 
         public ClickEvent getEvent() {

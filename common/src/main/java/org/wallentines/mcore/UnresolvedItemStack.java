@@ -39,12 +39,9 @@ public class UnresolvedItemStack {
         this.manager = manager;
     }
 
-    public ItemStack resolve(Player player) {
+    public ItemStack resolve(PlaceholderContext ctx) {
 
         ItemStack.Builder out = builder.copy();
-        PlaceholderContext ctx = new PlaceholderContext();
-        ctx.addValue(player);
-
         if(title != null) {
             out.withName(title.resolve(manager, ctx));
         }

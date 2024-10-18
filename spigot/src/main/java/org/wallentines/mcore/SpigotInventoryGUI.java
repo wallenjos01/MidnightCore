@@ -16,10 +16,10 @@ import java.util.HashMap;
 
 public class SpigotInventoryGUI extends SingleInventoryGUI {
 
-    private final HashMap<SpigotPlayer, Inventory> players = new HashMap<>();
+    private final HashMap<SpigotPlayer, Menu> players = new HashMap<>();
 
-    public SpigotInventoryGUI(UnresolvedComponent title, int rows) {
-        super(title, rows);
+    public SpigotInventoryGUI(UnresolvedComponent title, int rows, PlaceholderContext ctx) {
+        super(title, rows, ctx);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class SpigotInventoryGUI extends SingleInventoryGUI {
         Inventory inv = Bukkit.createInventory(null, size, title.resolve(ctx).toLegacyText());
         spl.getInternal().openInventory(inv);
 
-        players.put(spl, inv);
+        players.put(spl, new Menu(spl, inv));
         doUpdate(spl);
     }
 
@@ -76,7 +76,7 @@ public class SpigotInventoryGUI extends SingleInventoryGUI {
     private void doUpdate(org.wallentines.mcore.Player player) {
 
         SpigotPlayer spl = ConversionUtil.validate(player);
-        Inventory menu = players.get(spl);
+        Menu menu = players.get(spl);
 
         if(menu == null) {
             doOpen(spl);
@@ -88,16 +88,28 @@ public class SpigotInventoryGUI extends SingleInventoryGUI {
 
             if(items[i] == null) continue;
 
-            ItemStack is = items[i].getItem(spl);
+            ItemStack is = items[i].getItem(menu.ctx);
             if(is == null) {
                 continue;
             }
 
             SpigotItem mis = ConversionUtil.validate(is);
-            menu.setItem(i, mis.getInternal());
+            menu.inventory.setItem(i, mis.getInternal());
+        }
+    }
+
+    private class Menu {
+        private final Inventory inventory;
+        private final PlaceholderContext ctx;
+
+        public Menu(SpigotPlayer player, Inventory inventory) {
+            this.inventory = inventory;
+            this.ctx = context.withValue(player);
         }
 
+
     }
+
 
     private static class GUIListener implements Listener {
 
