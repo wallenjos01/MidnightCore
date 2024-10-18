@@ -107,7 +107,6 @@ public class UnresolvedComponent {
      */
     public Component resolve(PlaceholderContext ctx) {
 
-        if(ctx != null) ctx = ctx.and(context);
         return resolve(PlaceholderManager.INSTANCE, ctx);
     }
 
@@ -128,6 +127,8 @@ public class UnresolvedComponent {
      * @return A resolved component
      */
     public Component resolve(PlaceholderManager manager, PlaceholderContext ctx) {
+
+        if(ctx != null) ctx = ctx.and(context);
 
         // Will only be non-null if the component had no placeholders
         if(completed != null) {
