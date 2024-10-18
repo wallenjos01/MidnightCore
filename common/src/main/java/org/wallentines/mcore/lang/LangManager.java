@@ -146,6 +146,7 @@ public class LangManager {
                 .withContextValue(this)
                 .build();
 
+        comp.getContext().addValue(this);
         for(Object o : args) comp.getContext().addValue(o);
         return comp;
     }
@@ -157,6 +158,7 @@ public class LangManager {
                 .withContextValue(this)
                 .build();
 
+        comp.getContext().addValue(this);
         for(Object o : args) comp.getContext().addValue(o);
         return comp;
     }
