@@ -17,7 +17,7 @@ plugins {
 // the user will need to build all required Spigot versions using the Spigot BuildTools. (https://www.spigotmc.org/wiki/buildtools/)
 // In the case where building Spigot jars is not necessary, this flag can be disabled.
 // See spigot/build.gradle.kts for the list of versions.
-val buildSpigot = false
+val buildSpigot = true
 
 rootProject.name = "midnightcore"
 
