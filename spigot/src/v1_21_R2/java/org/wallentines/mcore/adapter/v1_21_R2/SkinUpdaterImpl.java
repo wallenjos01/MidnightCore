@@ -1,4 +1,4 @@
-package org.wallentines.mcore.adapter.v1_21_R1;
+package org.wallentines.mcore.adapter.v1_21_R2;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -10,10 +10,11 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EnumItemSlot;
+import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.Skin;
@@ -42,14 +43,14 @@ public class SkinUpdaterImpl implements SkinUpdater {
         GameProfile gameProfile = ((CraftPlayer) player).getProfile(); // getGameProfile()
         setProfileSkin(gameProfile, skin);
 
-        MinecraftServer server = epl.d;
+        MinecraftServer server = epl.g;
         if (server == null) return;
 
         // Make sure player is ready to receive a respawn packet
         epl.Y(); // stopRiding()
 
         // Store velocity so it can be re-applied later
-        Vec3D velocity = epl.dr();
+        Vec3D velocity = epl.dz();
 
         // Create Packets
         ClientboundPlayerInfoRemovePacket remove = new ClientboundPlayerInfoRemovePacket(List.of(player.getUniqueId()));
@@ -57,22 +58,22 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
         List<Pair<EnumItemSlot, ItemStack>> items = Arrays.stream(EnumItemSlot.values()).map(eis -> new Pair<>(eis, epl.a(eis))).toList(); // getItemBySlot
 
-        int entityId = epl.an(); // getId()
+        int entityId = epl.ar(); // getId()
         PacketPlayOutEntityEquipment equip = new PacketPlayOutEntityEquipment(entityId, items);
 
-        WorldServer world = epl.A(); // serverLevel()
+        WorldServer world = epl.y(); // serverLevel()
         PacketPlayOutRespawn respawn = new PacketPlayOutRespawn(epl.b(world), (byte) 3);
 
         PacketPlayOutExperience exp = new PacketPlayOutExperience(epl.cs, epl.cr, epl.cq);
 
         Location location = player.getLocation();
-        PacketPlayOutPosition position = new PacketPlayOutPosition(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch(), Set.of(), 0);
+        PacketPlayOutPosition position = new PacketPlayOutPosition(entityId, PositionMoveRotation.a(epl), Set.of());
 
         // Player information should be sent to everyone
-        for (EntityPlayer obs : server.ah().t()) { // getPlayerList(), getPlayers()
+        for (EntityPlayer obs : server.ag().t()) { // getPlayerList(), getPlayers()
 
-            obs.c.b(remove); // connection, send
-            obs.c.b(add);
+            obs.f.b(remove); // connection, send
+            obs.f.b(add);
         }
 
         // Entity information should be sent to observers in the same world
@@ -90,14 +91,14 @@ public class SkinUpdaterImpl implements SkinUpdater {
                     loc.getZ(),
                     loc.getYaw(),
                     loc.getPitch(),
-                    epl.am(),
+                    epl.aq(),
                     0,
                     velocity,
                     player.getEyeLocation().getYaw()
             );
 
             PacketPlayOutEntityMetadata tracker = null;
-            List<DataWatcher.c<?>> entityData = epl.ar().c(); // DataValue<?>, getEntityData(), getNonDefaultValues()
+            List<DataWatcher.c<?>> entityData = epl.au().c(); // DataValue<?>, getEntityData(), getNonDefaultValues()
             if (entityData != null) {
                 tracker = new PacketPlayOutEntityMetadata(entityId, entityData);
             }
@@ -110,32 +111,32 @@ public class SkinUpdaterImpl implements SkinUpdater {
 
             for (EntityPlayer obs : observers) {
 
-                obs.c.b(destroy);
-                obs.c.b(spawn);
-                obs.c.b(head);
-                obs.c.b(equip);
-                if (tracker != null) obs.c.b(tracker);
+                obs.f.b(destroy);
+                obs.f.b(spawn);
+                obs.f.b(head);
+                obs.f.b(equip);
+                if (tracker != null) obs.f.b(tracker);
             }
         }
 
         // The remaining packets should only be sent to the updated player
-        epl.c.b(respawn);
-        epl.c.b(new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.o, 0.0f)); // LEVEL_CHUNKS_LOAD_START (13)
+        epl.f.b(respawn);
+        epl.f.b(new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.o, 0.0f)); // LEVEL_CHUNKS_LOAD_START (13)
 
-        server.ah().d(epl); // sendPlayerPermissionLevel
-        server.ah().e(epl); // sendAllPlayerInfo
+        server.ag().d(epl); // sendPlayerPermissionLevel
+        server.ag().e(epl); // sendAllPlayerInfo
 
-        epl.c.b(position);
-        epl.c.b(equip);
-        epl.c.b(exp);
+        epl.f.b(position);
+        epl.f.b(equip);
+        epl.f.b(exp);
 
-        epl.w(); // onUpdateAbilities
+        epl.x(); // onUpdateAbilities
 
         epl.f(velocity); // setDeltaMovement()
-        epl.c.b(new PacketPlayOutEntityVelocity(epl));
+        epl.f.b(new PacketPlayOutEntityVelocity(epl));
 
-        for (MobEffect mobeffect : epl.et()) {
-            epl.c.a(new PacketPlayOutEntityEffect(entityId, mobeffect, true));
+        for (MobEffect mobeffect : epl.eB()) {
+            epl.f.a(new PacketPlayOutEntityEffect(entityId, mobeffect, true));
         }
     }
 }
