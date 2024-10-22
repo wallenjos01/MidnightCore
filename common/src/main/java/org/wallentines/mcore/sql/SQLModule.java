@@ -43,9 +43,9 @@ public abstract class SQLModule {
         }
     }
 
-    protected void init(ConfigSection config, Executor executor) {
+    protected void init(ConfigSection config, PlaceholderContext context, Executor executor) {
 
-        this.registry = PresetRegistry.SERIALIZER.deserialize(ConfigContext.INSTANCE, applyPlaceholders(config, new PlaceholderContext())).getOrThrow();
+        this.registry = PresetRegistry.SERIALIZER.deserialize(ConfigContext.INSTANCE, applyPlaceholders(config, context)).getOrThrow();
         this.executor = executor;
 
     }

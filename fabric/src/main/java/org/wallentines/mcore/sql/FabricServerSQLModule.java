@@ -3,6 +3,7 @@ package org.wallentines.mcore.sql;
 import net.minecraft.Util;
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.sql.DatabasePreset;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -12,7 +13,7 @@ public class FabricServerSQLModule extends SQLModule implements ServerModule {
     @Override
     public boolean initialize(ConfigSection config, Server data) {
 
-        init(config, Util.backgroundExecutor());
+        init(config, new PlaceholderContext().withValue(data), Util.backgroundExecutor());
         return true;
     }
 

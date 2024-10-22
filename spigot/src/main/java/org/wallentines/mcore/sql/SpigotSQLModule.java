@@ -2,6 +2,7 @@ package org.wallentines.mcore.sql;
 
 import org.wallentines.mcore.Server;
 import org.wallentines.mcore.ServerModule;
+import org.wallentines.mcore.lang.PlaceholderContext;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.sql.DatabasePreset;
 import org.wallentines.midnightlib.module.ModuleInfo;
@@ -15,7 +16,7 @@ public class SpigotSQLModule extends SQLModule implements ServerModule {
     @Override
     public boolean initialize(ConfigSection config, Server data) {
 
-        init(config, new ThreadPoolExecutor(1, 8, 10000, TimeUnit.MILLISECONDS, new SynchronousQueue<>()));
+        init(config, new PlaceholderContext().withValue(data), new ThreadPoolExecutor(1, 8, 10000, TimeUnit.MILLISECONDS, new SynchronousQueue<>()));
         return true;
     }
 

@@ -38,7 +38,7 @@ dependencies {
         modApi(include(fabricApi.module(mod, "0.106.1+1.21.2"))!!)
     }
 
-    include(modApi("me.lucko:fabric-permissions-api:0.3.1") {
+    include(modApi("me.lucko:fabric-permissions-api:0.3.2") {
         isTransitive = false
     })
 
