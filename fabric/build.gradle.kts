@@ -21,7 +21,7 @@ dependencies {
     shadow(project(":client").setTransitive(false))
 
     // Minecraft
-    minecraft("com.mojang:minecraft:1.21.2")
+    minecraft("com.mojang:minecraft:1.21.3")
     mappings(loom.officialMojangMappings())
 
     // Fabric Loader
@@ -35,7 +35,7 @@ dependencies {
             "fabric-command-api-v2"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.106.1+1.21.2"))!!)
+        modApi(include(fabricApi.module(mod, "0.106.1+1.21.3"))!!)
     }
 
     include(modApi("me.lucko:fabric-permissions-api:0.3.2") {
