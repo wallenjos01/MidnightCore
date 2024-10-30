@@ -217,7 +217,7 @@ public class TestUtil {
                     .of(version, new Identifier("minecraft", "stone_sword"))
                     .withEnchantment(new Identifier("minecraft", "sharpness"), 100)
                     .withLegacyEnchantment(16, 100)
-                    .withName(Component.text("Test Sword").withColor(new Color(0xAF4EBE)))
+                    .withName(Component.text("Test Sword").withColor(new Color(0xAF4EBE)).withShadowColor(new Color(0x277379)))
                     .build();
 
             pl.setItem(EquipmentSlot.HEAD, hat);

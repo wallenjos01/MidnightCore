@@ -256,4 +256,20 @@ public class TestComponentSerializing {
 
     }
 
+    @Test
+    public void testShadowColor() {
+
+        String unparsed = "&e:fHello, World";
+        Component parsed = ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(unparsed)).getOrThrow();
+
+        Assertions.assertEquals(Component.text("Hello, World").withColor(Color.fromRGBI(14)).withShadowColor(Color.fromRGBI(15)), parsed);
+
+
+        unparsed = "&e::Hello, World";
+        parsed = ConfigSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(unparsed)).getOrThrow();
+
+        Assertions.assertEquals(Component.text(":Hello, World").withColor(Color.fromRGBI(14)), parsed);
+
+    }
+
 }

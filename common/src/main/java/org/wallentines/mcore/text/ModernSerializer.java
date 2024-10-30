@@ -3,6 +3,7 @@ package org.wallentines.mcore.text;
 import org.wallentines.mcore.GameVersion;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.*;
+import org.wallentines.midnightlib.math.Color;
 import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.ArrayList;
@@ -39,6 +40,10 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
         context.set("font", context.toString(value.font == null ? null : value.font.toString()), out);
         context.set("insertion", context.toString(value.insertion), out);
 
+        if (version.hasFeature(GameVersion.Feature.COMPONENT_SHADOW_COLOR) && value.shadowColor != null) {
+            context.set("shadow_color", context.toNumber(value.shadowColor.toDecimal()), out);
+        }
+
         if(value.hoverEvent != null) {
             SerializeResult<O> hoverEvent = HoverEvent.SERIALIZER.serialize(context, value.hoverEvent, version);
             if(!hoverEvent.isComplete()) {
@@ -54,6 +59,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
             }
             context.set("clickEvent", clickEvent.getOrThrow(), out);
         }
+
 
         // Children
         if(!value.children.isEmpty()) {
@@ -167,6 +173,7 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
         out.insertion = Serializer.STRING.deserialize(context, context.get("insertion", value)).get().orElse(null);
         out.hoverEvent = HoverEvent.SERIALIZER.deserialize(context, context.get("hoverEvent", value), version).get().orElse(null);
         out.clickEvent = ClickEvent.SERIALIZER.deserialize(context, context.get("clickEvent", value)).get().orElse(null);
+        out.shadowColor = Color.SERIALIZER.deserialize(context, context.get("shadow_color", value)).get().map(Color::asRGBA).orElse(null);
 
         O extra = context.get("extra", value);
         if(context.isList(extra)) {

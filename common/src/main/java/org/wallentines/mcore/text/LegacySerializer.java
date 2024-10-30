@@ -16,16 +16,17 @@ public class LegacySerializer implements Serializer<Component> {
     /**
      * A LegacySerializer instance which uses the color code character and does not support hex. For true legacy text
      */
-    public static final LegacySerializer INSTANCE = new LegacySerializer('\u00A7', false);
+    public static final LegacySerializer INSTANCE = new LegacySerializer('\u00A7', false, false);
 
     /**
      * A LegacySerializer instance which uses an ampersand for color codes and has hex support. For text stored in
      * config files.
      */
-    public static final LegacySerializer CONFIG_INSTANCE = new LegacySerializer('&', true);
+    public static final LegacySerializer CONFIG_INSTANCE = new LegacySerializer('&', true, true);
 
     private final Character colorChar;
     private final boolean hexSupport;
+    private final boolean shadowSupport;
 
     /**
      * Creates a LegacySerializer with the given color character, and optional rgb color support
@@ -34,8 +35,20 @@ public class LegacySerializer implements Serializer<Component> {
      *                   character is '&') should be parsed or written.
      */
     public LegacySerializer(Character colorChar, boolean hexSupport) {
+        this(colorChar, hexSupport, false);
+    }
+
+    /**
+     * Creates a LegacySerializer with the given color character, and optional rgb color support
+     * @param colorChar The character which should prefix all color codes
+     * @param hexSupport Whether hex color codes which appear after the color character (i.e. &#112233 if the color
+     *                   character is '&') should be parsed or written.
+     * @param shadowSupport Whether shadow color setting should be enabled. (i.e. &a:b)
+     */
+    public LegacySerializer(Character colorChar, boolean hexSupport, boolean shadowSupport) {
         this.colorChar = colorChar;
         this.hexSupport = hexSupport;
+        this.shadowSupport = shadowSupport;
     }
 
     @Override
@@ -73,9 +86,15 @@ public class LegacySerializer implements Serializer<Component> {
 
         StringBuilder out = new StringBuilder();
 
-        if(component.color != null) out.append(colorChar).append(hexSupport ?
-                                    '#' + component.color.toPlainHex() :
-                                    Integer.toHexString(component.color.toRGBI()));
+        if(component.color != null) {
+            out.append(colorChar).append(hexSupport ?
+                    '#' + component.color.toPlainHex() :
+                    Integer.toHexString(component.color.toRGBI()));
+            if(shadowSupport && component.shadowColor != null) {
+                out.append(':')
+                        .append(hexSupport ? '#' + component.shadowColor.toPlainHex() : Integer.toHexString(component.shadowColor.toRGBI()));
+            }
+        }
 
         if(component.bold != null && component.bold)                   out.append(colorChar).append("l");
         if(component.italic  != null && component.italic)              out.append(colorChar).append("o");
@@ -93,8 +112,10 @@ public class LegacySerializer implements Serializer<Component> {
 
         StringBuilder currentString = new StringBuilder();
         MutableComponent currentComponent = out;
+        boolean justColored = false;
 
-        for(int i = 0 ; i < content.length() ; i++) {
+        int i;
+        for(i = 0 ; i < content.length() - 1; i++) {
 
             char c = content.charAt(i);
             if(c == colorChar && i < content.length() - 1) {
@@ -117,6 +138,7 @@ public class LegacySerializer implements Serializer<Component> {
 
                     i += 1;
                     currentComponent.color = Color.fromRGBI(legacy);
+                    justColored = true;
 
                 } else if(next == 'r') {
 
@@ -130,6 +152,7 @@ public class LegacySerializer implements Serializer<Component> {
                     i += 1;
 
                     currentComponent.reset = true;
+                    justColored = false;
 
                 } else if(hexSupport && next == '#' && i < content.length() - 8) {
 
@@ -144,6 +167,7 @@ public class LegacySerializer implements Serializer<Component> {
 
                     i += 7;
                     currentComponent.color = Color.parse(hex).get().orElse(null);
+                    justColored = true;
 
                 } else {
 
@@ -164,10 +188,35 @@ public class LegacySerializer implements Serializer<Component> {
                         case 'm': { currentComponent.strikethrough = true; i += 1; break; }
                         case 'k': { currentComponent.obfuscated = true; i += 1; break; }
                     }
+                    justColored = false;
                 }
+
+            } else if(justColored && c == ':') {
+
+                char next = content.charAt(i + 1);
+                if(next == ':') {
+                    currentString.append(':');
+                    i += 1;
+                } else if ((next >= '0' && next <= '9') || (next >= 'a' && next <= 'f')) {
+                    int legacy = Integer.parseInt(String.valueOf(next), 16);
+                    i += 1;
+                    currentComponent.shadowColor = Color.fromRGBI(legacy).asRGBA();
+                } else if(next == '#' && i < content.length() - 8) {
+
+                    String hex = content.substring(i + 2, i + 8);
+                    i += 7;
+                    currentComponent.color = Color.parse(hex).get().orElse(null);
+                }
+                justColored = false;
+
             } else {
                 currentString.append(c);
+                justColored = false;
             }
+        }
+
+        if(i < content.length()) {
+            currentString.append(content.charAt(i));
         }
 
         if(!currentString.isEmpty()) {

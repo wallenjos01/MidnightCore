@@ -65,6 +65,11 @@ public class MutableComponent {
     public ClickEvent clickEvent;
 
     /**
+     * The event which occurs when a player clicks on the component
+     */
+    public Color.RGBA shadowColor;
+
+    /**
      * The content which will be displayed to the player
      */
     public Content content;
@@ -91,6 +96,7 @@ public class MutableComponent {
         out.insertion = other.insertion;
         out.hoverEvent = other.hoverEvent;
         out.clickEvent = other.clickEvent;
+        out.shadowColor = other.shadowColor;
         other.children.forEach(out::addChild);
 
         return out;
@@ -142,6 +148,7 @@ public class MutableComponent {
         out.insertion = this.insertion;
         out.hoverEvent = this.hoverEvent;
         out.clickEvent = this.clickEvent;
+        out.shadowColor = this.shadowColor;
         return out;
     }
 
@@ -155,7 +162,7 @@ public class MutableComponent {
 
 
     public Component toComponent() {
-        return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion, hoverEvent, clickEvent, content, children.stream().map(e -> e.leftOrGet(MutableComponent::toComponent)).toList());
+        return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion, hoverEvent, clickEvent, shadowColor, content, children.stream().map(e -> e.leftOrGet(MutableComponent::toComponent)).toList());
     }
 
 

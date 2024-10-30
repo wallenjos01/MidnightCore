@@ -153,6 +153,10 @@ public class GameVersion {
          */
         public static final Feature ITEM_NAME_OVERRIDE = new Feature(766, GameVersion.RELEASE_MAX_VERSION, 182);
 
+        /**
+         * In 24w44a, the shadow_color text component field was added
+         */
+        public static final Feature COMPONENT_SHADOW_COLOR = new Feature(769, GameVersion.RELEASE_MAX_VERSION, 220);
 
         public final int minVersion;
         public final int maxVersion;

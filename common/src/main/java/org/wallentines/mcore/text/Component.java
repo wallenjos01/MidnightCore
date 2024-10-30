@@ -75,6 +75,11 @@ public class Component {
     public final ClickEvent clickEvent;
 
     /**
+     * (24w44a) The color of the component outline
+     */
+    public final Color.RGBA shadowColor;
+
+    /**
      * The content which will be displayed to the player
      */
     public final Content content;
@@ -86,8 +91,8 @@ public class Component {
 
 
     Component(Color color, Boolean bold, Boolean italic, Boolean underlined, Boolean strikethrough,
-                      Boolean obfuscated, Boolean reset, Identifier font, String insertion, HoverEvent<?> hoverEvent,
-                      ClickEvent clickEvent, Content content, Collection<Component> children) {
+              Boolean obfuscated, Boolean reset, Identifier font, String insertion, HoverEvent<?> hoverEvent,
+              ClickEvent clickEvent, Color.RGBA shadowColor, Content content, Collection<Component> children) {
         this.color = color;
         this.bold = bold;
         this.italic = italic;
@@ -99,6 +104,7 @@ public class Component {
         this.insertion = insertion;
         this.hoverEvent = hoverEvent;
         this.clickEvent = clickEvent;
+        this.shadowColor = shadowColor;
         this.content = content;
         this.children = children == null ? List.of() : List.copyOf(children);
     }
@@ -108,7 +114,7 @@ public class Component {
      * @param content The content of the new component
      */
     public Component(Content content) {
-        this(null, null, null, null, null, null, null, null, null, null, null, content, null);
+        this(null, null, null, null, null, null, null, null, null, null, null, null, content, null);
     }
 
     /**
@@ -247,7 +253,7 @@ public class Component {
      */
     public Component withColor(Color color) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -257,7 +263,7 @@ public class Component {
      */
     public Component withBold(Boolean bold) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -267,7 +273,7 @@ public class Component {
      */
     public Component withItalic(Boolean italic) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -277,7 +283,7 @@ public class Component {
      */
     public Component withUnderlined(Boolean underline) {
         return new Component(color, bold, italic, underline, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -287,7 +293,7 @@ public class Component {
      */
     public Component withStrikethrough(Boolean strikethrough) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -297,7 +303,7 @@ public class Component {
      */
     public Component withObfuscated(Boolean obfuscated) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -307,7 +313,7 @@ public class Component {
      */
     public Component withReset(Boolean reset) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -317,7 +323,7 @@ public class Component {
      */
     public Component withFont(Identifier font) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -327,7 +333,7 @@ public class Component {
      */
     public Component withInsertion(String insertion) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -337,7 +343,7 @@ public class Component {
      */
     public Component withHoverEvent(HoverEvent<?> hoverEvent) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -347,7 +353,26 @@ public class Component {
      */
     public Component withClickEvent(ClickEvent clickEvent) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
+    }
+
+    /**
+     * Creates a copy of this component with a new clickEvent.
+     * @param shadowColor The shadowColor to set
+     * @return A new component with the given clickEvent
+     */
+    public Component withShadowColor(Color.RGBA shadowColor) {
+        return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
+                hoverEvent, clickEvent, shadowColor, content, children);
+    }
+    /**
+     * Creates a copy of this component with a new clickEvent.
+     * @param shadowColor The shadowColor to set
+     * @return A new component with the given clickEvent
+     */
+    public Component withShadowColor(Color shadowColor) {
+        return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
+                hoverEvent, clickEvent, shadowColor.asRGBA(), content, children);
     }
 
     /**
@@ -357,7 +382,7 @@ public class Component {
      */
     public Component withContent(Content content) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -367,7 +392,7 @@ public class Component {
      */
     public Component withChildren(Collection<Component> children) {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -380,7 +405,7 @@ public class Component {
         List<Component> out = new ArrayList<>(children);
         out.add(child);
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, out);
+                hoverEvent, clickEvent, shadowColor, content, out);
     }
 
     /**
@@ -393,7 +418,7 @@ public class Component {
         List<Component> out = new ArrayList<>(this.children);
         out.addAll(children);
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, out);
+                hoverEvent, clickEvent, shadowColor, content, out);
     }
 
     /**
@@ -402,7 +427,7 @@ public class Component {
      */
     public Component copy() {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, children);
+                hoverEvent, clickEvent, shadowColor, content, children);
     }
 
     /**
@@ -411,7 +436,7 @@ public class Component {
      */
     public Component baseCopy() {
         return new Component(color, bold, italic, underlined, strikethrough, obfuscated, reset, font, insertion,
-                hoverEvent, clickEvent, content, null);
+                hoverEvent, clickEvent, shadowColor, content, null);
     }
 
     public Component fillStyle(Component other) {
@@ -427,6 +452,7 @@ public class Component {
                 other.insertion == null ? insertion : other.insertion,
                 other.hoverEvent == null ? hoverEvent : other.hoverEvent,
                 other.clickEvent == null ? clickEvent : other.clickEvent,
+                other.shadowColor == null ? shadowColor : other.shadowColor,
                 content,
                 children
         );
