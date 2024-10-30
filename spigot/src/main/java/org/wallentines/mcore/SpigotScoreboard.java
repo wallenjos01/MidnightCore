@@ -97,7 +97,7 @@ public class SpigotScoreboard extends CustomScoreboard {
             }
 
             this.board = manager.getNewScoreboard();
-            this.ctx = context.copy().withValue(player);
+            this.ctx = (context == null ? new PlaceholderContext() : context.copy()).withValue(player);
         }
 
         void init() {

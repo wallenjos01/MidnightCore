@@ -99,7 +99,7 @@ public class FabricScoreboard extends CustomScoreboard {
             this.teams = new PlayerTeam[15];
             this.board = new ServerScoreboard(spl.server);
             this.player = spl;
-            this.ctx = context.copy().withValue(player);
+            this.ctx = (context == null ? new PlaceholderContext() : context.copy()).withValue(player);
         }
 
         public void init() {

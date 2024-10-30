@@ -34,7 +34,7 @@ public class UnresolvedComponent {
     private UnresolvedComponent(boolean tryParseJSON, PlaceholderContext context, List<Either<String, UnresolvedPlaceholder>> entries) {
         this.tryParseJSON = tryParseJSON;
         this.context = context;
-        this.parts = List.copyOf(entries);
+        this.parts = entries == null ? null : List.copyOf(entries);
     }
 
     private UnresolvedComponent(Component completed) {
@@ -186,14 +186,17 @@ public class UnresolvedComponent {
     }
 
     public UnresolvedComponent copy() {
+        if(completed != null) return this;
         return new UnresolvedComponent(tryParseJSON, context.copy(), parts);
     }
 
     public UnresolvedComponent copyWithContext(PlaceholderContext context) {
+        if(completed != null) return this;
         return new UnresolvedComponent(tryParseJSON, context, parts);
     }
 
     public UnresolvedComponent copyWith(Object... values) {
+        if(completed != null) return this;
         return new UnresolvedComponent(tryParseJSON, context.copy().withValues(values), parts);
     }
 
