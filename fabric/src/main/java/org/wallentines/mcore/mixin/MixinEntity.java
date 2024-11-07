@@ -1,14 +1,11 @@
 package org.wallentines.mcore.mixin;
 
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -21,7 +18,6 @@ import org.wallentines.mcore.util.RegistryUtil;
 import org.wallentines.midnightlib.math.Vec3d;
 import org.wallentines.midnightlib.registry.Identifier;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -117,38 +113,7 @@ public abstract class MixinEntity implements Entity {
         }
 
         ServerLevel level = server.getLevel(ResourceKey.create(Registries.DIMENSION, ConversionUtil.toResourceLocation(location.dimension)));
-
-        double x = location.position.getX();
-        double y = location.position.getY();
-        double z = location.position.getZ();
-
-        float yaw = location.yaw;
-        float pitch = location.pitch;
-
-        BlockPos blockPos = BlockPos.containing(x, y, z);
-        if (!Level.isInSpawnableBounds(blockPos)) {
-
-            throw new IllegalArgumentException("Attempt to teleport Entity outside of maximum world boundaries!");
-
-        } else {
-
-            float wrappedYaw = Mth.wrapDegrees(yaw);
-            float wrappedPitch = Mth.wrapDegrees(pitch);
-
-
-            //if (teleportTo(level, x, y, z, new HashSet<>(), wrappedYaw, wrappedPitch)) {
-            if(teleportTo(level, x, y, z, new HashSet<>(), wrappedYaw, wrappedPitch, false)) {
-
-                if (self instanceof LivingEntity liv && !liv.isFallFlying()) {
-                    setDeltaMovement(getDeltaMovement().multiply(1.0, 0.0, 1.0));
-                    setOnGround(true);
-                }
-
-                if (self instanceof PathfinderMob path) {
-                    path.getNavigation().stop();
-                }
-            }
-        }
+        AccessorTeleportCommand.callPerformTeleport(null, self, level, location.position.getX(), location.position.getY(), location.position.getZ(), Set.of(), location.yaw, location.pitch, null);
     }
 
     public ItemStack mcore$getItem(EquipmentSlot slot) {

@@ -9,6 +9,7 @@
     "AccessorPlayer",
     "AccessorPlayerAdvancements",
     "AccessorPlayerList",
+    "AccessorTeleportCommand",
     "MixinClientboundCommandsPacket",
     "MixinCommandSourceStack",
     "MixinComponentSerialization",
@@ -17,8 +18,8 @@
     "MixinMinecraftServer",
     "MixinPlayerAdvancements",
     "MixinPlayerList",
-    "MixinServerConfigPacketListener",
     "MixinServerCommonPacketListener",
+    "MixinServerConfigPacketListener",
     "MixinServerPlayer",
     "MixinServerScoreboard"
   ],

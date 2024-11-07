@@ -45,6 +45,7 @@ public abstract class MixinMinecraftServer implements Server {
     @Shadow public abstract boolean isDedicatedServer();
     @Shadow public abstract Path getWorldPath(LevelResource levelResource);
 
+    @Shadow public abstract int getPlayerCount();
 
     public Player mcore$getPlayer(UUID uuid) {
         return playerList.getPlayer(uuid);
@@ -59,9 +60,8 @@ public abstract class MixinMinecraftServer implements Server {
         return playerList.getPlayers().stream().map(pl -> (Player) pl);
     }
 
-    public int mcore$getPlayerCount() {
-        return playerList.getPlayerCount();
-    }
+    @Intrinsic(displace = true)
+    public int mcore$getPlayerCount() { return getPlayerCount(); }
 
     public void mcore$runCommand(String command, boolean quiet) {
         CommandSourceStack stack = createCommandSourceStack();
