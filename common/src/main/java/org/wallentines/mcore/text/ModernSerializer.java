@@ -173,7 +173,13 @@ public class ModernSerializer implements ContextSerializer<Component, GameVersio
         out.insertion = Serializer.STRING.deserialize(context, context.get("insertion", value)).get().orElse(null);
         out.hoverEvent = HoverEvent.SERIALIZER.deserialize(context, context.get("hoverEvent", value), version).get().orElse(null);
         out.clickEvent = ClickEvent.SERIALIZER.deserialize(context, context.get("clickEvent", value)).get().orElse(null);
-        out.shadowColor = Color.SERIALIZER.deserialize(context, context.get("shadow_color", value)).get().map(Color::asRGBA).orElse(null);
+        out.shadowColor = Serializer.INT.deserialize(context, context.get("shadow_color", value)).get().map(rgb -> {
+            int alpha = (rgb >> 24) & 0xFF;
+            int red   = (rgb >> 16) & 0xFF;
+            int green = (rgb >> 8) & 0xFF;
+            int blue  = (rgb) & 0xFF;
+            return new Color.RGBA(red, green, blue, alpha);
+        }).orElse(null);
 
         O extra = context.get("extra", value);
         if(context.isList(extra)) {

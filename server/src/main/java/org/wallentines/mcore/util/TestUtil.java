@@ -15,6 +15,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.UUID;
 
 public class TestUtil {
@@ -49,8 +50,15 @@ public class TestUtil {
                     .build();
 
 
+            String proto;
+            if(version.isSnapshot()) {
+                proto = "Snapshot " + version.getSnapshotVersion();
+            } else {
+                proto = Objects.toString(version.getProtocolVersion());
+            }
+
             pl.sendMessage(
-                    Component.text(version.getId() + " (" + version.getProtocolVersion() + ") [" + srv.isDedicatedServer() + "]")
+                    Component.text(version.getId() + " (" + proto + ") [" + srv.isDedicatedServer() + "]")
                             .withHoverEvent(HoverEvent.forItem(is))
             );
 

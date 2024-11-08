@@ -297,7 +297,7 @@ public class ConversionUtil {
      */
     public static Style getStyle(Component component) {
 
-        return Style.EMPTY
+        Style out = Style.EMPTY
                 .withBold(component.bold)
                 .withItalic(component.italic)
                 .withUnderlined(component.underlined)
@@ -308,6 +308,12 @@ public class ConversionUtil {
                 .withHoverEvent(component.hoverEvent == null ? null : ConversionUtil.toMCHoverEvent(component.hoverEvent))
                 .withClickEvent(component.clickEvent == null ? null : ConversionUtil.toMCClickEvent(component.clickEvent))
                 .withColor(component.color == null ? null : ConversionUtil.toTextColor(component.color));
+
+        if(component.shadowColor != null) {
+            out = out.withShadowColor(component.shadowColor.toDecimal());
+        }
+
+        return out;
     }
 
     /**
