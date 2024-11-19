@@ -32,10 +32,11 @@ dependencies {
             "fabric-api-base",
             "fabric-lifecycle-events-v1",
             "fabric-networking-api-v1",
-            "fabric-command-api-v2"
+            "fabric-command-api-v2",
+            "fabric-registry-sync-v0"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.107.0+1.21.3"))!!)
+        modApi(include(fabricApi.module(mod, "0.109.0+1.21.3"))!!)
     }
 
     include(modApi("me.lucko:fabric-permissions-api:0.3.2") {

@@ -6,6 +6,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import org.wallentines.mcore.extension.ServerExtensionModule;
 import org.wallentines.mcore.lang.LangRegistry;
@@ -14,6 +17,7 @@ import org.wallentines.mcore.lang.PlaceholderSupplier;
 import org.wallentines.mcore.messenger.ServerMessengerModule;
 import org.wallentines.mcore.pluginmsg.FabricServerPluginMessageModule;
 import org.wallentines.mcore.pluginmsg.ServerPluginMessageModule;
+import org.wallentines.mcore.predicate.PermissionPredicate;
 import org.wallentines.mcore.savepoint.FabricSavepointModule;
 import org.wallentines.mcore.savepoint.SavepointModule;
 import org.wallentines.mcore.session.FabricSessionModule;
@@ -96,8 +100,8 @@ public class Init implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPING.register(Server.STOP_EVENT::invoke);
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> Server.RUNNING_SERVER.reset());
 
-
         ServerSideArgumentInfo.register(IdentifierArgument.class, ResourceLocationArgument.id());
 
+        Registry.register(BuiltInRegistries.ENTITY_SUB_PREDICATE_TYPE, ResourceLocation.tryBuild("midnightcore", "permission"), PermissionPredicate.CODEC);
     }
 }
