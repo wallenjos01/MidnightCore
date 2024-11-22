@@ -58,7 +58,7 @@ public class MessengerPacket implements Packet {
 
 
 
-    protected final Identifier channel;
+    protected final String channel;
     protected final ByteBuf payload;
     protected final String namespace;
     protected final Instant sent;
@@ -66,11 +66,11 @@ public class MessengerPacket implements Packet {
     protected final long ttl;
     protected final byte systemChannel;
 
-    public MessengerPacket(Identifier channel, ByteBuf payload, BufCipher cipher, String namespace, long ttl) {
+    public MessengerPacket(String channel, ByteBuf payload, BufCipher cipher, String namespace, long ttl) {
         this(channel, payload, cipher, namespace, ttl, Instant.now(Clock.systemUTC()));
     }
 
-    public MessengerPacket(Identifier channel, ByteBuf payload, BufCipher cipher, String namespace, long ttl, Instant sent) {
+    public MessengerPacket(String channel, ByteBuf payload, BufCipher cipher, String namespace, long ttl, Instant sent) {
         this.channel = channel;
         this.payload = payload == null ? null : payload.duplicate();
         this.sent = sent;
@@ -170,7 +170,7 @@ public class MessengerPacket implements Packet {
         if(systemChannel != -1) {
             real.writeByte(systemChannel);
         } else {
-            PacketBufferUtil.writeUtf(real, channel.toString(), 255);
+            PacketBufferUtil.writeUtf(real, channel, 255);
         }
 
         // Payload
@@ -243,7 +243,7 @@ public class MessengerPacket implements Packet {
         if(systemChannel > 0) {
             out = new MessengerPacket(systemChannel, payload, cipher, sent);
         } else {
-            out = new MessengerPacket(Identifier.parseOrDefault(channel, "mcore"), payload, cipher, ns, ttl, sent);
+            out = new MessengerPacket(channel, payload, cipher, ns, ttl, sent);
         }
 
         return out;

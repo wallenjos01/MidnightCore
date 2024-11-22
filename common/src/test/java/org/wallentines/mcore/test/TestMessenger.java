@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.wallentines.mcore.messenger.MessengerPacket;
 import org.wallentines.mcore.messenger.PluginMessageBroker;
-import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.smi.Message;
 
 import javax.crypto.KeyGenerator;
@@ -41,7 +40,7 @@ public class TestMessenger {
             ByteBuf data = Unpooled.buffer();
             data.writeLong(value);
 
-            Identifier packetId = new Identifier("test", "test");
+            String packetId = "test";
 
             MessengerPacket packet = new MessengerPacket(packetId, data, cipher, null, 1000);
             Assertions.assertEquals(cipher != null, packet.getFlags().contains(MessengerPacket.Flag.ENCRYPTED));

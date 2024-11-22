@@ -6,19 +6,21 @@ plugins {
 
 dependencies {
 
+    compileOnlyApi(libs.jetbrains.annotations)
+
     api(libs.midnight.cfg)
     api(libs.midnight.cfg.sql)
     api(libs.midnight.cfg.binary)
     api(libs.midnight.cfg.json)
     api(libs.midnight.cfg.nbt)
     api(libs.midnight.lib)
-    api(libs.smi)
+    api(libs.smi.api)
+    api(libs.smi.base)
 
     api(libs.netty.codec)
     api(libs.netty.buffer)
 
     api(libs.slf4j.api)
-    compileOnlyApi(libs.jetbrains.annotations)
 
     testImplementation(libs.midnight.cfg)
     testImplementation(libs.midnight.cfg.json)

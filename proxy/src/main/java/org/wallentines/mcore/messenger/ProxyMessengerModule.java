@@ -58,7 +58,7 @@ public class ProxyMessengerModule extends MessengerModule implements ProxyModule
         }
 
         ConfigSection messengers = config.getSection("messengers");
-        loadAll(messengers, registry);
+        init(messengers, registry);
 
         return true;
     }

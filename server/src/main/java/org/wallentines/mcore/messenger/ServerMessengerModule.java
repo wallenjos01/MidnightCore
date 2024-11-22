@@ -56,7 +56,7 @@ public class ServerMessengerModule extends MessengerModule implements ServerModu
         }
 
         ConfigSection messengers = config.getSection("messengers");
-        loadAll(messengers, registry);
+        init(messengers, registry);
 
         return true;
     }

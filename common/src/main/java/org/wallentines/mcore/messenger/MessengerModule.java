@@ -3,35 +3,37 @@ package org.wallentines.mcore.messenger;
 import org.jetbrains.annotations.Nullable;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mdcfg.ConfigSection;
-import org.wallentines.mdcfg.serializer.ConfigContext;
-import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.smi.Messenger;
 import org.wallentines.smi.MessengerType;
-
-import java.util.Collections;
-import java.util.Map;
+import org.wallentines.smi.MessengerManager;
+import org.wallentines.smi.MessengerManagerImpl;
 
 public class MessengerModule {
 
-    private Map<String, Messenger> messengers;
-
     public static final Registry<Identifier, MessengerType<?>> REGISTRY = Registry.create("smi");
+    protected MessengerManagerImpl manager;
 
-    protected void loadAll(ConfigSection section, Registry<Identifier, MessengerType<?>> registry) {
-        Serializer<Messenger> serializer = Messenger.createSerializer(registry);
-        messengers = serializer.mapOf().deserialize(ConfigContext.INSTANCE, section).getOrThrow();
+    protected void init(ConfigSection section, Registry<Identifier, MessengerType<?>> registry) {
+        manager = new MessengerManagerImpl(registry);
+        manager.loadAll(section);
+
+        if(MessengerManager.Holder.gInstance == null) {
+            MessengerManagerImpl.register(manager);
+        }
     }
 
     protected void shutdown() {
-        messengers.values().forEach(Messenger::close);
-        messengers = Collections.emptyMap();
+        manager.clear();
+        if(MessengerManager.Holder.gInstance == manager) {
+            MessengerManager.Holder.gInstance = null;
+        }
     }
 
     @Nullable
     public Messenger getMessenger(String name) {
-        return messengers.get(name);
+        return manager.messenger(name);
     }
 
     public static final Identifier ID = new Identifier(MidnightCoreAPI.MOD_ID, "messenger");

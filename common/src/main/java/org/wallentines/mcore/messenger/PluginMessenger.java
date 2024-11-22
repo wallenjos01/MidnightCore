@@ -3,26 +3,26 @@ package org.wallentines.mcore.messenger;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mdcfg.serializer.ObjectSerializer;
 import org.wallentines.mdcfg.serializer.Serializer;
-import org.wallentines.midnightlib.event.EventHandler;
 import org.wallentines.midnightlib.event.HandlerList;
-import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.smi.Message;
-import org.wallentines.smi.Messenger;
+import org.wallentines.smi.SerializableMessenger;
 import org.wallentines.smi.MessengerType;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
-public class PluginMessenger implements Messenger {
+public class PluginMessenger implements SerializableMessenger {
 
     private final MessengerType<PluginMessenger> type;
 
     final String namespace;
     private final PluginMessageBroker broker;
     private final boolean encrypt;
+    private boolean isClosed = false;
 
-    private final Map<Identifier, HandlerList<Message>> handlers;
+    private final Map<String, HandlerList<Message>> handlers;
 
     public PluginMessenger(MessengerType<PluginMessenger> type, PluginMessageBroker broker, String namespace, boolean encrypt) {
         this.type = type;
@@ -41,21 +41,24 @@ public class PluginMessenger implements Messenger {
 
     @Override
     public void publish(Message msg) {
+        if(isClosed) return;
         broker.send(namespace, msg, encrypt);
     }
 
     @Override
     public void publish(Message msg, long ttl) {
+        if(isClosed) return;
         broker.send(namespace, msg, encrypt, ttl);
     }
 
     @Override
-    public void subscribe(Identifier channel, Object listener, EventHandler<Message> handler) {
-        handlers.computeIfAbsent(channel, k -> new HandlerList<>()).register(listener, handler);
+    public void subscribe(String channel, Object listener, Consumer<Message> handler) {
+        if(isClosed) return;
+        handlers.computeIfAbsent(channel, k -> new HandlerList<>()).register(listener, handler::accept);
     }
 
     @Override
-    public void unsubscribe(Identifier channel, Object listener) {
+    public void unsubscribe(String channel, Object listener) {
         HandlerList<Message> handler = handlers.get(channel);
         if (handler != null) {
             handler.unregisterAll(listener);
@@ -63,7 +66,7 @@ public class PluginMessenger implements Messenger {
     }
 
     @Override
-    public void unsubscribeAll(Identifier channel) {
+    public void unsubscribeAll(String channel) {
         HandlerList<Message> handler = handlers.get(channel);
         if (handler != null) {
             handler.unregisterAll();
@@ -73,6 +76,12 @@ public class PluginMessenger implements Messenger {
     @Override
     public void close() {
         handlers.clear();
+        isClosed = true;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return isClosed;
     }
 
     void handle(MessengerPacket packet) {
