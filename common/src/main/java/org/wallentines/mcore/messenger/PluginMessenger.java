@@ -55,6 +55,22 @@ public class PluginMessenger implements Messenger {
     }
 
     @Override
+    public void unsubscribe(Identifier channel, Object listener) {
+        HandlerList<Message> handler = handlers.get(channel);
+        if (handler != null) {
+            handler.unregisterAll(listener);
+        }
+    }
+
+    @Override
+    public void unsubscribeAll(Identifier channel) {
+        HandlerList<Message> handler = handlers.get(channel);
+        if (handler != null) {
+            handler.unregisterAll();
+        }
+    }
+
+    @Override
     public void close() {
         handlers.clear();
     }
