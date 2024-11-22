@@ -1,98 +1,104 @@
 package org.wallentines.mcore.messenger;
 
-import io.netty.buffer.ByteBuf;
 import org.wallentines.mcore.MidnightCoreAPI;
-import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.event.EventHandler;
 import org.wallentines.midnightlib.event.HandlerList;
+import org.wallentines.midnightlib.registry.Identifier;
+import org.wallentines.smi.Message;
+import org.wallentines.smi.Messenger;
+import org.wallentines.smi.MessengerType;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * A messenger which uses plugin messages to communicate across traditional Minecraft proxies
- */
-public class PluginMessenger extends Messenger {
+public class PluginMessenger implements Messenger {
 
+    private final MessengerType<PluginMessenger> type;
+
+    final String namespace;
     private final PluginMessageBroker broker;
-    private final Map<String, HandlerList<Message>> handlers;
-    protected final String namespace;
+    private final boolean encrypt;
 
-    protected PluginMessenger(MessengerModule module, PluginMessageBroker broker, String namespace) {
-        super(module);
-        this.handlers = new HashMap<>();
-        this.namespace = namespace;
+    private final Map<Identifier, HandlerList<Message>> handlers;
+
+    public PluginMessenger(MessengerType<PluginMessenger> type, PluginMessageBroker broker, String namespace, boolean encrypt) {
+        this.type = type;
         this.broker = broker;
+        this.namespace = namespace;
+        this.encrypt = encrypt;
+        this.handlers = new ConcurrentHashMap<>();
 
-        broker.register(this);
+        this.broker.register(this);
     }
 
-    void handle(PluginMessageBroker.Packet pck) {
+    @Override
+    public MessengerType<?> getType() {
+        return type;
+    }
 
-        if(pck.isSystemMessage()) {
+    @Override
+    public void publish(Message msg) {
+        broker.send(namespace, msg, encrypt);
+    }
+
+    @Override
+    public void publish(Message msg, long ttl) {
+        broker.send(namespace, msg, encrypt, ttl);
+    }
+
+    @Override
+    public void subscribe(Identifier channel, Object listener, EventHandler<Message> handler) {
+        handlers.computeIfAbsent(channel, k -> new HandlerList<>()).register(listener, handler);
+    }
+
+    @Override
+    public void close() {
+        handlers.clear();
+    }
+
+    void handle(MessengerPacket packet) {
+
+        if(packet.isSystemMessage()) {
             MidnightCoreAPI.LOGGER.warn("Attempt to handle system message!");
             return;
         }
 
-        HandlerList<Message> list = handlers.get(pck.channel);
+        HandlerList<Message> list = handlers.get(packet.channel);
 
         if(list == null) {
             return;
         }
-        if(!Objects.equals(pck.namespace, namespace)) {
-            MidnightCoreAPI.LOGGER.warn("Received a message with mismatched namespace! (" + pck.namespace + ")");
+        if(!Objects.equals(packet.namespace, namespace)) {
+            MidnightCoreAPI.LOGGER.warn("Received a message with mismatched namespace! ({})", packet.namespace);
             return;
         }
-        list.invoke(pck.toMessage(this));
+
+        list.invoke(packet.toMessage());
     }
 
-    @Override
-    public void publish(String channel, ByteBuf message) {
-        publish(channel, 0, message);
-    }
+    public static MessengerType<PluginMessenger> createType(PluginMessageBroker broker) {
 
-    @Override
-    public void publish(String channel, int ttl, ByteBuf message) {
-        broker.send(channel, namespace, ttl, message);
-    }
+        return new MessengerType<PluginMessenger>() {
 
-    @Override
-    public void unsubscribe(Object listener, String channel) {
-        handlers.computeIfPresent(channel, (k,v) -> {
-            v.unregisterAll(listener);
-            return v;
-        });
-    }
-
-    @Override
-    public void subscribe(Object listener, String channel, EventHandler<Message> handler) {
-        handlers.compute(channel, (k,v) -> {
-            if(v == null) v = new HandlerList<>();
-            v.register(listener, handler);
-            return v;
-        });
-    }
-
-    public static final MessengerType TYPE = new MessengerType() {
-
-        @Override
-        public Messenger create(MessengerModule module, ConfigSection params) {
-
-            PluginMessageBroker broker = module.getPluginMessageBroker();
-            if(broker == null) throw new IllegalArgumentException("A plugin message broker is required!");
-
-            return new PluginMessenger(
-                    module,
-                    broker,
-                    params.getOrDefault("namespace", (String) null)
+            private final Serializer<PluginMessenger> serializer = ObjectSerializer.create(
+                    Serializer.STRING.entry("namespace", pm -> pm.namespace),
+                    Serializer.BOOLEAN.entry("encrypt", pm -> pm.encrypt),
+                    (ns, enc) -> new PluginMessenger(this, broker, ns, enc)
             );
-        }
 
-        @Override
-        public boolean usesPluginMessageBroker() {
-            return true;
-        }
-    };
+            @Override
+            public Class<PluginMessenger> getMessengerClass() {
+                return PluginMessenger.class;
+            }
+
+            @Override
+            public Serializer<PluginMessenger> getSerializer() {
+                return serializer;
+            }
+        };
+    }
 
 }

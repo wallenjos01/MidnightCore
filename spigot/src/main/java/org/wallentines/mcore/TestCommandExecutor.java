@@ -52,7 +52,6 @@ public class TestCommandExecutor extends BukkitCommand {
                 case "skin" -> TestUtil.skinCmd(player);
                 case "save" -> TestUtil.saveCmd(player);
                 case "load" -> TestUtil.loadCmd(player);
-                case "messenger" -> TestUtil.messengerCmd(player);
             }
         } else if(args.length == 2) {
             if(args[0].equals("gui") && args[1].equals("paged")) {
@@ -85,6 +84,6 @@ public class TestCommandExecutor extends BukkitCommand {
     private List<String> getTestSubcommands(String[] args) {
 
         if(args.length > 1) return new ArrayList<>();
-        return Arrays.asList("gui", "equip", "scoreboard", "skin", "save", "load", "messenger");
+        return Arrays.asList("gui", "equip", "scoreboard", "skin", "save", "load");
     }
 }

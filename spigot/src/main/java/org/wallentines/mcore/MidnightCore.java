@@ -152,7 +152,7 @@ public class MidnightCore extends JavaPlugin {
         ServerModule.REGISTRY.register(SavepointModule.ID, SpigotSavepointModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SessionModule.ID, SpigotSessionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(SQLModule.ID, SpigotSQLModule.MODULE_INFO);
-        ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.ALWAYS_REGISTER);
+        ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.MODULE_INFO);
 
         PlaceholderManager.INSTANCE.registerSupplier("midnightcore_version", PlaceholderSupplier.inline(ctx -> getPlugin(MidnightCore.class).getDescription().getVersion()));
 

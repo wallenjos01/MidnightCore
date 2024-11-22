@@ -1,5 +1,6 @@
 package org.wallentines.mcore.messenger;
 
+import io.netty.buffer.Unpooled;
 import org.wallentines.mcore.MidnightCoreAPI;
 import org.wallentines.mcore.Proxy;
 import org.wallentines.mcore.ProxyServer;
@@ -10,15 +11,10 @@ import org.wallentines.mdcfg.ConfigObject;
 import org.wallentines.mdcfg.codec.BinaryCodec;
 import org.wallentines.mdcfg.serializer.*;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.*;
 
 public class ProxyPluginMessageBroker extends PluginMessageBroker {
@@ -28,23 +24,21 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     private final Map<String, ForwardInfo> forwarders = new HashMap<>();
     private final boolean enablePersistence;
 
-    public ProxyPluginMessageBroker(Proxy proxy, ProxyPluginMessageModule module, boolean encrypt, boolean enablePersistence) {
-        super();
+    public ProxyPluginMessageBroker(Proxy proxy, Path keyPath, ProxyPluginMessageModule module, boolean enablePersistence) {
+        super(keyPath);
 
         this.proxy = proxy;
         this.module = module;
         this.enablePersistence = enablePersistence;
 
-        init(encrypt);
-
         if (enablePersistence) {
             loadRegistrations();
         }
 
-        module.registerServerHandler(MESSAGE_ID, (msg, payload) -> {
+        module.registerServerHandler(MessengerPacket.MESSAGE_ID, (msg, payload) -> {
 
             ProxyServer server = msg.server();
-            Packet packet = readPacket(payload);
+            MessengerPacket packet = MessengerPacket.readPacket(payload, cipher);
 
             if(packet.isSystemMessage()) {
 
@@ -58,8 +52,8 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
                         List<String> namespaces = new ArrayList<>();
 
                         for(int i = 0 ; i < messengers ; i++) {
-                            EnumSet<Flag> flags = Flag.unpack(packet.payload.readByte());
-                            if(flags.contains(Flag.NAMESPACED)) {
+                            EnumSet<MessengerPacket.Flag> flags = MessengerPacket.Flag.unpack(packet.payload.readByte());
+                            if(flags.contains(MessengerPacket.Flag.NAMESPACED)) {
                                 String namespace = PacketBufferUtil.readUtf(packet.payload);
                                 namespaces.add(namespace);
                             }
@@ -86,7 +80,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
             if(packet.isExpired()) return;
 
             if(!forwarders.containsKey(server.getName())) {
-                module.sendServerMessage(server, new Packet(REQUEST, null));
+                module.sendServerMessage(server, new MessengerPacket(REQUEST, Unpooled.buffer(), cipher));
             }
 
             // Handle
@@ -125,13 +119,13 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         ForwardInfo info = forwarders.get(server.getName());
 
         if(info == null || info.persisted) {
-            module.sendServerMessage(server, new Packet(REQUEST, null));
+            module.sendServerMessage(server, new MessengerPacket(REQUEST, null, cipher));
             if(info == null) return;
         }
 
         while(!info.queue.isEmpty()) {
 
-            Packet packet = info.queue.remove();
+            MessengerPacket packet = info.queue.remove();
             if(packet.isExpired()) continue;
 
             module.sendServerMessage(info.server, packet);
@@ -140,15 +134,15 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     }
 
     @Override
-    protected void send(Packet packet) {
+    protected void sendPacket(MessengerPacket packet) {
         forward(packet, null);
     }
 
-    protected void forward(Packet packet, ProxyServer sender) {
+    protected void forward(MessengerPacket packet, ProxyServer sender) {
 
         for(ForwardInfo fi : forwarders.values()) {
 
-            Packet toSend = packet.encrypted(fi.encrypt);
+            MessengerPacket toSend = packet.withCipher(fi.encrypt ? null : cipher);
             if(fi.server == sender || !fi.hasNamespace(toSend.namespace)) continue;
 
             if(fi.server.getPlayerCount() == 0) {
@@ -163,7 +157,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
     }
 
     @Override
-    public void onShutdown() {
+    public void shutdown() {
 
         if(enablePersistence) {
 
@@ -180,30 +174,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
             }
         }
         forwarders.clear();
-        module.unregisterServerHandler(MESSAGE_ID);
-    }
-
-    @Override
-    protected Path getKeyFile() {
-
-        Path out = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.key");
-        if(!Files.exists(out)) {
-
-            SecureRandom random = new SecureRandom();
-
-            try(OutputStream fos = Files.newOutputStream(out)) {
-                KeyGenerator gen = KeyGenerator.getInstance("AES");
-                gen.init(128, random);
-                SecretKey key = gen.generateKey();
-                fos.write(key.getEncoded());
-
-            } catch (NoSuchAlgorithmException | IOException ex) {
-                MidnightCoreAPI.LOGGER.warn("Failed to generate messenger key!", ex);
-                return out;
-            }
-        }
-
-        return out;
+        module.unregisterServerHandler(MessengerPacket.MESSAGE_ID);
     }
 
     private static class ForwardInfo {
@@ -214,7 +185,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         final boolean rootNamespace;
         boolean persisted = false;
 
-        final Queue<Packet> queue = new ArrayDeque<>();
+        final Queue<MessengerPacket> queue = new ArrayDeque<>();
 
         ForwardInfo(ProxyServer server, boolean encrypt, boolean rootNamespace, Collection<String> namespace) {
             this.server = server;
@@ -252,24 +223,24 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
 
     }
 
-    public static final Factory FACTORY = (msg, cfg) -> {
-
-        if(!(msg instanceof ProxyMessengerModule)) {
-            throw new IllegalStateException("Unable to create plugin message broker! Proxy messenger required!");
-        }
-
-        Proxy prx = ((ProxyMessengerModule) msg).getProxy();
-        ProxyPluginMessageModule pm = prx.getModuleManager().getModule(ProxyPluginMessageModule.class);
-
-        if(pm == null) {
-            throw new IllegalStateException("Unable to create plugin message broker! Plugin message module is unloaded!");
-        }
-
-        return new ProxyPluginMessageBroker(
-                prx,
-                pm,
-                cfg.getOrDefault("encrypt", false),
-                cfg.getOrDefault("persistence", true));
-    };
+//    public static final Factory FACTORY = (msg, cfg) -> {
+//
+//        if(!(msg instanceof ProxyMessengerModule)) {
+//            throw new IllegalStateException("Unable to create plugin message broker! Proxy messenger required!");
+//        }
+//
+//        Proxy prx = ((ProxyMessengerModule) msg).getProxy();
+//        ProxyPluginMessageModule pm = prx.getModuleManager().getModule(ProxyPluginMessageModule.class);
+//
+//        if(pm == null) {
+//            throw new IllegalStateException("Unable to create plugin message broker! Plugin message module is unloaded!");
+//        }
+//
+//        return new ProxyPluginMessageBroker(
+//                prx,
+//                pm,
+//                cfg.getOrDefault("encrypt", false),
+//                cfg.getOrDefault("persistence", true));
+//    };
 
 }

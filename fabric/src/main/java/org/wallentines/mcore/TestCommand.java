@@ -66,13 +66,6 @@ public class TestCommand {
                         return 1;
                     })
             )
-            .then(Commands.literal("messenger")
-                    .executes(ctx -> {
-                        Player pl = ctx.getSource().getPlayerOrException();
-                        TestUtil.messengerCmd(pl);
-                        return 1;
-                    })
-            )
         );
 
     }

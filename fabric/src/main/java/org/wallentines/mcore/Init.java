@@ -68,7 +68,7 @@ public class Init implements ModInitializer {
         ServerModule.REGISTRY.register(ServerPluginMessageModule.ID, FabricServerPluginMessageModule.MODULE_INFO);
         ServerModule.REGISTRY.register(ServerExtensionModule.ID, ServerExtensionModule.MODULE_INFO);
         ServerModule.REGISTRY.register(FabricServerSQLModule.ID, FabricServerSQLModule.MODULE_INFO);
-        ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.STARTUP_REGISTER);
+        ServerModule.REGISTRY.register(ServerMessengerModule.ID, ServerMessengerModule.MODULE_INFO);
 
     }
 

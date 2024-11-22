@@ -2,6 +2,7 @@
 netty = "4.1.113.Final"
 mdcfg = "2.5.1-SNAPSHOT"
 mdlib = "1.7.2-SNAPSHOT"
+smi = "0.1.0-SNAPSHOT"
 slf4j = "2.0.11"
 jbr-anno = "24.1.0"
 zstd = "1.5.5-5"
@@ -16,6 +17,7 @@ midnight-cfg-gson = { module = "org.wallentines:midnightcfg-codec-gson", version
 midnight-cfg-binary = { module = "org.wallentines:midnightcfg-codec-binary", version.ref="mdcfg" }
 midnight-cfg-nbt = { module = "org.wallentines:midnightcfg-codec-nbt", version.ref="mdcfg" }
 midnight-lib = { module = "org.wallentines:midnightlib", version.ref="mdlib" }
+smi = { module = "org.wallentines:smi-api", version.ref = "smi" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref="jbr-anno" }

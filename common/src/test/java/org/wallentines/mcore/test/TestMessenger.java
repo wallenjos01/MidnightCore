@@ -4,15 +4,16 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.wallentines.mcore.messenger.Message;
+import org.wallentines.mcore.messenger.MessengerPacket;
 import org.wallentines.mcore.messenger.PluginMessageBroker;
+import org.wallentines.midnightlib.registry.Identifier;
+import org.wallentines.smi.Message;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -23,19 +24,15 @@ public class TestMessenger {
     private static class DummyPluginMessageBroker extends PluginMessageBroker {
 
         public DummyPluginMessageBroker(boolean encrypt) {
-            init(encrypt);
+            super(encrypt ? Paths.get("messenger.key") : null);
         }
 
         @Override
-        protected void send(Packet packet) { }
+        protected void sendPacket(MessengerPacket packet) { }
 
         @Override
-        protected void onShutdown() { }
+        protected void shutdown() { }
 
-        @Override
-        protected Path getKeyFile() {
-            return Paths.get("messenger.key");
-        }
 
         public void testPackets() {
 
@@ -44,21 +41,22 @@ public class TestMessenger {
             ByteBuf data = Unpooled.buffer();
             data.writeLong(value);
 
-            Packet packet = new Packet("test", shouldEncrypt(), null, 1000, data);
+            Identifier packetId = new Identifier("test", "test");
 
-            Assertions.assertEquals(shouldEncrypt(), packet.getFlags().contains(Flag.ENCRYPTED));
+            MessengerPacket packet = new MessengerPacket(packetId, data, cipher, null, 1000);
+            Assertions.assertEquals(cipher != null, packet.getFlags().contains(MessengerPacket.Flag.ENCRYPTED));
 
             ByteBuf encoded = Unpooled.buffer();
             packet.write(encoded);
 
-            Packet decoded = readPacket(encoded);
+            MessengerPacket decoded = MessengerPacket.readPacket(encoded, cipher);
 
-            Assertions.assertEquals(shouldEncrypt(), decoded.getFlags().contains(Flag.ENCRYPTED));
+            Assertions.assertEquals(cipher != null, decoded.getFlags().contains(MessengerPacket.Flag.ENCRYPTED));
 
-            Message msg = decoded.toMessage(null);
+            Message msg = decoded.toMessage();
 
-            Assertions.assertEquals("test", msg.channel());
-            Assertions.assertEquals(value, msg.payload().readLong());
+            Assertions.assertEquals(packetId, msg.channel);
+            Assertions.assertEquals(value, msg.payload.getLong());
 
         }
     }

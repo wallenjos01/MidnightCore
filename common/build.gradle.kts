@@ -12,6 +12,7 @@ dependencies {
     api(libs.midnight.cfg.json)
     api(libs.midnight.cfg.nbt)
     api(libs.midnight.lib)
+    api(libs.smi)
 
     api(libs.netty.codec)
     api(libs.netty.buffer)
