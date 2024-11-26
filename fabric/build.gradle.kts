@@ -51,6 +51,8 @@ dependencies {
     modApi(libs.midnight.cfg.gson)
     modApi(libs.midnight.cfg.nbt)
     modApi(libs.midnight.lib)
+    modApi(libs.smi.api)
+    modApi(libs.smi.base)
     modApi(libs.zstd.jni)
 
     shadow(libs.midnight.cfg) { isTransitive = false }
@@ -60,6 +62,8 @@ dependencies {
     shadow(libs.midnight.cfg.gson) { isTransitive = false }
     shadow(libs.midnight.cfg.nbt) { isTransitive = false }
     shadow(libs.midnight.lib) { isTransitive = false }
+    shadow(libs.smi.api) { isTransitive = false }
+    shadow(libs.smi.base) { isTransitive = false }
     shadow(libs.zstd.jni) { isTransitive = false }
 
 }

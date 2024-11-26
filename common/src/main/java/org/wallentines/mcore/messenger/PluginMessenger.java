@@ -109,8 +109,8 @@ public class PluginMessenger implements SerializableMessenger {
         return new MessengerType<PluginMessenger>() {
 
             private final Serializer<PluginMessenger> serializer = ObjectSerializer.create(
-                    Serializer.STRING.entry("namespace", pm -> pm.namespace),
-                    Serializer.BOOLEAN.entry("encrypt", pm -> pm.encrypt),
+                    Serializer.STRING.<PluginMessenger>entry("namespace", pm -> pm.namespace).optional(),
+                    Serializer.BOOLEAN.<PluginMessenger>entry("encrypt", pm -> pm.encrypt).orElse(false),
                     (ns, enc) -> new PluginMessenger(this, broker, ns, enc)
             );
 
