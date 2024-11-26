@@ -35,7 +35,7 @@ dependencies {
             "fabric-registry-sync-v0"
     )
     for(mod in apiModules) {
-        modApi(include(fabricApi.module(mod, "0.109.0+1.21.3"))!!)
+        modApi(include(fabricApi.module(mod, "0.110.0+1.21.4"))!!)
     }
 
     include(modApi("me.lucko:fabric-permissions-api:0.3.2") {
