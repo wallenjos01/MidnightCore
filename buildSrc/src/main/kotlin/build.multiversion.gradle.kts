@@ -1,4 +1,4 @@
-import build.plugin.Common
+import buildlogic.Utils
 
 plugins {
     id("java")
@@ -17,5 +17,5 @@ patch {
     patchSet("java8", sourceSets["main"], sourceSets["main"].java, multiVersion.getCompileTask(8))
 }
 
-multiVersion.getJarTask(8).archiveBaseName.set(Common.getArchiveName(project, rootProject))
-multiVersion.getJarTask(17).archiveBaseName.set(Common.getArchiveName(project, rootProject))
+multiVersion.getJarTask(8).archiveBaseName.set(Utils.getArchiveName(project, rootProject))
+multiVersion.getJarTask(17).archiveBaseName.set(Utils.getArchiveName(project, rootProject))

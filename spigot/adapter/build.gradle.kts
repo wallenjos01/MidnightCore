@@ -1,7 +1,6 @@
 plugins {
-    id("mod-build")
-    id("mod-multi-version")
-    id("mod-publish")
+    id("build.library")
+    id("build.multiversion")
 }
 
 

@@ -36,14 +36,14 @@ public class ProxyMessengerModule extends MessengerModule implements ProxyModule
         }
 
         ConfigSection pm = config.getSection("plugin_message_broker");
-        if(pm.getBoolean("enable")) {
+        if(pm.getBoolean("enabled")) {
 
             ProxyPluginMessageModule mod = data.getModuleManager().getModule(ProxyPluginMessageModule.class);
             if(mod == null) {
                 MidnightCoreAPI.LOGGER.error("Unable to enable plugin message messenger! Plugin message module is unloaded!");
             } else {
                 Path keyPath;
-                if(pm.getBoolean("encrypt")) {
+                if(pm.getOrDefault("encrypt", false)) {
                     keyPath = data.getConfigDirectory().resolve("MidnightCore").resolve("messenger.key");
                     if(!Files.exists(keyPath)) {
                         genKey(keyPath);
@@ -97,11 +97,10 @@ public class ProxyMessengerModule extends MessengerModule implements ProxyModule
             .with("messengers", new ConfigSection()
                     .with("default", new ConfigSection()
                             .with("type", "mcore:plugin_message")
-                            .with("encrypt", false)
                     )
             )
             .with("plugin_message_broker", new ConfigSection()
-                    .with("enable", true)
+                    .with("enabled", true)
                     .with("encrypt", false)
                     .with("persistent_registration", true)
             );

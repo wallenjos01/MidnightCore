@@ -1,6 +1,7 @@
+import buildlogic.Utils
+
 plugins {
-    id("mod-build")
-    id("mod-publish")
+    id("build.library")
 }
 
 dependencies {

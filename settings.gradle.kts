@@ -1,17 +1,3 @@
-pluginManagement {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-        maven("https://maven.fabricmc.net/")
-        maven("https://maven.wallentines.org/plugins")
-    }
-
-    includeBuild("gradle/plugins")
-}
-
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-}
 
 // Building Spigot requires many Spigot versions from 1.8 to 1.21.1 to be available in the local repository. To do this,
 // the user will need to build all required Spigot versions using the Spigot BuildTools. (https://www.spigotmc.org/wiki/buildtools/)

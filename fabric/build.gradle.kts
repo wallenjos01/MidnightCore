@@ -1,13 +1,12 @@
-import build.plugin.Common
+import buildlogic.Utils
 
 plugins {
-    id("mod-build")
-    id("mod-publish")
-    id("mod-shadow")
-    id("mod-fabric")
+    id("build.library")
+    id("build.fabric")
+    id("build.shadow")
 }
 
-Common.setupResources(project, rootProject, "fabric.mod.json")
+Utils.setupResources(project, rootProject, "fabric.mod.json")
 
 dependencies {
 

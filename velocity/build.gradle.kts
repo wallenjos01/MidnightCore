@@ -1,12 +1,11 @@
-import build.plugin.Common
+import buildlogic.Utils
 
 plugins {
-    id("mod-build")
-    id("mod-shadow")
-    id("mod-publish")
+    id("build.library")
+    id("build.shadow")
 }
 
-Common.setupResources(project, rootProject, "velocity-plugin.json")
+Utils.setupResources(project, rootProject, "velocity-plugin.json")
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/")

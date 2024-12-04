@@ -1,12 +1,11 @@
-import build.plugin.Common
-import build.plugin.MultiShadow
+import buildlogic.Utils
+import buildlogic.MultiShadow
 import org.jetbrains.kotlin.parsing.parseBoolean
 
 plugins {
-    id("mod-build")
-    id("mod-shadow")
-    id("mod-multi-version")
-    id("mod-publish")
+    id("build.library")
+    id("build.shadow")
+    id("build.multiversion")
 }
 
 repositories {
@@ -16,7 +15,7 @@ repositories {
     maven("https://libraries.minecraft.net/")
 }
 
-Common.setupResources(project, rootProject, "plugin.yml")
+Utils.setupResources(project, rootProject, "plugin.yml")
 MultiShadow.setupShadow(project, multiVersion, 17, "1.17-1.20.4")
 MultiShadow.setupShadow(project, multiVersion, 8, "1.8-1.16")
 
