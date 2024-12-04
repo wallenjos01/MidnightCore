@@ -1,12 +1,12 @@
 # MidnightCore
 *A cross-platform library for Minecraft servers, clients, and proxies*
 <br/>
-Current Version: 2.0.0-pre8
+Current Version: 2.0.0-pre9
 
 ## Overview
 - MidnightCore has a number of classes and features to make creating plugins and mods easier.
 - The library currently supports Fabric servers and clients, Spigot servers, and Velocity proxies
-  - Fabric builds are for the current version (1.20.6), and Spigot supports versions 1.8-1.20.6
+  - Fabric builds are for the current version (1.20.6), and Spigot supports versions 1.8-1.21.4
 - The library is designed to be modular, so anything that a user does not need can be disabled
 
 ## Usage
@@ -33,15 +33,15 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots") // For Fabric servers, required for fabric-permissions-api
 }
 dependencies {
-    compileOnly("org.wallentines:midnightcore-common:2.0.0-pre8")
+    compileOnly("org.wallentines:midnightcore-common:2.0.0-pre9")
     
-    compileOnly("org.wallentines:midnightcore-server:2.0.0-pre8") // For servers
-    compileOnly("org.wallentines:midnightcore-client:2.0.0-pre8") // For clients
-    compileOnly("org.wallentines:midnightcore-proxy:2.0.0-pre8") // For proxies
+    compileOnly("org.wallentines:midnightcore-server:2.0.0-pre9") // For servers
+    compileOnly("org.wallentines:midnightcore-client:2.0.0-pre9") // For clients
+    compileOnly("org.wallentines:midnightcore-proxy:2.0.0-pre9") // For proxies
     
-    compileOnly("org.wallentines:midnightcore-fabric:2.0.0-pre8") // For Fabric servers and clients
-    compileOnly("org.wallentines:midnightcore-spigot:2.0.0-pre8") // For Spigot servers
-    compileOnly("org.wallentines:midnightcore-velocity:2.0.0-pre8") // For Velocity proxies
+    compileOnly("org.wallentines:midnightcore-fabric:2.0.0-pre9") // For Fabric servers and clients
+    compileOnly("org.wallentines:midnightcore-spigot:2.0.0-pre9") // For Spigot servers
+    compileOnly("org.wallentines:midnightcore-velocity:2.0.0-pre9") // For Velocity proxies
 }
 ```
 - As shown above, the library is divided into three layers: Common, Environment, and Target
@@ -103,8 +103,8 @@ dependencies {
 - ItemStacks can be created and manipulated using MidnightCore.
 - To create a new ItemStack, use the `ItemStack.Builder` class.
   - Items can be created by ID, using a base type and color, or by specifying a Skin for a Player head
-- Item NBT can be obtained as a MidnightCFG `ConfigSection` using `ItemStack::getTag()`, and updated using
-`ItemStack::setTag()`
+- Item components can be loaded from and saved to MidnightConfig `ConfigObject`s using `ItemStack::loadComponent` and 
+`ItemStack::saveComponent`, respectively.
 
 ### Events
 - MidnightCore bundles [MidnightLib](https://github.com/wallenjos01/MidnightLib) for a few data types and for its event

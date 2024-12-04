@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
 
-    implementation("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
+    implementation("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 
     api(project(":common"))
     api(project(":proxy"))
