@@ -420,6 +420,30 @@ public interface ItemStack {
             removedComponents.remove(id);
         }
 
+        public void set(Identifier id, String obj) {
+            if(obj == null) {
+                clear(id);
+                return;
+            }
+            set(id, new ConfigPrimitive(obj));
+        }
+
+        public void set(Identifier id, Number obj) {
+            if(obj == null) {
+                clear(id);
+                return;
+            }
+            set(id, new ConfigPrimitive(obj));
+        }
+
+        public void set(Identifier id, Boolean obj) {
+            if(obj == null) {
+                clear(id);
+                return;
+            }
+            set(id, new ConfigPrimitive(obj));
+        }
+
         public void clear(Identifier id) {
             components.remove(id);
         }

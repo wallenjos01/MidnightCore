@@ -16,7 +16,7 @@ public class ConfigOps implements DynamicOps<ConfigObject> {
 
     @Override
     public ConfigObject empty() {
-        return null;
+        return ConfigPrimitive.NULL;
     }
 
     @Override
@@ -74,26 +74,40 @@ public class ConfigOps implements DynamicOps<ConfigObject> {
     @Override
     public DataResult<ConfigObject> mergeToList(ConfigObject list, ConfigObject value) {
 
-        if(!list.isList()) return DataResult.error(() -> "Not a list!");
+        if(list != null && !list.isList() && !list.equals(empty())) return DataResult.error(() -> "Not a list!");
 
-        list.asList().add(value);
-        return DataResult.success(list);
+        ConfigList output;
+        if(list != null && list.isList()) {
+            output = list.asList().copy();
+        } else {
+            output = new ConfigList();
+        }
+        output.asList().add(value);
+
+        return DataResult.success(output);
     }
 
     @Override
     public DataResult<ConfigObject> mergeToMap(ConfigObject map, ConfigObject key, ConfigObject value) {
 
-        if(!map.isSection()) return DataResult.error(() -> "Not a map!");
+        if(map != null && !map.isSection() && !map.equals(empty())) return DataResult.error(() -> "Not a map!");
         if(!key.isString()) return DataResult.error(() -> "Key was not a String!");
 
-        map.asSection().set(key.asString(), value);
-        return DataResult.success(map);
+        ConfigSection output;
+        if(map != null && map.isSection()) {
+            output = map.asSection().copy();
+        } else {
+            output = new ConfigSection();
+        }
+        output.set(key.asString(), value);
+
+        return DataResult.success(output);
     }
 
     @Override
     public DataResult<Stream<Pair<ConfigObject, ConfigObject>>> getMapValues(ConfigObject input) {
 
-        if(input.isSection()) {
+        if(input != null && input.isSection()) {
             return DataResult.success(input.asSection().getKeys().stream().map(key -> Pair.of(new ConfigPrimitive(key), input.asSection().get(key))));
         }
 

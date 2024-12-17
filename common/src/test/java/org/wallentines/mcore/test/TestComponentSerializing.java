@@ -64,6 +64,7 @@ public class TestComponentSerializing {
         Serializer<Component> ser = ModernSerializer.INSTANCE.forContext(GameVersion.MAX);
         testModern(ser);
 
+        Common.VERSION.setProtocolVersion(769);
 
         // Complex
         Component cmp = Component.text("Hello")

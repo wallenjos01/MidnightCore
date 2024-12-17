@@ -5,6 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.spongepowered.asm.mixin.*;
@@ -53,7 +54,7 @@ public abstract class MixinItemStack implements ItemStack {
         }
 
         DataComponentType<?> dct = type.get().value();
-        set(dct, dct.codecOrThrow().decode(ConfigOps.INSTANCE, config).getOrThrow().getFirst());
+        set(dct, dct.codecOrThrow().decode(RegistryOps.create(ConfigOps.INSTANCE, RegistryUtil.access()), config).getOrThrow().getFirst());
     }
 
     public ConfigObject mcore$saveComponent(Identifier id) {

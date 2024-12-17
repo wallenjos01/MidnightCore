@@ -47,6 +47,7 @@ public class TestUtil {
                     .withCount(13)
                     .withName(org.wallentines.mcore.text.Component.text("Test").withColor(TextColor.GREEN))
                     .withLore(Arrays.asList(org.wallentines.mcore.text.Component.text("Bruh")))
+                    .withEnchantment(Identifier.parse("minecraft:knockback"), 10)
                     .build();
 
 
@@ -221,12 +222,21 @@ public class TestUtil {
                     .withEnchantment(new Identifier("minecraft", "feather_falling"), 4)
                     .withLegacyEnchantment(2, 4)
                     .build();
+
             ItemStack sword = ItemStack.Builder
                     .of(version, new Identifier("minecraft", "stone_sword"))
                     .withEnchantment(new Identifier("minecraft", "sharpness"), 100)
                     .withLegacyEnchantment(16, 100)
                     .withName(Component.text("Test Sword").withColor(new Color(0xAF4EBE)).withShadowColor(new Color(0x277379)))
                     .build();
+
+            if(version.hasFeature(GameVersion.Feature.ITEM_COMPONENTS)) {
+                ItemStack.ComponentPatchSet set = sword.getComponentPatch();
+                set.set(new Identifier("minecraft", "max_stack_size"), 4);
+                set.set(new Identifier("minecraft", "rarity"), "epic");
+
+                sword.loadComponents(set);
+            }
 
             pl.setItem(EquipmentSlot.HEAD, hat);
             pl.setItem(EquipmentSlot.CHEST, shirt);
