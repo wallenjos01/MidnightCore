@@ -11,7 +11,7 @@ public class TestCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
         dispatcher.register(Commands.literal("mcoretest")
-            .requires(Permissions.require(MidnightCoreAPI.MOD_ID + ".command.test", 4))
+            .requires(Permissions.require(MidnightCoreAPI.MOD_ID + ".command.test", 2))
             .executes(ctx -> {
                 Player pl = ctx.getSource().getPlayerOrException();
                 TestUtil.cmd(pl);

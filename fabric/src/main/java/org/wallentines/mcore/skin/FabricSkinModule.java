@@ -81,7 +81,6 @@ public class FabricSkinModule extends SkinModule {
         ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(spl.createCommonSpawnInfo(world), (byte) 3);
 
 
-        ClientboundPlayerPositionPacket position = new ClientboundPlayerPositionPacket(spl.getId(), PositionMoveRotation.of(spl), new HashSet<>());
         ClientboundSetExperiencePacket experience = new ClientboundSetExperiencePacket(spl.experienceProgress, spl.totalExperience, spl.experienceLevel);
 
 
@@ -140,7 +139,7 @@ public class FabricSkinModule extends SkinModule {
         server.getPlayerList().sendPlayerPermissionLevel(spl);
         server.getPlayerList().sendAllPlayerInfo(spl);
 
-        spl.connection.send(position);
+        spl.connection.teleport(PositionMoveRotation.of(spl), new HashSet<>());
         spl.connection.send(equip);
         spl.connection.send(experience);
 

@@ -93,16 +93,23 @@ public class TestUtil {
     }
 
     private static final UUID SKIN_UUID = UUID.fromString("ce784258-10ca-45fb-b787-8dde07375f2b");
+    private static Skin cachedSkin;
 
     public static void skinCmd(Player pl) {
 
         try {
-
-            pl.sendMessage(org.wallentines.mcore.text.Component.text("Attempting to download skin...").withColor(TextColor.AQUA));
-            MojangUtil.getSkinAsync(SKIN_UUID).thenAccept(skin -> {
+            if(cachedSkin == null) {
+                pl.sendMessage(org.wallentines.mcore.text.Component.text("Attempting to download skin...").withColor(TextColor.AQUA));
+                MojangUtil.getSkinAsync(SKIN_UUID).thenAccept(skin -> {
+                    TestUtil.cachedSkin = skin;
+                    pl.sendMessage(org.wallentines.mcore.text.Component.text("Skin obtained!").withColor(TextColor.AQUA));
+                    pl.setSkin(skin);
+                });
+            } else {
                 pl.sendMessage(org.wallentines.mcore.text.Component.text("Skin obtained!").withColor(TextColor.AQUA));
-                pl.setSkin(skin);
-            });
+                pl.setSkin(cachedSkin);
+            }
+
 
         } catch (Throwable th) {
             MidnightCoreAPI.LOGGER.warn("An error occurred during a test command!", th);
