@@ -32,7 +32,7 @@ public class ConfigSerializer implements Serializer<Component> {
     public <O> SerializeResult<O> serialize(SerializeContext<O> context, Component value) {
 
         if(value.hasNonLegacyComponents()) {
-            return ModernSerializer.INSTANCE.serialize(context, value, GameVersion.MAX).flatMap(o -> context.toString(JSONCodec.minified().encodeToString(context, o)));
+            return ModernSerializer.INSTANCE.serialize(GameVersion.context(), value).flatMap(o -> context.toString(JSONCodec.minified().encodeToString(GameVersion.context(), o)));
         }
 
         return LegacySerializer.CONFIG_INSTANCE.serialize(context, value);
@@ -44,16 +44,20 @@ public class ConfigSerializer implements Serializer<Component> {
         if(context.isString(value)) {
 
             if(tryParseJSON) {
-                String s = context.asString(value);
+
+                String s = context.asString(value).getOrNull();
+
+                if(s != null) {
                 String stripped = s.stripLeading();
                 if (stripped.isEmpty()) return SerializeResult.success(Component.text(s));
                 if (stripped.charAt(0) == '{') {
                     try {
                         O sec = JSONCodec.minified().decode(context, stripped);
-                        return ModernSerializer.INSTANCE.forContext(GameVersion.MAX).deserialize(context, sec);
+                        return ModernSerializer.INSTANCE.deserialize(context, sec);
                     } catch (DecodeException ex) {
                         // Ignore
                     }
+                }
                 }
             }
 
@@ -61,7 +65,7 @@ public class ConfigSerializer implements Serializer<Component> {
 
         } else {
 
-            return ModernSerializer.INSTANCE.deserialize(context, value, GameVersion.MAX);
+            return ModernSerializer.INSTANCE.deserialize(context, value);
         }
     }
 }

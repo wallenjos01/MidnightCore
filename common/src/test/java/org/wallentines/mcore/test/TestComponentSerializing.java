@@ -2,11 +2,11 @@ package org.wallentines.mcore.test;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.wallentines.mcore.GameVersion;
 import org.wallentines.mcore.text.*;
 import org.wallentines.mdcfg.ConfigList;
 import org.wallentines.mdcfg.ConfigPrimitive;
 import org.wallentines.mdcfg.ConfigSection;
+import org.wallentines.mdcfg.codec.JSONCodec;
 import org.wallentines.mdcfg.serializer.ConfigContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.mdcfg.serializer.Serializer;
@@ -52,8 +52,8 @@ public class TestComponentSerializing {
         String serialized = comp.toLegacyText();
         String serialized2 = LegacySerializer.INSTANCE.serialize(ConfigContext.INSTANCE, comp).getOrThrow().asString();
 
-        Assertions.assertEquals(serialized, unparsed.asString());
-        Assertions.assertEquals(serialized2, unparsed.asString());
+        Assertions.assertEquals(unparsed.asString(), serialized);
+        Assertions.assertEquals(unparsed.asString(), serialized2);
 
     }
 
@@ -61,7 +61,7 @@ public class TestComponentSerializing {
     @Test
     public void testModernSerializer() {
 
-        Serializer<Component> ser = ModernSerializer.INSTANCE.forContext(GameVersion.MAX);
+        Serializer<Component> ser = ModernSerializer.INSTANCE;
         testModern(ser);
 
         Common.VERSION.setProtocolVersion(769);
@@ -147,6 +147,23 @@ public class TestComponentSerializing {
         Assertions.assertInstanceOf(Content.Text.class, comp.children.get(0).content);
 
     }
+
+    @Test
+    public void testHoverEvent() {
+
+        String encoded = "{\"text\":\"Hello\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":{\"text\":\"Test\"}}}";
+        Component cmp = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.loadConfig(encoded)).getOrThrow();
+
+        Assertions.assertInstanceOf(Content.Text.class, cmp.content);
+        Assertions.assertEquals("Hello", cmp.text());
+        Assertions.assertNotNull(cmp.hoverEvent);
+        Assertions.assertEquals(HoverEvent.create(Component.text("Test")), cmp.hoverEvent);
+
+        String reencoded = cmp.toJSONString();
+        Assertions.assertEquals(encoded, reencoded);
+
+    }
+
 
     @Test
     public void testConfigSerializer() {

@@ -44,7 +44,7 @@ public class ConversionUtil {
 
     public static net.kyori.adventure.text.Component toAdventure(Component component) {
 
-        JsonObject obj = ModernSerializer.INSTANCE.serialize(GsonContext.INSTANCE, component, GameVersion.MAX).getOrThrow().getAsJsonObject();
+        JsonObject obj = ModernSerializer.INSTANCE.serialize(GameVersion.context(GsonContext.INSTANCE), component).getOrThrow().getAsJsonObject();
         return GsonComponentSerializer.builder().build().deserializeFromTree(obj);
     }
 

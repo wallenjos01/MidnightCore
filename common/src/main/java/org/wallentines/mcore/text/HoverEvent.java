@@ -11,6 +11,7 @@ import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class HoverEvent<T> {
 
@@ -68,67 +69,88 @@ public class HoverEvent<T> {
         return out;
     }
 
-    public static final ContextSerializer<HoverEvent<?>, GameVersion> SERIALIZER = new ContextSerializer<>() {
-        @Override
-        public <O> SerializeResult<O> serialize(SerializeContext<O> context, HoverEvent<?> event, GameVersion version) {
-            return serializeGeneric(context, event, version);
-        }
+// = new ContextSerializer<>() {
+//        @Override
+//        public <O> SerializeResult<O> serialize(SerializeContext<O> context, HoverEvent<?> event, GameVersion version) {
+//            return serializeGeneric(context, event, version);
+//        }
+//
+//        private <GT,O> SerializeResult<O> serializeGeneric(SerializeContext<O> context, HoverEvent<GT> event, GameVersion version) {
+//            String id = TYPES.getId(event.type);
+//            if(id == null) {
+//                return SerializeResult.failure("Attempt to serialized unregistered HoverEvent type " + event.type + "!");
+//            }
+//
+//            O out = context.toMap(new HashMap<>());
+//            context.set("action", context.toString(id), out);
+//
+//            return event.type.serializer.serialize(context, event.value, version).map(o -> {
+//
+//                if(version.hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
+//                    context.set("contents", o, out);
+//                } else {
+//                    if(event.type == Type.SHOW_TEXT || event.type == Type.SHOW_ACHIEVEMENT) {
+//                        context.set("value", o, out);
+//                    } else {
+//                        context.set("value", context.toString(snbt(version).encodeToString(context, o)), out);
+//                    }
+//                }
+//                return SerializeResult.success(out);
+//            });
+//        }
+//
+//        @Override
+//        public <O> SerializeResult<HoverEvent<?>> deserialize(SerializeContext<O> context, O value, GameVersion version) {
+//
+//            if(!context.isMap(value)) {
+//                return SerializeResult.failure("Don't know how to deserialize " + value + " as a HoverEvent!");
+//            }
+//
+//            O oid = context.get("action", value);
+//            if(!context.isString(oid)) {
+//                return SerializeResult.failure("Can't deserialize HoverEvent! Missing key action!");
+//            }
+//
+//            String id = context.asString(oid);
+//            Type<?> type = TYPES.get(id);
+//            if(type == null) {
+//                return SerializeResult.failure("Can't deserialize HoverEvent! No action of type " + oid + "!");
+//            }
+//
+//            return type.deserialize(context, value, version).flatMap(th -> th);
+//        }
+//    };
 
-        private <GT,O> SerializeResult<O> serializeGeneric(SerializeContext<O> context, HoverEvent<GT> event, GameVersion version) {
-            String id = TYPES.getId(event.type);
-            if(id == null) {
-                return SerializeResult.failure("Attempt to serialized unregistered HoverEvent type " + event.type + "!");
-            }
 
-            O out = context.toMap(new HashMap<>());
-            context.set("action", context.toString(id), out);
+    public static final Registry<String, HoverEvent.Type<?>> TYPES = Registry.createStringRegistry();
 
-            return event.type.serializer.serialize(context, event.value, version).map(o -> {
+    public static final Serializer<HoverEvent<?>> SERIALIZER = TYPES.byIdSerializer().fieldOf("action").dispatch(
+            HoverEvent::fromType,
+            HoverEvent::fromEvent
+    );
 
-                if(version.hasFeature(GameVersion.Feature.HOVER_CONTENTS)) {
-                    context.set("contents", o, out);
-                } else {
-                    if(event.type == Type.SHOW_TEXT || event.type == Type.SHOW_ACHIEVEMENT) {
-                        context.set("value", o, out);
-                    } else {
-                        context.set("value", context.toString(snbt(version).encodeToString(context, o)), out);
-                    }
-                }
-                return SerializeResult.success(out);
-            });
-        }
+    private static <T> Type<T> fromEvent(HoverEvent<T> event) {
+        return event.getType();
+    }
 
-        @Override
-        public <O> SerializeResult<HoverEvent<?>> deserialize(SerializeContext<O> context, O value, GameVersion version) {
-
-            if(!context.isMap(value)) {
-                return SerializeResult.failure("Don't know how to deserialize " + value + " as a HoverEvent!");
-            }
-
-            O oid = context.get("action", value);
-            if(!context.isString(oid)) {
-                return SerializeResult.failure("Can't deserialize HoverEvent! Missing key action!");
-            }
-
-            String id = context.asString(oid);
-            Type<?> type = TYPES.get(id);
-            if(type == null) {
-                return SerializeResult.failure("Can't deserialize HoverEvent! No action of type " + oid + "!");
-            }
-
-            return type.deserialize(context, value, version).flatMap(th -> th);
-        }
-    };
+    private static <T> Serializer<HoverEvent<?>> fromType(Type<T> type) {
+        return type.getSerializer().fieldOf("contents").map(
+                he -> SerializeResult.success(he.getValue()).cast(type.valueType),
+                val -> SerializeResult.success(new HoverEvent<>(type, val))
+        );
+    }
 
 
     public static class Type<T> {
-        private final ContextSerializer<T, GameVersion> serializer;
+        private final Serializer<T> serializer;
+        private final Class<T> valueType;
 
-        public Type(ContextSerializer<T, GameVersion> serializer) {
+        public Type(Serializer<T> serializer, Class<T> valueType) {
             this.serializer = serializer;
+            this.valueType = valueType;
         }
 
-        public ContextSerializer<T, GameVersion> getSerializer() {
+        public Serializer<T> getSerializer() {
             return serializer;
         }
 
@@ -141,20 +163,22 @@ public class HoverEvent<T> {
             String contentName = version.hasFeature(GameVersion.Feature.HOVER_CONTENTS) ? "contents" : "value";
             O content = context.get(contentName, value);
 
-            return getSerializer().deserialize(context, content, version).flatMap(this::create);
+            return getSerializer().deserialize(context, content).flatMap(this::create);
         }
 
         /**
          * Shows text in a tooltip when a component is hovered over
          */
-        public static final HoverEvent.Type<Component> SHOW_TEXT = register("show_text", ModernSerializer.INSTANCE);
+        public static final HoverEvent.Type<Component> SHOW_TEXT = register("show_text", ModernSerializer.INSTANCE, Component.class);
 
         /**
          * Shows an item tooltip when a component is hovered over
          */
-        public static final HoverEvent.Type<ItemStack> SHOW_ITEM = register("show_item", new ContextSerializer<ItemStack, GameVersion>() {
+        public static final HoverEvent.Type<ItemStack> SHOW_ITEM = register("show_item", new Serializer<ItemStack>() {
             @Override
-            public <O> SerializeResult<O> serialize(SerializeContext<O> ctx, ItemStack value, GameVersion version) {
+            public <O> SerializeResult<O> serialize(SerializeContext<O> ctx, ItemStack value) {
+
+                GameVersion version = GameVersion.getVersion(ctx);
 
                 ConfigSection out = new ConfigSection();
                 out.set("id", value.getType().toString());
@@ -180,8 +204,9 @@ public class HoverEvent<T> {
             }
 
             @Override
-            public <O> SerializeResult<ItemStack> deserialize(SerializeContext<O> ctx, O value, GameVersion version) {
+            public <O> SerializeResult<ItemStack> deserialize(SerializeContext<O> ctx, O value) {
 
+                GameVersion version = GameVersion.getVersion(ctx);
                 ConfigSection sec = ctx.convert(ConfigContext.INSTANCE, value).asSection();
                 String sid = sec.getOrDefault("id", (String) null);
                 if(sid == null) {
@@ -233,7 +258,7 @@ public class HoverEvent<T> {
 
                 return SerializeResult.success(builder.build());
             }
-        });
+        }, ItemStack.class);
 //        public static final HoverEvent.Type<ItemStack> SHOW_ITEM = register("show_item", ContextObjectSerializer.create(
 //                Identifier.serializer("minecraft").entry("id", (is, ver) -> is.getType()),
 //                Serializer.INT.<ItemStack,GameVersion>entry(ver ->
@@ -257,19 +282,20 @@ public class HoverEvent<T> {
          * Shows entity data when a component is hovered over
          */
         public static final HoverEvent.Type<EntityInfo> SHOW_ENTITY = register("show_entity",
-                ContextObjectSerializer.create(
-                        ItemUtil.UUID_SERIALIZER.entry("id", (ei, ver) -> ei.uuid),
-                        Identifier.serializer("minecraft").<EntityInfo, GameVersion>entry("type", (ei, ver) -> ei.type).orElse(ver -> new Identifier("minecraft", "pig")),
-                        ModernSerializer.INSTANCE.entry("name", (ei, ver) -> ei.name),
-                        (version, uuid, identifier, component) -> new EntityInfo(component, identifier, uuid)
-                )
+                ObjectSerializer.create(
+                        ItemUtil.UUID_SERIALIZER.<EntityInfo>entry("id", (ei) -> ei.uuid),
+                        Identifier.serializer("minecraft").<EntityInfo>entry("type", (ei) -> ei.type).orElse(new Identifier("minecraft", "pig")),
+                        ModernSerializer.INSTANCE.<EntityInfo>entry("name", (ei) -> ei.name),
+                        (uuid, identifier, component) -> new EntityInfo(component, identifier, uuid)
+                ),
+                EntityInfo.class
         );
 
         /**
          * Shows an achievement name and description when a component is hovered over.
          * Not used since pre-1.12
          */
-        public static final HoverEvent.Type<String> SHOW_ACHIEVEMENT = register("show_achievement", ContextSerializer.fromStatic(InlineSerializer.RAW));
+        public static final HoverEvent.Type<String> SHOW_ACHIEVEMENT = register("show_achievement", InlineSerializer.RAW, String.class);
 
     }
 
@@ -286,14 +312,11 @@ public class HoverEvent<T> {
         }
     }
 
-    public static final Registry<String, HoverEvent.Type<?>> TYPES = Registry.createStringRegistry();
 
-    private static <T> HoverEvent.Type<T> register(String id, ContextSerializer<T, GameVersion> serializer) {
-        Type<T> type = new Type<>(serializer);
+    private static <T> HoverEvent.Type<T> register(String id, Serializer<T> serializer, Class<T> valueType) {
+        Type<T> type = new Type<>(serializer, valueType);
         HoverEvent.TYPES.register(id, type);
         return type;
     }
-
-
 
 }

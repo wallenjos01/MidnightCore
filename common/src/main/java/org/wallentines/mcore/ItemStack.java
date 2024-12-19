@@ -235,7 +235,7 @@ public interface ItemStack {
 
             if(encoded == null) return getTypeName().withColor(getRarityColor());
 
-            name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, encoded.asString()), getVersion()).getOrThrow();
+            name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(GameVersion.context(getVersion()), encoded.asString())).getOrThrow();
 
         // pre-1.20.5: Get item name from tag
         } else {
@@ -253,7 +253,7 @@ public interface ItemStack {
             String rawName = display.getString("Name");
 
             if(getVersion().hasFeature(GameVersion.Feature.COMPONENT_ITEM_NAMES)) {
-                name = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.minified().decode(ConfigContext.INSTANCE, rawName), getVersion()).getOrThrow();
+                name = ModernSerializer.INSTANCE.deserialize(GameVersion.context(getVersion()), JSONCodec.minified().decode(ConfigContext.INSTANCE, rawName)).getOrThrow();
             } else {
                 name = LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(rawName)).getOrThrow();
                 if(name.italic == null && name.color != null) {
@@ -301,7 +301,7 @@ public interface ItemStack {
 
             String s = o.asString();
             if(ver.hasFeature(GameVersion.Feature.COMPONENT_ITEM_LORE)) {
-                out.add(ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(s), ver).getOrThrow());
+                out.add(ModernSerializer.INSTANCE.deserialize(GameVersion.context(getVersion()), new ConfigPrimitive(s)).getOrThrow());
             } else {
                 out.add(LegacySerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, new ConfigPrimitive(s)).getOrThrow());
             }
@@ -377,18 +377,7 @@ public interface ItemStack {
     Identifier PROFILE_COMPONENT = new Identifier("minecraft", "profile");
 
 
-    ContextSerializer<ItemStack, GameVersion> VERSION_SERIALIZER = new ContextSerializer<ItemStack, GameVersion>() {
-        @Override
-        public <O> SerializeResult<O> serialize(SerializeContext<O> ctx, ItemStack value, GameVersion context) {
-            return Builder.SERIALIZER.serialize(ctx, value.asBuilder(), context);
-        }
-        @Override
-        public <O> SerializeResult<ItemStack> deserialize(SerializeContext<O> ctx, O value, GameVersion context) {
-            return Builder.SERIALIZER.deserialize(ctx, value, context).flatMap(Builder::build);
-        }
-    };
-
-    Serializer<ItemStack> SERIALIZER = VERSION_SERIALIZER.forContext(GameVersion.CURRENT_VERSION::get);
+    Serializer<ItemStack> SERIALIZER = Builder.SERIALIZER.flatMap(ItemStack::asBuilder, Builder::build);
 
     /**
      * An interface to construct an item stack
@@ -478,7 +467,7 @@ public interface ItemStack {
             return out;
         }
 
-        public static final Serializer<ComponentPatchSet> SERIALIZER = ConfigObject.SERIALIZER.mapOf().map(set -> {
+        public static final Serializer<ComponentPatchSet> SERIALIZER = ConfigObject.SERIALIZER.mapOf().flatMap(set -> {
 
             Map<String, ConfigObject> out = new HashMap<>();
             for(Identifier s : set.components.keySet()) {
@@ -981,37 +970,48 @@ public interface ItemStack {
             }
         }
 
-        public static final ContextSerializer<Builder, GameVersion> SERIALIZER = ContextObjectSerializer.create(
-                Identifier.serializer("minecraft").<Builder, GameVersion>entry(
+
+        public static final Serializer<Builder> SERIALIZER = ObjectSerializer.<Builder>builder()
+                .withEntry(Identifier.serializer("minecraft").<Builder>entry(
                                 "id",
-                                (b, ver) -> b.id)
+                                (b) -> b.id)
                         .acceptKey("type")
-                        .optional(),
-                NumberSerializer.forInt(1,99).<Builder, GameVersion>entry(
+                        .optional())
+                .withEntry(NumberSerializer.forInt(1,99).<Builder>entry(
                                 "count",
-                                (b,ver) -> b.count)
+                                (b) -> b.count)
                         .acceptKey("Count")
-                        .orElse(v -> 1),
-                NumberSerializer.forByte((byte) 0,(byte) 15).<Builder, GameVersion>entry(
+                        .orElse(1))
+                .withEntry(NumberSerializer.forByte((byte) 0,(byte) 15).<Builder>entry(
                                 "data",
-                                (b,ver) -> ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : b.dataValue)
+                                (b, ctx) -> {
+                                    GameVersion ver = GameVersion.getVersion(ctx);
+                                    return ver.hasFeature(GameVersion.Feature.NAMESPACED_IDS) ? null : b.dataValue;
+                                })
                         .acceptKey("Damage")
-                        .optional(),
-                ConfigSection.SERIALIZER.<Builder, GameVersion>entry(
+                        .optional())
+                .withEntry(ConfigSection.SERIALIZER.<Builder>entry(
                                 "tag",
-                                (b,ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : b.getCustomData())
-                        .optional(),
-                ComponentPatchSet.SERIALIZER.<Builder, GameVersion>entry(
+                                (b, ctx) -> {
+                                    GameVersion ver = GameVersion.getVersion(ctx);
+                                    return ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? null : b.getCustomData();
+                                })
+                        .optional())
+                .withEntry(ComponentPatchSet.SERIALIZER.<Builder>entry(
                                 "components",
-                                (b,ver) -> ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? b.components : null)
-                        .optional(),
-                (ver, type, count, data, tag, components) ->
-                        new Builder(ver, type)
-                                .withCount(count)
-                                .withDataValue(data)
-                                .withCustomData(tag)
-                                .withComponents(components)
-        );
+                            (b, ctx) -> {
+                                GameVersion ver = GameVersion.getVersion(ctx);
+                                return ver.hasFeature(GameVersion.Feature.ITEM_COMPONENTS) ? b.components : null;
+                            })
+                        .optional())
+                .build((es, ctx) -> {
+                    GameVersion ver = GameVersion.getVersion(ctx);
+                    return SerializeResult.success(new ItemStack.Builder(ver, es.get(0))
+                            .withCount(es.get(1))
+                            .withDataValue(es.get(2))
+                            .withCustomData(es.get(3))
+                            .withComponents(es.get(4)));
+                });
     }
 
 }

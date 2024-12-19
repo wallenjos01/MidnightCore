@@ -180,7 +180,7 @@ public class Component {
      * @return A ConfigSection representing the component
      */
     public ConfigSection toConfigSection() {
-        return ModernSerializer.INSTANCE.serialize(ConfigContext.INSTANCE, this, GameVersion.MAX).getOrThrow().asSection();
+        return ModernSerializer.INSTANCE.serialize(GameVersion.context(), this).getOrThrow().asSection();
     }
 
     /**
@@ -189,7 +189,7 @@ public class Component {
      * @return A ConfigSection representing the component
      */
     public ConfigSection toConfigSection(GameVersion version) {
-        return ModernSerializer.INSTANCE.serialize(ConfigContext.INSTANCE, this, version).getOrThrow().asSection();
+        return ModernSerializer.INSTANCE.serialize(GameVersion.context(version), this).getOrThrow().asSection();
     }
 
     /**

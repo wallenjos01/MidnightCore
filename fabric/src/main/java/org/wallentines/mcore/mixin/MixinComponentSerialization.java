@@ -45,8 +45,8 @@ public class MixinComponentSerialization {
 
                     try {
                         new NBTCodec(false).encode(
-                                ConfigContext.INSTANCE,
-                                ModernSerializer.INSTANCE.forContext(new GameVersion(SharedConstants.getCurrentVersion().getId(), SharedConstants.getProtocolVersion())),
+                                GameVersion.context(new GameVersion(SharedConstants.getCurrentVersion().getId(), SharedConstants.getProtocolVersion())),
+                                ModernSerializer.INSTANCE,
                                 wc.internal,
                                 new ByteBufOutputStream(object));
                         return;

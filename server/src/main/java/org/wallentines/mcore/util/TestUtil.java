@@ -145,7 +145,8 @@ public class TestUtil {
             gui.setItem(3, new UnresolvedItemStack(ItemStack.Builder.glassWithColor(version, TextColor.GREEN), UnresolvedComponent.parse("%player_name%").getOrThrow(), null), (cpl, cl) -> {
                 cpl.sendMessage(Component.text(cl.name()));
                 gui.close(cpl);
-            });gui.setItem(8, ItemStack.empty(), (cpl, cl) -> {
+            });
+            gui.setItem(8, ItemStack.empty(), (cpl, cl) -> {
                 cpl.sendMessage(Component.text("Hello, " + cpl.getUsername()));
             });
 

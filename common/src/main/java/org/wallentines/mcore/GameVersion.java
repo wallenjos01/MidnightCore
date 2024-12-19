@@ -1,5 +1,9 @@
 package org.wallentines.mcore;
 
+import org.wallentines.mdcfg.ConfigObject;
+import org.wallentines.mdcfg.serializer.ConfigContext;
+import org.wallentines.mdcfg.serializer.DelegatedContext;
+import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.midnightlib.types.DefaultedSingleton;
 import org.wallentines.midnightlib.types.Singleton;
 
@@ -78,6 +82,40 @@ public class GameVersion {
 
     public static final GameVersion VERSION_1_8 = new GameVersion("1.8", 47);
     public static final GameVersion MAX = new GameVersion("Maximum", RELEASE_MAX_VERSION);
+
+    public static class VersionContext<T> extends DelegatedContext<T, GameVersion> {
+        public VersionContext(SerializeContext<T> delegate) {
+            super(delegate, CURRENT_VERSION.getOr(MAX));
+        }
+
+        public VersionContext(SerializeContext<T> delegate, GameVersion value) {
+            super(delegate, value);
+        }
+    }
+
+    public static VersionContext<ConfigObject> context() {
+        return new VersionContext<>(ConfigContext.INSTANCE);
+    }
+
+    public static VersionContext<ConfigObject> context(GameVersion version) {
+        return new VersionContext<>(ConfigContext.INSTANCE, version);
+    }
+
+    public static <T, C extends SerializeContext<T>> VersionContext<T> context(C value) {
+        return new VersionContext<>(value);
+    }
+
+    public static <T, C extends SerializeContext<T>> VersionContext<T> context(C value, GameVersion version) {
+        return new VersionContext<>(value, version);
+    }
+
+    public static GameVersion getVersion(SerializeContext<?> context) {
+        if(context instanceof VersionContext) {
+            return ((VersionContext<?>) context).getContextValue();
+        }
+        return CURRENT_VERSION.getOr(MAX);
+    }
+
 
     public static class Feature {
 

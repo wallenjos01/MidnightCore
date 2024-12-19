@@ -105,7 +105,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
             return;
         }
 
-        Serializer<ForwardInfo> ser = ForwardInfo.SERIALIZER.forContext(proxy);
+        Serializer<ForwardInfo> ser = ForwardInfo.serializer(proxy);
         for(ConfigObject obj : root.values()) {
             ser.deserialize(ConfigContext.INSTANCE, obj).get().ifPresent(fi -> {
                 fi.persisted = true;
@@ -163,7 +163,7 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
 
             Path out = proxy.getConfigDirectory().resolve("MidnightCore").resolve("messenger.mdb");
             ConfigList root = new ConfigList();
-            Serializer<ForwardInfo> ser = ForwardInfo.SERIALIZER.forContext(proxy);
+            Serializer<ForwardInfo> ser = ForwardInfo.serializer(proxy);
             for(ForwardInfo fi : forwarders.values()) {
                 root.add(fi, ser);
             }
@@ -200,26 +200,30 @@ public class ProxyPluginMessageBroker extends PluginMessageBroker {
         }
 
 
-        static final ContextSerializer<ProxyServer, Proxy> SERVER = new ContextSerializer<>() {
-            @Override
-            public <O> SerializeResult<O> serialize(SerializeContext<O> ctx, ProxyServer value, Proxy context) {
-                return SerializeResult.success(ctx.toString(value.getName()));
-            }
+        static Serializer<ProxyServer> server(Proxy proxy) {
+            return new Serializer<ProxyServer>() {
+                @Override
+                public <O> SerializeResult<O> serialize(SerializeContext<O> ctx, ProxyServer value) {
+                    return SerializeResult.success(ctx.toString(value.getName()));
+                }
 
-            @Override
-            public <O> SerializeResult<ProxyServer> deserialize(SerializeContext<O> ctx, O value, Proxy context) {
-                if(!ctx.isString(value)) return SerializeResult.failure("Expected a string!");
-                return SerializeResult.ofNullable(context.getServer(ctx.asString(value)));
-            }
+                @Override
+                public <O> SerializeResult<ProxyServer> deserialize(SerializeContext<O> ctx, O value) {
+                    return ctx.asString(value).map(name -> SerializeResult.ofNullable(proxy.getServer(name), "Unknown server " + name));
+                }
+            };
         };
 
-        static final ContextSerializer<ForwardInfo, Proxy> SERIALIZER = ContextObjectSerializer.create(
-                SERVER.entry("server", (fi, ctx) -> fi.server),
-                Serializer.BOOLEAN.entry("encrypt", (fi, ctx) -> fi.encrypt),
-                Serializer.BOOLEAN.entry("root", (fi, ctx) -> fi.rootNamespace),
-                Serializer.STRING.listOf().entry("namespaces", (fi, ctx) -> fi.namespaces),
-                (ctx, server, enc, root, ns) -> new ForwardInfo(server, enc, root, ns)
-        );
+        static Serializer<ForwardInfo> serializer(Proxy proxy) {
+
+            return ObjectSerializer.create(
+                    server(proxy).entry("server", (fi, ctx) -> fi.server),
+                    Serializer.BOOLEAN.entry("encrypt", (fi, ctx) -> fi.encrypt),
+                    Serializer.BOOLEAN.entry("root", (fi, ctx) -> fi.rootNamespace),
+                    Serializer.STRING.listOf().entry("namespaces", (fi, ctx) -> fi.namespaces),
+                    ForwardInfo::new
+            );
+        }
 
     }
 

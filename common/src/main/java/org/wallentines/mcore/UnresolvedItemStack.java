@@ -57,7 +57,7 @@ public class UnresolvedItemStack {
         @Override
         public <O> SerializeResult<O> serialize(SerializeContext<O> context, UnresolvedItemStack value) {
 
-            SerializeResult<O> out = ItemStack.Builder.SERIALIZER.serialize(context, value.builder, GameVersion.CURRENT_VERSION.get());
+            SerializeResult<O> out = ItemStack.Builder.SERIALIZER.serialize(GameVersion.context(context), value.builder);
             if(!out.isComplete()) return out;
 
             O map = out.getOrThrow();
@@ -78,7 +78,7 @@ public class UnresolvedItemStack {
         @Override
         public <O> SerializeResult<UnresolvedItemStack> deserialize(SerializeContext<O> context, O value) {
 
-            return ItemStack.Builder.SERIALIZER.deserialize(context, value, GameVersion.CURRENT_VERSION.get()).map(builder -> {
+            return ItemStack.Builder.SERIALIZER.deserialize(GameVersion.context(context), value).map(builder -> {
 
                 UnresolvedComponent name = null;
                 List<UnresolvedComponent> lore = null;

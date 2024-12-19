@@ -6,10 +6,7 @@ import org.wallentines.mcore.text.Component;
 import org.wallentines.mcore.text.ModernSerializer;
 import org.wallentines.mcore.text.TextColor;
 import org.wallentines.mdcfg.codec.JSONCodec;
-import org.wallentines.mdcfg.serializer.ConfigContext;
-import org.wallentines.mdcfg.serializer.ContextSerializer;
-import org.wallentines.mdcfg.serializer.SerializeContext;
-import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -49,10 +46,11 @@ public class ItemUtil {
         );
     }
 
-    public static final ContextSerializer<UUID, GameVersion> UUID_SERIALIZER = new ContextSerializer<>() {
+    public static final Serializer<UUID> UUID_SERIALIZER = new Serializer<UUID>() {
         @Override
-        public <O> SerializeResult<O> serialize(SerializeContext<O> serializeContext, UUID uuid, GameVersion version) {
+        public <O> SerializeResult<O> serialize(SerializeContext<O> serializeContext, UUID uuid) {
 
+            GameVersion version = GameVersion.getVersion(serializeContext);
             if(version.hasFeature(GameVersion.Feature.INT_ARRAY_UUIDS)) {
                 List<O> out = Arrays.stream(splitUUID(uuid)).boxed().map(serializeContext::toNumber).toList();
                 return SerializeResult.success(serializeContext.toList(out));
@@ -63,26 +61,35 @@ public class ItemUtil {
         }
 
         @Override
-        public <O> SerializeResult<UUID> deserialize(SerializeContext<O> serializeContext, O o, GameVersion version) {
+        public <O> SerializeResult<UUID> deserialize(SerializeContext<O> serializeContext, O o) {
 
+            GameVersion version = GameVersion.getVersion(serializeContext);
             if(version.hasFeature(GameVersion.Feature.INT_ARRAY_UUIDS)) {
-                int[] arr = new int[4];
-                int index = 0;
-                Collection<O> os = serializeContext.asList(o);
-                if(os.size() != 4) {
-                    return SerializeResult.failure("Unable to deserialize UUID as an int-array! Array was not the right length");
-                }
 
-                for(O oo : os) {
-                    arr[index++] = serializeContext.asNumber(oo).intValue();
-                }
-                return SerializeResult.success(joinUUID(arr));
+                return serializeContext.asList(o).map(os -> {
+
+                    int[] arr = new int[4];
+                    int index = 0;
+                    if(os.size() != 4) {
+                        return SerializeResult.failure("Unable to deserialize UUID as an int-array! Array was not the right length");
+                    }
+
+                    for(O oo : os) {
+                        SerializeResult<Number> num = serializeContext.asNumber(oo);
+                        if(!num.isComplete()) return SerializeResult.failure(num.getError());
+
+                        arr[index++] = num.getOrThrow().intValue();
+                    }
+                    return SerializeResult.success(joinUUID(arr));
+                });
 
             } else {
                 try {
-                    return SerializeResult.success(UUID.fromString(serializeContext.asString(o)));
+                    return SerializeResult.success(java.util.UUID.fromString(serializeContext.asString(o).getOrThrow()));
                 } catch (IllegalArgumentException ex) {
                     return SerializeResult.failure("Unable to read UUID from string! " + ex.getMessage());
+                } catch (SerializeException ex) {
+                    return SerializeResult.failure(ex);
                 }
             }
 
@@ -124,7 +131,7 @@ public class ItemUtil {
         String strName;
         if(version.hasFeature(feature)) {
             try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                JSONCodec.minified().encode(ConfigContext.INSTANCE, ModernSerializer.INSTANCE.forContext(version), component, bos);
+                JSONCodec.minified().encode(new GameVersion.VersionContext(ConfigContext.INSTANCE, version), ModernSerializer.INSTANCE, component, bos);
                 strName = bos.toString();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);

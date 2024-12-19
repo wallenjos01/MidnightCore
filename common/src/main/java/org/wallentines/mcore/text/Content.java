@@ -1,8 +1,12 @@
 package org.wallentines.mcore.text;
 
+import org.jetbrains.annotations.NotNull;
 import org.wallentines.mdcfg.ConfigSection;
 import org.wallentines.mdcfg.serializer.ObjectSerializer;
+import org.wallentines.mdcfg.serializer.SerializeContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.mdcfg.serializer.Serializer;
+import org.wallentines.midnightlib.registry.Registry;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,9 +18,9 @@ import java.util.Objects;
 public abstract class Content {
 
     // The Content type (i.e. text, translate, keybind, etc.)
-    protected final Type type;
+    protected final Type<?> type;
 
-    protected Content(Type type) {
+    protected Content(Type<?> type) {
         this.type = type;
     }
 
@@ -24,9 +28,11 @@ public abstract class Content {
      * Returns the Content type
      * @return The Content type
      */
-    public Type getType() {
+    public Type<?> getType() {
         return type;
     }
+
+    public abstract <O> SerializeResult<O> serialize(SerializeContext<O> ctx);
 
     /**
      * A Content type which displays plaintext
@@ -54,6 +60,16 @@ public abstract class Content {
         @Override
         public int hashCode() {
             return Objects.hash(text);
+        }
+
+        public static final Serializer<Text> SERIALIZER = ObjectSerializer.create(
+                Serializer.STRING.entry("text", con -> con.text),
+                Text::new
+        );
+
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> ctx) {
+            return SERIALIZER.serialize(ctx, this);
         }
     }
 
@@ -101,6 +117,15 @@ public abstract class Content {
             return Objects.hash(key, fallback, with);
         }
 
+        public static final Serializer<Translate> SERIALIZER = ObjectSerializer.create(
+                Serializer.STRING.entry("translate", con -> con.key),
+                Translate::new
+        );
+
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> ctx) {
+            return SERIALIZER.serialize(ctx, this);
+        }
     }
 
 
@@ -136,6 +161,11 @@ public abstract class Content {
                 Serializer.STRING.entry("keybind", con -> con.key),
                 Keybind::new
         );
+
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> ctx) {
+            return SERIALIZER.serialize(ctx, this);
+        }
     }
 
 
@@ -195,6 +225,11 @@ public abstract class Content {
                         cfg.getOrDefault("value", (String) null)
                 )
         );
+
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> ctx) {
+            return SERIALIZER.serialize(ctx, this);
+        }
     }
 
 
@@ -240,6 +275,11 @@ public abstract class Content {
                 Serializer.STRING.entry("selector", con -> con.value),
                 Selector::new
         );
+
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> ctx) {
+            return SERIALIZER.serialize(ctx, this);
+        }
     }
 
 
@@ -305,12 +345,10 @@ public abstract class Content {
             STORAGE
         }
 
-        public static Serializer<NBT> serializer(Serializer<Component> serializer) {
-
-            return ObjectSerializer.create(
-                    Serializer.STRING.entry("nbt", con -> con.path),
+        public static final Serializer<NBT> SERIALIZER = ObjectSerializer.create(
+                    Serializer.STRING.<NBT>entry("nbt", con -> con.path),
                     Serializer.BOOLEAN.<NBT>entry("interpret", con -> con.interpret).optional(),
-                    serializer.<NBT>entry("separator", con -> con.separator).optional(),
+                    ModernSerializer.INSTANCE.<NBT>entry("separator", con -> con.separator).optional(),
                     Serializer.STRING.<NBT>entry("block", con -> con.type == DataSourceType.BLOCK ? con.data : null).optional(),
                     Serializer.STRING.<NBT>entry("entity", con -> con.type == DataSourceType.ENTITY ? con.data : null).optional(),
                     Serializer.STRING.<NBT>entry("storage", con -> con.type == DataSourceType.STORAGE ? con.data : null).optional(),
@@ -336,33 +374,52 @@ public abstract class Content {
                         return new NBT(path, interpret, sep, type, data);
                     }
             );
+
+        @Override
+        public <O> SerializeResult<O> serialize(SerializeContext<O> ctx) {
+            return SERIALIZER.serialize(ctx, this);
         }
     }
 
-    public enum Type {
-        TEXT("text"),
-        TRANSLATE("translate"),
-        KEYBIND("ketbind"),
-        SCORE("score"),
-        SELECTOR("selector"),
-        NBT("nbt");
+    public static class Type<T extends Content> {
 
-        final String id;
+        final Class<T> typeClass;
+        final Serializer<T> serializer;
 
-        Type(String id) {
-            this.id = id;
+        Type(Class<T> typeClass, Serializer<T> serializer) {
+            this.typeClass = typeClass;
+            this.serializer = serializer;
+        }
+
+        public static final Type<Content.Text> TEXT = new Type<Content.Text>(Content.Text.class, Content.Text.SERIALIZER);
+        public static final Type<Content.Translate> TRANSLATE = new Type<Content.Translate>(Content.Translate.class, Content.Translate.SERIALIZER);
+        public static final Type<Content.Keybind> KEYBIND = new Type<Content.Keybind>(Content.Keybind.class, Content.Keybind.SERIALIZER);
+        public static final Type<Content.Score> SCORE = new Type<Content.Score>(Content.Score.class, Content.Score.SERIALIZER);
+        public static final Type<Content.Selector> SELECTOR = new Type<Content.Selector>(Content.Selector.class, Content.Selector.SERIALIZER);
+        public static final Type<Content.NBT> NBT = new Type<Content.NBT>(Content.NBT.class, Content.NBT.SERIALIZER);
+
+        public static final Registry<String, Type<?>> TYPES = bootstrap(Registry.createStringRegistry());
+
+        private static Registry<String, Type<?>> bootstrap(@NotNull Registry<String, Type<?>> registry) {
+
+            registry.register("text", TEXT);
+            registry.register("translate", TRANSLATE);
+            registry.register("keybind", KEYBIND);
+            registry.register("score", SCORE);
+            registry.register("selector", SELECTOR);
+            registry.register("nbt", NBT);
+
+            return registry.freeze();
         }
 
         public String getId() {
-            return id;
+            return TYPES.getId(this);
         }
 
-        public static Type byId(String id) {
-            for(Type t : values()) {
-                if(t.id.equals(id)) return t;
-            }
-            return null;
+        public static Type<?> byId(String id) {
+            return TYPES.get(id);
         }
+
     }
 
 }

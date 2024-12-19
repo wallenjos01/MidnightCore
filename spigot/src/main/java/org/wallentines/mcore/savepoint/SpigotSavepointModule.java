@@ -47,12 +47,7 @@ public class SpigotSavepointModule extends SavepointModule {
 
     @Override
     public Serializer<Savepoint> getSerializer() {
-        return SpigotSavepoint.SERIALIZER.map(sp -> {
-            if(!(sp instanceof SpigotSavepoint)) {
-                return null;
-            }
-            return (SpigotSavepoint) sp;
-        }, ssp -> ssp);
+        return SpigotSavepoint.SERIALIZER.cast(SpigotSavepoint.class, Savepoint.class);
     }
 
     @Override

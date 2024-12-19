@@ -161,7 +161,7 @@ public class UnresolvedComponent {
             }
 
             try {
-                SerializeResult<Component> base = ModernSerializer.INSTANCE.deserialize(ConfigContext.INSTANCE, JSONCodec.loadConfig(toParse.toString()), GameVersion.MAX);
+                SerializeResult<Component> base = ModernSerializer.INSTANCE.deserialize(GameVersion.context(), JSONCodec.loadConfig(toParse.toString()));
                 if (base.isComplete()) {
                     return finalizeJSON(manager, finalContext, base.getOrThrow());
                 }

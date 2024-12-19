@@ -175,29 +175,29 @@ public class ConversionUtil {
 
     public static ComponentContents toContents(Content content) {
 
-        switch (content.getType()) {
-            case TEXT:
+        switch (content.getType().getId()) {
+            case "text":
                 return new PlainTextContents.LiteralContents(((Content.Text) content).text);
-            case TRANSLATE: {
+            case "translate": {
                 Content.Translate md = (Content.Translate) content;
                 return new TranslatableContents(
                         md.key,
                         md.fallback,
                         md.with == null ? null : md.with.stream().map(WrappedComponent::new).toArray());
             }
-            case KEYBIND:
+            case "keybind":
                 return new KeybindContents(((Content.Keybind) content).key);
-            case SCORE: {
+            case "score": {
                 Content.Score md = (Content.Score) content;
                 return new ScoreContents(Either.right(md.name), md.objective);
             }
-            case SELECTOR: {
+            case "selector": {
                 Content.Selector md = (Content.Selector) content;
                 return new SelectorContents(
                         SelectorPattern.parse(md.value).getOrThrow(),
                         Optional.ofNullable(md.separator == null ? null : new WrappedComponent(md.separator)));
             }
-            case NBT: {
+            case "nbt": {
                 Content.NBT md = (Content.NBT) content;
                 DataSource source = switch (md.type) {
                     case BLOCK -> new BlockDataSource(md.data);

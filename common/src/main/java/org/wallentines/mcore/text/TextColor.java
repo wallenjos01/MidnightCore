@@ -1,9 +1,9 @@
 package org.wallentines.mcore.text;
 
 import org.wallentines.mcore.GameVersion;
-import org.wallentines.mdcfg.serializer.ContextSerializer;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
+import org.wallentines.mdcfg.serializer.Serializer;
 import org.wallentines.midnightlib.math.Color;
 
 public final class TextColor {
@@ -105,15 +105,16 @@ public final class TextColor {
         return version.hasFeature(GameVersion.Feature.RGB_TEXT) ? color.toHex() : toLegacyColor(color);
     }
 
-    public static final ContextSerializer<Color, GameVersion> SERIALIZER = new ContextSerializer<>() {
+    public static final Serializer<Color> SERIALIZER = new Serializer<>() {
         @Override
-        public <O> SerializeResult<O> serialize(SerializeContext<O> context, Color value, GameVersion version) {
-            return SerializeResult.success(context.toString(TextColor.serialize(value, version)));
+        public <O> SerializeResult<O> serialize(SerializeContext<O> context, Color value) {
+            GameVersion ver = GameVersion.getVersion(context);
+            return SerializeResult.success(context.toString(TextColor.serialize(value, ver)));
         }
 
         @Override
-        public <O> SerializeResult<Color> deserialize(SerializeContext<O> context, O value, GameVersion version) {
-            return SerializeResult.success(TextColor.parse(context.asString(value)));
+        public <O> SerializeResult<Color> deserialize(SerializeContext<O> context, O value) {
+            return context.asString(value).flatMap(TextColor::parse);
         }
     };
 

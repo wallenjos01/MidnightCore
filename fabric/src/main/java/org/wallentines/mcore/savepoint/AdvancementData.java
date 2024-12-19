@@ -85,7 +85,7 @@ public record AdvancementData(Map<ResourceLocation, AdvancementProgress> advance
             if (!map.isComplete()) return SerializeResult.failure(map.getError());
 
             O num = context.get("DataVersion", value);
-            Integer version = num == null ? null : context.asNumber(num).intValue();
+            Integer version = num == null ? null : context.asNumber(num).getOrThrow().intValue();
 
             return SerializeResult.success(new AdvancementData(map.getOrThrow(), version));
         }

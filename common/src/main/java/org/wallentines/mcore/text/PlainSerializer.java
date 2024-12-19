@@ -23,7 +23,7 @@ public class PlainSerializer implements Serializer<Component> {
             if(!child.isComplete()) {
                 return child;
             }
-            str.append(context.asString(child.getOrThrow()));
+            str.append(context.asString(child.getOrThrow()).getOrThrow());
         }
 
         return SerializeResult.success(context.toString(str.toString()));
@@ -31,22 +31,17 @@ public class PlainSerializer implements Serializer<Component> {
 
     @Override
     public <O> SerializeResult<Component> deserialize(SerializeContext<O> context, O value) {
-
-        if(!context.isString(value)) {
-            return SerializeResult.failure("Cannot create plain text component out of non-string " + value);
-        }
-
-        return SerializeResult.success(Component.text(context.asString(value)));
+        return context.asString(value).flatMap(Component::text);
     }
 
 
     public static String serializeContent(Content content) {
-        switch (content.type) {
-            case TEXT:
+        switch (content.type.getId()) {
+            case "text":
                 return ((Content.Text) content).text;
-            case TRANSLATE:
+            case "translate":
                 return ((Content.Translate) content).key;
-            case KEYBIND:
+            case "keybind":
                 return ((Content.Keybind) content).key;
             default:
                 return "";

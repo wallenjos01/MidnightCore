@@ -53,7 +53,7 @@ public class MessengerPacket implements Packet {
             return out;
         }
 
-        public static final Serializer<EnumSet<Flag>> SERIALIZER = Serializer.BYTE.map(Flag::pack, Flag::unpack);
+        public static final Serializer<EnumSet<Flag>> SERIALIZER = Serializer.BYTE.flatMap(Flag::pack, Flag::unpack);
     }
 
 

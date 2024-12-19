@@ -4,6 +4,7 @@ import net.minecraft.nbt.*;
 import org.wallentines.mdcfg.ByteBufferInputStream;
 import org.wallentines.mdcfg.Tuples;
 import org.wallentines.mdcfg.serializer.SerializeContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,41 +47,41 @@ public class NBTContext implements SerializeContext<Tag> {
     }
 
     @Override
-    public String asString(Tag object) {
-        return isString(object) ? object.getAsString() : null;
+    public SerializeResult<String> asString(Tag object) {
+        return isString(object) ? SerializeResult.success(object.getAsString()) : SerializeResult.failure("Not a string");
     }
 
     @Override
-    public Number asNumber(Tag object) {
-        return isNumber(object) ? ((NumericTag) object).getAsNumber() : null;
+    public SerializeResult<Number> asNumber(Tag object) {
+        return isNumber(object) ? SerializeResult.success(((NumericTag) object).getAsNumber()) : SerializeResult.failure("Not a number");
     }
 
     @Override
-    public Boolean asBoolean(Tag object) {
-        return isBoolean(object) ? ((ByteTag) object).getAsByte() != 0 : null;
+    public SerializeResult<Boolean> asBoolean(Tag object) {
+        return isBoolean(object) ? SerializeResult.success(((ByteTag) object).getAsByte() != 0) : SerializeResult.failure("Not a boolean");
     }
 
     @Override
-    public ByteBuffer asBlob(Tag object) {
-        if(!isBlob(object)) return null;
-        return ByteBuffer.wrap(((ByteArrayTag) object).getAsByteArray());
+    public SerializeResult<ByteBuffer> asBlob(Tag object) {
+        if(!isBlob(object)) return SerializeResult.failure("Not a blob");
+        return SerializeResult.success(ByteBuffer.wrap(((ByteArrayTag) object).getAsByteArray()));
     }
 
     @Override
-    public Collection<Tag> asList(Tag object) {
+    public SerializeResult<Collection<Tag>> asList(Tag object) {
 
-        return isList(object) ? new ArrayList<>((CollectionTag<?>) object) : null;
+        return isList(object) ? SerializeResult.success(new ArrayList<>((CollectionTag<?>) object)) : SerializeResult.failure("Not a list");
     }
 
     @Override
-    public Map<String, Tag> asMap(Tag object) {
-        return isMap(object) ? ((CompoundTag) object).getAllKeys().stream()
+    public SerializeResult<Map<String, Tag>> asMap(Tag object) {
+        return isMap(object) ? SerializeResult.success(((CompoundTag) object).getAllKeys().stream()
                 .map(key -> new Tuples.T2<>(key, ((CompoundTag) object).get(key)))
-                .collect(Collectors.toMap(t2 -> t2.p1, t2 -> t2.p2)) : null;
+                .collect(Collectors.toMap(t2 -> t2.p1, t2 -> t2.p2))) : SerializeResult.failure("Not a map");
     }
 
     @Override
-    public Map<String, Tag> asOrderedMap(Tag object) {
+    public SerializeResult<Map<String, Tag>> asOrderedMap(Tag object) {
         return asMap(object);
     }
 

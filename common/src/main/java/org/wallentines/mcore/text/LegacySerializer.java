@@ -65,7 +65,7 @@ public class LegacySerializer implements Serializer<Component> {
                 return childRes;
             }
 
-            out.append(context.asString(childRes.getOrThrow()));
+            out.append(context.asString(childRes.getOrThrow()).getOrThrow());
         }
 
         return SerializeResult.success(context.toString(out.toString()));
@@ -74,11 +74,7 @@ public class LegacySerializer implements Serializer<Component> {
     @Override
     public <O> SerializeResult<Component> deserialize(SerializeContext<O> context, O value) {
 
-        if(!context.isString(value)) {
-            return SerializeResult.failure("Unable to deserialize " + value + "! Expected a String!");
-        }
-
-        return SerializeResult.success(parsePlainText(context.asString(value)));
+        return context.asString(value).flatMap(this::parsePlainText);
     }
 
 

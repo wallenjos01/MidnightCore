@@ -2,6 +2,7 @@ package org.wallentines.mcore;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.wallentines.mdcfg.serializer.SerializeContext;
+import org.wallentines.mdcfg.serializer.SerializeResult;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -11,51 +12,61 @@ public class YamlContext implements SerializeContext<Object> {
     public static final YamlContext INSTANCE = new YamlContext();
 
     @Override
-    public String asString(Object object) {
-        return isString(object) ? (String) object : null;
+    public SerializeResult<String> asString(Object object) {
+        return isString(object)
+                ? SerializeResult.success((String) object)
+                : SerializeResult.failure("Not a string");
     }
 
     @Override
-    public Number asNumber(Object object) {
-        return isNumber(object) ? (Number) object : null;
+    public SerializeResult<Number> asNumber(Object object) {
+        return isNumber(object)
+                ? SerializeResult.success((Number) object)
+                : SerializeResult.failure("Not a number");
     }
 
     @Override
-    public Boolean asBoolean(Object object) {
-        return isBoolean(object) ? (Boolean) object : null;
+    public SerializeResult<Boolean> asBoolean(Object object) {
+        return isBoolean(object)
+                ? SerializeResult.success((Boolean) object)
+                : SerializeResult.failure("Not a boolean");
     }
 
     @Override
-    public ByteBuffer asBlob(Object object) {
-        return isBlob(object) ? (ByteBuffer) object : null;
+    public SerializeResult<ByteBuffer> asBlob(Object object) {
+        return isBlob(object)
+                ? SerializeResult.success((ByteBuffer) object)
+                : SerializeResult.failure("Not a blob");
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Object> asList(Object object) {
-        return isList(object) ? (Collection<Object>) object : null;
+    public SerializeResult<Collection<Object>> asList(Object object) {
+        return isList(object)
+                ? SerializeResult.success((Collection<Object>) object)
+                : SerializeResult.failure("Not a list");
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, Object> asMap(Object object) {
-        if(!isMap(object)) return null;
-        if(object instanceof Map) return (Map<String, Object>) object;
+    public SerializeResult<Map<String, Object>> asMap(Object object) {
+        if(!isMap(object)) return SerializeResult.failure("Not a map");
+        if(object instanceof Map) return SerializeResult.success((Map<String, Object>) object);
 
         Map<String, Object> out = new HashMap<>();
         addMapEntries((ConfigurationSection) object, out);
-        return out;
+        return SerializeResult.success(out);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, Object> asOrderedMap(Object object) {
-        if(!isMap(object)) return null;
-        if(object instanceof Map) return (Map<String, Object>) object;
+    public SerializeResult<Map<String, Object>> asOrderedMap(Object object) {
+        if(!isMap(object)) return SerializeResult.failure("Not a map");
+        if(object instanceof Map) return SerializeResult.success((Map<String, Object>) object);
 
         Map<String, Object> out = new LinkedHashMap<>();
         addMapEntries((ConfigurationSection) object, out);
-        return out;
+        return SerializeResult.success(out);
     }
 
     private void addMapEntries(ConfigurationSection object, Map<String, Object> out) {

@@ -1,8 +1,0 @@
-[
-  {
-    "lines": [ "all" ],
-    "type": "replace",
-    "find": "new ContextSerializer<>() {",
-    "replace": "new ContextSerializer<Component, Context>() {"
-  }
-]
