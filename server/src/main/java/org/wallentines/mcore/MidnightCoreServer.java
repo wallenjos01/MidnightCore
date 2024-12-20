@@ -15,6 +15,7 @@ import org.wallentines.midnightlib.math.Region;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.requirement.CheckType;
+import org.wallentines.midnightlib.requirement.CompositeCheck;
 import org.wallentines.midnightlib.requirement.StringCheck;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 import org.wallentines.midnightlib.types.Singleton;
@@ -88,18 +89,23 @@ public class MidnightCoreServer {
 
     }
 
-    static void registerRequirements(Registry<Identifier, CheckType<Player>> registry) {
 
-        registry.tryRegister("cooldown", CooldownRequirement.type());
-        registry.tryRegister("permission", PlayerCheck.create(Serializer.STRING, "value", Player::hasPermission));
-        registry.tryRegister("world", PlayerCheck.create(Identifier.serializer("minecraft"), "value", (pl, id) -> pl.getDimensionId().equals(id)));
-        registry.tryRegister("region", PlayerCheck.create(Region.SERIALIZER, "value", (pl, reg) -> reg.isWithin(pl.getPosition())));
-        registry.tryRegister("locale", PlayerCheck.create(Serializer.STRING, "value", (pl, str) -> str.contains("_") ? pl.getLanguage().equals(str) : pl.getLanguage().startsWith(str)));
-        registry.tryRegister("username", StringCheck.type(Player::getUsername));
-        registry.tryRegister("uuid", StringCheck.type(pl -> pl.getUUID().toString()));
-        registry.tryRegister("game_mode", StringCheck.type(pl -> pl.getGameMode().getId()));
+    static void registerRequirements(Registry<Identifier, CheckType<Player, ?>> registry) {
 
+        registry.tryRegister("composite", new CompositeCheck.Type<>(registry));
+
+        registry.tryRegister("username", new StringCheck.Type<>(Player::getUsername));
+        registry.tryRegister("uuid", new StringCheck.Type<>(pl -> pl.getUUID().toString()));
+        registry.tryRegister("game_mode", new StringCheck.Type<>(pl -> pl.getGameMode().getId()));
+
+        registry.tryRegister("permission", new PlayerCheck.Type<>(Player::hasPermission, Serializer.STRING));
+        registry.tryRegister("world", new PlayerCheck.Type<>((pl, id) -> pl.getDimensionId().equals(id), Identifier.serializer("minecraft")));
+        registry.tryRegister("locale", new PlayerCheck.Type<>((pl, str) -> str.contains("_") ? pl.getLanguage().equals(str) : pl.getLanguage().startsWith(str), Serializer.STRING));
+        registry.tryRegister("region", new PlayerCheck.Type<>((pl, reg) -> reg.isWithin(pl.getPosition()), Region.SERIALIZER));
+
+        registry.tryRegister("cooldown", new CooldownRequirement.Type<>());
     }
+
 
     public LangManager getLangManager() {
         return langManager;

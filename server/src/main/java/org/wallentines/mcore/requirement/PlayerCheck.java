@@ -1,6 +1,7 @@
 package org.wallentines.mcore.requirement;
 
 import org.wallentines.mcore.Player;
+import org.wallentines.mdcfg.TypeReference;
 import org.wallentines.mdcfg.serializer.SerializeContext;
 import org.wallentines.mdcfg.serializer.SerializeResult;
 import org.wallentines.mdcfg.serializer.Serializer;
@@ -11,37 +12,47 @@ import java.util.function.BiPredicate;
 
 public class PlayerCheck<T> implements Check<Player> {
 
+    private final Type<T> type;
     private final T value;
-    private final BiPredicate<Player, T> checker;
-    private final Serializer<T> serializer;
 
-    public PlayerCheck(T value, BiPredicate<Player, T> checker, Serializer<T> serializer) {
+    public PlayerCheck(Type<T> type, T value) {
+        this.type = type;
         this.value = value;
-        this.checker = checker;
-        this.serializer = serializer;
     }
 
     @Override
     public boolean check(Player player) {
-        return checker.test(player, value);
+        return type.checker.test(player, value);
     }
 
     @Override
-    public <O> SerializeResult<O> serialize(SerializeContext<O> ctx) {
-        return serializer.serialize(ctx, value);
+    public Type<T> type() {
+        return type;
     }
 
-    public static <T> CheckType<Player> create(Serializer<T> serializer, BiPredicate<Player, T> checker) {
-        return new CheckType<Player>() {
-            @Override
-            public <O> SerializeResult<Check<Player>> deserialize(SerializeContext<O> ctx, O o) {
-
-                return serializer.deserialize(ctx, o).flatMap(t -> new PlayerCheck<>(t, checker, serializer));
-            }
-        };
+    public T value() {
+        return value;
     }
 
-    public static <T> CheckType<Player> create(Serializer<T> serializer, String value, BiPredicate<Player, T> checker) {
-        return create(serializer.fieldOf(value), checker);
+    public static class Type<T> implements CheckType<Player, PlayerCheck<T>> {
+
+        private BiPredicate<Player, T> checker;
+        private Serializer<PlayerCheck<T>> serializer;
+
+        public Type(BiPredicate<Player, T> checker, Serializer<T> serializer) {
+
+            this.serializer = serializer.flatMap(PlayerCheck<T>::value, val -> new PlayerCheck<>(this, val));
+
+        }
+
+        @Override
+        public TypeReference<PlayerCheck<T>> type() {
+            return new TypeReference<PlayerCheck<T>>() {};
+        }
+
+        @Override
+        public Serializer<PlayerCheck<T>> serializer() {
+            return serializer;
+        }
     }
 }

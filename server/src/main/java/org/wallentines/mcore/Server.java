@@ -13,7 +13,9 @@ import org.wallentines.midnightlib.module.ModuleManager;
 import org.wallentines.midnightlib.registry.Identifier;
 import org.wallentines.midnightlib.registry.Registry;
 import org.wallentines.midnightlib.requirement.CheckType;
+import org.wallentines.midnightlib.requirement.CompositeCheck;
 import org.wallentines.midnightlib.requirement.Requirement;
+import org.wallentines.midnightlib.requirement.StringCheck;
 import org.wallentines.midnightlib.types.ResettableSingleton;
 
 import java.io.IOException;
@@ -179,10 +181,7 @@ public interface Server {
 
     }
 
-    /**
-     * The global file codec registry. Contains a JSON codec, and YAML on Spigot
-     */
-    Registry<Identifier, CheckType<Player>> REQUIREMENT_REGISTRY = Requirement.defaultRegistry(MidnightCoreAPI.MOD_ID);
+    Registry<Identifier, CheckType<Player, ?>> REQUIREMENT_REGISTRY = Registry.create(MidnightCoreAPI.MOD_ID);
 
 
 }
